@@ -1,6 +1,6 @@
 "use client";
 import { usePlayerStore } from '@/hooks/usePlayerStore';
-import { Play, SkipBack, SkipForward, Volume2, Repeat, Shuffle } from 'lucide-react';
+import { Play, SkipBack, SkipForward, Volume2, Repeat, Repeat1, Shuffle } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/lib/utils';
@@ -18,12 +18,22 @@ const PlayerBar = () => {
     prev, 
     setVolume, 
     setProgress,
-    setSeekTo
+    setSeekTo,
+    isShuffling,
+    repeatMode,
+    toggleShuffle,
+    setRepeatMode
   } = usePlayerStore();
 
   const togglePlay = () => {
     if (isPlaying) pause();
     else play();
+  };
+
+  const toggleRepeat = () => {
+    if (repeatMode === 'off') setRepeatMode('all');
+    else if (repeatMode === 'all') setRepeatMode('one');
+    else setRepeatMode('off');
   };
 
   const handleSeek = (value: number[]) => {
@@ -49,7 +59,12 @@ const PlayerBar = () => {
       {/* Controls */}
       <div className="flex flex-col items-center w-auto md:w-1/2 md:max-w-2xl px-0 md:px-4 absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 bottom-2 md:bottom-auto">
         <div className="flex items-center gap-4 md:gap-6 mb-1 md:mb-2">
-          <Button variant="ghost" size="icon" className="hidden md:inline-flex text-gray-400 hover:text-white hover:bg-transparent">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`hidden md:inline-flex hover:bg-transparent ${isShuffling ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
+            onClick={toggleShuffle}
+          >
             <Shuffle size={20} />
           </Button>
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-transparent" onClick={prev}>
@@ -65,8 +80,13 @@ const PlayerBar = () => {
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-transparent" onClick={next}>
             <SkipForward size={20} className="md:w-6 md:h-6" />
           </Button>
-          <Button variant="ghost" size="icon" className="hidden md:inline-flex text-gray-400 hover:text-white hover:bg-transparent">
-            <Repeat size={20} />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`hidden md:inline-flex hover:bg-transparent ${repeatMode !== 'off' ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
+            onClick={toggleRepeat}
+          >
+            {repeatMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
           </Button>
         </div>
         {/* Progress Bar */}

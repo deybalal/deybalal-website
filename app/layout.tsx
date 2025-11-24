@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import PlayerBar from "@/components/PlayerBar";
 import PlayerProvider from "@/components/PlayerProvider";
 
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,18 +17,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`antialiased bg-background text-foreground`}
       >
-        <div className="flex min-h-screen">
-          <Navbar />
-          <main className="flex-1 ml-0 md:ml-20 pb-32 md:pb-24 p-4 md:p-8 overflow-y-auto h-screen scroll-smooth">
-            {children}
-          </main>
-        </div>
-        <PlayerBar />
-        <PlayerProvider />
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+          <div className="flex min-h-screen">
+            <Navbar />
+            <main className="flex-1 ml-0 md:ml-20 pb-32 md:pb-24 p-4 md:p-8 overflow-y-auto h-screen scroll-smooth">
+              {children}
+            </main>
+          </div>
+          <PlayerBar />
+          <PlayerProvider />
+        </ThemeProvider>
       </body>
     </html>
   );

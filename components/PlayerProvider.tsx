@@ -72,7 +72,13 @@ const PlayerProvider = () => {
   };
 
   const handleEnded = () => {
-    next();
+    const { repeatMode } = usePlayerStore.getState();
+    if (repeatMode === 'one' && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(e => console.error("Play error:", e));
+    } else {
+      next();
+    }
   };
 
   return (

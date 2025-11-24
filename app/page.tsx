@@ -40,12 +40,21 @@ export default function Home() {
   return (
     <div className="space-y-10">
       {/* Hero Section */}
-      <section className="relative h-64 rounded-2xl overflow-hidden bg-gradient-to-r from-primary to-secondary flex items-center px-10 shadow-2xl neon-box">
-        <div className="z-10">
-          <h1 className="text-5xl font-bold text-white mb-2 neon-text">Welcome Back</h1>
-          <p className="text-gray-200 text-lg">Discover the sound of the future.</p>
+      <section className="relative h-80 rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center px-12 shadow-2xl neon-box group">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-30 mix-blend-overlay transition-transform duration-700 group-hover:scale-105" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+        
+        <div className="z-10 max-w-2xl space-y-6">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium text-accent">
+            Premium Sound Experience
+          </div>
+          <h1 className="text-6xl md:text-7xl font-bold text-white tracking-tight leading-tight">
+            Feel the <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-purple-400 neon-text">Rhythm</span>
+          </h1>
+          <p className="text-gray-300 text-xl leading-relaxed max-w-lg">
+            Immerse yourself in a world of crystal clear audio and curated playlists designed for your every mood.
+          </p>
         </div>
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
       </section>
 
       {/* Trending Songs */}

@@ -22,6 +22,11 @@ interface PlayerState {
   setDuration: (duration: number) => void;
   seekTo: number | null;
   setSeekTo: (time: number | null) => void;
+  
+  isShuffling: boolean;
+  repeatMode: 'off' | 'all' | 'one';
+  toggleShuffle: () => void;
+  setRepeatMode: (mode: 'off' | 'all' | 'one') => void;
 }
 
 export const usePlayerStore = create<PlayerState>()(
@@ -35,6 +40,8 @@ export const usePlayerStore = create<PlayerState>()(
       progress: 0,
       duration: 0,
       seekTo: null,
+      isShuffling: false,
+      repeatMode: 'off',
 
       play: () => set({ isPlaying: true }),
       pause: () => set({ isPlaying: false }),
@@ -53,25 +60,41 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       next: () => {
-        const { queue, currentIndex } = get();
-        if (currentIndex < queue.length - 1) {
+        const { queue, currentIndex, isShuffling, repeatMode } = get();
+        
+        if (queue.length === 0) return;
+
+        let nextIndex = -1;
+
+        if (isShuffling) {
+          // Simple random shuffle
+          nextIndex = Math.floor(Math.random() * queue.length);
+          // Try to avoid same song if queue > 1
+          if (queue.length > 1 && nextIndex === currentIndex) {
+             nextIndex = (nextIndex + 1) % queue.length;
+          }
+        } else {
+          if (currentIndex < queue.length - 1) {
+            nextIndex = currentIndex + 1;
+          } else if (repeatMode === 'all') {
+            nextIndex = 0;
+          }
+        }
+
+        if (nextIndex !== -1) {
           set({ 
-            currentIndex: currentIndex + 1, 
-            currentSong: queue[currentIndex + 1],
+            currentIndex: nextIndex, 
+            currentSong: queue[nextIndex],
             isPlaying: true 
           });
+        } else {
+            // End of queue and not repeating
+            set({ isPlaying: false });
         }
       },
 
       prev: () => {
-        const { queue, currentIndex, progress } = get();
-        // If more than 3 seconds in, restart song
-        if (progress > 3) {
-            // Logic handled by component seeking, but here we just update state if needed
-            // Actually, prev usually goes to previous song. 
-            // We'll let the component handle the seek-to-start logic if needed, 
-            // or just go to prev song here.
-        }
+        const { queue, currentIndex } = get();
         
         if (currentIndex > 0) {
           set({ 
@@ -86,6 +109,9 @@ export const usePlayerStore = create<PlayerState>()(
       setProgress: (progress) => set({ progress }),
       setDuration: (duration) => set({ duration }),
       setSeekTo: (seekTo) => set({ seekTo }),
+      
+      toggleShuffle: () => set((state) => ({ isShuffling: !state.isShuffling })),
+      setRepeatMode: (mode) => set({ repeatMode: mode }),
     }),
     {
       name: 'player-storage',
@@ -96,6 +122,8 @@ export const usePlayerStore = create<PlayerState>()(
         duration: state.duration,
         currentSong: state.currentSong,
         currentIndex: state.currentIndex,
+        isShuffling: state.isShuffling,
+        repeatMode: state.repeatMode,
       }) as PlayerState,
     }
   )
