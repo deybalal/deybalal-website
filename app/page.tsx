@@ -1,34 +1,42 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import AlbumCard from "@/components/AlbumCard";
 import SongCard from "@/components/SongCard";
 import { Album, Song } from "@/types/types";
 
-// Mock Data (Replace with real data fetching later)
-const mockSongs: Song[] = Array(5).fill({
-  id: "1",
-  title: "Neon Nights",
-  artist: "Cyberpunk Collective",
-  album: "Future City",
-  coverArt: "",
-  duration: 210,
-  uri: "",
-  filename: "song.mp3",
-  index: 0
-});
-
-const mockAlbums: Album[] = Array(4).fill({
-  id: "1",
-  name: "Future City",
-  artistName: "Cyberpunk Collective",
-  artistId: "1",
-  coverArt: "",
-  songs: [],
-  releaseDate: Date.now(),
-  duration: 0,
-  createdAt: Date.now(),
-  updatedAt: Date.now()
-});
-
 export default function Home() {
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch Songs
+        const songsRes = await fetch('/api/songs');
+        if (songsRes.ok) {
+          const result = await songsRes.json();
+          if (result.success) {
+            setSongs(result.data);
+          }
+        }
+
+        // Fetch Albums (User changed this to POST)
+        const albumsRes = await fetch('/api/albums', { method: 'POST' });
+        if (albumsRes.ok) {
+          const result = await albumsRes.json();
+          if (result.success) {
+            setAlbums(result.data);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch data', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="space-y-10">
       {/* Hero Section */}
@@ -47,9 +55,13 @@ export default function Home() {
           Trending Songs
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {mockSongs.map((song, i) => (
-            <SongCard key={i} song={{...song, id: i.toString()}} />
-          ))}
+          {songs.length > 0 ? (
+            songs.map((song) => (
+              <SongCard key={song.id} song={song} />
+            ))
+          ) : (
+            <p className="text-gray-500 col-span-full">No songs found. Add some in the Admin Panel!</p>
+          )}
         </div>
       </section>
 
@@ -60,9 +72,13 @@ export default function Home() {
           New Albums
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {mockAlbums.map((album, i) => (
-            <AlbumCard key={i} album={{...album, id: i.toString()}} />
-          ))}
+          {albums.length > 0 ? (
+            albums.map((album) => (
+              <AlbumCard key={album.id} album={album} />
+            ))
+          ) : (
+            <p className="text-gray-500 col-span-full">No albums found. Add some in the Admin Panel!</p>
+          )}
         </div>
       </section>
     </div>
