@@ -11,8 +11,11 @@ datasource db {
 
 model Song {
   id           String   @id @default(cuid())
+  slug         String   @unique
   title        String
-  artist       String?
+  titleEn        String
+  artist       String
+  artistEn       String
   albumName    String?
   coverArt     String?
   duration     Int      @default(0)
@@ -35,6 +38,7 @@ model Album {
   id          String   @id @default(cuid())
   name        String
   artistName  String
+  artistNameEn String
   coverArt    String?
   releaseDate DateTime?
   duration    Int      @default(0)

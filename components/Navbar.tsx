@@ -1,17 +1,15 @@
-
-import { Home, Disc, Mic2, ListMusic, Heart, User } from 'lucide-react';
+import { Home, Disc, Mic2, ListMusic, Heart, User } from "lucide-react";
 import Link from "next/link";
-import DarkModeToggle from '@/components/DarkModeToggle';
+import DynamicDarkModeToggle from "@/components/DynamicDarkModeToggle";
 
 const Navbar = () => {
-
   const navItems = [
-    { name: 'Home', href: '/', icon: Home },
-    { name: 'Dashboard', href: '/panel', icon: User },
-    { name: 'Albums', href: '/album', icon: Disc },
-    { name: 'Artists', href: '/artist', icon: Mic2 },
-    { name: 'Playlists', href: '/playlists', icon: ListMusic },
-    { name: 'Favorites', href: '/favorites', icon: Heart },
+    { name: "Home", href: "/", icon: Home },
+    { name: "Dashboard", href: "/panel", icon: User },
+    { name: "Albums", href: "/album", icon: Disc },
+    { name: "Artists", href: "/artist", icon: Mic2 },
+    { name: "Playlists", href: "/playlists", icon: ListMusic },
+    { name: "Favorites", href: "/favorites", icon: Heart },
   ];
 
   return (
@@ -19,7 +17,7 @@ const Navbar = () => {
       <div className="text-white mb-10 text-2xl font-bold text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
         Music Player
       </div>
-      
+
       <div className="flex flex-col gap-6 w-full group-hover:bg-background/90 flex-1">
         {navItems.map((item) => (
           <Link
@@ -35,11 +33,11 @@ const Navbar = () => {
             <div className="absolute left-0 top-0 h-full w-1 bg-accent opacity-0 hover:opacity-100 transition-opacity" />
           </Link>
         ))}
-        
-              {/* Theme Toggle */}
-              <div className='flex items-center py-3 text-gray-400 hover:text-white hover:bg-foreground/10 transition-colors duration-200 relative'>
-              <DarkModeToggle /> 
-              </div>
+
+        {/* Theme Toggle */}
+        <div className="flex items-center py-3 text-gray-400 hover:text-white hover:bg-foreground/10 transition-colors duration-200 relative">
+          <DynamicDarkModeToggle />
+        </div>
       </div>
     </nav>
   );

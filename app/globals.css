@@ -13,7 +13,7 @@
 :root {
   --primary: oklch(0.205 0 0);
   --secondary: oklch(0.97 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: oklch(0.55 0.25 240);
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-blur: 10px;
@@ -70,7 +70,8 @@ body {
 
 /* Neon Glow */
 .neon-text {
-  text-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 20px var(--accent);
+  text-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent),
+    0 0 20px var(--accent);
 }
 
 .neon-box {
