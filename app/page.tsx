@@ -40,17 +40,17 @@ export default function Home() {
   return (
     <div className="space-y-10">
       {/* Hero Section */}
-      <section className="relative h-80 rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900 flex items-center px-12 shadow-2xl neon-box group">
+      <section className="relative h-80 rounded-3xl overflow-hidden bg-linear-to-br from-indigo-900 via-purple-900 to-pink-900 dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900 flex items-center px-12 shadow-2xl neon-box group">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-30 mix-blend-overlay transition-transform duration-700 group-hover:scale-105" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent dark:from-black/80 dark:via-black/40" />
+        <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 to-transparent dark:from-black/80 dark:via-black/40" />
 
         <div className="z-10 max-w-2xl space-y-6">
-          <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 dark:border-white/20 text-sm font-medium text-gray-900 dark:text-accent">
+          <div className="text-white inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 dark:border-white/20 text-sm font-medium">
             Premium Sound Experience
           </div>
           <h1 className="text-6xl md:text-7xl font-bold text-white tracking-tight leading-tight">
             Feel the{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-accent dark:to-purple-400 font-extrabold">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-purple-600 dark:from-accent dark:to-purple-400 font-extrabold">
               Rhythm
             </span>
           </h1>

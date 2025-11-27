@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,25 +13,32 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { toast } from 'sonner';
-import { Album } from '@/types/types';
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { Album } from "@/types/types";
 
 const formSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  artist: z.string().optional(),
+  title: z.string().min(1, "Title is required"),
+  titleEn: z.string().optional(),
+  artist: z.string().min(2, "You must enter artist name!"),
+  artistEn: z.string().optional(),
   albumId: z.string().optional(),
-  uri: z.string().min(1, 'URI is required'),
+  albumName: z.string().optional(),
   coverArt: z.string().optional(),
   duration: z.number().min(0).optional(),
+  filename: z.string().optional(),
+  lyrics: z.string().optional(),
+  syncedLyrics: z.string().optional(),
+  tempCoverArt: z.string().optional(),
 });
 
 type SongFormValues = z.infer<typeof formSchema>;
@@ -38,23 +46,30 @@ type SongFormValues = z.infer<typeof formSchema>;
 export default function SongForm() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const form = useForm<SongFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      artist: '',
-      albumId: '',
-      uri: '',
-      coverArt: '',
+      title: "",
+      titleEn: "",
+      artist: "",
+      artistEn: "",
+      albumId: "",
+      albumName: "",
+      coverArt: "",
       duration: 0,
+      filename: "",
+      lyrics: "",
+      syncedLyrics: "",
+      tempCoverArt: "",
     },
   });
 
   useEffect(() => {
     const fetchAlbums = async () => {
       try {
-        const res = await fetch('/api/albums', { method: "POST" });
+        const res = await fetch("/api/albums", { method: "POST" });
         if (res.ok) {
           const result = await res.json();
           if (result.success) {
@@ -62,7 +77,7 @@ export default function SongForm() {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch albums', error);
+        console.error("Failed to fetch albums", error);
       }
     };
     fetchAlbums();
@@ -71,27 +86,169 @@ export default function SongForm() {
   async function onSubmit(values: SongFormValues) {
     setLoading(true);
     try {
-      const res = await fetch('/api/songs/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/songs/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
       const result = await res.json();
-      if (!res.ok || !result.success) throw new Error(result.message || 'Failed to create song');
+      if (!res.ok || !result.success) {
+        toast.error(result.message || "Failed to create song");
+        throw new Error(result.message || "Failed to create song");
+      }
 
-      toast.success('Song created successfully');
+      toast.success("Song created successfully");
       form.reset();
-    } catch (error) {
-      toast.error('Failed to create song');
+    } catch {
+      toast.error("Failed to create song");
     } finally {
       setLoading(false);
     }
   }
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".mp3")) {
+      toast.error("Please select an MP3 file");
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload/mp3", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || "Failed to upload file");
+      }
+
+      const { filePath, filename, metadata, coverArt, tempCoverArt } =
+        result.data;
+
+      form.setValue("filename", filename);
+
+      if (metadata.title) form.setValue("title", metadata.title);
+      if (metadata.artist) form.setValue("artist", metadata.artist);
+      if (metadata.album) form.setValue("albumName", metadata.album);
+      if (metadata.duration)
+        form.setValue("duration", Math.round(metadata.duration));
+
+      if (coverArt) {
+        form.setValue("coverArt", coverArt);
+        form.setValue("tempCoverArt", tempCoverArt);
+      }
+
+      toast.success("File uploaded and metadata extracted");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload file");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload/image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || "Failed to upload image");
+      }
+
+      const { filePath, filename } = result.data;
+
+      form.setValue("coverArt", filePath);
+      form.setValue("tempCoverArt", filename);
+
+      toast.success("Cover art uploaded");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload cover art");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-md">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 max-w-md"
+      >
+        <FormItem>
+          <FormLabel>Upload MP3</FormLabel>
+          <FormControl>
+            <Input
+              type="file"
+              accept=".mp3,audio/mpeg"
+              onChange={handleFileUpload}
+              disabled={uploading}
+            />
+          </FormControl>
+          {uploading && (
+            <p className="text-sm text-muted-foreground">
+              Uploading and parsing...
+            </p>
+          )}
+        </FormItem>
+        <FormField
+          control={form.control}
+          name="coverArt"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cover Art</FormLabel>
+              <FormControl>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverUpload}
+                      disabled={uploading}
+                      className="w-full"
+                    />
+                  </div>
+                  {field.value && (
+                    <div className="relative w-32 h-32 rounded-md overflow-hidden border">
+                      <Image
+                        src={field.value}
+                        alt="Cover Art Preview"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="title"
@@ -107,12 +264,39 @@ export default function SongForm() {
         />
         <FormField
           control={form.control}
+          name="titleEn"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title (English)</FormLabel>
+              <FormControl>
+                <Input placeholder="Song Title (English)" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="artist"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Artist</FormLabel>
               <FormControl>
                 <Input placeholder="Artist Name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="artistEn"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Artist (English)</FormLabel>
+              <FormControl>
+                <Input placeholder="Artist Name (English)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -144,25 +328,12 @@ export default function SongForm() {
         />
         <FormField
           control={form.control}
-          name="uri"
+          name="albumName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Audio URI</FormLabel>
+              <FormLabel>Album Name (Optional override)</FormLabel>
               <FormControl>
-                <Input placeholder="/music/song.mp3" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="coverArt"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cover Art URI</FormLabel>
-              <FormControl>
-                <Input placeholder="/images/cover.jpg" {...field} />
+                <Input placeholder="Album Name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -175,13 +346,13 @@ export default function SongForm() {
             <FormItem>
               <FormLabel>Duration (seconds)</FormLabel>
               <FormControl>
-                <Input 
-                  type="number" 
+                <Input
+                  type="number"
                   {...field}
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;
-                    field.onChange(value === '' ? undefined : Number(value));
+                    field.onChange(value === "" ? undefined : Number(value));
                   }}
                 />
               </FormControl>
@@ -189,8 +360,34 @@ export default function SongForm() {
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="lyrics"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Lyrics</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Song lyrics..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="syncedLyrics"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Synced Lyrics (LRC)</FormLabel>
+              <FormControl>
+                <Textarea placeholder="[00:00.00] Lyrics..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button type="submit" disabled={loading}>
-          {loading ? 'Creating...' : 'Create Song'}
+          {loading ? "Creating..." : "Create Song"}
         </Button>
       </form>
     </Form>

@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import PlayerBar from "@/components/PlayerBar";
 import PlayerProvider from "@/components/PlayerProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -18,15 +19,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`antialiased bg-background text-foreground`}
-      >
+      <body className={`antialiased bg-background text-foreground`}>
         <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
           <div className="flex min-h-screen">
             <Navbar />
             <main className="flex-1 ml-0 md:ml-20 pb-32 md:pb-24 p-4 md:p-8 overflow-y-auto h-screen scroll-smooth">
@@ -35,6 +34,7 @@ export default function RootLayout({
           </div>
           <PlayerBar />
           <PlayerProvider />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

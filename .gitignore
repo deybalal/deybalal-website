@@ -10,7 +10,7 @@
 !.yarn/releases
 !.yarn/versions
 
-public/assets/*.ts
+public/assets/
 
 # testing
 /coverage
