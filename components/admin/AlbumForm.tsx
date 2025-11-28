@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -130,7 +130,7 @@ export default function AlbumForm() {
 
       toast.success("Album created successfully");
       form.reset();
-    } catch (error) {
+    } catch {
       toast.error("Failed to create album");
     } finally {
       setLoading(false);

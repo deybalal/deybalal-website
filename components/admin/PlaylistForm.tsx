@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,12 +12,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { toast } from "react-hot-toast";
 
 const formSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   coverArt: z.string().optional(),
 });
@@ -28,28 +28,29 @@ export default function PlaylistForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      description: '',
-      coverArt: '',
+      name: "",
+      description: "",
+      coverArt: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
     try {
-      const res = await fetch('/api/playlists/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/playlists/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
       const result = await res.json();
-      if (!res.ok || !result.success) throw new Error(result.message || 'Failed to create playlist');
+      if (!res.ok || !result.success)
+        throw new Error(result.message || "Failed to create playlist");
 
-      toast.success('Playlist created successfully');
+      toast.success("Playlist created successfully");
       form.reset();
-    } catch (error) {
-      toast.error('Failed to create playlist');
+    } catch {
+      toast.error("Failed to create playlist");
     } finally {
       setLoading(false);
     }
@@ -57,7 +58,10 @@ export default function PlaylistForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-md">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 max-w-md"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -98,7 +102,7 @@ export default function PlaylistForm() {
           )}
         />
         <Button type="submit" disabled={loading}>
-          {loading ? 'Creating...' : 'Create Playlist'}
+          {loading ? "Creating..." : "Create Playlist"}
         </Button>
       </form>
     </Form>

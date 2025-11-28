@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),

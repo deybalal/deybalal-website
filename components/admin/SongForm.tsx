@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 import { Album } from "@/types/types";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";

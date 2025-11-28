@@ -3,7 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import PlayerBar from "@/components/PlayerBar";
 import PlayerProvider from "@/components/PlayerProvider";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "react-hot-toast";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -34,7 +34,16 @@ export default function RootLayout({
           </div>
           <PlayerBar />
           <PlayerProvider />
-          <Toaster />
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              style: {
+                background: "hsl(var(--background))",
+                color: "hsl(var(--foreground))",
+                border: "1px solid hsl(var(--border))",
+              },
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>
