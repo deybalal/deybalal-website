@@ -51,6 +51,7 @@ export type Album = {
   releaseDate: number;
   duration: number;
   genre?: string;
+  artist?: Artist | null;
   createdAt: number;
   updatedAt: number;
 };

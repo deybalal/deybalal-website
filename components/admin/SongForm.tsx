@@ -91,11 +91,16 @@ export default function SongForm() {
 
   useEffect(() => {
     const fetchAlbums = async () => {
+      console.log("What");
+
       try {
         const res = await fetch("/api/albums", { method: "POST" });
         if (res.ok) {
           const result = await res.json();
           if (result.success) {
+            console.log(result.data);
+            console.log("WDYM");
+
             setAlbums(result.data);
           }
         }
@@ -232,6 +237,8 @@ export default function SongForm() {
       setUploading(false);
     }
   };
+
+  console.log(albums);
 
   return (
     <Form {...form}>
