@@ -42,6 +42,7 @@ const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   artistName: z.string().min(1, "Artist Name is required"),
   nameEn: z.string().min(1, "Artist Name in English is required"),
+  artistId: z.string().optional(), // Will be set automatically when artist is selected
   coverArt: z.string().optional(),
   releaseDate: z.string().optional(),
 });
@@ -58,6 +59,7 @@ export default function AlbumForm() {
       name: "",
       artistName: "",
       nameEn: "",
+      artistId: "",
       coverArt: "",
       releaseDate: "",
     },
@@ -194,6 +196,7 @@ export default function AlbumForm() {
                             key={artist.id}
                             onSelect={() => {
                               form.setValue("artistName", artist.name);
+                              form.setValue("artistId", artist.id);
                               if (artist.nameEn) {
                                 form.setValue("nameEn", artist.nameEn);
                               }

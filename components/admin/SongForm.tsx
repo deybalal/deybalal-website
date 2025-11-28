@@ -52,6 +52,7 @@ const formSchema = z.object({
   titleEn: z.string().optional(),
   artist: z.string().min(2, "You must enter artist name!"),
   artistEn: z.string().optional(),
+  artistId: z.string().optional(), // Will be set automatically when artist is selected
   albumId: z.string().optional(),
   albumName: z.string().optional(),
   coverArt: z.string().optional(),
@@ -70,6 +71,7 @@ export default function SongForm() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [openArtist, setOpenArtist] = useState(false);
+  const [fileInputKey, setFileInputKey] = useState(0); // Key to force file input reset
 
   const form = useForm<SongFormValues>({
     resolver: zodResolver(formSchema),
@@ -78,6 +80,7 @@ export default function SongForm() {
       titleEn: "",
       artist: "",
       artistEn: "",
+      artistId: "",
       albumId: "",
       albumName: "",
       coverArt: "",
@@ -98,7 +101,6 @@ export default function SongForm() {
         if (res.ok) {
           const result = await res.json();
           if (result.success) {
-            console.log(result.data);
             console.log("WDYM");
 
             setAlbums(result.data);
@@ -144,12 +146,52 @@ export default function SongForm() {
 
       toast.success("Song created successfully");
       form.reset();
+      setFileInputKey((prev) => prev + 1); // Reset file inputs by changing key
     } catch {
       toast.error("Failed to create song");
     } finally {
       setLoading(false);
     }
   }
+
+  // Helper function to calculate string similarity (Levenshtein distance)
+  const getStringSimilarity = (str1: string, str2: string): number => {
+    const s1 = str1.toLowerCase().trim();
+    const s2 = str2.toLowerCase().trim();
+
+    if (s1 === s2) return 1;
+
+    const len1 = s1.length;
+    const len2 = s2.length;
+
+    if (len1 === 0 || len2 === 0) return 0;
+
+    // Create a matrix for dynamic programming
+    const matrix: number[][] = [];
+
+    for (let i = 0; i <= len1; i++) {
+      matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= len2; j++) {
+      matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= len1; i++) {
+      for (let j = 1; j <= len2; j++) {
+        const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost
+        );
+      }
+    }
+
+    const distance = matrix[len1][len2];
+    const maxLen = Math.max(len1, len2);
+    return 1 - distance / maxLen;
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -181,8 +223,100 @@ export default function SongForm() {
       form.setValue("filename", filename);
 
       if (metadata.title) form.setValue("title", metadata.title);
-      if (metadata.artist) form.setValue("artist", metadata.artist);
-      if (metadata.album) form.setValue("albumName", metadata.album);
+
+      // Search for matching artist by name or nameEn with fuzzy matching
+      if (metadata.artist) {
+        // First try exact match
+        let matchingArtist = artists.find(
+          (artist) =>
+            artist.name === metadata.artist || artist.nameEn === metadata.artist
+        );
+
+        // If no exact match, try fuzzy matching with 70% similarity threshold
+        if (!matchingArtist) {
+          const SIMILARITY_THRESHOLD = 0.7;
+          let bestMatch: Artist | null = null;
+          let bestSimilarity = 0;
+
+          artists.forEach((artist) => {
+            const nameSimilarity = getStringSimilarity(
+              artist.name,
+              metadata.artist
+            );
+            const nameEnSimilarity = artist.nameEn
+              ? getStringSimilarity(artist.nameEn, metadata.artist)
+              : 0;
+
+            const maxSimilarity = Math.max(nameSimilarity, nameEnSimilarity);
+
+            if (
+              maxSimilarity > bestSimilarity &&
+              maxSimilarity >= SIMILARITY_THRESHOLD
+            ) {
+              bestSimilarity = maxSimilarity;
+              bestMatch = artist;
+            }
+          });
+
+          matchingArtist = bestMatch || undefined;
+        }
+
+        console.log("matchingArtist ", matchingArtist);
+
+        if (matchingArtist) {
+          // Set both artist name and ID
+          form.setValue("artist", matchingArtist.name);
+          form.setValue("artistId", matchingArtist.id);
+          if (matchingArtist.nameEn) {
+            form.setValue("artistEn", matchingArtist.nameEn);
+          }
+        } else {
+          // If no match found, just set the name
+          form.setValue("artist", metadata.artist);
+        }
+      }
+
+      // Search for matching album by name with fuzzy matching
+      if (metadata.album) {
+        // First try exact match
+        let matchingAlbum = albums.find(
+          (album) => album.name === metadata.album
+        );
+
+        // If no exact match, try fuzzy matching with 70% similarity threshold
+        if (!matchingAlbum) {
+          const SIMILARITY_THRESHOLD = 0.7;
+          let bestMatch: Album | null = null;
+          let bestSimilarity = 0;
+
+          albums.forEach((album) => {
+            const nameSimilarity = getStringSimilarity(
+              album.name,
+              metadata.album
+            );
+
+            if (
+              nameSimilarity > bestSimilarity &&
+              nameSimilarity >= SIMILARITY_THRESHOLD
+            ) {
+              bestSimilarity = nameSimilarity;
+              bestMatch = album;
+            }
+          });
+
+          matchingAlbum = bestMatch || undefined;
+        }
+
+        if (matchingAlbum) {
+          // Set both album name and ID
+          form.setValue("albumId", matchingAlbum.id);
+          form.setValue("albumName", matchingAlbum.name);
+        } else {
+          // If no match found, just set the name
+          form.setValue("albumName", metadata.album);
+        }
+      }
+
       if (metadata.duration)
         form.setValue("duration", Math.round(metadata.duration));
 
@@ -238,7 +372,7 @@ export default function SongForm() {
     }
   };
 
-  console.log(albums);
+  console.log("artists ", artists);
 
   return (
     <Form {...form}>
@@ -250,6 +384,7 @@ export default function SongForm() {
           <FormLabel>Upload MP3</FormLabel>
           <FormControl>
             <Input
+              key={`mp3-${fileInputKey}`}
               type="file"
               accept=".mp3,audio/mpeg"
               onChange={handleFileUpload}
@@ -272,6 +407,7 @@ export default function SongForm() {
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-4">
                     <Input
+                      key={`cover-${fileInputKey}`}
                       type="file"
                       accept="image/*"
                       onChange={handleCoverUpload}
@@ -360,6 +496,7 @@ export default function SongForm() {
                             key={artist.id}
                             onSelect={() => {
                               form.setValue("artist", artist.name);
+                              form.setValue("artistId", artist.id); // Automatically set artistId
                               if (artist.nameEn) {
                                 form.setValue("artistEn", artist.nameEn);
                               }
@@ -405,7 +542,7 @@ export default function SongForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Album</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select an album" />

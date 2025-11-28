@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       name: z.string().min(1),
       artistName: z.string().min(1),
       nameEn: z.string().min(1, "Artist Name in English is required"),
+      artistId: z.string().optional(), // Artist ID for database relation
       coverArt: z.string().optional(),
       releaseDate: z.string().optional(), // Expecting ISO string
     });
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
         name: validatedData.name,
         artistName: validatedData.artistName,
         artistNameEn: validatedData.nameEn,
+        artistId: validatedData.artistId || undefined,
         coverArt: validatedData.coverArt,
         releaseDate: validatedData.releaseDate
           ? new Date(validatedData.releaseDate)

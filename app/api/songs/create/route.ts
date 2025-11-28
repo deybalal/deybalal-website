@@ -12,6 +12,7 @@ const songSchema = z.object({
   titleEn: z.string().optional(),
   artist: z.string().min(2, "You must enter artist name!"),
   artistEn: z.string().optional(),
+  artistId: z.string().optional(), // Artist ID for database relation
   albumId: z.string().optional(),
   albumName: z.string().optional(),
   uri: z.string().optional(),
@@ -41,7 +42,11 @@ export async function POST(request: Request) {
 
     const slug =
       validatedData.slug ||
-      slugify(`${validatedData.artist}-${validatedData.title}`);
+      slugify(
+        `${validatedData.artist}-${
+          validatedData.titleEn ? validatedData.titleEn : validatedData.title
+        }`
+      );
 
     let finalCoverArt = validatedData.coverArt;
 
@@ -90,6 +95,7 @@ export async function POST(request: Request) {
         titleEn: validatedData.titleEn || "",
         artist: validatedData.artist || "",
         artistEn: validatedData.artistEn || "",
+        artistId: validatedData.artistId || undefined, // Set artistId for proper relation
         albumId: validatedData.albumId || undefined,
         albumName: validatedData.albumName,
         uri:
