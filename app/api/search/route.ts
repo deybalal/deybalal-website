@@ -25,6 +25,7 @@ export async function POST(request: Request) {
             { title: { contains: normalizedQuery, mode: "insensitive" } },
             { artist: { contains: normalizedQuery, mode: "insensitive" } },
             { albumName: { contains: normalizedQuery, mode: "insensitive" } },
+            { titleEn: { contains: normalizedQuery, mode: "insensitive" } },
           ],
         },
         take: 7,
@@ -43,6 +44,9 @@ export async function POST(request: Request) {
           OR: [
             { name: { contains: normalizedQuery, mode: "insensitive" } },
             { artistName: { contains: normalizedQuery, mode: "insensitive" } },
+            {
+              artistNameEn: { contains: normalizedQuery, mode: "insensitive" },
+            },
           ],
         },
         take: 5,
@@ -70,7 +74,10 @@ export async function POST(request: Request) {
       // 4. Search Artists (Limit 5)
       prisma.artist.findMany({
         where: {
-          name: { contains: normalizedQuery, mode: "insensitive" },
+          OR: [
+            { name: { contains: normalizedQuery, mode: "insensitive" } },
+            { nameEn: { contains: normalizedQuery, mode: "insensitive" } },
+          ],
         },
         take: 5,
         select: {

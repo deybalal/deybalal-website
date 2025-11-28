@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SongForm from "@/components/admin/SongForm";
 import AlbumForm from "@/components/admin/AlbumForm";
 import PlaylistForm from "@/components/admin/PlaylistForm";
+import ArtistForm from "@/components/admin/ArtistForm";
 
 export default function PanelPage() {
   return (
@@ -14,8 +15,9 @@ export default function PanelPage() {
       </p>
 
       <Tabs defaultValue="songs" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-md bg-muted">
+        <TabsList className="grid w-full grid-cols-4 max-w-xl bg-muted">
           <TabsTrigger value="songs">Songs</TabsTrigger>
+          <TabsTrigger value="artists">Artists</TabsTrigger>
           <TabsTrigger value="albums">Albums</TabsTrigger>
           <TabsTrigger value="playlists">Playlists</TabsTrigger>
         </TabsList>
@@ -41,6 +43,14 @@ export default function PanelPage() {
               Add New Playlist
             </h2>
             <PlaylistForm />
+          </div>
+        </TabsContent>
+        <TabsContent value="artists" className="mt-6">
+          <div className="bg-card p-6 rounded-lg border border-border">
+            <h2 className="text-xl font-semibold text-foreground mb-4">
+              Add New Artist
+            </h2>
+            <ArtistForm />
           </div>
         </TabsContent>
       </Tabs>

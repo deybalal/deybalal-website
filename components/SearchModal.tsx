@@ -45,6 +45,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [results, setResults] = useState<SearchResults | null>(null);
   const [isPending, startTransition] = useTransition();
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Debounce query
   useEffect(() => {
@@ -63,6 +64,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }
 
     startTransition(async () => {
+      setIsLoading(true);
+
       try {
         const res = await fetch("/api/search", {
           method: "POST",
@@ -81,6 +84,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       } catch (error) {
         console.error("Search error", error);
         setResults(null);
+      } finally {
+        setIsLoading(false);
       }
     });
   }, [debouncedQuery]);
@@ -101,40 +106,84 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         {/* Search Header */}
         <div className="flex items-center px-6 py-6 border-b border-white/10 bg-white/5">
           <Search className="w-6 h-6 text-zinc-400 mr-4" />
-          <Input
-            placeholder="What do you want to listen to?"
-            className="flex-1 p-2 border-none bg-transparent focus-visible:ring-0 text-xl placeholder:text-zinc-500 h-auto font-medium tracking-tight"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            autoFocus
-          />
-          {query && (
-            <button
-              onClick={() => {
-                setQuery("");
-                setResults(null);
-              }}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors mr-2"
-            >
-              <X className="w-5 h-5 text-zinc-400" />
-            </button>
-          )}
+          <div className="w-full flex relative">
+            <Input
+              placeholder="What do you want to listen to?"
+              className="flex-1 p-2 border-none bg-transparent focus-visible:ring-0 text-xl placeholder:text-zinc-500 h-auto font-medium tracking-tight"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+            />
+            {query && (
+              <button
+                onClick={() => {
+                  setQuery("");
+                  setResults(null);
+                }}
+                className="absolute z-10 right-0 cursor-pointer p-2 hover:bg-white/10 rounded-full transition-colors mr-2"
+              >
+                <X className="w-5 h-5 text-zinc-400 hover:text-red-500" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Results Area */}
         <ScrollArea className="h-[65vh]">
           <div className="p-6">
-            {isPending ? (
-              <div className="flex flex-col items-center justify-center h-60 text-zinc-500 animate-pulse">
-                <div className="w-12 h-12 rounded-full bg-white/10 mb-4" />
-                <div className="h-4 w-32 bg-white/10 rounded" />
+            {query.trim() !== "" &&
+            (isPending || isLoading || query !== debouncedQuery) ? (
+              <div className="space-y-8 animate-pulse">
+                {/* Songs Skeleton */}
+                <section>
+                  <div className="h-7 w-24 bg-white/10 rounded mb-4" />
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="flex items-center p-2 rounded-md">
+                        <div className="w-12 h-12 rounded bg-white/10 mr-4" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 w-48 bg-white/10 rounded" />
+                          <div className="h-3 w-32 bg-white/10 rounded" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Artists Skeleton */}
+                <section>
+                  <div className="h-7 w-24 bg-white/10 rounded mb-4" />
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="flex flex-col items-center p-4">
+                        <div className="w-32 h-32 rounded-full bg-white/10 mb-4" />
+                        <div className="h-4 w-24 bg-white/10 rounded mb-2" />
+                        <div className="h-3 w-16 bg-white/10 rounded" />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Albums Skeleton */}
+                <section>
+                  <div className="h-7 w-24 bg-white/10 rounded mb-4" />
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="p-4">
+                        <div className="w-full aspect-square rounded-md bg-white/10 mb-4" />
+                        <div className="h-4 w-32 bg-white/10 rounded mb-2" />
+                        <div className="h-3 w-24 bg-white/10 rounded" />
+                      </div>
+                    ))}
+                  </div>
+                </section>
               </div>
             ) : query.trim() !== "" &&
-              (!results ||
-                (results.songs.length === 0 &&
-                  results.artists.length === 0 &&
-                  results.albums.length === 0 &&
-                  results.playlists.length === 0)) ? (
+              results &&
+              results.songs.length === 0 &&
+              results.artists.length === 0 &&
+              results.albums.length === 0 &&
+              results.playlists.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-60 text-zinc-400">
                 <p className="text-lg font-medium">
                   No results found for &quot;{query}&quot;
@@ -144,7 +193,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   fewer or different keywords.
                 </p>
               </div>
-            ) : !results ? (
+            ) : !results || query.trim() === "" ? (
               <div className="flex flex-col items-center justify-center h-80 text-zinc-500 gap-6">
                 <div className="p-6 rounded-full bg-white/5 ring-1 ring-white/10">
                   <Search className="w-10 h-10 opacity-40" />
@@ -158,7 +207,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   </p>
                 </div>
               </div>
-            ) : (
+            ) : results ? (
               <div className="space-y-10 pb-8">
                 {/* Songs Section */}
                 {results.songs.length > 0 && (
@@ -326,7 +375,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   </section>
                 )}
               </div>
-            )}
+            ) : null}
           </div>
         </ScrollArea>
       </DialogContent>

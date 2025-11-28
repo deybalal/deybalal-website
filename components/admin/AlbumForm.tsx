@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,46 +12,126 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import Image from "next/image";
+
+interface Artist {
+  id: string;
+  name: string;
+  nameEn?: string | null;
+}
 
 const formSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  artistName: z.string().min(1, 'Artist Name is required'),
+  name: z.string().min(1, "Name is required"),
+  artistName: z.string().min(1, "Artist Name is required"),
+  nameEn: z.string().min(1, "Artist Name in English is required"),
   coverArt: z.string().optional(),
   releaseDate: z.string().optional(),
 });
 
 export default function AlbumForm() {
   const [loading, setLoading] = useState(false);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [openArtist, setOpenArtist] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      artistName: '',
-      coverArt: '',
-      releaseDate: '',
+      name: "",
+      artistName: "",
+      nameEn: "",
+      coverArt: "",
+      releaseDate: "",
     },
   });
+
+  useEffect(() => {
+    const fetchArtists = async () => {
+      try {
+        const res = await fetch("/api/artists");
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success) {
+            setArtists(result.data);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch artists", error);
+      }
+    };
+    fetchArtists();
+  }, []);
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload/image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || "Failed to upload image");
+      }
+
+      const { filePath } = result.data;
+      form.setValue("coverArt", filePath);
+      toast.success("Cover art uploaded");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload cover art");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
     try {
-      const res = await fetch('/api/albums/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/albums/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
       const result = await res.json();
-      if (!res.ok || !result.success) throw new Error(result.message || 'Failed to create album');
+      if (!res.ok || !result.success)
+        throw new Error(result.message || "Failed to create album");
 
-      toast.success('Album created successfully');
+      toast.success("Album created successfully");
       form.reset();
     } catch (error) {
-      toast.error('Failed to create album');
+      toast.error("Failed to create album");
     } finally {
       setLoading(false);
     }
@@ -59,7 +139,10 @@ export default function AlbumForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-md">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 max-w-md"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -77,10 +160,74 @@ export default function AlbumForm() {
           control={form.control}
           name="artistName"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex flex-col">
               <FormLabel>Artist Name</FormLabel>
+              <Popover open={openArtist} onOpenChange={setOpenArtist}>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openArtist}
+                      className={cn(
+                        "w-full justify-between",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value
+                        ? artists.find((artist) => artist.name === field.value)
+                            ?.name || field.value
+                        : "Select artist"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search artist..." />
+                    <CommandList>
+                      <CommandEmpty>No artist found.</CommandEmpty>
+                      <CommandGroup>
+                        {artists.map((artist) => (
+                          <CommandItem
+                            value={artist.name}
+                            key={artist.id}
+                            onSelect={() => {
+                              form.setValue("artistName", artist.name);
+                              if (artist.nameEn) {
+                                form.setValue("nameEn", artist.nameEn);
+                              }
+                              setOpenArtist(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                artist.name === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {artist.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="nameEn"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Artist Name (English)</FormLabel>
               <FormControl>
-                <Input placeholder="Artist Name" {...field} />
+                <Input placeholder="Artist Name (English)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -91,9 +238,29 @@ export default function AlbumForm() {
           name="coverArt"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cover Art URI</FormLabel>
+              <FormLabel>Cover Art</FormLabel>
               <FormControl>
-                <Input placeholder="/images/cover.jpg" {...field} />
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverUpload}
+                      disabled={uploading}
+                      className="w-full"
+                    />
+                  </div>
+                  {field.value && (
+                    <div className="relative w-32 h-32 rounded-md overflow-hidden border">
+                      <Image
+                        src={field.value}
+                        alt="Cover Art Preview"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -106,14 +273,19 @@ export default function AlbumForm() {
             <FormItem>
               <FormLabel>Release Date</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input
+                  type="number"
+                  maxLength={4}
+                  placeholder="2025"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" disabled={loading}>
-          {loading ? 'Creating...' : 'Create Album'}
+          {loading ? "Creating..." : "Create Album"}
         </Button>
       </form>
     </Form>

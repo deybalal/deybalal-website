@@ -25,6 +25,27 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Album } from "@/types/types";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+interface Artist {
+  id: string;
+  name: string;
+  nameEn?: string | null;
+}
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -45,8 +66,10 @@ type SongFormValues = z.infer<typeof formSchema>;
 
 export default function SongForm() {
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [openArtist, setOpenArtist] = useState(false);
 
   const form = useForm<SongFormValues>({
     resolver: zodResolver(formSchema),
@@ -80,7 +103,23 @@ export default function SongForm() {
         console.error("Failed to fetch albums", error);
       }
     };
+
+    const fetchArtists = async () => {
+      try {
+        const res = await fetch("/api/artists");
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success) {
+            setArtists(result.data);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch artists", error);
+      }
+    };
+
     fetchAlbums();
+    fetchArtists();
   }, []);
 
   async function onSubmit(values: SongFormValues) {
@@ -280,11 +319,62 @@ export default function SongForm() {
           control={form.control}
           name="artist"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex flex-col">
               <FormLabel>Artist</FormLabel>
-              <FormControl>
-                <Input placeholder="Artist Name" {...field} />
-              </FormControl>
+              <Popover open={openArtist} onOpenChange={setOpenArtist}>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openArtist}
+                      className={cn(
+                        "w-full justify-between",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value
+                        ? artists.find((artist) => artist.name === field.value)
+                            ?.name || field.value
+                        : "Select artist"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search artist..." />
+                    <CommandList>
+                      <CommandEmpty>No artist found.</CommandEmpty>
+                      <CommandGroup>
+                        {artists.map((artist) => (
+                          <CommandItem
+                            value={artist.name}
+                            key={artist.id}
+                            onSelect={() => {
+                              form.setValue("artist", artist.name);
+                              if (artist.nameEn) {
+                                form.setValue("artistEn", artist.nameEn);
+                              }
+                              setOpenArtist(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                artist.name === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {artist.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
