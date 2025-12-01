@@ -112,8 +112,10 @@ const PlayerBar = () => {
           <Button
             variant="ghost"
             size="icon"
-            className={`hidden md:inline-flex hover:bg-transparent ${
-              isShuffling ? "text-accent" : "text-gray-400 hover:text-white"
+            className={`hidden md:inline-flex  hover:bg-transparent cursor-pointer ${
+              isShuffling
+                ? "text-foreground"
+                : "text-gray-400 hover:text-foreground"
             }`}
             onClick={toggleShuffle}
           >
@@ -122,14 +124,14 @@ const PlayerBar = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-400 hover:text-white hover:bg-transparent"
+            className="text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
             onClick={prev}
           >
             <SkipBack size={20} className="md:w-6 md:h-6" />
           </Button>
           <Button
             size="icon"
-            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-accent text-accent-foreground hover:scale-105 transition-transform neon-box hover:bg-accent/90"
+            className="w-10 h-10 md:w-12 md:h-12 justify-center items-center rounded-full bg-accent dark:bg-cyan-800 text-white hover:scale-115 transition-transform neon-box hover:bg-accent/90 cursor-pointer"
             onClick={togglePlay}
           >
             {isPlaying ? (
@@ -145,7 +147,7 @@ const PlayerBar = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-400 hover:text-white hover:bg-transparent"
+            className="text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
             onClick={next}
           >
             <SkipForward size={20} className="md:w-6 md:h-6" />
@@ -153,10 +155,10 @@ const PlayerBar = () => {
           <Button
             variant="ghost"
             size="icon"
-            className={`hidden md:inline-flex hover:bg-transparent ${
+            className={`hidden md:inline-flex hover:bg-transparent cursor-pointer ${
               repeatMode !== "off"
-                ? "text-accent"
-                : "text-gray-400 hover:text-white"
+                ? "text-foreground"
+                : "text-gray-400 hover:text-foreground"
             }`}
             onClick={toggleRepeat}
           >

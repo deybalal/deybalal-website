@@ -176,3 +176,24 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer and Edge */
+  overflow: -moz-scrollbars-none; /* Old versions of Firefox */
+  &::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent; /* Safari and Chrome */
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent; /* Safari and Chrome */
+  }
+  &::-webkit-scrollbar-button {
+    display: none; /* Safari and Chrome */
+  }
+  &::-webkit-scrollbar-corner {
+    display: none; /* Safari and Chrome */
+  }
+}

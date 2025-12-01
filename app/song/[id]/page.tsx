@@ -11,12 +11,15 @@ import {
   Repeat1,
   Shuffle,
   Heart,
+  List,
+  ListPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { formatTime } from "@/lib/utils";
 import Image from "next/image";
+import Lyrics from "@/components/Lyrics";
 
 export default function SongDetailPage({
   params,
@@ -112,118 +115,174 @@ export default function SongDetailPage({
 
   const displayProgress = isCurrentSong ? progress : 0;
   const displayDuration = isCurrentSong ? duration : song.duration || 0;
+  const hasLyrics = !!song.syncedLyrics || !!song.lyrics;
 
   return (
-    <div className="h-full flex flex-col items-center justify-center max-w-4xl mx-auto py-10">
-      {/* Art */}
-      <div className="w-full max-w-md aspect-square bg-card rounded-2xl shadow-2xl mb-10 neon-box relative overflow-hidden group">
-        {song.coverArt ? (
-          <Image
-            src={song.coverArt || ""}
-            alt={song.title || "Song"}
-            fill
-            className="object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-indigo-900 via-purple-900 to-pink-900">
-            <span className="text-6xl font-bold text-white/20">♪</span>
-          </div>
-        )}
-        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      </div>
-
-      {/* Info */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">
-          {song.title}
-        </h1>
-        <p className="text-xl text-muted-foreground">
-          {song.artist || "Unknown Artist"}
-        </p>
-        {song.album && (
-          <p className="text-sm text-muted-foreground/70 mt-1">{song.album}</p>
-        )}
-      </div>
-
-      {/* Progress */}
-      <div className="w-full mb-8 px-4">
-        <Slider
-          value={[displayProgress]}
-          onValueChange={handleSeek}
-          max={displayDuration || 100}
-          step={1}
-          className="mb-2"
-          disabled={!isCurrentSong}
-        />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{formatTime(displayProgress)}</span>
-          <span>{formatTime(displayDuration)}</span>
+    <div
+      className={`h-[calc(100dvh-120px)] w-full flex-1 flex justify-center m-0 mx-auto p-0 transition-all duration-500 ${
+        hasLyrics
+          ? "max-w-7xl flex flex-col lg:grid lg:grid-cols-2 lg:gap-12 px-2"
+          : "max-w-4xl flex flex-col items-center justify-center"
+      }`}
+    >
+      {/* Lyrics Column (Left on Desktop) */}
+      {hasLyrics && (
+        <div className="hidden lg:block h-[calc(100dvh-120px)] bg-card/30 rounded-3xl p-6 border border-white/5 shadow-xl">
+          <Lyrics lrc={song.syncedLyrics} plainLyrics={song.lyrics} />
         </div>
-      </div>
+      )}
 
-      {/* Controls */}
-      <div className="flex items-center gap-8">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`hover:bg-transparent scale-125 ${
-            isShuffling
-              ? "text-accent"
-              : "text-muted-foreground hover:text-foreground"
+      {/* Main Content (Right or Center) */}
+      {/* Main Content (Right or Center) */}
+      <div
+        className={`flex flex-col items-center justify-between w-full h-full py-2 ${
+          hasLyrics
+            ? "lg:h-[calc(100dvh-120px)] lg:justify-center lg:gap-8"
+            : ""
+        }`}
+      >
+        {/* Art */}
+        <div
+          className={`w-full aspect-square bg-card rounded-2xl shadow-2xl neon-box relative overflow-hidden group transition-all duration-500 ${
+            hasLyrics ? "max-w-[80vw] lg:max-w-sm" : "max-w-md"
           }`}
-          onClick={toggleShuffle}
         >
-          <Shuffle size={24} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-muted-foreground hover:text-foreground hover:bg-transparent scale-125"
-          onClick={prev}
-        >
-          <SkipBack size={32} />
-        </Button>
-        <Button
-          size="icon"
-          className="w-20 h-20 rounded-full bg-accent text-accent-foreground hover:scale-105 transition-transform neon-box hover:bg-accent/90 flex items-center justify-center"
-          onClick={handlePlayPause}
-        >
-          {isCurrentSong && isPlaying ? (
-            <Pause size={60} fill="currentColor" />
+          {song.coverArt ? (
+            <Image
+              src={song.coverArt || ""}
+              alt={song.title || "Song"}
+              fill
+              className="object-cover"
+            />
           ) : (
-            <Play size={60} fill="currentColor" className="m" />
+            <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-indigo-900 via-purple-900 to-pink-900">
+              <span className="text-6xl font-bold text-white/20">♪</span>
+            </div>
           )}
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-muted-foreground hover:text-foreground hover:bg-transparent scale-125"
-          onClick={next}
-        >
-          <SkipForward size={32} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`hover:bg-transparent scale-125 ${
-            repeatMode !== "off"
-              ? "text-accent"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-          onClick={toggleRepeat}
-        >
-          {repeatMode === "one" ? <Repeat1 size={24} /> : <Repeat size={24} />}
-        </Button>
-      </div>
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-      <div className="mt-10">
-        <Button
-          variant="outline"
-          className="gap-2 border-accent text-accent hover:bg-accent hover:text-accent-foreground"
-        >
-          <Heart size={20} />
-          Add to Favorites
-        </Button>
+          {/* Mobile Lyrics Overlay */}
+          {hasLyrics && (
+            <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[2px] p-4 lg:hidden overflow-hidden rounded-2xl">
+              <Lyrics lrc={song.syncedLyrics} plainLyrics={song.lyrics} />
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="flex justify-between w-full px-4">
+          <div className="mt-2">
+            <Button
+              variant="outline"
+              className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
+            >
+              <ListPlus size="full" className="size-full" />
+            </Button>
+          </div>
+          <div className="text-center flex-1 min-w-0 px-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 line-clamp-1">
+              {song.title}
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground line-clamp-1">
+              {song.artist || "Unknown Artist"}
+            </p>
+            {song.album && (
+              <p className="text-sm text-muted-foreground/70 mt-1 line-clamp-1">
+                {song.album}
+              </p>
+            )}
+          </div>
+
+          <div className="mt-2">
+            <Button
+              variant="outline"
+              className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
+            >
+              <Heart size={33} />
+            </Button>
+          </div>
+        </div>
+
+        {/* Progress */}
+        <div className="w-full px-4">
+          <Slider
+            value={[displayProgress]}
+            onValueChange={handleSeek}
+            max={displayDuration || 100}
+            step={1}
+            className="mb-2 cursor-pointer"
+            disabled={!isCurrentSong}
+          />
+          <div className="flex justify-between text-sm text-muted-foreground cursor-pointer">
+            <span>{formatTime(displayProgress)}</span>
+            <span>{formatTime(displayDuration)}</span>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="flex items-center gap-6 md:gap-8">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`hover:bg-transparent scale-125 cursor-pointer ${
+              isShuffling
+                ? "text-accent"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={toggleShuffle}
+          >
+            <Shuffle size={24} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground hover:text-foreground hover:bg-transparent scale-125 cursor-pointer"
+            onClick={prev}
+          >
+            <SkipBack size={32} />
+          </Button>
+          <Button
+            size="icon"
+            className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-accent dark:bg-cyan-800 text-white hover:scale-105 transition-transform neon-box hover:bg-accent/90 flex items-center justify-center cursor-pointer"
+            onClick={handlePlayPause}
+          >
+            {isCurrentSong && isPlaying ? (
+              <Pause
+                className="w-10 h-10 md:w-[60px] md:h-[60px]"
+                fill="currentColor"
+              />
+            ) : (
+              <Play
+                className="w-10 h-10 md:w-[60px] md:h-[60px] ml-1"
+                fill="currentColor"
+              />
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground hover:text-foreground hover:bg-transparent scale-125 cursor-pointer"
+            onClick={next}
+          >
+            <SkipForward size={32} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`hover:bg-transparent scale-125 cursor-pointer ${
+              repeatMode !== "off"
+                ? "text-accent"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={toggleRepeat}
+          >
+            {repeatMode === "one" ? (
+              <Repeat1 size={24} />
+            ) : (
+              <Repeat size={24} />
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
