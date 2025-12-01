@@ -13,7 +13,7 @@ interface SongCardProps {
 }
 
 const SongCard = ({ song }: SongCardProps) => {
-  const { pause, play, currentSong, isPlaying } = usePlayerStore();
+  const { pause, play, currentSong, isPlaying, setSong } = usePlayerStore();
 
   return (
     <Card className="group relative overflow-hidden cursor-pointer border-0 bg-transparent">
@@ -67,6 +67,8 @@ const SongCard = ({ song }: SongCardProps) => {
                       } else {
                         play();
                       }
+                    } else {
+                      setSong(song);
                     }
                   }}
                   className="z-50 relative w-16 h-16 rounded-full bg-white dark:bg-white/95 backdrop-blur-md flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-2xl shadow-purple-500/30 dark:shadow-black/50 hover:shadow-purple-500/50"

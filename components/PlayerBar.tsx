@@ -1,5 +1,6 @@
 "use client";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
+import { useEffect } from "react";
 import {
   Play,
   SkipBack,
@@ -50,6 +51,32 @@ const PlayerBar = () => {
     setSeekTo(value[0]);
     setProgress(value[0]); // Optimistic update
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (isPlaying) pause();
+        else play();
+      } else if (e.code === "ArrowUp") {
+        e.preventDefault();
+        setVolume(Math.min(volume + 2, 100));
+      } else if (e.code === "ArrowDown") {
+        e.preventDefault();
+        setVolume(Math.max(volume - 2, 0));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [volume, isPlaying, pause, play, setVolume]);
 
   if (!currentSong) return null; // Or return a disabled state
 
@@ -141,7 +168,7 @@ const PlayerBar = () => {
           </Button>
         </div>
         {/* Progress Bar */}
-        <div className="w-64 md:w-full flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-gray-400 hidden md:flex">
+        <div className="w-64 md:w-full items-center gap-2 md:gap-3 text-[10px] md:text-xs text-gray-400 hidden md:flex">
           <span>{formatTime(progress)}</span>
           <Slider
             value={[progress]}
