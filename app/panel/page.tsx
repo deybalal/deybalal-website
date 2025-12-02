@@ -1,59 +1,51 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SongForm from "@/components/admin/SongForm";
-import AlbumForm from "@/components/admin/AlbumForm";
-import PlaylistForm from "@/components/admin/PlaylistForm";
-import ArtistForm from "@/components/admin/ArtistForm";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { DataTable } from "@/components/data-table";
+import { columns } from "./columns";
 
-export default function PanelPage() {
+export default async function PanelPage() {
+  const songs = await prisma.song.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-foreground neon-text">
-        Admin Panel
-      </h1>
-      <p className="text-muted-foreground">
-        Manage your music library content.
-      </p>
+    <div className="space-y-6 w-full">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground neon-text">
+            Admin Panel
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your music library content.
+          </p>
+        </div>
+      </div>
 
-      <Tabs defaultValue="songs" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 max-w-xl bg-muted">
-          <TabsTrigger value="songs">Songs</TabsTrigger>
-          <TabsTrigger value="artists">Artists</TabsTrigger>
-          <TabsTrigger value="albums">Albums</TabsTrigger>
-          <TabsTrigger value="playlists">Playlists</TabsTrigger>
-        </TabsList>
-        <TabsContent value="songs" className="mt-6">
-          <div className="bg-card p-6 rounded-lg border border-border">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              Add New Song
-            </h2>
-            <SongForm />
-          </div>
-        </TabsContent>
-        <TabsContent value="albums" className="mt-6">
-          <div className="bg-card p-6 rounded-lg border border-border">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              Add New Album
-            </h2>
-            <AlbumForm />
-          </div>
-        </TabsContent>
-        <TabsContent value="playlists" className="mt-6">
-          <div className="bg-card p-6 rounded-lg border border-border">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              Add New Playlist
-            </h2>
-            <PlaylistForm />
-          </div>
-        </TabsContent>
-        <TabsContent value="artists" className="mt-6">
-          <div className="bg-card p-6 rounded-lg border border-border">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              Add New Artist
-            </h2>
-            <ArtistForm />
-          </div>
-        </TabsContent>
-      </Tabs>
+      <div className="flex flex-wrap gap-4">
+        <Button>User Area</Button>
+        <Button asChild variant="secondary">
+          <Link href="/panel/new/song">Add New Song</Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link href="/panel/new/artist">Add New Artist</Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link href="/panel/new/album">Add New Album</Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link href="/panel/new/playlist">Add New Playlist</Link>
+        </Button>
+      </div>
+
+      <div className="bg-card p-6 rounded-lg border border-border">
+        <h2 className="text-xl font-semibold text-foreground mb-4">
+          All Songs
+        </h2>
+        <DataTable columns={columns} data={songs} />
+      </div>
     </div>
   );
 }
