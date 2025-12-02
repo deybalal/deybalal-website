@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
 import {
   Select,
   SelectContent,
@@ -63,8 +63,7 @@ const formSchema = z.object({
   coverArt: z.string().optional(),
   duration: z.number().min(0).optional(),
   filename: z.string().optional(),
-  lyrics: z.string().optional(),
-  syncedLyrics: z.string().optional(),
+
   tempCoverArt: z.string().optional(),
 });
 
@@ -92,8 +91,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       coverArt: "",
       duration: 0,
       filename: "",
-      lyrics: "",
-      syncedLyrics: "",
+
       tempCoverArt: "",
     },
   });
@@ -157,8 +155,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               form.setValue("coverArt", song.coverArt || "");
               form.setValue("duration", song.duration || 0);
               form.setValue("filename", song.filename || "");
-              form.setValue("lyrics", song.lyrics || "");
-              form.setValue("syncedLyrics", song.syncedLyrics || "");
             } else {
               toast.error("Failed to fetch song data");
             }
@@ -643,32 +639,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="lyrics"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Lyrics</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Song lyrics..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="syncedLyrics"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Synced Lyrics (LRC)</FormLabel>
-              <FormControl>
-                <Textarea placeholder="[00:00.00] Lyrics..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <Button type="submit" disabled={loading || fetchingData}>
           {loading
             ? mode === "edit"

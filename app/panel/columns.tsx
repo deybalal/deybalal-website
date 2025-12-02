@@ -36,8 +36,13 @@ const ActionsCell = ({ row }: { row: Row<Song> }) => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem>
-          <Link href={`/panel/lyrics/${song.id}`} className="w-full">
+          <Link href={`/panel/edit/lyrics/${song.id}`} className="w-full">
             Edit Lyrics
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href={`/panel/edit/synced/${song.id}`} className="w-full">
+            Edit Synced Lyrics
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
