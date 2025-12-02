@@ -47,6 +47,11 @@ interface Artist {
   nameEn?: string | null;
 }
 
+interface SongFormProps {
+  songId?: string;
+  mode?: "create" | "edit";
+}
+
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   titleEn: z.string().optional(),
@@ -65,13 +70,14 @@ const formSchema = z.object({
 
 type SongFormValues = z.infer<typeof formSchema>;
 
-export default function SongForm() {
+export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [openArtist, setOpenArtist] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0); // Key to force file input reset
+  const [fetchingData, setFetchingData] = useState(false);
 
   const form = useForm<SongFormValues>({
     resolver: zodResolver(formSchema),
@@ -129,26 +135,74 @@ export default function SongForm() {
     fetchArtists();
   }, []);
 
+  // Fetch song data in edit mode
+  useEffect(() => {
+    if (mode === "edit" && songId) {
+      const fetchSongData = async () => {
+        setFetchingData(true);
+        try {
+          const res = await fetch(`/api/songs/${songId}`);
+          if (res.ok) {
+            const result = await res.json();
+            if (result.success) {
+              const song = result.data;
+              // Populate form with song data
+              form.setValue("title", song.title || "");
+              form.setValue("titleEn", song.titleEn || "");
+              form.setValue("artist", song.artist || "");
+              form.setValue("artistEn", song.artistEn || "");
+              form.setValue("artistId", song.artistId || "");
+              form.setValue("albumId", song.albumId || "");
+              form.setValue("albumName", song.albumName || "");
+              form.setValue("coverArt", song.coverArt || "");
+              form.setValue("duration", song.duration || 0);
+              form.setValue("filename", song.filename || "");
+              form.setValue("lyrics", song.lyrics || "");
+              form.setValue("syncedLyrics", song.syncedLyrics || "");
+            } else {
+              toast.error("Failed to fetch song data");
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching song:", error);
+          toast.error("Failed to fetch song data");
+        } finally {
+          setFetchingData(false);
+        }
+      };
+
+      fetchSongData();
+    }
+  }, [mode, songId, form]);
+
   async function onSubmit(values: SongFormValues) {
     setLoading(true);
     try {
-      const res = await fetch("/api/songs/create", {
-        method: "POST",
+      const endpoint =
+        mode === "edit" ? `/api/songs/${songId}` : "/api/songs/create";
+      const method = mode === "edit" ? "PUT" : "POST";
+
+      const res = await fetch(endpoint, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        toast.error(result.message || "Failed to create song");
-        throw new Error(result.message || "Failed to create song");
+        toast.error(result.message || `Failed to ${mode} song`);
+        throw new Error(result.message || `Failed to ${mode} song`);
       }
 
-      toast.success("Song created successfully");
-      form.reset();
-      setFileInputKey((prev) => prev + 1); // Reset file inputs by changing key
+      toast.success(
+        `Song ${mode === "edit" ? "updated" : "created"} successfully`
+      );
+      if (mode === "create") {
+        form.reset();
+        setFileInputKey((prev) => prev + 1); // Reset file inputs by changing key
+      }
     } catch {
-      toast.error("Failed to create song");
+      toast.error(`Failed to ${mode} song`);
     } finally {
       setLoading(false);
     }
@@ -260,8 +314,6 @@ export default function SongForm() {
 
           matchingArtist = bestMatch || undefined;
         }
-
-        console.log("matchingArtist ", matchingArtist);
 
         if (matchingArtist) {
           // Set both artist name and ID
@@ -376,10 +428,7 @@ export default function SongForm() {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 max-w-md"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
         <FormItem>
           <FormLabel>Upload MP3</FormLabel>
           <FormControl>
@@ -620,8 +669,14 @@ export default function SongForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Song"}
+        <Button type="submit" disabled={loading || fetchingData}>
+          {loading
+            ? mode === "edit"
+              ? "Updating..."
+              : "Creating..."
+            : mode === "edit"
+            ? "Update Song"
+            : "Create Song"}
         </Button>
       </form>
     </Form>

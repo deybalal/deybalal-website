@@ -25,8 +25,8 @@ model Song {
   lyrics       String?
   syncedLyrics String?
   playCount    Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isDisabled Boolean @default(false)
+  disabledDescription String?
 
   albumId      String?
   album        Album?   @relation(fields: [albumId], references: [id])
@@ -35,6 +35,9 @@ model Song {
   artistRel    Artist?  @relation(fields: [artistId], references: [id])
   
   playlists    Playlist[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Album {
