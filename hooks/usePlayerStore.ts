@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { Song } from '@/types/types';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { Song } from "@/types/types";
 
 interface PlayerState {
   isPlaying: boolean;
@@ -10,10 +10,10 @@ interface PlayerState {
   volume: number;
   progress: number;
   duration: number;
-  
+
   play: () => void;
   pause: () => void;
-  setSong: (song: Song) => void;
+  setSong: (song: Song, play?: boolean) => void;
   setQueue: (songs: Song[], startIndex?: number) => void;
   next: () => void;
   prev: () => void;
@@ -22,11 +22,11 @@ interface PlayerState {
   setDuration: (duration: number) => void;
   seekTo: number | null;
   setSeekTo: (time: number | null) => void;
-  
+
   isShuffling: boolean;
-  repeatMode: 'off' | 'all' | 'one';
+  repeatMode: "off" | "all" | "one";
   toggleShuffle: () => void;
-  setRepeatMode: (mode: 'off' | 'all' | 'one') => void;
+  setRepeatMode: (mode: "off" | "all" | "one") => void;
 }
 
 export const usePlayerStore = create<PlayerState>()(
@@ -41,27 +41,27 @@ export const usePlayerStore = create<PlayerState>()(
       duration: 0,
       seekTo: null,
       isShuffling: false,
-      repeatMode: 'off',
+      repeatMode: "off",
 
       play: () => set({ isPlaying: true }),
       pause: () => set({ isPlaying: false }),
-      
-      setSong: (song) => {
-        set({ currentSong: song, isPlaying: true });
+
+      setSong: (song, play) => {
+        set({ currentSong: song, isPlaying: play === false ? false : true });
       },
 
       setQueue: (songs, startIndex = 0) => {
-        set({ 
-          queue: songs, 
-          currentIndex: startIndex, 
+        set({
+          queue: songs,
+          currentIndex: startIndex,
           currentSong: songs[startIndex] || null,
-          isPlaying: true 
+          isPlaying: true,
         });
       },
 
       next: () => {
         const { queue, currentIndex, isShuffling, repeatMode } = get();
-        
+
         if (queue.length === 0) return;
 
         let nextIndex = -1;
@@ -71,36 +71,36 @@ export const usePlayerStore = create<PlayerState>()(
           nextIndex = Math.floor(Math.random() * queue.length);
           // Try to avoid same song if queue > 1
           if (queue.length > 1 && nextIndex === currentIndex) {
-             nextIndex = (nextIndex + 1) % queue.length;
+            nextIndex = (nextIndex + 1) % queue.length;
           }
         } else {
           if (currentIndex < queue.length - 1) {
             nextIndex = currentIndex + 1;
-          } else if (repeatMode === 'all') {
+          } else if (repeatMode === "all") {
             nextIndex = 0;
           }
         }
 
         if (nextIndex !== -1) {
-          set({ 
-            currentIndex: nextIndex, 
+          set({
+            currentIndex: nextIndex,
             currentSong: queue[nextIndex],
-            isPlaying: true 
+            isPlaying: true,
           });
         } else {
-            // End of queue and not repeating
-            set({ isPlaying: false });
+          // End of queue and not repeating
+          set({ isPlaying: false });
         }
       },
 
       prev: () => {
         const { queue, currentIndex } = get();
-        
+
         if (currentIndex > 0) {
-          set({ 
-            currentIndex: currentIndex - 1, 
+          set({
+            currentIndex: currentIndex - 1,
             currentSong: queue[currentIndex - 1],
-            isPlaying: true 
+            isPlaying: true,
           });
         }
       },
@@ -109,22 +109,24 @@ export const usePlayerStore = create<PlayerState>()(
       setProgress: (progress) => set({ progress }),
       setDuration: (duration) => set({ duration }),
       setSeekTo: (seekTo) => set({ seekTo }),
-      
-      toggleShuffle: () => set((state) => ({ isShuffling: !state.isShuffling })),
+
+      toggleShuffle: () =>
+        set((state) => ({ isShuffling: !state.isShuffling })),
       setRepeatMode: (mode) => set({ repeatMode: mode }),
     }),
     {
-      name: 'player-storage',
-      partialize: (state) => ({
-        volume: state.volume,
-        progress: state.progress,
-        queue: state.queue,
-        duration: state.duration,
-        currentSong: state.currentSong,
-        currentIndex: state.currentIndex,
-        isShuffling: state.isShuffling,
-        repeatMode: state.repeatMode,
-      }) as PlayerState,
+      name: "player-storage",
+      partialize: (state) =>
+        ({
+          volume: state.volume,
+          progress: state.progress,
+          queue: state.queue,
+          duration: state.duration,
+          currentSong: state.currentSong,
+          currentIndex: state.currentIndex,
+          isShuffling: state.isShuffling,
+          repeatMode: state.repeatMode,
+        } as PlayerState),
     }
   )
 );
