@@ -18,6 +18,7 @@ model Song {
   artistEn       String
   albumName    String?
   coverArt     String?
+  year     Int      @default(0)
   duration     Int      @default(0)
   uri          String
   filename     String?
@@ -31,8 +32,7 @@ model Song {
   albumId      String?
   album        Album?   @relation(fields: [albumId], references: [id])
   
-  artistId     String?
-  artistRel    Artist?  @relation(fields: [artistId], references: [id])
+  artists      Artist[]
   
   playlists    Playlist[]
 
@@ -46,7 +46,7 @@ model Album {
   artistName  String
   artistNameEn String
   coverArt    String?
-  releaseDate DateTime?
+  releaseDate Int?
   duration    Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

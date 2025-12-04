@@ -41,6 +41,11 @@ const ActionsCell = ({ row }: { row: Row<Song> }) => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem>
+          <Link href={`/panel/edit/sync/${song.id}`} className="w-full">
+            Sync Lyrics
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
           <Link href={`/panel/edit/synced/${song.id}`} className="w-full">
             Edit Synced Lyrics
           </Link>

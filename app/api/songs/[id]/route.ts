@@ -14,6 +14,7 @@ export async function GET(
 
     const song = await prisma.song.findUnique({
       where: { id },
+      include: { artists: true },
     });
 
     if (!song) {
@@ -44,9 +45,8 @@ export async function PUT(
     // Check if song exists
     const existingSong = await prisma.song.findUnique({
       where: { id },
+      include: { artists: true },
     });
-
-    console.log("ERXingirting: ", existingSong);
 
     if (!existingSong) {
       return NextResponse.json(
@@ -63,21 +63,22 @@ export async function PUT(
         titleEn: body.titleEn ?? existingSong.titleEn ?? null,
         artist: body.artist,
         artistEn: body.artistEn ?? existingSong.artistEn ?? null,
-        artistId:
-          (body.artistId ? body.artistId : null) ??
-          existingSong.artistId ??
-          null,
+        artists: {
+          set: [], // Disconnect all existing
+          connect: body.artistIds?.map((id: string) => ({ id })) || [], // Connect new ones
+        },
         albumId:
           (body.albumId ? body.albumId : null) ?? existingSong.albumId ?? null,
         albumName: body.albumName ?? existingSong.albumName ?? null,
         coverArt: body.coverArt ?? existingSong.coverArt ?? null,
+        year: body.year ?? existingSong.year ?? null,
         duration: body.duration ?? existingSong.duration ?? null,
         lyrics: body.lyrics ?? existingSong.lyrics ?? null,
         syncedLyrics: body.syncedLyrics ?? existingSong.syncedLyrics ?? null,
       },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, data: updatedSong });
   } catch (error) {
     console.error("Error updating song:", error);
     return NextResponse.json(

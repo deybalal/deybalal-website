@@ -57,10 +57,11 @@ const formSchema = z.object({
   titleEn: z.string().optional(),
   artist: z.string().min(2, "You must enter artist name!"),
   artistEn: z.string().optional(),
-  artistId: z.string().optional(), // Will be set automatically when artist is selected
+  artistIds: z.array(z.string()).optional(), // Multiple artist IDs
   albumId: z.string().optional(),
   albumName: z.string().optional(),
   coverArt: z.string().optional(),
+  year: z.number().min(0).optional(),
   duration: z.number().min(0).optional(),
   filename: z.string().optional(),
 
@@ -72,6 +73,7 @@ type SongFormValues = z.infer<typeof formSchema>;
 export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [selectedArtists, setSelectedArtists] = useState<Artist[]>([]); // Track selected artists
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [openArtist, setOpenArtist] = useState(false);
@@ -85,10 +87,11 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       titleEn: "",
       artist: "",
       artistEn: "",
-      artistId: "",
+      artistIds: [],
       albumId: "",
       albumName: "",
       coverArt: "",
+      year: 0,
       duration: 0,
       filename: "",
 
@@ -149,10 +152,20 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               form.setValue("titleEn", song.titleEn || "");
               form.setValue("artist", song.artist || "");
               form.setValue("artistEn", song.artistEn || "");
-              form.setValue("artistId", song.artistId || "");
+
+              // Set multiple artists
+              if (song.artists && song.artists.length > 0) {
+                setSelectedArtists(song.artists);
+                form.setValue(
+                  "artistIds",
+                  song.artists.map((a: Artist) => a.id)
+                );
+              }
+
               form.setValue("albumId", song.albumId || "");
               form.setValue("albumName", song.albumName || "");
               form.setValue("coverArt", song.coverArt || "");
+              form.setValue("year", song.year || 0);
               form.setValue("duration", song.duration || 0);
               form.setValue("filename", song.filename || "");
             } else {
@@ -170,6 +183,19 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       fetchSongData();
     }
   }, [mode, songId, form]);
+
+  // Update artistEn whenever selectedArtists changes
+  useEffect(() => {
+    const artistEnNames = selectedArtists
+      .map((a) => a.nameEn)
+      .filter((name): name is string => !!name);
+
+    if (artistEnNames.length > 0) {
+      form.setValue("artistEn", artistEnNames.join(", "));
+    } else {
+      form.setValue("artistEn", "");
+    }
+  }, [selectedArtists, form]);
 
   async function onSubmit(values: SongFormValues) {
     setLoading(true);
@@ -195,6 +221,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       );
       if (mode === "create") {
         form.reset();
+        setSelectedArtists([]);
         setFileInputKey((prev) => prev + 1); // Reset file inputs by changing key
       }
     } catch {
@@ -312,12 +339,21 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
         }
 
         if (matchingArtist) {
-          // Set both artist name and ID
+          // Set both artist name and IDs
           form.setValue("artist", matchingArtist.name);
-          form.setValue("artistId", matchingArtist.id);
-          if (matchingArtist.nameEn) {
-            form.setValue("artistEn", matchingArtist.nameEn);
+          const currentIds = form.getValues("artistIds") || [];
+          if (!currentIds.includes(matchingArtist.id)) {
+            form.setValue("artistIds", [...currentIds, matchingArtist.id]);
           }
+
+          // Update selectedArtists (artistEn will be updated by useEffect)
+          setSelectedArtists((prev) => {
+            const updatedArtists = prev.find((a) => a.id === matchingArtist.id)
+              ? prev
+              : [...prev, matchingArtist];
+
+            return updatedArtists;
+          });
         } else {
           // If no match found, just set the name
           form.setValue("artist", metadata.artist);
@@ -364,6 +400,8 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
           form.setValue("albumName", metadata.album);
         }
       }
+
+      if (metadata.year) form.setValue("year", Math.round(metadata.year));
 
       if (metadata.duration)
         form.setValue("duration", Math.round(metadata.duration));
@@ -508,7 +546,47 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
           name="artist"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Artist</FormLabel>
+              <FormLabel>Artists</FormLabel>
+
+              {/* Display selected artists as badges */}
+              {selectedArtists.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {selectedArtists.map((artist) => (
+                    <div
+                      key={artist.id}
+                      className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm"
+                    >
+                      <span>{artist.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedArtists((prev) =>
+                            prev.filter((a) => a.id !== artist.id)
+                          );
+                          form.setValue(
+                            "artistIds",
+                            selectedArtists
+                              .filter((a) => a.id !== artist.id)
+                              .map((a) => a.id)
+                          );
+                          // Update artist string
+                          const remaining = selectedArtists.filter(
+                            (a) => a.id !== artist.id
+                          );
+                          form.setValue(
+                            "artist",
+                            remaining.map((a) => a.name).join(", ")
+                          );
+                        }}
+                        className="hover:text-destructive"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <Popover open={openArtist} onOpenChange={setOpenArtist}>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -518,13 +596,12 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                       aria-expanded={openArtist}
                       className={cn(
                         "w-full justify-between",
-                        !field.value && "text-muted-foreground"
+                        selectedArtists.length === 0 && "text-muted-foreground"
                       )}
                     >
-                      {field.value
-                        ? artists.find((artist) => artist.name === field.value)
-                            ?.name || field.value
-                        : "Select artist"}
+                      {selectedArtists.length > 0
+                        ? `${selectedArtists.length} artist(s) selected`
+                        : "Select artists"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
@@ -540,18 +617,60 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                             value={artist.name}
                             key={artist.id}
                             onSelect={() => {
-                              form.setValue("artist", artist.name);
-                              form.setValue("artistId", artist.id); // Automatically set artistId
-                              if (artist.nameEn) {
-                                form.setValue("artistEn", artist.nameEn);
+                              const isSelected = selectedArtists.some(
+                                (a) => a.id === artist.id
+                              );
+
+                              if (isSelected) {
+                                // Remove artist
+                                setSelectedArtists((prev) =>
+                                  prev.filter((a) => a.id !== artist.id)
+                                );
+                                form.setValue(
+                                  "artistIds",
+                                  selectedArtists
+                                    .filter((a) => a.id !== artist.id)
+                                    .map((a) => a.id)
+                                );
+                              } else {
+                                // Add artist
+                                setSelectedArtists((prev) => [...prev, artist]);
+                                form.setValue("artistIds", [
+                                  ...(form.getValues("artistIds") || []),
+                                  artist.id,
+                                ]);
                               }
-                              setOpenArtist(false);
+
+                              // Update artist string
+                              const newSelected = isSelected
+                                ? selectedArtists.filter(
+                                    (a) => a.id !== artist.id
+                                  )
+                                : [...selectedArtists, artist];
+                              form.setValue(
+                                "artist",
+                                newSelected.map((a) => a.name).join(", ")
+                              );
+
+                              // Update artistEn with all selected artists' nameEn
+                              const artistEnNames = newSelected
+                                .map((a) => a.nameEn)
+                                .filter((name): name is string => !!name);
+
+                              if (artistEnNames.length > 0) {
+                                form.setValue(
+                                  "artistEn",
+                                  artistEnNames.join(", ")
+                                );
+                              } else {
+                                form.setValue("artistEn", "");
+                              }
                             }}
                           >
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                artist.name === field.value
+                                selectedArtists.some((a) => a.id === artist.id)
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
@@ -613,6 +732,28 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               <FormLabel>Album Name (Optional override)</FormLabel>
               <FormControl>
                 <Input placeholder="Album Name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="year"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Release Year</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  placeholder="2025"
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    field.onChange(value === "" ? undefined : Number(value));
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

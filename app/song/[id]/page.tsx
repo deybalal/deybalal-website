@@ -13,6 +13,8 @@ import {
   Heart,
   List,
   ListPlus,
+  LoaderIcon,
+  LoaderPinwheel,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -20,6 +22,7 @@ import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { formatTime } from "@/lib/utils";
 import Image from "next/image";
 import Lyrics from "@/components/Lyrics";
+import Link from "next/link";
 
 export default function SongDetailPage({
   params,
@@ -27,7 +30,6 @@ export default function SongDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = React.use(params);
-  console.log("Whey ", id);
 
   const [song, setSong] = useState<Song | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,16 +101,18 @@ export default function SongDetailPage({
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+      <div className="size-full flex items-center justify-center">
+        <p className=" animate-spin">
+          <LoaderPinwheel size={60} />
+        </p>
       </div>
     );
   }
 
   if (!song) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-muted-foreground">Song not found</p>
+      <div className="size-full flex items-center justify-center">
+        <p className="text-muted-foreground text-3xl">Song not found!</p>
       </div>
     );
   }
@@ -183,9 +187,35 @@ export default function SongDetailPage({
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 line-clamp-1">
               {song.title}
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground line-clamp-1">
-              {song.artist || "Unknown Artist"}
-            </p>
+            {song.artist ? (
+              song.artists && song.artists.length > 0 ? (
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {song.artists.map((artist, index) => (
+                    <React.Fragment key={artist.id}>
+                      <Link
+                        href={`/artist/${artist.id}`}
+                        className="text-lg md:text-xl text-muted-foreground hover:scale-110 hover:text-foreground transition-transform"
+                      >
+                        {artist.name}
+                      </Link>
+                      {index < song.artists.length - 1 && (
+                        <span className="text-lg md:text-xl text-muted-foreground">
+                          و
+                        </span>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-lg md:text-xl text-muted-foreground line-clamp-1">
+                  {song.artist || "Unknown Artist"}
+                </p>
+              )
+            ) : (
+              <p className="text-lg md:text-xl text-muted-foreground line-clamp-1">
+                Unknown Artist
+              </p>
+            )}
             {song.album && (
               <p className="text-sm text-muted-foreground/70 mt-1 line-clamp-1">
                 {song.album}

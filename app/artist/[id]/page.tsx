@@ -52,18 +52,25 @@ export default async function ArtistDetailPage({
   // Map Prisma songs to our app's Song type
   const songs: Song[] = artist.songs.map((song) => ({
     ...song,
-    artist: artist!.name,
+    artists: [
+      {
+        id: artist!.id,
+        name: artist!.name,
+        image: artist!.image,
+        songs: [], // Empty array since we don't need nested song data
+      },
+    ],
     album: song.albumName || null,
     coverArt: song.coverArt || null,
     title: song.title,
+    titleEn: song.titleEn,
     uri: song.uri,
     filename: song.filename || "",
     index: song.index,
+    year: song.year.toString(),
     duration: song.duration,
     id: song.id,
   }));
-
-  console.log(artist.albums);
 
   // Map Prisma albums to our app's Album type
   const albums: Album[] = artist.albums.map((album) => ({
@@ -71,7 +78,7 @@ export default async function ArtistDetailPage({
     artistName: artist!.name,
     artistId: artist!.id,
     songs: [], // We don't need songs for the card view
-    releaseDate: album.releaseDate ? new Date(album.releaseDate).getTime() : 0,
+    releaseDate: album.releaseDate ? Number(album.releaseDate) : 0,
     createdAt: new Date(album.createdAt).getTime(),
     updatedAt: new Date(album.updatedAt).getTime(),
     coverArt: album.coverArt || undefined,
@@ -116,7 +123,7 @@ export default async function ArtistDetailPage({
       </section>
 
       {/* Albums */}
-      <section>
+      <section className="pb-24">
         <h2 className="text-2xl font-bold text-white mb-6">Discography</h2>
         {albums.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">

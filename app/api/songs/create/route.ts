@@ -12,11 +12,12 @@ const songSchema = z.object({
   titleEn: z.string().optional(),
   artist: z.string().min(2, "You must enter artist name!"),
   artistEn: z.string().optional(),
-  artistId: z.string().optional(), // Artist ID for database relation
+  artistIds: z.array(z.string()).optional(), // Artist IDs for database relation
   albumId: z.string().optional(),
   albumName: z.string().optional(),
   uri: z.string().optional(),
   coverArt: z.string().optional(),
+  year: z.number().min(0).optional(),
   duration: z.number().min(0).optional(),
   filename: z.string().optional(),
   lyrics: z.string().optional(),
@@ -95,7 +96,9 @@ export async function POST(request: Request) {
         titleEn: validatedData.titleEn || "",
         artist: validatedData.artist || "",
         artistEn: validatedData.artistEn || "",
-        artistId: validatedData.artistId || undefined, // Set artistId for proper relation
+        artists: {
+          connect: validatedData.artistIds?.map((id) => ({ id })) || [],
+        },
         albumId: validatedData.albumId || undefined,
         albumName: validatedData.albumName,
         uri:
@@ -104,6 +107,7 @@ export async function POST(request: Request) {
             ? `/assets/mp3/${validatedData.filename}`
             : ""),
         coverArt: finalCoverArt,
+        year: validatedData.year || 0,
         duration: validatedData.duration || 0,
         filename: validatedData.filename,
         lyrics: validatedData.lyrics,

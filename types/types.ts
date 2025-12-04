@@ -3,8 +3,11 @@ export interface Song {
   localUri?: string;
   filename: string;
   title: string | undefined;
+  titleEn: string | undefined;
   artist: string | null;
   album: string | null;
+  albumId: string | null;
+  artists: Artist[];
   coverArt: string | null;
   index: number;
   year?: string | null;

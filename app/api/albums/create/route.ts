@@ -57,7 +57,7 @@ export async function POST(request: Request) {
         artistId: validatedData.artistId || undefined,
         coverArt: validatedData.coverArt,
         releaseDate: validatedData.releaseDate
-          ? new Date(validatedData.releaseDate)
+          ? Number(validatedData.releaseDate)
           : undefined,
       },
     });

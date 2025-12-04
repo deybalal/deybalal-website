@@ -36,14 +36,15 @@ export default async function AlbumDetailPage({
   // We need to map it to ensure compatibility with SongList and Player
   const songs: Song[] = album.songs.map((song) => ({
     ...song,
-    artist: album.artistName, // Use album's artist name for songs
-    album: album.name,
-    coverArt: album.coverArt || null,
-    // Ensure all required fields for Song type are present
+    artists: [],
+    album: song.albumName || null,
+    coverArt: song.coverArt || null,
     title: song.title,
+    titleEn: song.titleEn,
     uri: song.uri,
     filename: song.filename || "",
     index: song.index,
+    year: song.year.toString(),
     duration: song.duration,
     id: song.id,
   }));
@@ -96,11 +97,15 @@ export default async function AlbumDetailPage({
                 {album.artistName}
               </span>
             </div>
-            <span className="w-1 h-1 rounded-full bg-gray-500" />
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
-              <span>{new Date(album.createdAt).getFullYear()}</span>
-            </div>
+            {album.releaseDate && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-gray-500" />
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4" />
+                  <span>{album.releaseDate}</span>
+                </div>
+              </>
+            )}
             <span className="w-1 h-1 rounded-full bg-gray-500" />
             <div className="flex items-center gap-1.5">
               <Music className="w-4 h-4" />
