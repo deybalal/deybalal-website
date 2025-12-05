@@ -112,9 +112,9 @@ export default async function ArtistDetailPage({
 
       {/* Popular Songs */}
       <section>
-        <h2 className="text-2xl font-bold text-white mb-6">Songs</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">Songs</h2>
         {songs.length > 0 ? (
-          <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
+          <div className="bg-foreground/5 rounded-2xl p-6 border border-white/5">
             <SongList songs={songs} />
           </div>
         ) : (
@@ -124,7 +124,7 @@ export default async function ArtistDetailPage({
 
       {/* Albums */}
       <section className="pb-24">
-        <h2 className="text-2xl font-bold text-white mb-6">Discography</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">Discography</h2>
         {albums.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {albums.map((album) => (

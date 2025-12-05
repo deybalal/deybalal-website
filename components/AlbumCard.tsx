@@ -41,7 +41,7 @@ const AlbumCard = ({ album }: AlbumCardProps) => {
           </div>
         </Link>
         <div>
-          <h3 className="text-white font-bold truncate text-lg">
+          <h3 className="text-foreground font-bold truncate text-lg">
             {album.name}
           </h3>
           <p className="text-gray-400 text-sm truncate">{album.artistName}</p>

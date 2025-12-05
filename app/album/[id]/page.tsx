@@ -73,15 +73,15 @@ export default async function AlbumDetailPage({
 
         <div className="flex flex-col gap-4 pb-2 w-full">
           <div className="space-y-1">
-            <span className="text-accent uppercase tracking-widest text-xs font-bold bg-accent/10 px-3 py-1 rounded-full w-fit">
+            <span className="dark:text-gray-400 text-accent bg-accent/10 dark:bg-accent/90 uppercase tracking-widest text-xs font-bold px-3 py-1 rounded-full w-fit">
               Album
             </span>
-            <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-tight neon-text">
               {album.name}
             </h1>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-gray-300 text-sm md:text-base">
+          <div className="flex flex-wrap items-center gap-4 text-foreground/60 text-sm md:text-base">
             <div className="flex items-center gap-2">
               {album.artist?.image && (
                 <div className="w-6 h-6 rounded-full overflow-hidden relative">
@@ -93,7 +93,7 @@ export default async function AlbumDetailPage({
                   />
                 </div>
               )}
-              <span className="font-bold text-white hover:text-accent cursor-pointer transition-colors">
+              <span className="font-bold text-foreground hover:text-accent cursor-pointer transition-colors">
                 {album.artistName}
               </span>
             </div>
@@ -120,7 +120,7 @@ export default async function AlbumDetailPage({
       </div>
 
       {/* Songs List */}
-      <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
+      <div className="bg-foreground/5 rounded-2xl p-6 border border-forebg-foreground/5">
         <SongList songs={songs} />
       </div>
     </div>

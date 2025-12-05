@@ -79,7 +79,7 @@ export default function Home() {
       </section>
 
       {/* New Releases */}
-      <section>
+      <section className="pb-32">
         <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center">
           <span className="w-2 h-8 bg-purple-500 mr-3 rounded-full shadow-[0_0_10px_purple]"></span>
           New Albums

@@ -3,9 +3,10 @@
 import React, { useEffect, useState } from "react";
 import SongList from "@/components/SongList";
 import { Playlist } from "@/types/types";
-import { ListMusic, Loader2 } from "lucide-react";
+import { ListMusic, Loader2, LoaderPinwheel } from "lucide-react";
 import { formatTime } from "@/lib/utils";
 import Image from "next/image";
+import { toast } from "react-hot-toast";
 
 export default function PlaylistDetailPage({
   params,
@@ -38,8 +39,10 @@ export default function PlaylistDetailPage({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[50vh]">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="size-full flex items-center justify-center">
+        <p className=" animate-spin">
+          <LoaderPinwheel size={60} />
+        </p>
       </div>
     );
   }
@@ -70,7 +73,7 @@ export default function PlaylistDetailPage({
           )}
         </div>
         <div className="flex flex-col gap-2 pb-2">
-          <span className="text-accent uppercase tracking-widest text-sm font-bold">
+          <span className="text-gray-500 uppercase tracking-widest text-sm font-bold">
             Playlist
           </span>
           <h1 className="text-5xl md:text-7xl font-bold text-white neon-text">
@@ -94,7 +97,34 @@ export default function PlaylistDetailPage({
       </div>
 
       {/* Songs List */}
-      <SongList songs={playlist.songs || []} />
+      <SongList
+        songs={playlist.songs || []}
+        onRemove={async (songId) => {
+          try {
+            const res = await fetch(`/api/playlists/${id}/remove-song`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ songId }),
+            });
+            const result = await res.json();
+            if (result.success) {
+              // Refresh playlist
+              const res = await fetch(`/api/playlists/${id}`);
+              if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                  setPlaylist(data.data);
+                  toast.success("Song removed from playlist");
+                }
+              }
+            } else {
+              console.error(result.message);
+            }
+          } catch (error) {
+            console.error("Failed to remove song", error);
+          }
+        }}
+      />
     </div>
   );
 }

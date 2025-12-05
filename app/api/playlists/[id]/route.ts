@@ -36,3 +36,40 @@ export async function GET(
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    // Check if playlist exists
+    const playlist = await prisma.playlist.findUnique({
+      where: { id },
+    });
+
+    if (!playlist) {
+      return NextResponse.json(
+        { success: false, message: "Playlist not found" },
+        { status: 404 }
+      );
+    }
+
+    // Delete the playlist
+    await prisma.playlist.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Playlist deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting playlist:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to delete playlist" },
+      { status: 500 }
+    );
+  }
+}
