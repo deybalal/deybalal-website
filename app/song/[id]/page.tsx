@@ -167,7 +167,11 @@ export default function SongDetailPage({
       {/* Lyrics Column (Left on Desktop) */}
       {hasLyrics && (
         <div className="hidden lg:block h-[calc(100dvh-120px)] bg-card/30 rounded-3xl p-6 border border-white/5 shadow-xl">
-          <Lyrics lrc={song.syncedLyrics} plainLyrics={song.lyrics} />
+          <Lyrics
+            lrc={song.syncedLyrics}
+            plainLyrics={song.lyrics}
+            songId={song.id}
+          />
         </div>
       )}
 
@@ -203,7 +207,11 @@ export default function SongDetailPage({
           {/* Mobile Lyrics Overlay */}
           {hasLyrics && (
             <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[2px] p-4 lg:hidden overflow-hidden rounded-2xl">
-              <Lyrics lrc={song.syncedLyrics} plainLyrics={song.lyrics} />
+              <Lyrics
+                lrc={song.syncedLyrics}
+                plainLyrics={song.lyrics}
+                songId={song.id}
+              />
             </div>
           )}
         </div>
@@ -331,23 +339,23 @@ export default function SongDetailPage({
 
         {/* Controls */}
         <div className="flex items-center gap-6 md:gap-8">
-          <Button
-            size="icon"
-            className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-accent dark:bg-cyan-800 text-white hover:scale-105 transition-transform neon-box hover:bg-accent/90 flex items-center justify-center cursor-pointer"
-            onClick={handlePlayPause}
-          >
-            {isCurrentSong && isPlaying ? (
-              <Pause
-                className="w-10 h-10 md:w-[60px] md:h-[60px]"
-                fill="currentColor"
-              />
-            ) : (
-              <Play
-                className="w-10 h-10 md:w-[60px] md:h-[60px] ml-1"
-                fill="currentColor"
-              />
+          <div className="relative group">
+            {/* Pulsing effect when playing */}
+            {isCurrentSong && isPlaying && (
+              <div className="absolute inset-0 rounded-full bg-indigo-500/50 animate-ping" />
             )}
-          </Button>
+            <Button
+              size="icon"
+              className="relative z-10 w-20 h-20 md:w-24 md:h-24 rounded-full bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-xl shadow-indigo-500/40 hover:scale-110 hover:shadow-indigo-500/60 ring-4 ring-white/10 transition-all duration-300 flex items-center justify-center cursor-pointer"
+              onClick={handlePlayPause}
+            >
+              {isCurrentSong && isPlaying ? (
+                <Pause className="size-5 md:size-12 fill-white" />
+              ) : (
+                <Play className="size-5 md:size-12 fill-white" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

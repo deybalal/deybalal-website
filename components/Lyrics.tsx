@@ -10,8 +10,12 @@ interface LyricsProps {
   plainLyrics?: string | null;
 }
 
-export default function Lyrics({ lrc, plainLyrics }: LyricsProps) {
-  const { progress, setSeekTo, setProgress } = usePlayerStore();
+export default function Lyrics({
+  lrc,
+  plainLyrics,
+  songId,
+}: LyricsProps & { songId?: string }) {
+  const { progress, setSeekTo, setProgress, currentSong } = usePlayerStore();
 
   const parsedLyrics = useMemo(() => (lrc ? parseLRC(lrc) : []), [lrc]);
 
@@ -26,16 +30,24 @@ export default function Lyrics({ lrc, plainLyrics }: LyricsProps) {
   useEffect(() => {
     if (!isSynced || parsedLyrics.length === 0) return;
 
-    const index = parsedLyrics.findIndex(
-      (line, i) =>
-        progress >= line.time &&
-        (i === parsedLyrics.length - 1 || progress < parsedLyrics[i + 1].time)
-    );
+    let targetIndex = 0;
 
-    if (index !== -1 && index !== activeIndex) {
-      setActiveIndex(index);
+    // Only sync if the playing song matches the displayed song
+    if (!songId || currentSong?.id === songId) {
+      const foundIndex = parsedLyrics.findIndex(
+        (line, i) =>
+          progress >= line.time &&
+          (i === parsedLyrics.length - 1 || progress < parsedLyrics[i + 1].time)
+      );
+      if (foundIndex !== -1) {
+        targetIndex = foundIndex;
+      }
     }
-  }, [progress, parsedLyrics, isSynced, activeIndex]);
+
+    if (targetIndex !== activeIndex) {
+      setActiveIndex(targetIndex);
+    }
+  }, [progress, parsedLyrics, isSynced, activeIndex, currentSong, songId]);
 
   // Auto-scroll to active line
   useEffect(() => {

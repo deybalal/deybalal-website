@@ -3,6 +3,7 @@ import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { useEffect } from "react";
 import {
   Play,
+  Pause,
   SkipBack,
   SkipForward,
   Volume2,
@@ -129,21 +130,22 @@ const PlayerBar = () => {
           >
             <SkipBack size={20} className="md:w-6 md:h-6" />
           </Button>
-          <Button
-            size="icon"
-            className="w-10 h-10 md:w-12 md:h-12 justify-center items-center rounded-full bg-accent dark:bg-cyan-800 text-white hover:scale-115 transition-transform neon-box hover:bg-accent/90 cursor-pointer"
-            onClick={togglePlay}
-          >
-            {isPlaying ? (
-              <span className="font-bold">||</span>
-            ) : (
-              <Play
-                size={20}
-                fill="currentColor"
-                className="ml-1 md:w-6 md:h-6"
-              />
+          <div className="relative group">
+            {isPlaying && (
+              <div className="absolute inset-0 rounded-full bg-indigo-500/50 animate-ping" />
             )}
-          </Button>
+            <Button
+              size="icon"
+              className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/40 hover:scale-110 hover:shadow-indigo-500/60 ring-2 ring-white/10 transition-all duration-300 flex items-center justify-center cursor-pointer"
+              onClick={togglePlay}
+            >
+              {isPlaying ? (
+                <Pause className="size-4 md:size-6 fill-white" />
+              ) : (
+                <Play className="size-4 md:size-6 fill-white" />
+              )}
+            </Button>
+          </div>
           <Button
             variant="ghost"
             size="icon"

@@ -109,7 +109,7 @@ export default function AddToPlaylistDialog({
                     key={playlist.id}
                     onClick={() => addToPlaylist(playlist.id)}
                     disabled={addingId === playlist.id}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent/10 transition-colors group text-left"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-foreground/10 transition-colors group text-left cursor-pointer"
                   >
                     <div className="relative h-12 w-12 rounded-md overflow-hidden bg-muted flex items-center justify-center shrink-0">
                       {playlist.coverArt ? (
@@ -124,7 +124,7 @@ export default function AddToPlaylistDialog({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium truncate group-hover:text-accent transition-colors">
+                      <h4 className="font-medium truncate group-hover:text-forebg-foreground transition-colors">
                         {playlist.name}
                       </h4>
                       <p className="text-xs text-muted-foreground truncate">
@@ -132,7 +132,7 @@ export default function AddToPlaylistDialog({
                       </p>
                     </div>
                     {addingId === playlist.id && (
-                      <Loader2 className="h-4 w-4 animate-spin text-accent" />
+                      <Loader2 className="h-4 w-4 animate-spin text-forebg-foreground" />
                     )}
                   </button>
                 ))}
