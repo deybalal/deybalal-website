@@ -41,6 +41,7 @@ export type Playlist = {
   songsLength: number;
   duration: number;
   coverArt?: string;
+  isFavorite?: boolean;
   createdAt: number;
   updatedAt: number;
 };

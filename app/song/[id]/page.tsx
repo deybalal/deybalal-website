@@ -11,6 +11,7 @@ import Image from "next/image";
 import Lyrics from "@/components/Lyrics";
 import Link from "next/link";
 import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
+import { toast } from "react-hot-toast";
 
 export default function SongDetailPage({
   params,
@@ -21,6 +22,8 @@ export default function SongDetailPage({
 
   const [song, setSong] = useState<Song | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   const {
     isPlaying,
@@ -73,6 +76,62 @@ export default function SongDetailPage({
   const handleSeek = (value: number[]) => {
     setProgress(value[0]);
     setSeekTo(value[0]);
+  };
+
+  // Check if song is in favorites
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (!song) return;
+
+      try {
+        const res = await fetch("/api/favorites/isfavorite", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ songId: song.id }),
+        });
+        const data = await res.json();
+        if (data.success && data.isFavorite) {
+          setIsFavorite(true);
+        }
+      } catch (error) {
+        console.error("Failed to check favorite status", error);
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [song]);
+
+  const toggleFavorite = async () => {
+    if (!song || isTogglingFavorite) return;
+
+    setIsTogglingFavorite(true);
+    try {
+      const endpoint = isFavorite
+        ? "/api/favorites/remove-song"
+        : "/api/favorites/add-song";
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ songId: song.id }),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        setIsFavorite(!isFavorite);
+        toast.success(
+          isFavorite ? "Removed from favorites" : "Added to favorites"
+        );
+      } else {
+        toast.error(result.message || "Failed to update favorites");
+      }
+    } catch (error) {
+      console.error("Failed to toggle favorite", error);
+      toast.error("Failed to update favorites");
+    } finally {
+      setIsTogglingFavorite(false);
+    }
   };
 
   if (loading) {
@@ -242,9 +301,14 @@ export default function SongDetailPage({
           <div className="mt-2">
             <Button
               variant="outline"
+              onClick={toggleFavorite}
+              disabled={isTogglingFavorite}
               className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
             >
-              <Heart size={33} />
+              <Heart
+                size={33}
+                className={isFavorite ? "fill-red-500 text-red-500" : ""}
+              />
             </Button>
           </div>
         </div>

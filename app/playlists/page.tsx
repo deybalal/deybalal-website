@@ -10,6 +10,7 @@ import {
   MoreHorizontal,
   Link as LinkIcon,
   Trash2,
+  Star,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -130,6 +131,12 @@ export default function PlaylistsPage() {
                           className="text-white opacity-50"
                         />
                       )}
+                      {/* Favorites Badge */}
+                      {playlist.isFavorite && (
+                        <div className="absolute top-2 left-2 bg-yellow-500/90 backdrop-blur-sm rounded-full p-1.5">
+                          <Star size={16} className="text-white fill-white" />
+                        </div>
+                      )}
                     </div>
                     <div>
                       <h3 className="text-foreground font-bold truncate text-lg">
@@ -173,16 +180,18 @@ export default function PlaylistsPage() {
                       <LinkIcon className="mr-2 h-4 w-4" />
                       Copy Link
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleDeletePlaylist(playlist.id, playlist.name);
-                      }}
-                      className="text-red-500 focus:text-red-500"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Remove Playlist
-                    </DropdownMenuItem>
+                    {!playlist.isFavorite && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDeletePlaylist(playlist.id, playlist.name);
+                        }}
+                        className="text-red-500 focus:text-red-500"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Remove Playlist
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
