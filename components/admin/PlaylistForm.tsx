@@ -19,7 +19,6 @@ import { toast } from "react-hot-toast";
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  coverArt: z.string().optional(),
 });
 
 export default function PlaylistForm() {
@@ -30,7 +29,6 @@ export default function PlaylistForm() {
     defaultValues: {
       name: "",
       description: "",
-      coverArt: "",
     },
   });
 
@@ -88,19 +86,7 @@ export default function PlaylistForm() {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="coverArt"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cover Art URI</FormLabel>
-              <FormControl>
-                <Input placeholder="/images/cover.jpg" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <Button type="submit" disabled={loading}>
           {loading ? "Creating..." : "Create Playlist"}
         </Button>

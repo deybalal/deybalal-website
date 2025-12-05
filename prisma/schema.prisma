@@ -10,51 +10,51 @@ datasource db {
 }
 
 model Song {
-  id           String   @id @default(cuid())
-  slug         String   @unique
-  title        String
-  titleEn        String
-  artist       String
-  artistEn       String
-  albumName    String?
-  coverArt     String?
-  year     Int      @default(0)
-  duration     Int      @default(0)
-  uri          String
-  filename     String?
-  index        Int      @default(autoincrement())
-  lyrics       String?
-  syncedLyrics String?
-  playCount    Int      @default(0)
-  isDisabled Boolean @default(false)
+  id                  String  @id @default(cuid())
+  slug                String  @unique
+  title               String
+  titleEn             String
+  artist              String
+  artistEn            String
+  albumName           String?
+  coverArt            String?
+  year                Int     @default(0)
+  duration            Int     @default(0)
+  uri                 String
+  filename            String?
+  index               Int     @default(autoincrement())
+  lyrics              String?
+  syncedLyrics        String?
+  playCount           Int     @default(0)
+  isDisabled          Boolean @default(false)
   disabledDescription String?
 
-  albumId      String?
-  album        Album?   @relation(fields: [albumId], references: [id])
-  
-  artists      Artist[]
-  
-  playlists    Playlist[]
+  albumId String?
+  album   Album?  @relation(fields: [albumId], references: [id])
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  artists Artist[]
+
+  playlists Playlist[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Album {
-  id          String   @id @default(cuid())
-  name        String
-  artistName  String
+  id           String   @id @default(cuid())
+  name         String
+  artistName   String
   artistNameEn String
-  coverArt    String?
-  releaseDate Int?
-  duration    Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  artistId    String?
-  artist      Artist?  @relation(fields: [artistId], references: [id])
+  coverArt     String?
+  releaseDate  Int?
+  duration     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  songs       Song[]
+  artistId String?
+  artist   Artist? @relation(fields: [artistId], references: [id])
+
+  songs Song[]
 }
 
 model Playlist {
@@ -62,20 +62,21 @@ model Playlist {
   name        String
   description String?
   coverArt    String?
+  duration    Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  songs       Song[]
+
+  songs Song[]
 }
 
 model Artist {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  nameEn      String?
-  image       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String   @unique
+  nameEn    String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  songs       Song[]
-  albums      Album[]
+  songs  Song[]
+  albums Album[]
 }

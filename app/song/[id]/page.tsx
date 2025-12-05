@@ -2,20 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Song } from "@/types/types";
-import {
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Repeat,
-  Repeat1,
-  Shuffle,
-  Heart,
-  List,
-  ListPlus,
-  LoaderIcon,
-  LoaderPinwheel,
-} from "lucide-react";
+import { Play, Pause, Heart, ListPlus, LoaderPinwheel } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
@@ -23,6 +10,7 @@ import { formatTime } from "@/lib/utils";
 import Image from "next/image";
 import Lyrics from "@/components/Lyrics";
 import Link from "next/link";
+import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
 
 export default function SongDetailPage({
   params,
@@ -41,14 +29,8 @@ export default function SongDetailPage({
     duration,
     play,
     pause,
-    next,
-    prev,
     setProgress,
     setSeekTo,
-    isShuffling,
-    toggleShuffle,
-    repeatMode,
-    setRepeatMode,
   } = usePlayerStore();
 
   useEffect(() => {
@@ -86,12 +68,6 @@ export default function SongDetailPage({
       // Play this song (add it to queue and play)
       usePlayerStore.getState().setQueue([song], 0);
     }
-  };
-
-  const toggleRepeat = () => {
-    if (repeatMode === "off") setRepeatMode("all");
-    else if (repeatMode === "all") setRepeatMode("one");
-    else setRepeatMode("off");
   };
 
   const handleSeek = (value: number[]) => {
@@ -176,12 +152,17 @@ export default function SongDetailPage({
         {/* Info */}
         <div className="flex justify-between w-full px-4">
           <div className="mt-2">
-            <Button
-              variant="outline"
-              className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
-            >
-              <ListPlus size="full" className="size-full" />
-            </Button>
+            <AddToPlaylistDialog
+              songId={song.id}
+              trigger={
+                <Button
+                  variant="outline"
+                  className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
+                >
+                  <ListPlus size={33} className="size-full" />
+                </Button>
+              }
+            />
           </div>
           <div className="text-center flex-1 min-w-0 px-2">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 line-clamp-1">
@@ -221,6 +202,41 @@ export default function SongDetailPage({
                 {song.album}
               </p>
             )}
+            <div className="flex gap-2 justify-center mt-4">
+              {!song.lyrics && (
+                <Link href={`/panel/edit/lyrics/${song.id}`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs cursor-pointer"
+                  >
+                    Add Lyrics
+                  </Button>
+                </Link>
+              )}
+              {song.lyrics && !song.syncedLyrics && (
+                <Link href={`/panel/edit/sync/${song.id}`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs cursor-pointer"
+                  >
+                    Sync Lyrics
+                  </Button>
+                </Link>
+              )}
+              {song.lyrics && !song.syncedLyrics && (
+                <Link href={`/panel/edit/synced/${song.id}`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs cursor-pointer"
+                  >
+                    Paste Synced Lyrics
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
 
           <div className="mt-2">
@@ -252,26 +268,6 @@ export default function SongDetailPage({
         {/* Controls */}
         <div className="flex items-center gap-6 md:gap-8">
           <Button
-            variant="ghost"
-            size="icon"
-            className={`hover:bg-transparent scale-125 cursor-pointer ${
-              isShuffling
-                ? "text-accent"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            onClick={toggleShuffle}
-          >
-            <Shuffle size={24} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground hover:text-foreground hover:bg-transparent scale-125 cursor-pointer"
-            onClick={prev}
-          >
-            <SkipBack size={32} />
-          </Button>
-          <Button
             size="icon"
             className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-accent dark:bg-cyan-800 text-white hover:scale-105 transition-transform neon-box hover:bg-accent/90 flex items-center justify-center cursor-pointer"
             onClick={handlePlayPause}
@@ -286,30 +282,6 @@ export default function SongDetailPage({
                 className="w-10 h-10 md:w-[60px] md:h-[60px] ml-1"
                 fill="currentColor"
               />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground hover:text-foreground hover:bg-transparent scale-125 cursor-pointer"
-            onClick={next}
-          >
-            <SkipForward size={32} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`hover:bg-transparent scale-125 cursor-pointer ${
-              repeatMode !== "off"
-                ? "text-accent"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            onClick={toggleRepeat}
-          >
-            {repeatMode === "one" ? (
-              <Repeat1 size={24} />
-            ) : (
-              <Repeat size={24} />
             )}
           </Button>
         </div>
