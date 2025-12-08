@@ -27,7 +27,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import SearchModal from "@/components/SearchModal";
 import DynamicDarkModeToggle from "@/components/DynamicDarkModeToggle";
 import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
@@ -56,20 +55,11 @@ const PlayerBar = () => {
     setRepeatMode,
   } = usePlayerStore();
 
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     { name: "Home", href: "/", icon: Home },
-    {
-      name: "Search",
-      href: "#",
-      icon: Search,
-      onClick: () => {
-        setIsSearchOpen(true);
-        setIsMobileMenuOpen(false);
-      },
-    },
+    { name: "Search", href: "/search", icon: Search },
     { name: "Dashboard", href: "/panel", icon: User },
     { name: "Albums", href: "/album", icon: Disc },
     { name: "Artists", href: "/artist", icon: Mic2 },
@@ -277,14 +267,7 @@ const PlayerBar = () => {
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={(e) => {
-                    if (item.onClick) {
-                      e.preventDefault();
-                      item.onClick();
-                    } else {
-                      setIsMobileMenuOpen(false);
-                    }
-                  }}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center justify-end px-6 py-4 text-gray-400 hover:text-foreground hover:bg-white/5 transition-colors"
                 >
                   <span className="font-medium">{item.name}</span>
@@ -297,11 +280,6 @@ const PlayerBar = () => {
             </div>
           </SheetContent>
         </Sheet>
-
-        <SearchModal
-          isOpen={isSearchOpen}
-          onClose={() => setIsSearchOpen(false)}
-        />
       </div>
     </div>
   );

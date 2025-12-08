@@ -1,23 +1,12 @@
 "use client";
-import { Home, Disc, Mic2, ListMusic, Heart, User } from "lucide-react";
+import { Home, Disc, Mic2, ListMusic, Heart, User, Search } from "lucide-react";
 import Link from "next/link";
 import DynamicDarkModeToggle from "@/components/DynamicDarkModeToggle";
 
-import SearchModal from "@/components/SearchModal";
-import { Search } from "lucide-react";
-import { useState } from "react";
-
 const Navbar = () => {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-
   const navItems = [
     { name: "Home", href: "/", icon: Home },
-    {
-      name: "Search",
-      href: "#",
-      icon: Search,
-      onClick: () => setIsSearchOpen(true),
-    },
+    { name: "Search", href: "/search", icon: Search },
     { name: "Dashboard", href: "/panel", icon: User },
     { name: "Albums", href: "/album", icon: Disc },
     { name: "Artists", href: "/artist", icon: Mic2 },
@@ -36,12 +25,6 @@ const Navbar = () => {
           <Link
             key={item.name}
             href={item.href}
-            onClick={(e) => {
-              if (item.onClick) {
-                e.preventDefault();
-                item.onClick();
-              }
-            }}
             className="flex items-center px-6 py-3 text-gray-400 hover:text-white hover:bg-foreground/10 transition-colors duration-200 relative"
           >
             <item.icon className="w-6 h-6 min-w-[24px]" />
@@ -58,11 +41,6 @@ const Navbar = () => {
           <DynamicDarkModeToggle />
         </div>
       </div>
-
-      <SearchModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-      />
     </nav>
   );
 };
