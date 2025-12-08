@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { usePlayerStore } from '@/hooks/usePlayerStore';
-import { useEffect, useRef } from 'react';
+import { usePlayerStore, TAB_ID } from "@/hooks/usePlayerStore";
+import { useEffect, useRef } from "react";
 
 const PlayerProvider = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { 
-    isPlaying, 
-    currentSong, 
-    volume, 
-    play, 
-    pause, 
-    next, 
-    setProgress, 
+  const {
+    isPlaying,
+    currentSong,
+    volume,
+    next,
+    setProgress,
     setDuration,
     seekTo,
-    setSeekTo
+    setSeekTo,
+    activeId,
   } = usePlayerStore();
 
+  // Handle seeking
   useEffect(() => {
     if (audioRef.current && seekTo !== null) {
       audioRef.current.currentTime = seekTo;
@@ -25,61 +25,96 @@ const PlayerProvider = () => {
     }
   }, [seekTo, setSeekTo]);
 
+  // Handle play/pause
   useEffect(() => {
     if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.play().catch(e => console.error("Play error:", e));
+      if (isPlaying && activeId === TAB_ID) {
+        audioRef.current.play().catch((e) => console.error("Play error:", e));
       } else {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying]);
+  }, [isPlaying, activeId]);
 
+  // Handle volume
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume / 100;
     }
   }, [volume]);
 
+  // Handle song source changes
   useEffect(() => {
-    if (audioRef.current && currentSong) {
-      // In a real app, you'd use the actual URI. 
-      // For this demo, we'll use a placeholder or the mock URI if valid.
-      // Since we don't have real audio files, we can't really "play" anything 
-      // unless we have a public URL. 
-      // Let's assume the 'uri' in Song is a valid URL.
-      // If it's empty in mock data, this might fail or do nothing.
-      // We'll add a check.
-      if (currentSong.uri) {
-          audioRef.current.src = currentSong.uri;
-          if (isPlaying) {
-              audioRef.current.play().catch(e => console.error("Play error:", e));
-          }
+    if (audioRef.current && currentSong?.uri) {
+      // Only update src if it's different to avoid resetting progress
+      // We check against the current src (which might be a full URL)
+      const currentSrc = audioRef.current.src;
+      const newSrc = currentSong.uri;
+
+      // Simple check: if the src ends with the uri (handling relative/absolute)
+      // or if they are exactly equal.
+      const isSameSource = currentSrc === newSrc || currentSrc.endsWith(newSrc);
+
+      if (!isSameSource) {
+        audioRef.current.src = newSrc;
+        // If we are the active tab and supposed to be playing, play the new track
+        if (isPlaying && activeId === TAB_ID) {
+          audioRef.current.play().catch((e) => console.error("Play error:", e));
+        }
       }
     }
-  }, [currentSong]);
+  }, [currentSong, activeId, isPlaying]);
+
+  // Sync audio time when becoming active
+  useEffect(() => {
+    if (audioRef.current && activeId === TAB_ID) {
+      // If we just became active, sync our audio time to the stored progress
+      // to ensure we pick up where the other tab left off.
+      const { progress } = usePlayerStore.getState();
+      // Only sync if difference is significant (> 2 seconds) to avoid glitches
+      if (Math.abs(audioRef.current.currentTime - progress) > 2) {
+        audioRef.current.currentTime = progress;
+      }
+    }
+  }, [activeId]);
 
   const handleTimeUpdate = () => {
-    if (audioRef.current) {
+    if (audioRef.current && activeId === TAB_ID) {
       setProgress(audioRef.current.currentTime);
     }
   };
 
   const handleLoadedMetadata = () => {
-    if (audioRef.current) {
+    if (audioRef.current && activeId === TAB_ID) {
       setDuration(audioRef.current.duration);
     }
   };
 
   const handleEnded = () => {
+    if (activeId !== TAB_ID) return;
+
     const { repeatMode } = usePlayerStore.getState();
-    if (repeatMode === 'one' && audioRef.current) {
+    if (repeatMode === "one" && audioRef.current) {
       audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(e => console.error("Play error:", e));
+      audioRef.current.play().catch((e) => console.error("Play error:", e));
     } else {
       next();
     }
   };
+
+  // Sync state when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        usePlayerStore.persist.rehydrate();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   return (
     <audio

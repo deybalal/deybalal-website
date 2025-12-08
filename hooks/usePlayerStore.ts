@@ -2,6 +2,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Song } from "@/types/types";
 
+export const TAB_ID =
+  typeof window !== "undefined"
+    ? Math.random().toString(36).substring(7)
+    : "server";
+
 interface PlayerState {
   isPlaying: boolean;
   currentSong: Song | null;
@@ -10,6 +15,7 @@ interface PlayerState {
   volume: number;
   progress: number;
   duration: number;
+  activeId: string | null;
 
   play: () => void;
   pause: () => void;
@@ -22,6 +28,7 @@ interface PlayerState {
   setDuration: (duration: number) => void;
   seekTo: number | null;
   setSeekTo: (time: number | null) => void;
+  setActiveId: (id: string) => void;
 
   isShuffling: boolean;
   repeatMode: "off" | "all" | "one";
@@ -42,12 +49,18 @@ export const usePlayerStore = create<PlayerState>()(
       seekTo: null,
       isShuffling: false,
       repeatMode: "off",
+      activeId: null,
 
-      play: () => set({ isPlaying: true }),
+      play: () => set({ isPlaying: true, activeId: TAB_ID }),
       pause: () => set({ isPlaying: false }),
 
       setSong: (song, play) => {
-        set({ currentSong: song, isPlaying: play === false ? false : true });
+        set({
+          currentSong: song,
+          isPlaying: play === false ? false : true,
+          progress: 0,
+          activeId: play === false ? get().activeId : TAB_ID,
+        });
       },
 
       setQueue: (songs, startIndex = 0) => {
@@ -56,6 +69,8 @@ export const usePlayerStore = create<PlayerState>()(
           currentIndex: startIndex,
           currentSong: songs[startIndex] || null,
           isPlaying: true,
+          progress: 0,
+          activeId: TAB_ID,
         });
       },
 
@@ -86,6 +101,7 @@ export const usePlayerStore = create<PlayerState>()(
             currentIndex: nextIndex,
             currentSong: queue[nextIndex],
             isPlaying: true,
+            activeId: TAB_ID,
           });
         } else {
           // End of queue and not repeating
@@ -101,6 +117,7 @@ export const usePlayerStore = create<PlayerState>()(
             currentIndex: currentIndex - 1,
             currentSong: queue[currentIndex - 1],
             isPlaying: true,
+            activeId: TAB_ID,
           });
         }
       },
@@ -109,6 +126,7 @@ export const usePlayerStore = create<PlayerState>()(
       setProgress: (progress) => set({ progress }),
       setDuration: (duration) => set({ duration }),
       setSeekTo: (seekTo) => set({ seekTo }),
+      setActiveId: (id) => set({ activeId: id }),
 
       toggleShuffle: () =>
         set((state) => ({ isShuffling: !state.isShuffling })),
@@ -126,6 +144,7 @@ export const usePlayerStore = create<PlayerState>()(
           currentIndex: state.currentIndex,
           isShuffling: state.isShuffling,
           repeatMode: state.repeatMode,
+          activeId: state.activeId,
         } as PlayerState),
     }
   )
