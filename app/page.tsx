@@ -1,41 +1,56 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import AlbumCard from "@/components/AlbumCard";
 import SongCard from "@/components/SongCard";
-import { Album, Song } from "@/types/types";
+import { prisma } from "@/lib/prisma";
 
-export default function Home() {
-  const [songs, setSongs] = useState<Song[]>([]);
-  const [albums, setAlbums] = useState<Album[]>([]);
+export const dynamic = "force-dynamic";
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch Songs
-        const songsRes = await fetch("/api/songs");
-        if (songsRes.ok) {
-          const result = await songsRes.json();
-          if (result.success) {
-            setSongs(result.data);
-          }
-        }
+export default async function Home() {
+  const songsData = await prisma.song.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { artists: true },
+  });
 
-        // Fetch Albums (User changed this to POST)
-        const albumsRes = await fetch("/api/albums", { method: "POST" });
-        if (albumsRes.ok) {
-          const result = await albumsRes.json();
-          if (result.success) {
-            setAlbums(result.data);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch data", error);
-      }
-    };
+  const songs = songsData.map((song) => ({
+    ...song,
+    album: song.albumName,
+    coverArt: song.coverArt || null,
+    lyrics: song.lyrics || null,
+    syncedLyrics: song.syncedLyrics || null,
+    filename: song.filename || "",
+    year: song.year.toString(),
+    createdAt: song.createdAt.getTime(),
+    updatedAt: song.updatedAt.getTime(),
+    artists: song.artists.map((artist) => ({
+      ...artist,
+      songs: [],
+    })),
+  }));
 
-    fetchData();
-  }, []);
+  const albumsData = await prisma.album.findMany({
+    include: { songs: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const albums = albumsData.map((album) => ({
+    ...album,
+    artistId: album.artistId || "",
+    coverArt: album.coverArt || undefined,
+    releaseDate: album.releaseDate || 0,
+    createdAt: album.createdAt.getTime(),
+    updatedAt: album.updatedAt.getTime(),
+    songs: album.songs.map((song) => ({
+      ...song,
+      album: song.albumName,
+      coverArt: song.coverArt || null,
+      lyrics: song.lyrics || null,
+      syncedLyrics: song.syncedLyrics || null,
+      filename: song.filename || "",
+      year: song.year.toString(),
+      createdAt: song.createdAt.getTime(),
+      updatedAt: song.updatedAt.getTime(),
+      artists: [],
+    })),
+  }));
 
   return (
     <div className="space-y-10">
