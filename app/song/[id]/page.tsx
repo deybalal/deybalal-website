@@ -4,9 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Song } from "@/types/types";
 import { Play, Pause, Heart, ListPlus, LoaderPinwheel } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
-import { formatTime } from "@/lib/utils";
+import SongProgressSlider from "@/components/SongProgressSlider";
 import Image from "next/image";
 import Lyrics from "@/components/Lyrics";
 import Link from "next/link";
@@ -25,16 +24,10 @@ export default function SongDetailPage({
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
-  const {
-    isPlaying,
-    currentSong,
-    progress,
-    duration,
-    play,
-    pause,
-    setProgress,
-    setSeekTo,
-  } = usePlayerStore();
+  const isPlaying = usePlayerStore((state) => state.isPlaying);
+  const currentSong = usePlayerStore((state) => state.currentSong);
+  const play = usePlayerStore((state) => state.play);
+  const pause = usePlayerStore((state) => state.pause);
 
   useEffect(() => {
     const fetchSong = async () => {
@@ -71,11 +64,6 @@ export default function SongDetailPage({
       // Play this song (add it to queue and play)
       usePlayerStore.getState().setQueue([song], 0);
     }
-  };
-
-  const handleSeek = (value: number[]) => {
-    setProgress(value[0]);
-    setSeekTo(value[0]);
   };
 
   // Check if song is in favorites
@@ -152,8 +140,6 @@ export default function SongDetailPage({
     );
   }
 
-  const displayProgress = isCurrentSong ? progress : 0;
-  const displayDuration = isCurrentSong ? duration : song.duration || 0;
   const hasLyrics = !!song.syncedLyrics || !!song.lyrics;
 
   return (
@@ -322,20 +308,7 @@ export default function SongDetailPage({
         </div>
 
         {/* Progress */}
-        <div className="w-full px-4">
-          <Slider
-            value={[displayProgress]}
-            onValueChange={handleSeek}
-            max={displayDuration || 100}
-            step={1}
-            className="mb-2 cursor-pointer"
-            disabled={!isCurrentSong}
-          />
-          <div className="flex justify-between text-sm text-muted-foreground cursor-pointer">
-            <span>{formatTime(displayProgress)}</span>
-            <span>{formatTime(displayDuration)}</span>
-          </div>
-        </div>
+        <SongProgressSlider song={song} />
 
         {/* Controls */}
         <div className="flex items-center gap-6 md:gap-8">
