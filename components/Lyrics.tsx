@@ -15,7 +15,10 @@ export default function Lyrics({
   plainLyrics,
   songId,
 }: LyricsProps & { songId?: string }) {
-  const { progress, setSeekTo, setProgress, currentSong } = usePlayerStore();
+  const currentSong = usePlayerStore((state) => state.currentSong);
+  const setSeekTo = usePlayerStore((state) => state.setSeekTo);
+  const progress = usePlayerStore((state) => state.progress);
+  const setProgress = usePlayerStore((state) => state.setProgress);
 
   const parsedLyrics = useMemo(() => (lrc ? parseLRC(lrc) : []), [lrc]);
 
@@ -74,7 +77,7 @@ export default function Lyrics({
   };
 
   const handleLineClick = (time: number) => {
-    if (isSynced) {
+    if (isSynced && currentSong?.id === songId) {
       setSeekTo(time);
       setProgress(time);
     }

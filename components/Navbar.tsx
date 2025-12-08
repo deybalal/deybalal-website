@@ -27,7 +27,7 @@ const Navbar = () => {
 
   return (
     <nav className="fixed hover:bg-background/90 top-0 left-0 h-screen w-20 hidden md:flex flex-col items-center py-8 z-50 transition-all duration-300 hover:w-64 group overflow-hidden border-r border-white/5">
-      <div className="text-white mb-10 text-2xl font-bold text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+      <div className="mb-10 text-2xl font-bold text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
         Music Player
       </div>
 

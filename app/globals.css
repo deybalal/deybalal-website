@@ -197,3 +197,7 @@ body {
     display: none; /* Safari and Chrome */
   }
 }
+
+.rtl {
+  direction: rtl;
+}

@@ -10,7 +10,26 @@ import {
   Repeat,
   Repeat1,
   Shuffle,
+  Home,
+  Disc,
+  Mic2,
+  ListMusic,
+  Heart,
+  User,
+  Search,
+  Menu,
 } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import SearchModal from "@/components/SearchModal";
+import DynamicDarkModeToggle from "@/components/DynamicDarkModeToggle";
+import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { formatTime } from "@/lib/utils";
@@ -36,6 +55,27 @@ const PlayerBar = () => {
     toggleShuffle,
     setRepeatMode,
   } = usePlayerStore();
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navItems = [
+    { name: "Home", href: "/", icon: Home },
+    {
+      name: "Search",
+      href: "#",
+      icon: Search,
+      onClick: () => {
+        setIsSearchOpen(true);
+        setIsMobileMenuOpen(false);
+      },
+    },
+    { name: "Dashboard", href: "/panel", icon: User },
+    { name: "Albums", href: "/album", icon: Disc },
+    { name: "Artists", href: "/artist", icon: Mic2 },
+    { name: "Playlists", href: "/playlists", icon: ListMusic },
+    { name: "Favorites", href: "/favorites", icon: Heart },
+  ];
 
   const togglePlay = () => {
     if (isPlaying) pause();
@@ -205,6 +245,62 @@ const PlayerBar = () => {
           max={100}
           step={1}
           className="w-24 cursor-pointer"
+        />
+      </div>
+
+      {/* Mobile Menu Trigger */}
+      <div className="md:hidden flex items-center justify-end w-1/4">
+        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-gray-400 hover:text-white cursor-pointer"
+            >
+              <Menu size={24} />
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side="right"
+            className="w-64 bg-background/95 backdrop-blur-xl border-l border-white/10 p-0"
+          >
+            <SheetHeader className="p-6 border-b border-white/5">
+              <SheetTitle className="text-center text-xl font-bold text-foreground">
+                Music Player
+              </SheetTitle>
+              <SheetDescription className="text-center text-xs text-muted-foreground">
+                Navigate through your library
+              </SheetDescription>
+            </SheetHeader>
+            <div className="flex flex-col py-4">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={(e) => {
+                    if (item.onClick) {
+                      e.preventDefault();
+                      item.onClick();
+                    } else {
+                      setIsMobileMenuOpen(false);
+                    }
+                  }}
+                  className="flex items-center justify-end px-6 py-4 text-gray-400 hover:text-foreground hover:bg-white/5 transition-colors"
+                >
+                  <span className="font-medium">{item.name}</span>
+                  <item.icon className="w-5 h-5 ml-4" />
+                </Link>
+              ))}
+              <div className="flex py-3 transition-colors duration-200 relative justify-end items-end rtl flex-row-reverse gap-4">
+                <DynamicDarkModeToggle />
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        <SearchModal
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
         />
       </div>
     </div>
