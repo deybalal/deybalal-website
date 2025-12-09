@@ -126,7 +126,7 @@ export default function SongDetailClient({ song }: SongDetailClientProps) {
         {/* Art */}
         <div
           className={`w-full aspect-square bg-card rounded-2xl shadow-2xl neon-box relative overflow-hidden group transition-all duration-500 ${
-            hasLyrics ? "max-w-[80vw] lg:max-w-sm" : "max-w-md"
+            hasLyrics ? "max-w-[90vw] lg:max-w-sm" : "max-w-md"
           }`}
         >
           {song.coverArt ? (

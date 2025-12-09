@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { formatTime } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import MarqueeText from "./MarqueeText";
 
 const PlayerBar = () => {
   const {
@@ -116,7 +117,7 @@ const PlayerBar = () => {
       {/* Song Info */}
       <Link
         href={`/song/${currentSong.id}`}
-        className="flex items-center w-full md:w-1/4 pr-4 md:pr-0"
+        className="flex items-center flex-1 min-w-0 md:w-1/4 md:max-w-none pr-2 md:pr-0"
       >
         <div className="w-12 h-12 md:w-14 md:h-14 bg-gray-800 rounded-md neon-box mr-3 md:mr-4 shrink-0 relative overflow-hidden">
           <Image
@@ -128,17 +129,19 @@ const PlayerBar = () => {
           />
         </div>
         <div className="overflow-hidden flex-1">
-          <h4 className="text-foreground font-medium truncate text-sm md:text-base">
-            {currentSong.title}
-          </h4>
-          <p className="text-muted-foreground text-xs md:text-sm truncate">
-            {currentSong.artist}
-          </p>
+          <MarqueeText
+            text={currentSong.title || "No Title"}
+            className="text-foreground font-medium text-sm md:text-base"
+          />
+          <MarqueeText
+            text={currentSong.artist || "Unknown Artist"}
+            className="text-muted-foreground text-xs md:text-sm"
+          />
         </div>
       </Link>
 
       {/* Controls */}
-      <div className="flex flex-col items-center w-auto md:w-1/2 md:max-w-2xl px-0 md:px-4 absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 bottom-2 md:bottom-auto">
+      <div className="flex items-center justify-end flex-none mr-2 md:mr-0 md:flex-col md:items-center md:w-1/2 md:max-w-2xl xl:max-w-3xl md:px-4 md:static md:translate-x-0">
         <div className="flex items-center gap-4 md:gap-6 mb-1 md:mb-2">
           <Button
             variant="ghost"
@@ -239,7 +242,7 @@ const PlayerBar = () => {
       </div>
 
       {/* Mobile Menu Trigger */}
-      <div className="md:hidden flex items-center justify-end w-1/4">
+      <div className="md:hidden flex items-center justify-end flex-none">
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild>
             <Button
