@@ -103,9 +103,9 @@ export default function Lyrics({
             key={index}
             onClick={() => handleLineClick(line.time)}
             className={cn(
-              "text-lg md:text-xl lg:text-2xl  font-medium py-3 transition-all duration-300 cursor-pointer hover:text-foreground/60 text-center",
+              "text-lg md:text-xl lg:text-2xl  font-medium py-3 transition-all duration-300 cursor-pointer hover:text-white/60 md:hover:text-foreground/60 text-center",
               index === activeIndex
-                ? "text-foreground scale-105 origin-center"
+                ? "text-white md:text-foreground scale-105 origin-center"
                 : "text-muted-foreground/40"
             )}
           >

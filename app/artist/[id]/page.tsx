@@ -4,6 +4,7 @@ import AlbumCard from "@/components/AlbumCard";
 import { User } from "lucide-react";
 import Image from "next/image";
 import { Song, Album } from "@/types/types";
+import ArtistPlayButton from "@/components/ArtistPlayButton";
 
 export default async function ArtistDetailPage({
   params,
@@ -104,9 +105,12 @@ export default async function ArtistDetailPage({
           <h1 className="text-5xl md:text-7xl font-bold text-white neon-text mb-4">
             {artist.name}
           </h1>
-          <p className="text-gray-400 text-lg">
-            {songs.length} Songs • {albums.length} Albums
-          </p>
+          <div className="flex items-center justify-center md:justify-start gap-4 mb-2">
+            <p className="text-gray-400 text-lg">
+              {songs.length} Songs • {albums.length} Albums
+            </p>
+            <ArtistPlayButton songs={songs} />
+          </div>
         </div>
       </div>
 

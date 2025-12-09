@@ -141,7 +141,7 @@ export default function SongDetailClient({ song }: SongDetailClientProps) {
               <span className="text-6xl font-bold text-white/20">♪</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
           {/* Mobile Lyrics Overlay */}
           {hasLyrics && (
@@ -272,13 +272,13 @@ export default function SongDetailClient({ song }: SongDetailClientProps) {
             )}
             <Button
               size="icon"
-              className="relative z-10 w-20 h-20 md:w-24 md:h-24 rounded-full bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-xl shadow-indigo-500/40 hover:scale-110 hover:shadow-indigo-500/60 ring-4 ring-white/10 transition-all duration-300 flex items-center justify-center cursor-pointer"
+              className="relative z-10 w-18 h-18 md:w-24 md:h-24 rounded-full bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-xl shadow-indigo-500/40 hover:scale-110 hover:shadow-indigo-500/60 ring-4 ring-white/10 transition-all duration-300 flex items-center justify-center cursor-pointer"
               onClick={handlePlayPause}
             >
               {isCurrentSong && isPlaying ? (
-                <Pause className="size-5 md:size-12 fill-white" />
+                <Pause className="size-10 md:size-12 fill-white" />
               ) : (
-                <Play className="size-5 md:size-12 fill-white" />
+                <Play className="size-10 md:size-12 fill-white" />
               )}
             </Button>
           </div>
