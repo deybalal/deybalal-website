@@ -9,9 +9,11 @@ export async function GET(
     // Decode the ID in case it's passed as a name (backward compatibility or URL encoding)
     const idOrName = decodeURIComponent(params.id);
 
-    // Try to find by ID first, then by Name
-    let artist = await prisma.artist.findUnique({
-      where: { id: idOrName },
+    // Optimized: Single query instead of two separate queries
+    const artist = await prisma.artist.findFirst({
+      where: {
+        OR: [{ id: idOrName }, { name: idOrName }],
+      },
       include: {
         songs: {
           orderBy: { index: "asc" },
@@ -21,20 +23,6 @@ export async function GET(
         },
       },
     });
-
-    if (!artist) {
-      artist = await prisma.artist.findUnique({
-        where: { name: idOrName },
-        include: {
-          songs: {
-            orderBy: { index: "asc" },
-          },
-          albums: {
-            orderBy: { createdAt: "desc" },
-          },
-        },
-      });
-    }
 
     if (!artist) {
       return NextResponse.json(

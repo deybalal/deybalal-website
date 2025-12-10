@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { cache } from "@/lib/cache";
 
 export async function GET() {
   try {
+    const cacheKey = "artists:list";
+    const cached = cache.get(cacheKey, 300000); // 5 minutes
+
+    if (cached) {
+      return NextResponse.json({ success: true, data: cached });
+    }
+
     const artists = await prisma.artist.findMany({
       orderBy: {
         name: "asc",
@@ -14,6 +22,9 @@ export async function GET() {
         image: true,
       },
     });
+
+    cache.set(cacheKey, artists);
+
     return NextResponse.json({ success: true, data: artists });
   } catch (error) {
     console.error("Error fetching artists:", error);

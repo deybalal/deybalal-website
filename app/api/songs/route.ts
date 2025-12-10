@@ -1,17 +1,53 @@
-import { NextResponse } from 'next/server';
-import { unstable_noStore as noStore } from 'next/cache';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { unstable_noStore as noStore } from "next/cache";
+import { prisma } from "@/lib/prisma";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   noStore();
   try {
-    const songs = await prisma.song.findMany({
-      orderBy: { createdAt: 'desc' },
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "50");
+    const skip = (page - 1) * limit;
+
+    const [songs, total] = await Promise.all([
+      prisma.song.findMany({
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          titleEn: true,
+          artist: true,
+          artistEn: true,
+          coverArt: true,
+          duration: true,
+          year: true,
+          playCount: true,
+          isDisabled: true,
+        },
+      }),
+      prisma.song.count(),
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      data: songs,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
-    return NextResponse.json({ success: true, data: songs});
-  } catch (error) {
-    return NextResponse.json({ success: false, message: 'Failed to fetch songs' }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch songs" },
+      { status: 500 }
+    );
   }
 }

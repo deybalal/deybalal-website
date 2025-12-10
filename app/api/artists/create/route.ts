@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { cache } from "@/lib/cache";
 
 export async function POST(req: Request) {
   try {
@@ -31,6 +32,9 @@ export async function POST(req: Request) {
         image,
       },
     });
+
+    // Invalidate artists cache
+    cache.invalidate("artists:");
 
     return NextResponse.json({ success: true, data: artist });
   } catch (error) {

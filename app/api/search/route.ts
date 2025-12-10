@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export async function POST(request: Request) {
   const body = await request.json();
   const query = body.query;
@@ -81,6 +83,7 @@ export async function POST(request: Request) {
         },
         take: 5,
         select: {
+          id: true,
           name: true,
           image: true,
         },

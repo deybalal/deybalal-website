@@ -38,6 +38,12 @@ model Song {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([title])
+  @@index([artist])
+  @@index([albumId])
+  @@index([createdAt])
+  @@index([slug])
 }
 
 model Album {
@@ -55,6 +61,9 @@ model Album {
   artist   Artist? @relation(fields: [artistId], references: [id])
 
   songs Song[]
+
+  @@index([artistName])
+  @@index([artistId])
 }
 
 model Playlist {
@@ -68,6 +77,9 @@ model Playlist {
   updatedAt   DateTime @updatedAt
 
   songs Song[]
+
+  @@index([createdAt])
+  @@index([isFavorite])
 }
 
 model Artist {
@@ -80,4 +92,7 @@ model Artist {
 
   songs  Song[]
   albums Album[]
+
+  @@index([name])
+  @@index([nameEn])
 }
