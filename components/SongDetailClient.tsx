@@ -14,9 +14,13 @@ import { toast } from "react-hot-toast";
 
 interface SongDetailClientProps {
   song: Song;
+  isUserLoggedIn: boolean;
 }
 
-export default function SongDetailClient({ song }: SongDetailClientProps) {
+export default function SongDetailClient({
+  song,
+  isUserLoggedIn,
+}: SongDetailClientProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
@@ -43,6 +47,7 @@ export default function SongDetailClient({ song }: SongDetailClientProps) {
   // Check if song is in favorites
   useEffect(() => {
     const checkFavoriteStatus = async () => {
+      if (!isUserLoggedIn) return;
       try {
         const res = await fetch("/api/favorites/isfavorite", {
           method: "POST",
@@ -59,10 +64,10 @@ export default function SongDetailClient({ song }: SongDetailClientProps) {
     };
 
     checkFavoriteStatus();
-  }, [song.id]);
+  }, [isUserLoggedIn, song.id]);
 
   const toggleFavorite = async () => {
-    if (isTogglingFavorite) return;
+    if (isTogglingFavorite || isUserLoggedIn === false) return;
 
     setIsTogglingFavorite(true);
     try {
@@ -158,20 +163,30 @@ export default function SongDetailClient({ song }: SongDetailClientProps) {
         {/* Info */}
         <div className="flex justify-between w-full px-4">
           <div className="mt-2">
-            <AddToPlaylistDialog
-              songId={song.id}
-              trigger={
-                <Button
-                  variant="outline"
-                  className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
-                >
-                  <ListPlus size={33} className="size-full" />
-                </Button>
-              }
-            />
+            {isUserLoggedIn ? (
+              <AddToPlaylistDialog
+                songId={song.id}
+                trigger={
+                  <Button
+                    variant="outline"
+                    className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
+                  >
+                    <ListPlus size={33} className="size-full" />
+                  </Button>
+                }
+              />
+            ) : (
+              <Button
+                variant="outline"
+                className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
+                onClick={() => toast.error("You should Login first!")}
+              >
+                <ListPlus size={33} className="size-full" />
+              </Button>
+            )}
           </div>
           <div className="text-center flex-1 min-w-0 px-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 line-clamp-1">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
               {song.title}
             </h1>
             {song.artist ? (
@@ -248,7 +263,11 @@ export default function SongDetailClient({ song }: SongDetailClientProps) {
           <div className="mt-2">
             <Button
               variant="outline"
-              onClick={toggleFavorite}
+              onClick={
+                isUserLoggedIn
+                  ? toggleFavorite
+                  : () => toast.error("You should Login first!")
+              }
               disabled={isTogglingFavorite}
               className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
             >

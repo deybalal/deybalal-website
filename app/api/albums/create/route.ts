@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,20 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "You should Login first!",
+        },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     // Define schema here to avoid potential module evaluation issues during build

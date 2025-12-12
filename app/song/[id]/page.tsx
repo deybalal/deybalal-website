@@ -2,6 +2,8 @@ import React from "react";
 import { prisma } from "@/lib/prisma";
 import SongDetailClient from "@/components/SongDetailClient";
 import { LoaderPinwheel } from "lucide-react";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +27,12 @@ export default async function SongDetailPage({
     );
   }
 
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const isUserLoggedIn = !!session?.user;
+
   // Map Prisma result to match Song type
   const song = {
     ...songData,
@@ -42,5 +50,5 @@ export default async function SongDetailPage({
     })),
   };
 
-  return <SongDetailClient song={song} />;
+  return <SongDetailClient song={song} isUserLoggedIn={isUserLoggedIn} />;
 }

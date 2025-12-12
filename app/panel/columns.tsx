@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { Song } from "@prisma/client";
+import { Song, Artist, Album, Playlist } from "@prisma/client";
 import { Song as PlayerSong } from "@/types/types";
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
@@ -11,13 +11,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
 
-const ActionsCell = ({ row }: { row: Row<Song> }) => {
+const SongActionsCell = ({ row }: { row: Row<Song> }) => {
   const song = row.original;
   const { setSong } = usePlayerStore();
 
@@ -62,13 +61,6 @@ const ActionsCell = ({ row }: { row: Row<Song> }) => {
             Show Song Page
           </Link>
         </DropdownMenuItem>
-        {song.artistId && (
-          <DropdownMenuItem>
-            <Link href={`/artist/${song.artistId}`} className="w-full">
-              Show Artist
-            </Link>
-          </DropdownMenuItem>
-        )}
         {song.albumId && (
           <DropdownMenuItem>
             <Link href={`/album/${song.albumId}`} className="w-full">
@@ -81,7 +73,7 @@ const ActionsCell = ({ row }: { row: Row<Song> }) => {
   );
 };
 
-export const columns: ColumnDef<Song>[] = [
+export const songColumns: ColumnDef<Song>[] = [
   {
     accessorKey: "title",
     header: "Title",
@@ -110,6 +102,88 @@ export const columns: ColumnDef<Song>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <ActionsCell row={row} />,
+    cell: ({ row }) => <SongActionsCell row={row} />,
   },
 ];
+
+export const artistColumns: ColumnDef<Artist>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+  },
+  {
+    accessorKey: "nameEn",
+    header: "English Name",
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ row }) => {
+      return (
+        <div className="font-medium">
+          {new Date(row.getValue("createdAt")).toLocaleDateString()}
+        </div>
+      );
+    },
+  },
+];
+
+export const albumColumns: ColumnDef<Album>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+  },
+  {
+    accessorKey: "artistName",
+    header: "Artist",
+  },
+  {
+    accessorKey: "releaseDate",
+    header: "Release Year",
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ row }) => {
+      return (
+        <div className="font-medium">
+          {new Date(row.getValue("createdAt")).toLocaleDateString()}
+        </div>
+      );
+    },
+  },
+];
+
+export const playlistColumns: ColumnDef<Playlist>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+  },
+  {
+    accessorKey: "description",
+    header: "Description",
+  },
+  {
+    accessorKey: "isFavorite",
+    header: "Favorite",
+    cell: ({ row }) => (
+      <div className="font-medium">
+        {row.getValue("isFavorite") ? "Yes" : "No"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ row }) => {
+      return (
+        <div className="font-medium">
+          {new Date(row.getValue("createdAt")).toLocaleDateString()}
+        </div>
+      );
+    },
+  },
+];
+
+// Keep for backward compatibility if needed, but we should switch to songColumns
+export const columns = songColumns;
