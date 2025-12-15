@@ -23,9 +23,12 @@ export async function GET() {
       );
     }
 
-    // Try to find existing favorites playlist
+    // Try to find existing favorites playlist for this user
     let favoritesPlaylist = await prisma.playlist.findFirst({
-      where: { isFavorite: true },
+      where: {
+        isFavorite: true,
+        userId: session.user.id,
+      },
       include: {
         songs: {
           include: {
@@ -44,6 +47,7 @@ export async function GET() {
           description: "Your favorite songs",
           isFavorite: true,
           duration: 0,
+          userId: session.user.id,
         },
         include: {
           songs: {

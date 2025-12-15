@@ -45,6 +45,14 @@ export async function POST(
       );
     }
 
+    // Check if user owns the playlist
+    if (playlist.userId !== session.user.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 403 }
+      );
+    }
+
     // Check if song is already in playlist
     const songExists = playlist.songs.some((song) => song.id === songId);
     if (songExists) {

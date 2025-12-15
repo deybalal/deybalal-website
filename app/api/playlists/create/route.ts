@@ -36,6 +36,7 @@ export async function POST(request: Request) {
         name: validatedData.name,
         description: validatedData.description,
         coverArt: validatedData.coverArt,
+        userId: session.user.id,
       },
     });
 

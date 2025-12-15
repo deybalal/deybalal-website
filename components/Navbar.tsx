@@ -1,5 +1,14 @@
 "use client";
-import { Home, Disc, Mic2, ListMusic, Heart, User, Search } from "lucide-react";
+import {
+  Home,
+  Disc,
+  Mic2,
+  ListMusic,
+  Heart,
+  User,
+  Search,
+  LayoutDashboard,
+} from "lucide-react";
 import Link from "next/link";
 import DynamicDarkModeToggle from "@/components/DynamicDarkModeToggle";
 
@@ -7,11 +16,12 @@ const Navbar = () => {
   const navItems = [
     { name: "Home", href: "/", icon: Home },
     { name: "Search", href: "/search", icon: Search },
-    { name: "Dashboard", href: "/panel", icon: User },
+    { name: "Dashboard", href: "/panel", icon: LayoutDashboard },
     { name: "Albums", href: "/album", icon: Disc },
     { name: "Artists", href: "/artist", icon: Mic2 },
     { name: "Playlists", href: "/playlists", icon: ListMusic },
     { name: "Favorites", href: "/favorites", icon: Heart },
+    { name: "Profile", href: "/profile", icon: User },
   ];
 
   return (
