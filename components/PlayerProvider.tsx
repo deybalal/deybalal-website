@@ -17,6 +17,12 @@ const PlayerProvider = () => {
     activeId,
   } = usePlayerStore();
 
+  const incrementPlayCount = (songId: string) => {
+    fetch(`/api/songs/${songId}/play`, { method: "POST" }).catch((e) =>
+      console.error("Failed to increment play count:", e)
+    );
+  };
+
   // Handle seeking
   useEffect(() => {
     if (audioRef.current && seekTo !== null) {
@@ -60,6 +66,9 @@ const PlayerProvider = () => {
         // If we are the active tab and supposed to be playing, play the new track
         if (isPlaying && activeId === TAB_ID) {
           audioRef.current.play().catch((e) => console.error("Play error:", e));
+
+          // Increment play count
+          incrementPlayCount(currentSong.id);
         }
       }
     }
@@ -93,10 +102,13 @@ const PlayerProvider = () => {
   const handleEnded = () => {
     if (activeId !== TAB_ID) return;
 
-    const { repeatMode } = usePlayerStore.getState();
+    const { repeatMode, currentSong } = usePlayerStore.getState();
     if (repeatMode === "one" && audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch((e) => console.error("Play error:", e));
+      if (currentSong && currentSong.id) {
+        incrementPlayCount(currentSong.id);
+      }
     } else {
       next();
     }
