@@ -11,6 +11,7 @@ interface PlayerState {
   isPlaying: boolean;
   currentSong: Song | null;
   queue: Song[];
+  priorityQueue: Song[]; // User-added queue
   currentIndex: number;
   volume: number;
   progress: number;
@@ -21,6 +22,9 @@ interface PlayerState {
   pause: () => void;
   setSong: (song: Song, play?: boolean) => void;
   setQueue: (songs: Song[], startIndex?: number) => void;
+  addToQueue: (song: Song) => void;
+  playNext: (song: Song) => void;
+  removeFromQueue: (index: number) => void;
   next: () => void;
   prev: () => void;
   setVolume: (volume: number) => void;
@@ -42,6 +46,7 @@ export const usePlayerStore = create<PlayerState>()(
       isPlaying: false,
       currentSong: null,
       queue: [],
+      priorityQueue: [],
       currentIndex: -1,
       volume: 75,
       progress: 0,
@@ -66,6 +71,7 @@ export const usePlayerStore = create<PlayerState>()(
       setQueue: (songs, startIndex = 0) => {
         set({
           queue: songs,
+          priorityQueue: [], // Clear priority queue when setting new context? Or keep it? Usually clear or keep depends on UX. Let's clear for now to avoid confusion.
           currentIndex: startIndex,
           currentSong: songs[startIndex] || null,
           isPlaying: true,
@@ -74,9 +80,42 @@ export const usePlayerStore = create<PlayerState>()(
         });
       },
 
-      next: () => {
-        const { queue, currentIndex, isShuffling, repeatMode } = get();
+      addToQueue: (song) => {
+        set((state) => ({
+          priorityQueue: [...state.priorityQueue, song],
+        }));
+      },
 
+      playNext: (song) => {
+        set((state) => ({
+          priorityQueue: [song, ...state.priorityQueue],
+        }));
+      },
+
+      removeFromQueue: (index) => {
+        set((state) => ({
+          priorityQueue: state.priorityQueue.filter((_, i) => i !== index),
+        }));
+      },
+
+      next: () => {
+        const { queue, priorityQueue, currentIndex, isShuffling, repeatMode } =
+          get();
+
+        // 1. Check Priority Queue
+        if (priorityQueue.length > 0) {
+          const nextSong = priorityQueue[0];
+          const newPriorityQueue = priorityQueue.slice(1);
+          set({
+            currentSong: nextSong,
+            priorityQueue: newPriorityQueue,
+            isPlaying: true,
+            activeId: TAB_ID,
+          });
+          return;
+        }
+
+        // 2. Check Regular Queue
         if (queue.length === 0) return;
 
         let nextIndex = -1;
@@ -139,6 +178,7 @@ export const usePlayerStore = create<PlayerState>()(
           volume: state.volume,
           progress: state.progress,
           queue: state.queue,
+          priorityQueue: state.priorityQueue,
           duration: state.duration,
           currentSong: state.currentSong,
           currentIndex: state.currentIndex,

@@ -35,6 +35,7 @@ import { formatTime } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import MarqueeText from "./MarqueeText";
+import QueueDrawer from "./QueueDrawer";
 
 const PlayerBar = () => {
   const {
@@ -240,7 +241,7 @@ const PlayerBar = () => {
           className="w-24 cursor-pointer"
         />
       </div>
-
+      <QueueDrawer />
       {/* Mobile Menu Trigger */}
       <div className="md:hidden flex items-center justify-end flex-none">
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

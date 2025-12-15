@@ -62,7 +62,9 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch {
+  } catch (error) {
+    console.error((error as Error).message);
+
     return NextResponse.json(
       { success: false, message: "Failed to fetch playlists" },
       { status: 500 }
