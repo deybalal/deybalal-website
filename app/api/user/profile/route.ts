@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 const profileSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  isPrivate: z.boolean().optional(),
 });
 
 export async function PATCH(request: Request) {
@@ -30,6 +31,7 @@ export async function PATCH(request: Request) {
       where: { id: session.user.id },
       data: {
         name: validatedData.name,
+        isPrivate: validatedData.isPrivate,
       },
     });
 

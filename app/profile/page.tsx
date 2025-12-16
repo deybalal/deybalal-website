@@ -8,8 +8,35 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return redirect("/login");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      userIndex: true,
+      isPrivate: true,
+    },
+  });
+
+  if (!user) {
+    return redirect("/login");
+  }
+
   return (
     <div className="container mx-auto py-10 px-4 md:px-8">
       <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
@@ -29,7 +56,7 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ProfileForm />
+              <ProfileForm user={user} />
             </CardContent>
           </Card>
         </TabsContent>

@@ -113,6 +113,9 @@ model User {
   accounts      Account[]
   playlists     Playlist[]
 
+  userIndex Int     @unique @default(autoincrement())
+  isPrivate Boolean @default(true)
+
   @@unique([email])
   @@map("user")
 }
