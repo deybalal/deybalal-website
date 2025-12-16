@@ -3,11 +3,12 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const album = await prisma.album.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         songs: {
           orderBy: { index: "asc" },

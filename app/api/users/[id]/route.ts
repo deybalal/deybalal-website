@@ -28,7 +28,7 @@ export async function GET(
         userIndex: true,
         playlists: {
           where: {
-            isFavorite: false,
+            isPrivate: false,
           },
           select: {
             id: true,

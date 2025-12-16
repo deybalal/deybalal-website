@@ -3,11 +3,14 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Decode the ID in case it's passed as a name (backward compatibility or URL encoding)
-    const idOrName = decodeURIComponent(params.id);
+    // Decode the ID in case it's passed
+    //  as a name (backward compatibility or URL encoding)
+    const { id } = await params;
+
+    const idOrName = decodeURIComponent(id);
 
     // Optimized: Single query instead of two separate queries
     const artist = await prisma.artist.findFirst({

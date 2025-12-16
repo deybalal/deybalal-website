@@ -42,6 +42,7 @@ export type Playlist = {
   duration: number;
   coverArt?: string;
   isFavorite?: boolean;
+  isPrivate?: boolean;
   createdAt: number;
   updatedAt: number;
 };

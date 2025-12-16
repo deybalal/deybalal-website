@@ -73,6 +73,7 @@ model Playlist {
   coverArt    String?
   duration    Int      @default(0)
   isFavorite  Boolean  @default(false)
+  isPrivate   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -96,6 +97,7 @@ model Artist {
 
   songs  Song[]
   albums Album[]
+  users  User[]
 
   @@index([name])
   @@index([nameEn])
@@ -112,9 +114,12 @@ model User {
   sessions      Session[]
   accounts      Account[]
   playlists     Playlist[]
+  isPrivate     Boolean    @default(true)
 
-  userIndex Int     @unique @default(autoincrement())
-  isPrivate Boolean @default(true)
+  artistId String?
+  artist   Artist? @relation(fields: [artistId], references: [id])
+
+  userIndex Int @unique @default(autoincrement())
 
   @@unique([email])
   @@map("user")

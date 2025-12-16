@@ -22,7 +22,11 @@ export default async function PublicProfilePage({
   const user = await prisma.user.findFirst({
     where: { userIndex },
     include: {
-      playlists: true,
+      playlists: {
+        where: {
+          isPrivate: false,
+        },
+      },
     },
   });
 
