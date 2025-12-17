@@ -28,7 +28,7 @@ interface ProfileFormProps {
   user: {
     name: string;
     image: string | null;
-    userIndex: number;
+    userSlug: string;
     isPrivate: boolean;
   };
 }
@@ -97,7 +97,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
           Instagram! <Instagram className="inline-block ml-1 text-purple-500" />
         </div>
 
-        {mounted && user?.userIndex && (
+        {mounted && user?.userSlug && (
           <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm">
             <div className="flex flex-col space-y-1.5">
               <h3 className="font-semibold leading-none tracking-tight">
@@ -109,10 +109,10 @@ export default function ProfileForm({ user }: ProfileFormProps) {
             </div>
             <div className="mt-4 flex items-center gap-2">
               <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
-                {`${window.location.origin}/u/${user.userIndex}`}
+                {`${window.location.origin}/u/${user.userSlug}`}
               </code>
               <Link
-                href={`/u/${user.userIndex}`}
+                href={`/u/${user.userSlug}`}
                 target="_blank"
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9"
               >

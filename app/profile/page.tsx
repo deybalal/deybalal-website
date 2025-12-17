@@ -28,7 +28,7 @@ export default async function ProfilePage() {
       id: true,
       name: true,
       image: true,
-      userIndex: true,
+      userSlug: true,
       isPrivate: true,
     },
   });

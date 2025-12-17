@@ -106,7 +106,7 @@ model Artist {
 model User {
   id            String     @id
   name          String
-  email         String
+  email         String     @unique
   emailVerified Boolean    @default(false)
   image         String?
   createdAt     DateTime   @default(now())
@@ -119,9 +119,9 @@ model User {
   artistId String?
   artist   Artist? @relation(fields: [artistId], references: [id])
 
-  userIndex Int @unique @default(autoincrement())
+  userIndex Int    @unique @default(autoincrement())
+  userSlug  String @unique @default(nanoid(10)) @db.VarChar(10)
 
-  @@unique([email])
   @@map("user")
 }
 

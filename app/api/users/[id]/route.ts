@@ -9,9 +9,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const userIndex = parseInt(id);
+    const userSlug = id;
 
-    if (isNaN(userIndex)) {
+    if (!userSlug) {
       return NextResponse.json(
         { success: false, message: "Invalid user ID" },
         { status: 400 }
@@ -19,13 +19,13 @@ export async function GET(
     }
 
     const targetUser = await prisma.user.findFirst({
-      where: { userIndex },
+      where: { userSlug },
       select: {
         id: true,
         name: true,
         image: true,
         isPrivate: true,
-        userIndex: true,
+        userSlug: true,
         playlists: {
           where: {
             isPrivate: false,

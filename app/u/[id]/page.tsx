@@ -13,14 +13,14 @@ export default async function PublicProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const userIndex = parseInt(id);
+  const userSlug = id;
 
-  if (isNaN(userIndex)) {
+  if (!userSlug) {
     return notFound();
   }
 
   const user = await prisma.user.findFirst({
-    where: { userIndex },
+    where: { userSlug },
     include: {
       playlists: {
         where: {

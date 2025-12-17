@@ -13,8 +13,8 @@ export const auth = betterAuth({
   },
   // user: {
   //   additionalFields: {
-  //     userIndex: {
-  //       type: "number",
+  //     userSlug: {
+  //       type: "string",
   //     },
   //     isPrivate: {
   //       type: "boolean",
