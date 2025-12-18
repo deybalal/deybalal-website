@@ -32,19 +32,22 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
-import { authClient } from "@/lib/auth-client";
 import { toast } from "react-hot-toast";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-const SongActionsCell = ({ row }: { row: Row<Song> }) => {
+const SongActionsCell = ({
+  row,
+  userRole,
+}: {
+  row: Row<Song>;
+  userRole?: string;
+}) => {
   const song = row.original;
   const { setSong } = usePlayerStore();
-  const { data: session } = authClient.useSession();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const userRole = (session?.user as { role?: string })?.role;
   const canApprove = userRole === "moderator" || userRole === "administrator";
   const isAdmin = userRole === "administrator";
 
@@ -185,7 +188,7 @@ const SongActionsCell = ({ row }: { row: Row<Song> }) => {
   );
 };
 
-export const songColumns: ColumnDef<Song>[] = [
+export const getSongColumns = (userRole?: string): ColumnDef<Song>[] => [
   { accessorKey: "title", header: "Title" },
   { accessorKey: "artist", header: "Artist" },
   { accessorKey: "albumName", header: "Album" },
@@ -226,16 +229,23 @@ export const songColumns: ColumnDef<Song>[] = [
       );
     },
   },
-  { id: "actions", cell: ({ row }) => <SongActionsCell row={row} /> },
+  {
+    id: "actions",
+    cell: ({ row }) => <SongActionsCell row={row} userRole={userRole} />,
+  },
 ];
 
-const ArtistActionsCell = ({ row }: { row: Row<Artist> }) => {
+const ArtistActionsCell = ({
+  row,
+  userRole,
+}: {
+  row: Row<Artist>;
+  userRole?: string;
+}) => {
   const artist = row.original;
-  const { data: session } = authClient.useSession();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const userRole = (session?.user as { role?: string })?.role;
   const canApprove = userRole === "moderator" || userRole === "administrator";
   const isAdmin = userRole === "administrator";
 
@@ -319,7 +329,7 @@ const ArtistActionsCell = ({ row }: { row: Row<Artist> }) => {
   );
 };
 
-export const artistColumns: ColumnDef<Artist>[] = [
+export const getArtistColumns = (userRole?: string): ColumnDef<Artist>[] => [
   { accessorKey: "name", header: "Name" },
   {
     accessorKey: "isVerified",
@@ -340,16 +350,23 @@ export const artistColumns: ColumnDef<Artist>[] = [
       );
     },
   },
-  { id: "actions", cell: ({ row }) => <ArtistActionsCell row={row} /> },
+  {
+    id: "actions",
+    cell: ({ row }) => <ArtistActionsCell row={row} userRole={userRole} />,
+  },
 ];
 
-const AlbumActionsCell = ({ row }: { row: Row<Album> }) => {
+const AlbumActionsCell = ({
+  row,
+  userRole,
+}: {
+  row: Row<Album>;
+  userRole?: string;
+}) => {
   const album = row.original;
-  const { data: session } = authClient.useSession();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const userRole = (session?.user as { role?: string })?.role;
   const canApprove = userRole === "moderator" || userRole === "administrator";
   const isAdmin = userRole === "administrator";
 
@@ -466,7 +483,7 @@ const AlbumActionsCell = ({ row }: { row: Row<Album> }) => {
   );
 };
 
-export const albumColumns: ColumnDef<Album>[] = [
+export const getAlbumColumns = (userRole?: string): ColumnDef<Album>[] => [
   { accessorKey: "name", header: "Name" },
   { accessorKey: "artistName", header: "Artist" },
   {
@@ -492,16 +509,23 @@ export const albumColumns: ColumnDef<Album>[] = [
       );
     },
   },
-  { id: "actions", cell: ({ row }) => <AlbumActionsCell row={row} /> },
+  {
+    id: "actions",
+    cell: ({ row }) => <AlbumActionsCell row={row} userRole={userRole} />,
+  },
 ];
 
-const UserActionsCell = ({ row }: { row: Row<PrismaUser> }) => {
+const UserActionsCell = ({
+  row,
+  userRole,
+}: {
+  row: Row<PrismaUser>;
+  userRole?: string;
+}) => {
   const user = row.original;
-  const { data: session } = authClient.useSession();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const userRole = (session?.user as { role?: string })?.role;
   const isAdmin = userRole === "administrator";
 
   const updateRole = async (newRole: string) => {
@@ -591,7 +615,7 @@ const UserActionsCell = ({ row }: { row: Row<PrismaUser> }) => {
   );
 };
 
-export const userColumns: ColumnDef<PrismaUser>[] = [
+export const getUserColumns = (userRole?: string): ColumnDef<PrismaUser>[] => [
   { accessorKey: "name", header: "Name" },
   { accessorKey: "email", header: "Email" },
   {
@@ -622,10 +646,13 @@ export const userColumns: ColumnDef<PrismaUser>[] = [
       );
     },
   },
-  { id: "actions", cell: ({ row }) => <UserActionsCell row={row} /> },
+  {
+    id: "actions",
+    cell: ({ row }) => <UserActionsCell row={row} userRole={userRole} />,
+  },
 ];
 
-export const playlistColumns: ColumnDef<Playlist>[] = [
+export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
   { accessorKey: "name", header: "Name" },
   { accessorKey: "description", header: "Description" },
   {
@@ -638,5 +665,3 @@ export const playlistColumns: ColumnDef<Playlist>[] = [
     ),
   },
 ];
-
-export const columns = songColumns;

@@ -1,7 +1,6 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
 import SongDetailClient from "@/components/SongDetailClient";
-import { LoaderPinwheel } from "lucide-react";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 
