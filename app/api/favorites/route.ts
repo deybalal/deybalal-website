@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   noStore();
   try {
     const session = await auth.api.getSession({
@@ -23,6 +23,10 @@ export async function GET() {
       );
     }
 
+    const { searchParams } = new URL(request.url);
+    const page = Number(searchParams.get("page")) || 1;
+    const pageSize = Number(searchParams.get("pageSize")) || 20;
+
     // Try to find existing favorites playlist for this user
     let favoritesPlaylist = await prisma.playlist.findFirst({
       where: {
@@ -30,11 +34,17 @@ export async function GET() {
         userId: session.user.id,
       },
       include: {
+        _count: {
+          select: { songs: { where: { isActive: true } } },
+        },
         songs: {
+          where: { isActive: true },
           include: {
             artists: true,
             album: true,
           },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
         },
       },
     });
@@ -50,7 +60,11 @@ export async function GET() {
           userId: session.user.id,
         },
         include: {
+          _count: {
+            select: { songs: { where: { isActive: true } } },
+          },
           songs: {
+            where: { isActive: true },
             include: {
               artists: true,
               album: true,

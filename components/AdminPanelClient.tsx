@@ -13,6 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Music2, Mic2, Disc, ListMusic, Plus, Users } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Song,
   Artist,
@@ -33,6 +34,14 @@ interface AdminPanelClientProps {
   albumsCount: number;
   playlistsCount: number;
   usersCount: number;
+  pageSize: number;
+  currentPage: {
+    songs: number;
+    artists: number;
+    albums: number;
+    playlists: number;
+    users: number;
+  };
 }
 
 export default function AdminPanelClient({
@@ -47,6 +56,8 @@ export default function AdminPanelClient({
   albumsCount,
   playlistsCount,
   usersCount,
+  pageSize,
+  currentPage,
 }: AdminPanelClientProps) {
   const stats = [
     {
@@ -80,6 +91,15 @@ export default function AdminPanelClient({
       color: "text-red-500",
     },
   ];
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const onPageChange = (tab: string, page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(`${tab}Page`, page.toString());
+    router.push(`/panel?${params.toString()}`, { scroll: false });
+  };
 
   return (
     <div className="space-y-8 w-full p-4 md:p-8 animate-in fade-in duration-500">
@@ -174,6 +194,9 @@ export default function AdminPanelClient({
               columns={getSongColumns(userRole)}
               data={songs}
               searchKey="title"
+              pageCount={Math.ceil(songsCount / pageSize)}
+              pageIndex={currentPage.songs - 1}
+              onPageChange={(page) => onPageChange("songs", page + 1)}
             />
           </div>
         </TabsContent>
@@ -195,6 +218,9 @@ export default function AdminPanelClient({
               columns={getArtistColumns(userRole)}
               data={artists}
               searchKey="name"
+              pageCount={Math.ceil(artistsCount / pageSize)}
+              pageIndex={currentPage.artists - 1}
+              onPageChange={(page) => onPageChange("artists", page + 1)}
             />
           </div>
         </TabsContent>
@@ -216,6 +242,9 @@ export default function AdminPanelClient({
               columns={getAlbumColumns(userRole)}
               data={albums}
               searchKey="name"
+              pageCount={Math.ceil(albumsCount / pageSize)}
+              pageIndex={currentPage.albums - 1}
+              onPageChange={(page) => onPageChange("albums", page + 1)}
             />
           </div>
         </TabsContent>
@@ -237,6 +266,9 @@ export default function AdminPanelClient({
               columns={getPlaylistColumns()}
               data={playlists}
               searchKey="name"
+              pageCount={Math.ceil(playlistsCount / pageSize)}
+              pageIndex={currentPage.playlists - 1}
+              onPageChange={(page) => onPageChange("playlists", page + 1)}
             />
           </div>
         </TabsContent>
@@ -250,6 +282,9 @@ export default function AdminPanelClient({
               columns={getUserColumns(userRole)}
               data={users}
               searchKey="name"
+              pageCount={Math.ceil(usersCount / pageSize)}
+              pageIndex={currentPage.users - 1}
+              onPageChange={(page) => onPageChange("users", page + 1)}
             />
           </div>
         </TabsContent>

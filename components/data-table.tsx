@@ -26,26 +26,48 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey?: string;
+  pageCount?: number;
+  pageIndex?: number;
+  onPageChange?: (pageIndex: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey = "title",
+  pageCount,
+  pageIndex,
+  onPageChange,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
 
+  const isManualPagination = pageCount !== undefined && pageIndex !== undefined;
+
   const table = useReactTable({
     data,
     columns,
+    pageCount: pageCount,
+    manualPagination: isManualPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onPaginationChange: (updater) => {
+      if (onPageChange && isManualPagination) {
+        const nextState =
+          typeof updater === "function"
+            ? updater({ pageIndex: pageIndex, pageSize: 20 })
+            : updater;
+        onPageChange(nextState.pageIndex);
+      }
+    },
     state: {
       columnFilters,
+      ...(isManualPagination
+        ? { pagination: { pageIndex, pageSize: 20 } }
+        : {}),
     },
   });
 

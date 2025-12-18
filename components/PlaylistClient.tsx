@@ -8,15 +8,20 @@ import { formatTime } from "@/lib/utils";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Switch } from "@/components/ui/switch";
+import Pagination from "@/components/Pagination";
 
 type Props = {
   playlist: Playlist;
   sessionUserId: string | null;
+  currentPage: number;
+  totalPages: number;
 };
 
 export default function PlaylistClient({
   playlist: initialPlaylist,
   sessionUserId,
+  currentPage,
+  totalPages,
 }: Props) {
   const [playlist, setPlaylist] = useState(initialPlaylist);
 
@@ -96,7 +101,7 @@ export default function PlaylistClient({
           )}
 
           <div className="flex items-center gap-2 text-gray-400 mt-2">
-            <span>{playlist.songs.length} songs</span>
+            <span>{playlist.songsLength} songs</span>
             {playlist.duration > 0 && (
               <>
                 <span>•</span>
@@ -108,32 +113,35 @@ export default function PlaylistClient({
       </div>
 
       {/* Songs */}
-      <SongList
-        songs={playlist.songs}
-        onRemove={async (songId) => {
-          try {
-            const res = await fetch(
-              `/api/playlists/${playlist.id}/remove-song`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ songId }),
-              }
-            );
+      <div className="space-y-4">
+        <SongList
+          songs={playlist.songs}
+          onRemove={async (songId) => {
+            try {
+              const res = await fetch(
+                `/api/playlists/${playlist.id}/remove-song`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ songId }),
+                }
+              );
 
-            const result = await res.json();
-            if (result.success) {
-              setPlaylist({
-                ...playlist,
-                songs: playlist.songs.filter((s) => s.id !== songId),
-              });
-              toast.success("Song removed");
+              const result = await res.json();
+              if (result.success) {
+                setPlaylist({
+                  ...playlist,
+                  songs: playlist.songs.filter((s) => s.id !== songId),
+                });
+                toast.success("Song removed");
+              }
+            } catch {
+              toast.error("Failed to remove song");
             }
-          } catch {
-            toast.error("Failed to remove song");
-          }
-        }}
-      />
+          }}
+        />
+        <Pagination currentPage={currentPage} totalPages={totalPages} />
+      </div>
     </div>
   );
 }

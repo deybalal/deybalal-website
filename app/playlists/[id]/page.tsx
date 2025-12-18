@@ -8,20 +8,30 @@ import PlaylistSkeleton from "@/components/PlaylistSkeleton";
 
 export default async function PlaylistDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
   const { id } = await params;
+  const { page } = await searchParams;
+  const currentPage = Number(page) || 1;
+  const pageSize = 20;
 
   const playlistData = await prisma.playlist.findUnique({
     where: { id },
     include: {
+      _count: {
+        select: { songs: { where: { isActive: true } } },
+      },
       songs: {
         where: { isActive: true },
+        skip: (currentPage - 1) * pageSize,
+        take: pageSize,
       },
     },
   });
@@ -39,7 +49,7 @@ export default async function PlaylistDetailPage({
     userId: playlistData.userId ?? undefined,
     description: playlistData.description ?? undefined,
     coverArt: playlistData.coverArt ?? undefined,
-    songsLength: playlistData.songs.length,
+    songsLength: playlistData._count.songs,
     createdAt: playlistData.createdAt.getTime(),
     updatedAt: playlistData.updatedAt.getTime(),
     songs: playlistData.songs.map((song) => ({
@@ -63,6 +73,8 @@ export default async function PlaylistDetailPage({
       <PlaylistClient
         playlist={playlist}
         sessionUserId={session?.user.id ?? null}
+        currentPage={currentPage}
+        totalPages={Math.ceil(playlistData._count.songs / pageSize)}
       />
     </Suspense>
   );

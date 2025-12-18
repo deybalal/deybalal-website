@@ -3,12 +3,25 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import AdminPanelClient from "@/components/AdminPanelClient";
 
-export default async function PanelPage() {
+export default async function PanelPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
   const userRole = (session?.user as { role?: string })?.role;
+  const params = await searchParams;
+
+  const songsPage = Number(params.songsPage) || 1;
+  const artistsPage = Number(params.artistsPage) || 1;
+  const albumsPage = Number(params.albumsPage) || 1;
+  const playlistsPage = Number(params.playlistsPage) || 1;
+  const usersPage = Number(params.usersPage) || 1;
+
+  const pageSize = 20;
 
   const [
     songs,
@@ -22,11 +35,31 @@ export default async function PanelPage() {
     playlistsCount,
     usersCount,
   ] = await Promise.all([
-    prisma.song.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.artist.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.album.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.playlist.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.user.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.song.findMany({
+      orderBy: { createdAt: "desc" },
+      skip: (songsPage - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.artist.findMany({
+      orderBy: { createdAt: "desc" },
+      skip: (artistsPage - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.album.findMany({
+      orderBy: { createdAt: "desc" },
+      skip: (albumsPage - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.playlist.findMany({
+      orderBy: { createdAt: "desc" },
+      skip: (playlistsPage - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      skip: (usersPage - 1) * pageSize,
+      take: pageSize,
+    }),
     prisma.song.count(),
     prisma.artist.count(),
     prisma.album.count(),
@@ -47,6 +80,14 @@ export default async function PanelPage() {
       albumsCount={albumsCount}
       playlistsCount={playlistsCount}
       usersCount={usersCount}
+      pageSize={pageSize}
+      currentPage={{
+        songs: songsPage,
+        artists: artistsPage,
+        albums: albumsPage,
+        playlists: playlistsPage,
+        users: usersPage,
+      }}
     />
   );
 }

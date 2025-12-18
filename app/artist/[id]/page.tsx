@@ -5,22 +5,33 @@ import { User } from "lucide-react";
 import Image from "next/image";
 import { Song, Album } from "@/types/types";
 import ArtistPlayButton from "@/components/ArtistPlayButton";
+import Pagination from "@/components/Pagination";
 
 export default async function ArtistDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
   const { id } = await params;
+  const { page } = await searchParams;
   const decodedId = decodeURIComponent(id);
+  const currentPage = Number(page) || 1;
+  const pageSize = 20;
 
   // Try to find by ID first, then by Name
   let artist = await prisma.artist.findUnique({
     where: { id: decodedId },
     include: {
+      _count: {
+        select: { songs: { where: { isActive: true } } },
+      },
       songs: {
         where: { isActive: true },
         orderBy: { index: "asc" },
+        skip: (currentPage - 1) * pageSize,
+        take: pageSize,
       },
       albums: {
         orderBy: { createdAt: "desc" },
@@ -32,9 +43,14 @@ export default async function ArtistDetailPage({
     artist = await prisma.artist.findUnique({
       where: { name: decodedId },
       include: {
+        _count: {
+          select: { songs: { where: { isActive: true } } },
+        },
         songs: {
           where: { isActive: true },
           orderBy: { index: "asc" },
+          skip: (currentPage - 1) * pageSize,
+          take: pageSize,
         },
         albums: {
           orderBy: { createdAt: "desc" },
@@ -109,7 +125,7 @@ export default async function ArtistDetailPage({
           </h1>
           <div className="flex items-center justify-center md:justify-start gap-4 mb-2">
             <p className="text-gray-400 text-lg">
-              {songs.length} Songs • {albums.length} Albums
+              {artist._count.songs} Songs • {albums.length} Albums
             </p>
             <ArtistPlayButton songs={songs} />
           </div>
@@ -122,6 +138,10 @@ export default async function ArtistDetailPage({
         {songs.length > 0 ? (
           <div className="bg-foreground/5 rounded-2xl p-6 border border-white/5">
             <SongList songs={songs} />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(artist._count.songs / pageSize)}
+            />
           </div>
         ) : (
           <p className="text-gray-500">No songs found for this artist.</p>

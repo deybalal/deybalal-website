@@ -1,17 +1,35 @@
 import AlbumCard from "@/components/AlbumCard";
 import SongCard from "@/components/SongCard";
 import { prisma } from "@/lib/prisma";
+import { Song as PrismaSong, Artist as PrismaArtist } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const songsData = await prisma.song.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: "desc" },
-    include: { artists: true },
-  });
+  const [featuredSongsData, songsData, albumsData] = await Promise.all([
+    prisma.song.findMany({
+      where: { isActive: true, isFeatured: true },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      include: { artists: true },
+    }),
+    prisma.song.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      include: { artists: true },
+    }),
+    prisma.album.findMany({
+      where: { isActive: true },
+      include: { songs: true },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+  ]);
 
-  const songs = songsData.map((song) => ({
+  type PrismaSongWithArtists = PrismaSong & { artists: PrismaArtist[] };
+
+  const mapSong = (song: PrismaSongWithArtists) => ({
     ...song,
     album: song.albumName,
     coverArt: song.coverArt || null,
@@ -21,17 +39,14 @@ export default async function Home() {
     year: song.year.toString(),
     createdAt: song.createdAt.getTime(),
     updatedAt: song.updatedAt.getTime(),
-    artists: song.artists.map((artist) => ({
+    artists: song.artists.map((artist: PrismaArtist) => ({
       ...artist,
       songs: [],
     })),
-  }));
-
-  const albumsData = await prisma.album.findMany({
-    where: { isActive: true },
-    include: { songs: true },
-    orderBy: { createdAt: "desc" },
   });
+
+  const featuredSongs = featuredSongsData.map(mapSong);
+  const songs = songsData.map(mapSong);
 
   const albums = albumsData.map((album) => ({
     ...album,
@@ -203,6 +218,21 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Featured Songs */}
+      {featuredSongs.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center">
+            <span className="w-2 h-8 bg-blue-500 mr-3 rounded-full shadow-[0_0_10px_#3b82f6]"></span>
+            Featured Songs
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            {featuredSongs.map((song) => (
+              <SongCard key={song.id} song={song} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Trending Songs */}
       <section>

@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
   try {
     const [songs, albums, playlists, artists] = await Promise.all([
-      // 1. Search Songs (Limit 7)
+      // 1. Search Songs (Limit 20)
       prisma.song.findMany({
         where: {
           OR: [
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
           ],
           isActive: true,
         },
-        take: 7,
+        take: 20,
         select: {
           id: true,
           title: true,
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
         },
       }),
 
-      // 2. Search Albums (Limit 5)
+      // 2. Search Albums (Limit 20)
       prisma.album.findMany({
         where: {
           OR: [
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
           ],
           isActive: true,
         },
-        take: 5,
+        take: 20,
         select: {
           id: true,
           name: true,
@@ -60,12 +60,12 @@ export async function POST(request: Request) {
         },
       }),
 
-      // 3. Search Playlists (Limit 5)
+      // 3. Search Playlists (Limit 20)
       prisma.playlist.findMany({
         where: {
           name: { contains: normalizedQuery, mode: "insensitive" },
         },
-        take: 5,
+        take: 20,
         select: {
           id: true,
           name: true,
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
         },
       }),
 
-      // 4. Search Artists (Limit 5)
+      // 4. Search Artists (Limit 20)
       prisma.artist.findMany({
         where: {
           OR: [
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
             { nameEn: { contains: normalizedQuery, mode: "insensitive" } },
           ],
         },
-        take: 5,
+        take: 20,
         select: {
           id: true,
           name: true,

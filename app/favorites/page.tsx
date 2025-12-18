@@ -4,18 +4,28 @@ import { useEffect, useState } from "react";
 import SongList from "@/components/SongList";
 import { Song } from "@/types/types";
 import { Heart, LoaderPinwheel } from "lucide-react";
+import Pagination from "@/components/Pagination";
+import { useSearchParams } from "next/navigation";
 
 export default function FavoritesPage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalSongs, setTotalSongs] = useState(0);
+  const searchParams = useSearchParams();
+  const page = Number(searchParams.get("page")) || 1;
+  const pageSize = 20;
 
   useEffect(() => {
     const fetchFavorites = async () => {
+      setLoading(true);
       try {
-        const res = await fetch("/api/favorites");
+        const res = await fetch(
+          `/api/favorites?page=${page}&pageSize=${pageSize}`
+        );
         const data = await res.json();
-        if (data.success && data.data.songs) {
+        if (data.success && data.data) {
           setSongs(data.data.songs);
+          setTotalSongs(data.data._count.songs);
         }
       } catch (error) {
         console.error("Failed to fetch favorites", error);
@@ -25,7 +35,7 @@ export default function FavoritesPage() {
     };
 
     fetchFavorites();
-  }, []);
+  }, [page]);
 
   if (loading) {
     return (
@@ -52,23 +62,31 @@ export default function FavoritesPage() {
             Liked Songs
           </h1>
           <div className="flex items-center gap-2 text-gray-300 mt-2">
-            <span>{songs.length} songs</span>
+            <span>{totalSongs} songs</span>
           </div>
         </div>
       </div>
 
       {/* Songs List */}
-      {songs.length > 0 ? (
-        <SongList songs={songs} />
-      ) : (
-        <div className="text-center py-12 text-muted-foreground">
-          <Heart className="h-16 w-16 mx-auto mb-4 opacity-50" />
-          <p className="text-xl">No favorite songs yet</p>
-          <p className="text-sm mt-2">
-            Click the heart icon on songs to add them to your favorites!
-          </p>
-        </div>
-      )}
+      <div className="space-y-4">
+        {songs.length > 0 ? (
+          <>
+            <SongList songs={songs} />
+            <Pagination
+              currentPage={page}
+              totalPages={Math.ceil(totalSongs / pageSize)}
+            />
+          </>
+        ) : (
+          <div className="text-center py-12 text-muted-foreground">
+            <Heart className="h-16 w-16 mx-auto mb-4 opacity-50" />
+            <p className="text-xl">No favorite songs yet</p>
+            <p className="text-sm mt-2">
+              Click the heart icon on songs to add them to your favorites!
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
