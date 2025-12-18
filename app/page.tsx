@@ -28,6 +28,7 @@ export default async function Home() {
   }));
 
   const albumsData = await prisma.album.findMany({
+    where: { isActive: true },
     include: { songs: true },
     orderBy: { createdAt: "desc" },
   });

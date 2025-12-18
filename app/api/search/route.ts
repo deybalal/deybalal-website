@@ -49,6 +49,7 @@ export async function POST(request: Request) {
               artistNameEn: { contains: normalizedQuery, mode: "insensitive" },
             },
           ],
+          isActive: true,
         },
         take: 5,
         select: {

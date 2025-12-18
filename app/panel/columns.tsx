@@ -1,9 +1,21 @@
 "use client";
 
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { Song, Artist, Album, Playlist } from "@prisma/client";
+import {
+  Song,
+  Artist,
+  Album,
+  Playlist,
+  User as PrismaUser,
+} from "@prisma/client";
 import { Song as PlayerSong } from "@/types/types";
-import { MoreHorizontal } from "lucide-react";
+import {
+  MoreHorizontal,
+  CheckCircle2,
+  XCircle,
+  Star,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -11,14 +23,18 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-hot-toast";
 import { useTransition } from "react";
-import { CheckCircle2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const SongActionsCell = ({ row }: { row: Row<Song> }) => {
@@ -30,22 +46,17 @@ const SongActionsCell = ({ row }: { row: Row<Song> }) => {
 
   const userRole = (session?.user as { role?: string })?.role;
   const canApprove = userRole === "moderator" || userRole === "administrator";
+  const isAdmin = userRole === "administrator";
 
   const toggleActive = async () => {
     startTransition(async () => {
       try {
         const response = await fetch(`/api/songs/${song.id}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            isActive: !song.isActive,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isActive: !song.isActive }),
         });
-
         const result = await response.json();
-
         if (result.success) {
           toast.success(
             `Song ${song.isActive ? "deactivated" : "approved"} successfully`
@@ -61,6 +72,53 @@ const SongActionsCell = ({ row }: { row: Row<Song> }) => {
     });
   };
 
+  const toggleFeatured = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/songs/${song.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isFeatured: !song.isFeatured }),
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success(
+            `Song ${
+              song.isFeatured ? "removed from featured" : "marked as featured"
+            } successfully`
+          );
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to update song status");
+        }
+      } catch (error) {
+        console.error("Error updating song status:", error);
+        toast.error("An error occurred while updating song status");
+      }
+    });
+  };
+
+  const deleteSong = async () => {
+    if (!confirm("Are you sure you want to delete this song?")) return;
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/songs/${song.id}`, {
+          method: "DELETE",
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success("Song deleted successfully");
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to delete song");
+        }
+      } catch (error) {
+        console.error("Error deleting song:", error);
+        toast.error("An error occurred while deleting song");
+      }
+    });
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -70,6 +128,7 @@ const SongActionsCell = ({ row }: { row: Row<Song> }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuItem>
           <Link href={`/panel/edit/${song.id}`} className="w-full">
             Edit Song
@@ -78,16 +137,6 @@ const SongActionsCell = ({ row }: { row: Row<Song> }) => {
         <DropdownMenuItem>
           <Link href={`/panel/edit/lyrics/${song.id}`} className="w-full">
             Edit Lyrics
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link href={`/panel/edit/sync/${song.id}`} className="w-full">
-            Sync Lyrics
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link href={`/panel/edit/synced/${song.id}`} className="w-full">
-            Edit Synced Lyrics
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -100,6 +149,26 @@ const SongActionsCell = ({ row }: { row: Row<Song> }) => {
             {song.isActive ? "Deactivate Song" : "Approve Song"}
           </DropdownMenuItem>
         )}
+        {isAdmin && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={toggleFeatured}
+            disabled={isPending}
+          >
+            {song.isFeatured ? "Remove from Featured" : "Mark as Featured"}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem
+            className="cursor-pointer text-red-500 hover:text-red-600"
+            onClick={deleteSong}
+            disabled={isPending}
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Delete Song
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           className="cursor-pointer"
           onClick={() => setSong(song as unknown as PlayerSong)}
@@ -111,36 +180,21 @@ const SongActionsCell = ({ row }: { row: Row<Song> }) => {
             Show Song Page
           </Link>
         </DropdownMenuItem>
-        {song.albumId && (
-          <DropdownMenuItem>
-            <Link href={`/album/${song.albumId}`} className="w-full">
-              Show Album
-            </Link>
-          </DropdownMenuItem>
-        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 };
 
 export const songColumns: ColumnDef<Song>[] = [
-  {
-    accessorKey: "title",
-    header: "Title",
-  },
-  {
-    accessorKey: "artist",
-    header: "Artist",
-  },
-  {
-    accessorKey: "albumName",
-    header: "Album",
-  },
+  { accessorKey: "title", header: "Title" },
+  { accessorKey: "artist", header: "Artist" },
+  { accessorKey: "albumName", header: "Album" },
   {
     accessorKey: "isActive",
     header: "Status",
     cell: ({ row }) => {
       const isActive = row.getValue("isActive") as boolean;
+      const isFeatured = row.original.isFeatured;
       return (
         <div className="flex items-center gap-2">
           {isActive ? (
@@ -151,6 +205,9 @@ export const songColumns: ColumnDef<Song>[] = [
           <span className="text-sm font-medium">
             {isActive ? "Active" : "Pending"}
           </span>
+          {isFeatured && (
+            <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+          )}
         </div>
       );
     },
@@ -169,90 +226,417 @@ export const songColumns: ColumnDef<Song>[] = [
       );
     },
   },
-  {
-    id: "actions",
-    cell: ({ row }) => <SongActionsCell row={row} />,
-  },
+  { id: "actions", cell: ({ row }) => <SongActionsCell row={row} /> },
 ];
+
+const ArtistActionsCell = ({ row }: { row: Row<Artist> }) => {
+  const artist = row.original;
+  const { data: session } = authClient.useSession();
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const userRole = (session?.user as { role?: string })?.role;
+  const canApprove = userRole === "moderator" || userRole === "administrator";
+  const isAdmin = userRole === "administrator";
+
+  const toggleVerified = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/artists/${artist.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isVerified: !artist.isVerified }),
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success(
+            `Artist ${
+              artist.isVerified ? "unverified" : "verified"
+            } successfully`
+          );
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to update artist status");
+        }
+      } catch (error) {
+        console.error("Error updating artist status:", error);
+        toast.error("An error occurred while updating artist status");
+      }
+    });
+  };
+
+  const deleteArtist = async () => {
+    if (!confirm("Are you sure you want to delete this artist?")) return;
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/artists/${artist.id}`, {
+          method: "DELETE",
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success("Artist deleted successfully");
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to delete artist");
+        }
+      } catch (error) {
+        console.error("Error deleting artist:", error);
+        toast.error("An error occurred while deleting artist");
+      }
+    });
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        {canApprove && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={toggleVerified}
+            disabled={isPending}
+          >
+            {artist.isVerified ? "Unverify Artist" : "Verify Artist"}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem
+            className="cursor-pointer text-red-500 hover:text-red-600"
+            onClick={deleteArtist}
+            disabled={isPending}
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Delete Artist
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export const artistColumns: ColumnDef<Artist>[] = [
+  { accessorKey: "name", header: "Name" },
   {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "nameEn",
-    header: "English Name",
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
+    accessorKey: "isVerified",
+    header: "Status",
     cell: ({ row }) => {
+      const isVerified = row.getValue("isVerified") as boolean;
       return (
-        <div className="font-medium">
-          {new Date(row.getValue("createdAt")).toLocaleDateString()}
+        <div className="flex items-center gap-2">
+          {isVerified ? (
+            <CheckCircle2 className="h-4 w-4 text-blue-500" />
+          ) : (
+            <XCircle className="h-4 w-4 text-gray-500" />
+          )}
+          <span className="text-sm font-medium">
+            {isVerified ? "Verified" : "Unverified"}
+          </span>
         </div>
       );
     },
   },
+  { id: "actions", cell: ({ row }) => <ArtistActionsCell row={row} /> },
 ];
+
+const AlbumActionsCell = ({ row }: { row: Row<Album> }) => {
+  const album = row.original;
+  const { data: session } = authClient.useSession();
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const userRole = (session?.user as { role?: string })?.role;
+  const canApprove = userRole === "moderator" || userRole === "administrator";
+  const isAdmin = userRole === "administrator";
+
+  const toggleActive = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/albums/${album.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isActive: !album.isActive }),
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success(
+            `Album ${album.isActive ? "deactivated" : "approved"} successfully`
+          );
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to update album status");
+        }
+      } catch (error) {
+        console.error("Error updating album status:", error);
+        toast.error("An error occurred while updating album status");
+      }
+    });
+  };
+
+  const toggleFeatured = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/albums/${album.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isFeatured: !album.isFeatured }),
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success(
+            `Album ${
+              album.isFeatured ? "removed from featured" : "marked as featured"
+            } successfully`
+          );
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to update album status");
+        }
+      } catch (error) {
+        console.error("Error updating album status:", error);
+        toast.error("An error occurred while updating album status");
+      }
+    });
+  };
+
+  const deleteAlbum = async () => {
+    if (!confirm("Are you sure you want to delete this album?")) return;
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/albums/${album.id}`, {
+          method: "DELETE",
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success("Album deleted successfully");
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to delete album");
+        }
+      } catch (error) {
+        console.error("Error deleting album:", error);
+        toast.error("An error occurred while deleting album");
+      }
+    });
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        {canApprove && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={toggleActive}
+            disabled={isPending}
+          >
+            {album.isActive ? "Deactivate Album" : "Approve Album"}
+          </DropdownMenuItem>
+        )}
+        {isAdmin && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={toggleFeatured}
+            disabled={isPending}
+          >
+            {album.isFeatured ? "Remove from Featured" : "Mark as Featured"}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem
+            className="cursor-pointer text-red-500 hover:text-red-600"
+            onClick={deleteAlbum}
+            disabled={isPending}
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Delete Album
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export const albumColumns: ColumnDef<Album>[] = [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "artistName", header: "Artist" },
   {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "artistName",
-    header: "Artist",
-  },
-  {
-    accessorKey: "releaseDate",
-    header: "Release Year",
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
+    accessorKey: "isActive",
+    header: "Status",
     cell: ({ row }) => {
+      const isActive = row.getValue("isActive") as boolean;
+      const isFeatured = row.original.isFeatured;
       return (
-        <div className="font-medium">
-          {new Date(row.getValue("createdAt")).toLocaleDateString()}
+        <div className="flex items-center gap-2">
+          {isActive ? (
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          ) : (
+            <XCircle className="h-4 w-4 text-yellow-500" />
+          )}
+          <span className="text-sm font-medium">
+            {isActive ? "Active" : "Pending"}
+          </span>
+          {isFeatured && (
+            <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+          )}
         </div>
       );
     },
   },
+  { id: "actions", cell: ({ row }) => <AlbumActionsCell row={row} /> },
 ];
 
-export const playlistColumns: ColumnDef<Playlist>[] = [
+const UserActionsCell = ({ row }: { row: Row<PrismaUser> }) => {
+  const user = row.original;
+  const { data: session } = authClient.useSession();
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const userRole = (session?.user as { role?: string })?.role;
+  const isAdmin = userRole === "administrator";
+
+  const updateRole = async (newRole: string) => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/users/${user.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: newRole }),
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success(`User role updated to ${newRole}`);
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to update user role");
+        }
+      } catch (error) {
+        console.error("Error updating user role:", error);
+        toast.error("An error occurred while updating user role");
+      }
+    });
+  };
+
+  const toggleBanned = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/users/${user.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isBanned: !user.isBanned }),
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success(
+            `User ${user.isBanned ? "unbanned" : "banned"} successfully`
+          );
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to update user status");
+        }
+      } catch (error) {
+        console.error("Error updating user status:", error);
+        toast.error("An error occurred while updating user status");
+      }
+    });
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        {isAdmin && (
+          <>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Change Role</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={() => updateRole("user")}>
+                    User
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => updateRole("moderator")}>
+                    Moderator
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => updateRole("administrator")}>
+                    Administrator
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuItem
+              className="cursor-pointer text-red-500 hover:text-red-600"
+              onClick={toggleBanned}
+              disabled={isPending}
+            >
+              {user.isBanned ? "Unban User" : "Ban User"}
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export const userColumns: ColumnDef<PrismaUser>[] = [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "email", header: "Email" },
   {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-  },
-  {
-    accessorKey: "isFavorite",
-    header: "Favorite",
+    accessorKey: "role",
+    header: "Role",
     cell: ({ row }) => (
-      <div className="font-medium">
-        {row.getValue("isFavorite") ? "Yes" : "No"}
-      </div>
+      <span className="capitalize font-medium">
+        {row.getValue("role") as string}
+      </span>
     ),
   },
   {
-    accessorKey: "createdAt",
-    header: "Created At",
+    accessorKey: "isBanned",
+    header: "Status",
     cell: ({ row }) => {
+      const isBanned = row.getValue("isBanned") as boolean;
       return (
-        <div className="font-medium">
-          {new Date(row.getValue("createdAt")).toLocaleDateString()}
+        <div className="flex items-center gap-2">
+          {isBanned ? (
+            <XCircle className="h-4 w-4 text-red-500" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          )}
+          <span className="text-sm font-medium">
+            {isBanned ? "Banned" : "Active"}
+          </span>
         </div>
       );
     },
   },
+  { id: "actions", cell: ({ row }) => <UserActionsCell row={row} /> },
 ];
 
-// Keep for backward compatibility if needed, but we should switch to songColumns
+export const playlistColumns: ColumnDef<Playlist>[] = [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "description", header: "Description" },
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ row }) => (
+      <div className="font-medium">
+        {new Date(row.getValue("createdAt")).toLocaleDateString()}
+      </div>
+    ),
+  },
+];
+
 export const columns = songColumns;

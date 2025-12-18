@@ -77,3 +77,62 @@ export async function GET(
     );
   }
 }
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const userRole = (session.user as { role?: string }).role;
+
+    if (userRole !== "administrator") {
+      return NextResponse.json(
+        { success: false, message: "Only administrators can manage users" },
+        { status: 403 }
+      );
+    }
+
+    // Check if user exists
+    const targetUser = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!targetUser) {
+      return NextResponse.json(
+        { success: false, message: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Update the user
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        role: body.role,
+        isBanned: body.isBanned,
+      },
+    });
+
+    return NextResponse.json({ success: true, data: updatedUser });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to update user" },
+      { status: 500 }
+    );
+  }
+}

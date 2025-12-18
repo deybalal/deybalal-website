@@ -7,10 +7,11 @@ import {
   artistColumns,
   albumColumns,
   playlistColumns,
+  userColumns,
 } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Music2, Mic2, Disc, ListMusic, Plus } from "lucide-react";
+import { Music2, Mic2, Disc, ListMusic, Plus, Users } from "lucide-react";
 
 export default async function PanelPage() {
   const [
@@ -18,19 +19,23 @@ export default async function PanelPage() {
     artists,
     albums,
     playlists,
+    users,
     songsCount,
     artistsCount,
     albumsCount,
     playlistsCount,
+    usersCount,
   ] = await Promise.all([
     prisma.song.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.artist.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.album.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.playlist.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.user.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.song.count(),
     prisma.artist.count(),
     prisma.album.count(),
     prisma.playlist.count(),
+    prisma.user.count(),
   ]);
 
   const stats = [
@@ -57,6 +62,12 @@ export default async function PanelPage() {
       value: playlistsCount,
       icon: ListMusic,
       color: "text-orange-500",
+    },
+    {
+      title: "Total Users",
+      value: usersCount,
+      icon: Users,
+      color: "text-red-500",
     },
   ];
 
@@ -103,6 +114,7 @@ export default async function PanelPage() {
           <TabsTrigger value="artists">Artists</TabsTrigger>
           <TabsTrigger value="albums">Albums</TabsTrigger>
           <TabsTrigger value="playlists">Playlists</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
         </TabsList>
 
         <TabsContent value="songs" className="space-y-4">
@@ -178,6 +190,15 @@ export default async function PanelPage() {
               data={playlists}
               searchKey="name"
             />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-4">
+          <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
+            <h2 className="text-xl font-semibold">User Management</h2>
+          </div>
+          <div className="glass rounded-lg border border-white/10 overflow-hidden">
+            <DataTable columns={userColumns} data={users} searchKey="name" />
           </div>
         </TabsContent>
       </Tabs>

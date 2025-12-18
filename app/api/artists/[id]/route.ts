@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export async function GET(
   request: Request,
@@ -38,6 +40,109 @@ export async function GET(
   } catch {
     return NextResponse.json(
       { success: false, message: "Failed to fetch artist" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    const body = await request.json();
+
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const userRole = (session.user as { role?: string }).role;
+
+    // Check if artist exists
+    const existingArtist = await prisma.artist.findUnique({
+      where: { id },
+    });
+
+    if (!existingArtist) {
+      return NextResponse.json(
+        { success: false, message: "Artist not found" },
+        { status: 404 }
+      );
+    }
+
+    // Update the artist
+    const updatedArtist = await prisma.artist.update({
+      where: { id },
+      data: {
+        name: body.name,
+        nameEn: body.nameEn,
+        image: body.image,
+        isVerified:
+          body.isVerified !== undefined
+            ? userRole === "moderator" || userRole === "administrator"
+              ? body.isVerified
+              : existingArtist.isVerified
+            : existingArtist.isVerified,
+      },
+    });
+
+    return NextResponse.json({ success: true, data: updatedArtist });
+  } catch (error) {
+    console.error("Error updating artist:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to update artist" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const userRole = (session.user as { role?: string }).role;
+
+    if (userRole !== "administrator") {
+      return NextResponse.json(
+        { success: false, message: "Only administrators can delete artists" },
+        { status: 403 }
+      );
+    }
+
+    await prisma.artist.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Artist deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting artist:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to delete artist" },
       { status: 500 }
     );
   }

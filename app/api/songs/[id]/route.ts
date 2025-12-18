@@ -96,6 +96,12 @@ export async function PUT(
               ? body.isActive
               : existingSong.isActive
             : existingSong.isActive,
+        isFeatured:
+          body.isFeatured !== undefined
+            ? userRole === "administrator"
+              ? body.isFeatured
+              : existingSong.isFeatured
+            : existingSong.isFeatured,
       },
     });
 
@@ -104,6 +110,50 @@ export async function PUT(
     console.error("Error updating song:", error);
     return NextResponse.json(
       { success: false, message: "Failed to update song" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const userRole = (session.user as { role?: string }).role;
+
+    if (userRole !== "administrator") {
+      return NextResponse.json(
+        { success: false, message: "Only administrators can delete songs" },
+        { status: 403 }
+      );
+    }
+
+    await prisma.song.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Song deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting song:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to delete song" },
       { status: 500 }
     );
   }
