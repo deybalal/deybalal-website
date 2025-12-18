@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +44,19 @@ export async function PUT(
     const { id } = await context.params;
     const body = await request.json();
 
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const userRole = (session.user as { role?: string }).role;
+
     // Check if song exists
     const existingSong = await prisma.song.findUnique({
       where: { id },
@@ -75,6 +90,12 @@ export async function PUT(
         duration: body.duration ?? existingSong.duration ?? null,
         lyrics: body.lyrics ?? existingSong.lyrics ?? null,
         syncedLyrics: body.syncedLyrics ?? existingSong.syncedLyrics ?? null,
+        isActive:
+          body.isActive !== undefined
+            ? userRole === "moderator" || userRole === "administrator"
+              ? body.isActive
+              : existingSong.isActive
+            : existingSong.isActive,
       },
     });
 

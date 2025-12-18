@@ -20,7 +20,9 @@ export default async function PlaylistDetailPage({
   const playlistData = await prisma.playlist.findUnique({
     where: { id },
     include: {
-      songs: true,
+      songs: {
+        where: { isActive: true },
+      },
     },
   });
 

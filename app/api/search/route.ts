@@ -27,6 +27,7 @@ export async function POST(request: Request) {
             { albumName: { contains: normalizedQuery, mode: "insensitive" } },
             { titleEn: { contains: normalizedQuery, mode: "insensitive" } },
           ],
+          isActive: true,
         },
         take: 7,
         select: {

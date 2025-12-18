@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const songsData = await prisma.song.findMany({
+    where: { isActive: true },
     orderBy: { createdAt: "desc" },
     include: { artists: true },
   });

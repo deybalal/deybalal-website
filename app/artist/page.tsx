@@ -54,7 +54,7 @@ export default function ArtistPage() {
       {artists.length === 0 ? (
         <div className="text-gray-400 text-lg">No artists found.</div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-6">
           {artists.map((artist) => (
             <Link href={`/artist/${artist.id}`} key={artist.id}>
               <Card className="group relative overflow-hidden bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full">
@@ -71,9 +71,27 @@ export default function ArtistPage() {
                       <User size={48} className="text-gray-500" />
                     )}
                   </div>
-                  <h3 className="text-white font-bold truncate text-lg w-full">
-                    {artist.name}
+                  <h3 className="text-foreground font-bold text-lg w-full px-4 min-w-0 h-7">
+                    <div className="flex items-center justify-center gap-1 min-w-0">
+                      <span
+                        className="truncate block max-w-full"
+                        title={artist.name}
+                      >
+                        {artist.name}
+                      </span>
+
+                      {artist.isVerified && (
+                        <Image
+                          src="/images/verified.svg"
+                          alt="Verified"
+                          width={24}
+                          height={24}
+                          className="shrink-0 z-10"
+                        />
+                      )}
+                    </div>
                   </h3>
+
                   <p className="text-gray-400 text-sm">Artist</p>
                 </CardContent>
               </Card>

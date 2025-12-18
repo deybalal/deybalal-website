@@ -14,6 +14,7 @@ export async function GET(request: Request) {
 
     const [songs, total] = await Promise.all([
       prisma.song.findMany({
+        where: { isActive: true },
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,

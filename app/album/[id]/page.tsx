@@ -16,6 +16,7 @@ export default async function AlbumDetailPage({
     where: { id },
     include: {
       songs: {
+        where: { isActive: true },
         orderBy: { index: "asc" },
       },
       artist: true,

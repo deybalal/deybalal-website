@@ -40,6 +40,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import Link from "next/link";
 
 interface Artist {
   id: string;
@@ -134,7 +135,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
 
     fetchAlbums();
     fetchArtists();
-  }, []);
+  }, [openArtist]);
 
   // Fetch song data in edit mode
   useEffect(() => {
@@ -546,7 +547,16 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
           name="artist"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Artists</FormLabel>
+              <FormLabel>
+                Artists{" "}
+                <Link
+                  className="border p-1.5 rounded-md hover:scale-110 transition-all"
+                  href="/panel/new/artist"
+                  target="_blank"
+                >
+                  Add new
+                </Link>
+              </FormLabel>
 
               {/* Display selected artists as badges */}
               {selectedArtists.length > 0 && (

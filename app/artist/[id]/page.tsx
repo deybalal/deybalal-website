@@ -19,6 +19,7 @@ export default async function ArtistDetailPage({
     where: { id: decodedId },
     include: {
       songs: {
+        where: { isActive: true },
         orderBy: { index: "asc" },
       },
       albums: {
@@ -32,6 +33,7 @@ export default async function ArtistDetailPage({
       where: { name: decodedId },
       include: {
         songs: {
+          where: { isActive: true },
           orderBy: { index: "asc" },
         },
         albums: {

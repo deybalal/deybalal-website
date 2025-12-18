@@ -15,10 +15,51 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "react-hot-toast";
+import { useTransition } from "react";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const SongActionsCell = ({ row }: { row: Row<Song> }) => {
   const song = row.original;
   const { setSong } = usePlayerStore();
+  const { data: session } = authClient.useSession();
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const userRole = (session?.user as { role?: string })?.role;
+  const canApprove = userRole === "moderator" || userRole === "administrator";
+
+  const toggleActive = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/songs/${song.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            isActive: !song.isActive,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          toast.success(
+            `Song ${song.isActive ? "deactivated" : "approved"} successfully`
+          );
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to update song status");
+        }
+      } catch (error) {
+        console.error("Error updating song status:", error);
+        toast.error("An error occurred while updating song status");
+      }
+    });
+  };
 
   return (
     <DropdownMenu>
@@ -50,6 +91,15 @@ const SongActionsCell = ({ row }: { row: Row<Song> }) => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        {canApprove && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={toggleActive}
+            disabled={isPending}
+          >
+            {song.isActive ? "Deactivate Song" : "Approve Song"}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
           className="cursor-pointer"
           onClick={() => setSong(song as unknown as PlayerSong)}
@@ -85,6 +135,25 @@ export const songColumns: ColumnDef<Song>[] = [
   {
     accessorKey: "albumName",
     header: "Album",
+  },
+  {
+    accessorKey: "isActive",
+    header: "Status",
+    cell: ({ row }) => {
+      const isActive = row.getValue("isActive") as boolean;
+      return (
+        <div className="flex items-center gap-2">
+          {isActive ? (
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          ) : (
+            <XCircle className="h-4 w-4 text-yellow-500" />
+          )}
+          <span className="text-sm font-medium">
+            {isActive ? "Active" : "Pending"}
+          </span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "duration",

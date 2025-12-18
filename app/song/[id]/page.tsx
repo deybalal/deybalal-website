@@ -15,7 +15,7 @@ export default async function SongDetailPage({
   const { id } = await params;
 
   const songData = await prisma.song.findUnique({
-    where: { id },
+    where: { id, isActive: true },
     include: { artists: true },
   });
 

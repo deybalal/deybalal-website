@@ -28,6 +28,7 @@ model Song {
   playCount           Int     @default(0)
   isDisabled          Boolean @default(false)
   disabledDescription String?
+  isActive            Boolean @default(false)
 
   albumId String?
   album   Album?  @relation(fields: [albumId], references: [id])
@@ -95,12 +96,19 @@ model Artist {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  isVerified Boolean @default(false)
+
   songs  Song[]
   albums Album[]
   users  User[]
 
-  @@index([name])
   @@index([nameEn])
+}
+
+enum Role {
+  user
+  moderator
+  administrator
 }
 
 model User {
@@ -121,6 +129,8 @@ model User {
 
   userIndex Int    @unique @default(autoincrement())
   userSlug  String @unique @default(nanoid(10)) @db.VarChar(10)
+
+  role Role @default(user)
 
   @@map("user")
 }
