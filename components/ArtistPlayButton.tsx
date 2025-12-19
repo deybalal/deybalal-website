@@ -15,7 +15,7 @@ const ArtistPlayButton = ({ songs }: ArtistPlayButtonProps) => {
   const currentSong = usePlayerStore((state) => state.currentSong);
   const setQueue = usePlayerStore((state) => state.setQueue);
 
-  const isCurrentSong = currentSong?.id === songs[0].id;
+  const isCurrentSong = currentSong?.id === songs[0]?.id;
 
   const handlePlay = () => {
     if (songs.length > 0) {

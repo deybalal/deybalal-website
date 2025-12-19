@@ -5,6 +5,46 @@ import { headers } from "next/headers";
 import PlaylistClient from "@/components/PlaylistClient";
 import { Suspense } from "react";
 import PlaylistSkeleton from "@/components/PlaylistSkeleton";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const playlist = await prisma.playlist.findUnique({
+    where: { id },
+    include: { user: true },
+  });
+
+  if (!playlist) return { title: "Playlist Not Found" };
+
+  const ogImageUrl = `/api/og/playlist/${id}`;
+
+  return {
+    title: `${playlist.name} - Playlist`,
+    description: `Listen to ${playlist.name} by ${
+      playlist.user?.name || "User"
+    } on Dey`,
+    openGraph: {
+      title: playlist.name,
+      description: `Listen to ${playlist.name} by ${
+        playlist.user?.name || "User"
+      } on Dey`,
+      images: [ogImageUrl],
+      type: "music.playlist",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: playlist.name,
+      description: `Listen to ${playlist.name} by ${
+        playlist.user?.name || "User"
+      } on Dey`,
+      images: [ogImageUrl],
+    },
+  };
+}
 
 export default async function PlaylistDetailPage({
   params,

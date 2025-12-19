@@ -9,6 +9,7 @@ import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Switch } from "@/components/ui/switch";
 import Pagination from "@/components/Pagination";
+import { ShareButtons } from "@/components/ShareButtons";
 
 type Props = {
   playlist: Playlist;
@@ -100,14 +101,21 @@ export default function PlaylistClient({
             </p>
           )}
 
-          <div className="flex items-center gap-2 text-gray-400 mt-2">
-            <span>{playlist.songsLength} songs</span>
-            {playlist.duration > 0 && (
-              <>
-                <span>•</span>
-                <span>{formatTime(playlist.duration)}</span>
-              </>
-            )}
+          <div className="flex items-center justify-between text-gray-400 mt-2">
+            <div className="flex items-center gap-2">
+              <span>{playlist.songsLength} songs</span>
+              {playlist.duration > 0 && (
+                <>
+                  <span>•</span>
+                  <span>{formatTime(playlist.duration)}</span>
+                </>
+              )}
+            </div>
+            <ShareButtons
+              title={playlist.name}
+              url={`/playlists/${playlist.id}`}
+              type="playlist"
+            />
           </div>
         </div>
       </div>

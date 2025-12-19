@@ -132,6 +132,20 @@ export async function POST(request: Request) {
       },
     });
 
+    // Notify followers of each artist
+    if (validatedData.artistIds && validatedData.artistIds.length > 0) {
+      const { notifyFollowers } = await import("@/lib/notifications");
+      for (const artistId of validatedData.artistIds) {
+        await notifyFollowers({
+          artistId,
+          type: "NEW_RELEASE",
+          title: "New Music Released!",
+          message: `${validatedData.artist} just released a new song: ${validatedData.title}`,
+          link: `/song/${song.id}`,
+        });
+      }
+    }
+
     return NextResponse.json({ success: true, data: song });
   } catch (error) {
     console.error("Error creating song:", error);

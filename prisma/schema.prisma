@@ -37,6 +37,7 @@ model Song {
   artists Artist[]
 
   playlists Playlist[]
+  comments  Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -64,7 +65,8 @@ model Album {
   artistId String?
   artist   Artist? @relation(fields: [artistId], references: [id])
 
-  songs Song[]
+  songs    Song[]
+  comments Comment[]
 
   @@index([artistName])
   @@index([artistId])
@@ -101,11 +103,57 @@ model Artist {
 
   isVerified Boolean @default(false)
 
-  songs  Song[]
-  albums Album[]
-  users  User[]
+  songs     Song[]
+  albums    Album[]
+  users     User[]
+  followers Follow[]
 
   @@index([nameEn])
+}
+
+model Follow {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artistId  String
+  artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, artistId])
+  @@index([userId])
+  @@index([artistId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  songId    String?
+  song      Song?    @relation(fields: [songId], references: [id], onDelete: Cascade)
+  albumId   String?
+  album     Album?   @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([songId])
+  @@index([albumId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // e.g., "NEW_RELEASE", "COMMENT_REPLY"
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
 }
 
 enum Role {
@@ -135,6 +183,10 @@ model User {
   userSlug  String @unique @default(nanoid(10)) @db.VarChar(10)
 
   role Role @default(user)
+
+  follows       Follow[]
+  comments      Comment[]
+  notifications Notification[]
 
   @@map("user")
 }

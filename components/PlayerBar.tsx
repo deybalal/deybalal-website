@@ -36,6 +36,7 @@ import Image from "next/image";
 import Link from "next/link";
 import MarqueeText from "./MarqueeText";
 import QueueDrawer from "./QueueDrawer";
+import { NotificationCenter } from "./NotificationCenter";
 
 const PlayerBar = () => {
   const {
@@ -231,15 +232,18 @@ const PlayerBar = () => {
       </div>
 
       {/* Volume */}
-      <div className="hidden md:flex items-center justify-end w-1/4 gap-2">
-        <Volume2 size={20} className="text-gray-400" />
-        <Slider
-          value={[volume]}
-          onValueChange={(v) => setVolume(v[0])}
-          max={100}
-          step={1}
-          className="w-24 cursor-pointer"
-        />
+      <NotificationCenter />
+      <div className="hidden md:flex items-center justify-end w-1/4 gap-4">
+        <div className="flex items-center gap-2">
+          <Volume2 size={20} className="text-gray-400" />
+          <Slider
+            value={[volume]}
+            onValueChange={(v) => setVolume(v[0])}
+            max={100}
+            step={1}
+            className="w-24 cursor-pointer"
+          />
+        </div>
       </div>
       <QueueDrawer />
       {/* Mobile Menu Trigger */}

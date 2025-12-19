@@ -4,6 +4,43 @@ import Image from "next/image";
 import { Calendar, Music } from "lucide-react";
 import PlayAlbumButton from "@/components/PlayAlbumButton";
 import { Song } from "@/types/types";
+import { CommentSection } from "@/components/CommentSection";
+import { ShareButtons } from "@/components/ShareButtons";
+import { Metadata } from "next";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const album = await prisma.album.findUnique({
+    where: { id },
+  });
+
+  if (!album) return { title: "Album Not Found" };
+
+  const ogImageUrl = `/api/og/album/${id}`;
+
+  return {
+    title: `${album.name} - ${album.artistName}`,
+    description: `Listen to ${album.name} by ${album.artistName} on Dey`,
+    openGraph: {
+      title: album.name,
+      description: `Listen to ${album.name} by ${album.artistName} on Dey`,
+      images: [ogImageUrl],
+      type: "music.album",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: album.name,
+      description: `Listen to ${album.name} by ${album.artistName} on Dey`,
+      images: [ogImageUrl],
+    },
+  };
+}
 
 export default async function AlbumDetailPage({
   params,
@@ -31,6 +68,12 @@ export default async function AlbumDetailPage({
       </div>
     );
   }
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const isUserLoggedIn = !!session?.user;
 
   // Map Prisma songs to our app's Song type if needed, or cast if compatible
   // The Prisma type has artist as a relation, but our Song type expects artist name string
@@ -114,15 +157,25 @@ export default async function AlbumDetailPage({
             </div>
           </div>
 
-          <div className="mt-2">
+          <div className="mt-2 flex items-center gap-4">
             <PlayAlbumButton songs={songs} />
+            <ShareButtons
+              title={album.name}
+              url={`/album/${album.id}`}
+              type="album"
+            />
           </div>
         </div>
       </div>
 
       {/* Songs List */}
-      <div className="bg-foreground/5 rounded-2xl p-6 border border-forebg-foreground/5">
+      <div className="bg-foreground/5 rounded-2xl p-6 border border-white/5">
         <SongList songs={songs} />
+      </div>
+
+      {/* Comments Section */}
+      <div className="max-w-4xl mx-auto">
+        <CommentSection albumId={album.id} isUserLoggedIn={isUserLoggedIn} />
       </div>
     </div>
   );

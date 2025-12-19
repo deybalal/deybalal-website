@@ -3,8 +3,43 @@ import { prisma } from "@/lib/prisma";
 import SongDetailClient from "@/components/SongDetailClient";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { CommentSection } from "@/components/CommentSection";
+import { ShareButtons } from "@/components/ShareButtons";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const song = await prisma.song.findUnique({
+    where: { id },
+  });
+
+  if (!song) return { title: "Song Not Found" };
+
+  const ogImageUrl = `/api/og/song/${id}`;
+
+  return {
+    title: `${song.title} - ${song.artist}`,
+    description: `Listen to ${song.title} by ${song.artist} on Dey`,
+    openGraph: {
+      title: song.title,
+      description: `Listen to ${song.title} by ${song.artist} on Dey`,
+      images: [ogImageUrl],
+      type: "music.song",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: song.title,
+      description: `Listen to ${song.title} by ${song.artist} on Dey`,
+      images: [ogImageUrl],
+    },
+  };
+}
 
 export default async function SongDetailPage({
   params,
@@ -49,5 +84,25 @@ export default async function SongDetailPage({
     })),
   };
 
-  return <SongDetailClient song={song} isUserLoggedIn={isUserLoggedIn} />;
+  return (
+    <div className="space-y-12 pb-24 w-full flex-1">
+      <SongDetailClient song={song} isUserLoggedIn={isUserLoggedIn} />
+      <div className="max-w-4xl mx-auto px-6 my-12 pb-28 w-full flex-1">
+        <div className="flex items-center justify-between bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold">Share this song</h3>
+            <p className="text-sm text-gray-400">
+              Spread the music with your friends
+            </p>
+          </div>
+          <ShareButtons
+            title={song.title}
+            url={`/song/${song.id}`}
+            type="song"
+          />
+        </div>
+        <CommentSection songId={song.id} isUserLoggedIn={isUserLoggedIn} />
+      </div>
+    </div>
+  );
 }

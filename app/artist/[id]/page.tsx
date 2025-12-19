@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Song, Album } from "@/types/types";
 import ArtistPlayButton from "@/components/ArtistPlayButton";
 import Pagination from "@/components/Pagination";
+import { FollowButton } from "@/components/FollowButton";
 
 export default async function ArtistDetailPage({
   params,
@@ -128,6 +129,7 @@ export default async function ArtistDetailPage({
               {artist._count.songs} Songs • {albums.length} Albums
             </p>
             <ArtistPlayButton songs={songs} />
+            <FollowButton artistId={artist.id} />
           </div>
         </div>
       </div>
