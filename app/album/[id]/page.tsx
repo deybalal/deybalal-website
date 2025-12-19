@@ -74,6 +74,7 @@ export default async function AlbumDetailPage({
   });
 
   const isUserLoggedIn = !!session?.user;
+  const userSlug = session?.user.userSlug;
 
   // Map Prisma songs to our app's Song type if needed, or cast if compatible
   // The Prisma type has artist as a relation, but our Song type expects artist name string
@@ -175,7 +176,11 @@ export default async function AlbumDetailPage({
 
       {/* Comments Section */}
       <div className="max-w-4xl mx-auto">
-        <CommentSection albumId={album.id} isUserLoggedIn={isUserLoggedIn} />
+        <CommentSection
+          userSlug={userSlug}
+          albumId={album.id}
+          isUserLoggedIn={isUserLoggedIn}
+        />
       </div>
     </div>
   );

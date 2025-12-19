@@ -125,14 +125,18 @@ model Follow {
 }
 
 model Comment {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   content   String
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userSlug  String
   songId    String?
-  song      Song?    @relation(fields: [songId], references: [id], onDelete: Cascade)
+  song      Song?   @relation(fields: [songId], references: [id], onDelete: Cascade)
   albumId   String?
-  album     Album?   @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  album     Album?  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  isActive  Boolean @default(false)
+  isDeleted Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

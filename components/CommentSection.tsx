@@ -8,11 +8,24 @@ import { toast } from "react-hot-toast";
 import { Loader2, MessageSquare, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 
 interface Comment {
   id: string;
   content: string;
   createdAt: string;
+  isActive: boolean;
   user: {
     id: string;
     name: string;
@@ -25,12 +38,14 @@ interface CommentSectionProps {
   songId?: string;
   albumId?: string;
   isUserLoggedIn: boolean;
+  userSlug?: string;
 }
 
 export function CommentSection({
   songId,
   albumId,
   isUserLoggedIn,
+  userSlug,
 }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [content, setContent] = useState("");
@@ -83,8 +98,6 @@ export function CommentSection({
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this comment?")) return;
-
     try {
       const res = await fetch(`/api/comments?id=${id}`, {
         method: "DELETE",
@@ -173,23 +186,59 @@ export function CommentSection({
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-foreground hover:text-blue-400 transition-colors cursor-pointer">
+                    <Link
+                      href={`/u/${comment.user.userSlug}`}
+                      className="font-semibold text-foreground hover:text-blue-400 transition-colors cursor-pointer"
+                    >
                       {comment.user.name}
-                    </span>
+                    </Link>
                     <span className="text-xs text-gray-500">
                       {formatDistanceToNow(new Date(comment.createdAt), {
                         addSuffix: true,
                       })}
                     </span>
+                    {!comment.isActive && (
+                      <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[10px] font-medium border border-amber-500/20 flex items-center gap-1">
+                        <span className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
+                        Pending
+                      </span>
+                    )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(comment.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  {userSlug === comment.user.userSlug && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Delete Comment</DialogTitle>
+                          <DialogDescription>
+                            This cannot be undone!
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4">
+                          Are you sure you want to delete this comment?
+                        </div>
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                          </DialogClose>
+                          <Button
+                            onClick={() => handleDelete(comment.id)}
+                            className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
+                          >
+                            Delete
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                 </div>
                 <p className="text-foreground/70 whitespace-pre-wrap leading-relaxed">
                   {comment.content}

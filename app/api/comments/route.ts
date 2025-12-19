@@ -16,15 +16,24 @@ export async function GET(request: Request) {
       );
     }
 
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
     const comments = await prisma.comment.findMany({
       where: {
         songId: songId || undefined,
         albumId: albumId || undefined,
+        isDeleted: false,
       },
-      include: {
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        isActive: true,
+        userId: false,
         user: {
           select: {
-            id: true,
             name: true,
             image: true,
             userSlug: true,
@@ -36,7 +45,19 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, data: comments });
+    const filteredComments = comments.filter((cm) => {
+      if (!cm.isActive) {
+        if (cm.user.userSlug === session?.user.userSlug) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    });
+
+    return NextResponse.json({ success: true, data: filteredComments });
   } catch (error) {
     console.error("Error fetching comments:", error);
     return NextResponse.json(
@@ -79,6 +100,7 @@ export async function POST(request: Request) {
       data: {
         content,
         userId: session.user.id,
+        userSlug: session.user.userSlug,
         songId: songId || null,
         albumId: albumId || null,
       },
@@ -149,8 +171,9 @@ export async function DELETE(request: Request) {
       );
     }
 
-    await prisma.comment.delete({
+    await prisma.comment.update({
       where: { id },
+      data: { isDeleted: true },
     });
 
     return NextResponse.json({ success: true, message: "Comment deleted" });

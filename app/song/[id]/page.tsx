@@ -66,6 +66,7 @@ export default async function SongDetailPage({
   });
 
   const isUserLoggedIn = !!session?.user;
+  const userSlug = session?.user.userSlug;
 
   // Map Prisma result to match Song type
   const song = {
@@ -101,7 +102,11 @@ export default async function SongDetailPage({
             type="song"
           />
         </div>
-        <CommentSection songId={song.id} isUserLoggedIn={isUserLoggedIn} />
+        <CommentSection
+          userSlug={userSlug}
+          songId={song.id}
+          isUserLoggedIn={isUserLoggedIn}
+        />
       </div>
     </div>
   );

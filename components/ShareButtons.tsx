@@ -40,7 +40,7 @@ export function ShareButtons({ title, url, type }: ShareButtonsProps) {
       <Button
         variant="outline"
         size="icon"
-        className="rounded-full hover:bg-blue-500/10 hover:text-blue-400 border-white/10 h-9 w-9"
+        className="cursor-pointer rounded-full hover:bg-blue-500/10 hover:text-blue-400 border-white/10 h-9 w-9"
         onClick={() => window.open(shareLinks.telegram, "_blank")}
         title="Share on Telegram"
       >
@@ -49,7 +49,7 @@ export function ShareButtons({ title, url, type }: ShareButtonsProps) {
       <Button
         variant="outline"
         size="icon"
-        className="rounded-full hover:bg-blue-500/10 hover:text-blue-400 border-white/10 h-9 w-9"
+        className="cursor-pointer rounded-full hover:bg-blue-500/10 hover:text-blue-400 border-white/10 h-9 w-9"
         onClick={() => window.open(shareLinks.twitter, "_blank")}
         title="Share on Twitter"
       >
@@ -58,7 +58,7 @@ export function ShareButtons({ title, url, type }: ShareButtonsProps) {
       <Button
         variant="outline"
         size="icon"
-        className="rounded-full hover:bg-green-500/10 hover:text-green-400 border-white/10 h-9 w-9"
+        className="cursor-pointer rounded-full hover:bg-green-500/10 hover:text-green-400 border-white/10 h-9 w-9"
         onClick={() => window.open(shareLinks.whatsapp, "_blank")}
         title="Share on WhatsApp"
       >
@@ -67,7 +67,7 @@ export function ShareButtons({ title, url, type }: ShareButtonsProps) {
       <Button
         variant="outline"
         size="icon"
-        className="rounded-full hover:bg-white/10 border-white/10 h-9 w-9"
+        className="cursor-pointer rounded-full hover:bg-white/10 border-white/10 h-9 w-9"
         onClick={copyToClipboard}
         title="Copy Link"
       >
