@@ -7,6 +7,7 @@ import {
   Album,
   Playlist,
   User as PrismaUser,
+  Comment,
 } from "@prisma/client";
 import { Song as PlayerSong } from "@/types/types";
 import {
@@ -663,5 +664,161 @@ export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
         {new Date(row.getValue("createdAt")).toLocaleDateString()}
       </div>
     ),
+  },
+];
+
+const CommentsActionsCell = ({
+  row,
+  userRole,
+}: {
+  row: Row<Comment>;
+  userRole?: string;
+}) => {
+  const comment = row.original;
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const canApprove = userRole === "moderator" || userRole === "administrator";
+  const isAdmin = userRole === "administrator";
+
+  const toggleVerified = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/comments/${comment.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isActive: !comment.isActive }),
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success(
+            `Comment ${
+              comment.isActive ? "unverified" : "verified"
+            } successfully`
+          );
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to update comment status");
+        }
+      } catch (error) {
+        console.error("Error updating comment status:", error);
+        toast.error("An error occurred while updating comment status");
+      }
+    });
+  };
+
+  const deleteComment = async () => {
+    if (!confirm("Are you sure you want to delete this comment?")) return;
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/comments/${comment.id}`, {
+          method: "DELETE",
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success("Comment deleted successfully");
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to delete comment");
+        }
+      } catch (error) {
+        console.error("Error deleting comment:", error);
+        toast.error("An error occurred while deleting comment");
+      }
+    });
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        {canApprove && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={toggleVerified}
+            disabled={isPending}
+          >
+            {comment.isActive ? "Unverify Comment" : "Verify Comment"}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem
+            className="cursor-pointer text-red-500 hover:text-red-600"
+            onClick={deleteComment}
+            disabled={isPending}
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Delete Comment
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export const getCommentColumns = (userRole?: string): ColumnDef<Comment>[] => [
+  { accessorKey: "content", header: "Comment" },
+  {
+    accessorKey: "postTitle",
+    header: "Post Title",
+    cell: ({ row }) => {
+      const rowOriginal = row.original;
+
+      const url = rowOriginal.songId
+        ? `/song/${rowOriginal.songId}`
+        : `/album/${rowOriginal.albumId}`;
+      return (
+        <div className="flex items-center gap-2">
+          <Link
+            href={url}
+            target="_blank"
+            className="underline underline-offset-8 hover:text-blue-500 duration-700"
+          >
+            {rowOriginal.postTitle}
+          </Link>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ row }) => {
+      const createdAt = row.getValue("createdAt") as string;
+      return (
+        <div className="flex items-center gap-2">
+          {new Date(createdAt).toLocaleDateString()}{" "}
+          {new Date(createdAt).toLocaleTimeString()}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "isActive",
+    header: "Status",
+    cell: ({ row }) => {
+      const isActive = row.getValue("isActive") as boolean;
+      return (
+        <div className="flex items-center gap-2">
+          {isActive ? (
+            <CheckCircle2 className="h-4 w-4 text-blue-500" />
+          ) : (
+            <XCircle className="h-4 w-4 text-gray-500" />
+          )}
+          <span className="text-sm font-medium">
+            {isActive ? "Verified" : "Unverified"}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <CommentsActionsCell row={row} userRole={userRole} />,
   },
 ];

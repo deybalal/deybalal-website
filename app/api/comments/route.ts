@@ -96,6 +96,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const songTitle = await prisma.song.findUnique({ where: { id: songId } });
+
+    const albumTitle = await prisma.album.findUnique({
+      where: { id: albumId },
+    });
+
+    const postTitle = songId
+      ? (songTitle?.title as string)
+      : (albumTitle?.name as string);
+
     const comment = await prisma.comment.create({
       data: {
         content,
@@ -103,6 +113,7 @@ export async function POST(request: Request) {
         userSlug: session.user.userSlug,
         songId: songId || null,
         albumId: albumId || null,
+        postTitle,
       },
       include: {
         user: {

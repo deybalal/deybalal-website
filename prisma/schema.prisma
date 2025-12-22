@@ -134,6 +134,7 @@ model Comment {
   song      Song?   @relation(fields: [songId], references: [id], onDelete: Cascade)
   albumId   String?
   album     Album?  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  postTitle String
   isActive  Boolean @default(false)
   isDeleted Boolean @default(false)
 

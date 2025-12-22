@@ -20,6 +20,7 @@ export default async function PanelPage({
   const albumsPage = Number(params.albumsPage) || 1;
   const playlistsPage = Number(params.playlistsPage) || 1;
   const usersPage = Number(params.usersPage) || 1;
+  const commentsPage = Number(params.commentsPage) || 1;
 
   const pageSize = 20;
 
@@ -34,6 +35,8 @@ export default async function PanelPage({
     albumsCount,
     playlistsCount,
     usersCount,
+    comments,
+    commentsCount,
   ] = await Promise.all([
     prisma.song.findMany({
       orderBy: { createdAt: "desc" },
@@ -65,6 +68,15 @@ export default async function PanelPage({
     prisma.album.count(),
     prisma.playlist.count(),
     prisma.user.count(),
+    prisma.comment.findMany({
+      where: {
+        isDeleted: false,
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (commentsPage - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.comment.count(),
   ]);
 
   return (
@@ -80,6 +92,8 @@ export default async function PanelPage({
       albumsCount={albumsCount}
       playlistsCount={playlistsCount}
       usersCount={usersCount}
+      comments={comments}
+      commentsCount={commentsCount}
       pageSize={pageSize}
       currentPage={{
         songs: songsPage,
@@ -87,6 +101,7 @@ export default async function PanelPage({
         albums: albumsPage,
         playlists: playlistsPage,
         users: usersPage,
+        comments: commentsPage,
       }}
     />
   );

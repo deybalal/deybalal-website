@@ -9,10 +9,19 @@ import {
   getAlbumColumns,
   getPlaylistColumns,
   getUserColumns,
+  getCommentColumns,
 } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Music2, Mic2, Disc, ListMusic, Plus, Users } from "lucide-react";
+import {
+  Music2,
+  Mic2,
+  Disc,
+  ListMusic,
+  Plus,
+  Users,
+  MessageCircle,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Song,
@@ -20,6 +29,7 @@ import {
   Album,
   Playlist,
   User as PrismaUser,
+  Comment,
 } from "@prisma/client";
 
 interface AdminPanelClientProps {
@@ -35,12 +45,15 @@ interface AdminPanelClientProps {
   playlistsCount: number;
   usersCount: number;
   pageSize: number;
+  comments: Comment[];
+  commentsCount: number;
   currentPage: {
     songs: number;
     artists: number;
     albums: number;
     playlists: number;
     users: number;
+    comments: number;
   };
 }
 
@@ -58,6 +71,8 @@ export default function AdminPanelClient({
   usersCount,
   pageSize,
   currentPage,
+  comments,
+  commentsCount,
 }: AdminPanelClientProps) {
   const stats = [
     {
@@ -89,6 +104,12 @@ export default function AdminPanelClient({
       value: usersCount,
       icon: Users,
       color: "text-red-500",
+    },
+    {
+      title: "Total Comments",
+      value: commentsCount,
+      icon: MessageCircle,
+      color: "text-yellow-500",
     },
   ];
 
@@ -168,13 +189,24 @@ export default function AdminPanelClient({
             <ListMusic className="h-4 w-4" />
             <span>Playlists</span>
           </TabsTrigger>
-          <TabsTrigger
-            value="users"
-            className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
-          >
-            <Users className="h-4 w-4" />
-            <span>Users</span>
-          </TabsTrigger>
+          {userRole !== "user" && (
+            <TabsTrigger
+              value="users"
+              className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+            >
+              <Users className="h-4 w-4" />
+              <span>Users</span>
+            </TabsTrigger>
+          )}
+          {userRole !== "user" && (
+            <TabsTrigger
+              value="comments"
+              className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span>Comments</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="songs" className="space-y-4">
@@ -273,21 +305,41 @@ export default function AdminPanelClient({
           </div>
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-4">
-          <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold">User Management</h2>
-          </div>
-          <div className="glass rounded-lg border border-white/10 overflow-hidden">
-            <DataTable
-              columns={getUserColumns(userRole)}
-              data={users}
-              searchKey="name"
-              pageCount={Math.ceil(usersCount / pageSize)}
-              pageIndex={currentPage.users - 1}
-              onPageChange={(page) => onPageChange("users", page + 1)}
-            />
-          </div>
-        </TabsContent>
+        {userRole !== "user" && (
+          <TabsContent value="users" className="space-y-4">
+            <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
+              <h2 className="text-xl font-semibold">User Management</h2>
+            </div>
+            <div className="glass rounded-lg border border-white/10 overflow-hidden">
+              <DataTable
+                columns={getUserColumns(userRole)}
+                data={users}
+                searchKey="name"
+                pageCount={Math.ceil(usersCount / pageSize)}
+                pageIndex={currentPage.users - 1}
+                onPageChange={(page) => onPageChange("users", page + 1)}
+              />
+            </div>
+          </TabsContent>
+        )}
+
+        {userRole !== "user" && (
+          <TabsContent value="comments" className="space-y-4">
+            <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
+              <h2 className="text-xl font-semibold">Comments Management</h2>
+            </div>
+            <div className="glass rounded-lg border border-white/10 overflow-hidden">
+              <DataTable
+                columns={getCommentColumns(userRole)}
+                data={comments}
+                searchKey="content"
+                pageCount={Math.ceil(commentsCount / pageSize)}
+                pageIndex={currentPage.comments - 1}
+                onPageChange={(page) => onPageChange("comments", page + 1)}
+              />
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
