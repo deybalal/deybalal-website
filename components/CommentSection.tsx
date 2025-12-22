@@ -1,23 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "react-hot-toast";
-import { Loader2, MessageSquare, Trash2 } from "lucide-react";
+import { Loader2, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import DialogAlert from "./DialogAlert";
 
 interface Comment {
   id: string;
@@ -203,39 +194,14 @@ export function CommentSection({
                     )}
                   </div>
                   {userSlug === comment.user.userSlug && (
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                          <DialogTitle>Delete Comment</DialogTitle>
-                          <DialogDescription>
-                            This cannot be undone!
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4">
-                          Are you sure you want to delete this comment?
-                        </div>
-                        <DialogFooter>
-                          <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
-                          </DialogClose>
-                          <Button
-                            onClick={() => handleDelete(comment.id)}
-                            className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
-                          >
-                            Delete
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                    <div className="cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8">
+                      <DialogAlert
+                        title=""
+                        description="Are you sure you want to delete this comment?"
+                        fnButton="Delete"
+                        fn={() => handleDelete(comment.id)}
+                      />
+                    </div>
                   )}
                 </div>
                 <p className="text-foreground/70 whitespace-pre-wrap leading-relaxed">

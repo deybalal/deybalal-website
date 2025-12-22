@@ -10,13 +10,7 @@ import {
   Comment,
 } from "@prisma/client";
 import { Song as PlayerSong } from "@/types/types";
-import {
-  MoreHorizontal,
-  CheckCircle2,
-  XCircle,
-  Star,
-  Trash2,
-} from "lucide-react";
+import { MoreHorizontal, CheckCircle2, XCircle, Star } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -36,16 +30,7 @@ import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { toast } from "react-hot-toast";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import DialogAlert from "./DialogAlert";
 
 const SongActionsCell = ({
   row,
@@ -178,37 +163,12 @@ const SongActionsCell = ({
             disabled={isPending}
             asChild
           >
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 p-2 w-full cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                >
-                  <Trash2 className="mr-0.5 h-4 w-4" /> Delete Song
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Delete Song</DialogTitle>
-                  <DialogDescription>This cannot be undone!</DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4">
-                  Are you sure you want to delete this Song?
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
-                  </DialogClose>
-                  <Button
-                    onClick={() => deleteSong()}
-                    className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
-                  >
-                    Delete
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <DialogAlert
+              title="Delete Song"
+              description="Are you sure you want to delete this Song?"
+              fn={deleteSong}
+              fnButton="Delete"
+            />
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -360,37 +320,12 @@ const ArtistActionsCell = ({
             disabled={isPending}
             asChild
           >
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 p-2 w-full cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                >
-                  <Trash2 className="mr-0.5 h-4 w-4" /> Delete Artist
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Delete Artist</DialogTitle>
-                  <DialogDescription>This cannot be undone!</DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4">
-                  Are you sure you want to delete this Artist?
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
-                  </DialogClose>
-                  <Button
-                    onClick={() => deleteArtist()}
-                    className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
-                  >
-                    Delete
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <DialogAlert
+              title="Delete Artist"
+              description="Are you sure you want to delete this Artist?"
+              fnButton="Delete"
+              fn={deleteArtist}
+            />
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
@@ -543,37 +478,12 @@ const AlbumActionsCell = ({
             disabled={isPending}
             asChild
           >
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 p-2 w-full cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                >
-                  <Trash2 className="mr-0.5 h-4 w-4" /> Delete Album
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Delete Album</DialogTitle>
-                  <DialogDescription>This cannot be undone!</DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4">
-                  Are you sure you want to delete this Album?
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
-                  </DialogClose>
-                  <Button
-                    onClick={() => deleteAlbum()}
-                    className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
-                  >
-                    Delete
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <DialogAlert
+              title="Delete Album"
+              description="Are you sure you want to delete this Album?"
+              fnButton="Delete"
+              fn={deleteAlbum}
+            />
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
@@ -851,37 +761,12 @@ const CommentsActionsCell = ({
             disabled={isPending}
             asChild
           >
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 p-2 w-full cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                >
-                  <Trash2 className="mr-0.5 h-4 w-4" /> Delete Comment
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Delete Comment</DialogTitle>
-                  <DialogDescription>This cannot be undone!</DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4">
-                  Are you sure you want to delete this comment?
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
-                  </DialogClose>
-                  <Button
-                    onClick={() => deleteComment()}
-                    className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
-                  >
-                    Delete
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <DialogAlert
+              title="Delete Comment"
+              description="Are you sure you want to delete this comment?"
+              fnButton="Delete"
+              fn={deleteComment}
+            />
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

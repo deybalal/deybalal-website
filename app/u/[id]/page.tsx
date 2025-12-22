@@ -42,7 +42,7 @@ export default async function PublicProfilePage({
 
   if (user.isPrivate && !isOwner) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
+      <div className="container mx-auto px-4 py-8 text-center size-full flex justify-center items-center">
         <h1 className="text-2xl font-bold">This profile is private.</h1>
       </div>
     );

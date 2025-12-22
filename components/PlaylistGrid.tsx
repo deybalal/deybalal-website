@@ -7,7 +7,6 @@ import {
   ListMusic,
   MoreHorizontal,
   Link as LinkIcon,
-  Trash2,
   Star,
 } from "lucide-react";
 import Image from "next/image";
@@ -22,16 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import DialogAlert from "./DialogAlert";
 
 interface PlaylistGridProps {
   initialPlaylists: Playlist[];
@@ -80,7 +70,7 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pb-24">
       {playlists.map((playlist) => (
         <div key={playlist.id} className="relative group">
           <Link href={`/playlists/${playlist.id}`}>
@@ -124,7 +114,7 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
           </Link>
 
           {/* Three dots menu - visible on mobile, on hover for desktop */}
-          <div className="absolute top-2 right-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
+          <div className="absolute top-2 right-6 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -147,40 +137,12 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
                   Copy Link
                 </DropdownMenuItem>
                 {!playlist.isFavorite && (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 p-2 w-full cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Remove Playlist
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Delete Playlist</DialogTitle>
-                        <DialogDescription>
-                          This cannot be undone!
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4">
-                        Are you sure you want to delete this Playlist?
-                      </div>
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant="outline">Cancel</Button>
-                        </DialogClose>
-                        <Button
-                          onClick={() => handleDeletePlaylist(playlist.id)}
-                          className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
-                        >
-                          Delete
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                  <DialogAlert
+                    title="Remove Playlist"
+                    description="Are you sure you want to delete this Playlist?"
+                    fnButton="Delete"
+                    fn={() => handleDeletePlaylist(playlist.id)}
+                  />
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
