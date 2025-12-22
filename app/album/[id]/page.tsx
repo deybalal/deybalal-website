@@ -62,9 +62,18 @@ export default async function AlbumDetailPage({
 
   if (!album) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-gray-400">
+      <div className="flex flex-col items-center justify-center min-h-[50vh] w-full text-gray-400">
         <Music className="w-16 h-16 mb-4 opacity-50" />
         <h2 className="text-2xl font-bold">Album not found</h2>
+      </div>
+    );
+  }
+
+  if (!album.isActive) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] w-full text-gray-400">
+        <Music className="w-16 h-16 mb-4 opacity-50" />
+        <h2 className="text-2xl font-bold">This album is not active yet!</h2>
       </div>
     );
   }

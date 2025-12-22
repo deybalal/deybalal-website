@@ -51,9 +51,11 @@ export default async function PlaylistsPage() {
   }));
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-white neon-text">Playlists</h1>
+    <div className="space-y-8 w-full">
+      <div className="flex items-center">
+        <h1 className="text-4xl font-bold text-white neon-text mr-5">
+          Playlists
+        </h1>
         <Button asChild variant="outline">
           <Link
             href="/panel/new/playlist"

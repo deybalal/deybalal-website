@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { CommentSection } from "@/components/CommentSection";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Metadata } from "next";
+import { Music } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ export default async function SongDetailPage({
   const { id } = await params;
 
   const songData = await prisma.song.findUnique({
-    where: { id, isActive: true },
+    where: { id },
     include: { artists: true },
   });
 
@@ -57,6 +58,15 @@ export default async function SongDetailPage({
     return (
       <div className="size-full flex items-center justify-center">
         <p className="text-muted-foreground text-3xl">Song not found!</p>
+      </div>
+    );
+  }
+
+  if (!songData.isActive) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] w-full text-gray-400">
+        <Music className="w-16 h-16 mb-4 opacity-50" />
+        <h2 className="text-2xl font-bold">This Song is not active yet!</h2>
       </div>
     );
   }

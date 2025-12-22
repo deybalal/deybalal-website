@@ -113,7 +113,6 @@ const SongActionsCell = ({
   };
 
   const deleteSong = async () => {
-    if (!confirm("Are you sure you want to delete this song?")) return;
     startTransition(async () => {
       try {
         const response = await fetch(`/api/songs/${song.id}`, {
@@ -176,10 +175,40 @@ const SongActionsCell = ({
         {isAdmin && (
           <DropdownMenuItem
             className="cursor-pointer text-red-500 hover:text-red-600"
-            onClick={deleteSong}
             disabled={isPending}
+            asChild
           >
-            <Trash2 className="mr-2 h-4 w-4" /> Delete Song
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 p-2 w-full cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                >
+                  <Trash2 className="mr-0.5 h-4 w-4" /> Delete Song
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Delete Song</DialogTitle>
+                  <DialogDescription>This cannot be undone!</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4">
+                  Are you sure you want to delete this Song?
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DialogClose>
+                  <Button
+                    onClick={() => deleteSong()}
+                    className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
+                  >
+                    Delete
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -287,7 +316,6 @@ const ArtistActionsCell = ({
   };
 
   const deleteArtist = async () => {
-    if (!confirm("Are you sure you want to delete this artist?")) return;
     startTransition(async () => {
       try {
         const response = await fetch(`/api/artists/${artist.id}`, {
@@ -329,10 +357,40 @@ const ArtistActionsCell = ({
         {isAdmin && (
           <DropdownMenuItem
             className="cursor-pointer text-red-500 hover:text-red-600"
-            onClick={deleteArtist}
             disabled={isPending}
+            asChild
           >
-            <Trash2 className="mr-2 h-4 w-4" /> Delete Artist
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 p-2 w-full cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                >
+                  <Trash2 className="mr-0.5 h-4 w-4" /> Delete Artist
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Delete Artist</DialogTitle>
+                  <DialogDescription>This cannot be undone!</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4">
+                  Are you sure you want to delete this Artist?
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DialogClose>
+                  <Button
+                    onClick={() => deleteArtist()}
+                    className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
+                  >
+                    Delete
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
@@ -432,7 +490,6 @@ const AlbumActionsCell = ({
   };
 
   const deleteAlbum = async () => {
-    if (!confirm("Are you sure you want to delete this album?")) return;
     startTransition(async () => {
       try {
         const response = await fetch(`/api/albums/${album.id}`, {
@@ -483,10 +540,40 @@ const AlbumActionsCell = ({
         {isAdmin && (
           <DropdownMenuItem
             className="cursor-pointer text-red-500 hover:text-red-600"
-            onClick={deleteAlbum}
             disabled={isPending}
+            asChild
           >
-            <Trash2 className="mr-2 h-4 w-4" /> Delete Album
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 p-2 w-full cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                >
+                  <Trash2 className="mr-0.5 h-4 w-4" /> Delete Album
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Delete Album</DialogTitle>
+                  <DialogDescription>This cannot be undone!</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4">
+                  Are you sure you want to delete this Album?
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DialogClose>
+                  <Button
+                    onClick={() => deleteAlbum()}
+                    className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
+                  >
+                    Delete
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

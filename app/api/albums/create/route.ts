@@ -75,6 +75,7 @@ export async function POST(request: Request) {
         releaseDate: validatedData.releaseDate
           ? Number(validatedData.releaseDate)
           : undefined,
+        userId: session.user.id,
       },
     });
 

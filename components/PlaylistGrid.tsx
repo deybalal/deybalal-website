@@ -22,6 +22,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface PlaylistGridProps {
   initialPlaylists: Playlist[];
@@ -31,14 +41,7 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>(initialPlaylists);
   const router = useRouter();
 
-  const handleDeletePlaylist = async (
-    playlistId: string,
-    playlistName: string
-  ) => {
-    if (!confirm(`Are you sure you want to delete "${playlistName}"?`)) {
-      return;
-    }
-
+  const handleDeletePlaylist = async (playlistId: string) => {
     try {
       const res = await fetch(`/api/playlists/${playlistId}`, {
         method: "DELETE",
@@ -66,7 +69,7 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
 
   if (playlists.length === 0) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
+      <div className="text-center py-12 text-muted-foreground size-full min-h-[40dvh] flex justify-center items-center flex-col">
         <ListMusic className="h-16 w-16 mx-auto mb-4 opacity-50" />
         <p className="text-xl">No playlists found</p>
         <p className="text-sm mt-2">
@@ -144,16 +147,40 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
                   Copy Link
                 </DropdownMenuItem>
                 {!playlist.isFavorite && (
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleDeletePlaylist(playlist.id, playlist.name);
-                    }}
-                    className="text-red-500 focus:text-red-500"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Remove Playlist
-                  </DropdownMenuItem>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 p-2 w-full cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Remove Playlist
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Delete Playlist</DialogTitle>
+                        <DialogDescription>
+                          This cannot be undone!
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4">
+                        Are you sure you want to delete this Playlist?
+                      </div>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <Button
+                          onClick={() => handleDeletePlaylist(playlist.id)}
+                          className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
+                        >
+                          Delete
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
