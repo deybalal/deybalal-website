@@ -84,9 +84,20 @@ export async function DELETE(
 
     const userRole = (session.user as { role?: string }).role;
 
-    if (userRole !== "administrator" && userRole !== "moderator") {
+    const findComment = await prisma.comment.findUnique({
+      where: { id },
+    });
+
+    if (
+      userRole !== "administrator" &&
+      userRole !== "moderator" &&
+      findComment?.userSlug !== session.user.userSlug
+    ) {
       return NextResponse.json(
-        { success: false, message: "You are not authorized to to this!" },
+        {
+          success: false,
+          message: "You are not authorized to delete this comment!",
+        },
         { status: 403 }
       );
     }

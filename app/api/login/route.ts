@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -6,6 +7,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const { email, password } = body;
+
+    const findUser = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (findUser?.isBanned) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Sorry! You have been Blocked!",
+        },
+        { status: 401 }
+      );
+    }
 
     const login = await auth.api.signInEmail({
       body: {

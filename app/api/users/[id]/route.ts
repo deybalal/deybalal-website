@@ -127,6 +127,14 @@ export async function PUT(
       },
     });
 
+    if (body.isBanned) {
+      await prisma.session.deleteMany({
+        where: {
+          userId: id,
+        },
+      });
+    }
+
     return NextResponse.json({ success: true, data: updatedUser });
   } catch (error) {
     console.error("Error updating user:", error);

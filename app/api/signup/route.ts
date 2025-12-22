@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -7,14 +8,30 @@ export async function POST(request: NextRequest) {
 
     const { name, email, password } = body;
 
-    await auth.api.signUpEmail({
+    const signUp = await auth.api.signUpEmail({
       body: {
         name,
         email,
         password,
+        userSlug: undefined as unknown as string,
+        role: "user",
+        isPrivate: true,
+        isBanned: false,
         callbackURL: "/panel",
       },
     });
+
+    if (signUp.user) {
+      await prisma.playlist.create({
+        data: {
+          name: "Favorites",
+          description: "Your favorite songs",
+          isFavorite: true,
+          duration: 0,
+          userId: signUp.user.id,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,

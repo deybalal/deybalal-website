@@ -2,11 +2,25 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import PlaylistGrid from "@/components/PlaylistGrid";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function PlaylistsPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return redirect("/login");
+  }
+
   const playlistsData = await prisma.playlist.findMany({
+    where: {
+      userId: session.user.id,
+    },
     include: { songs: true },
     orderBy: { createdAt: "desc" },
   });

@@ -36,6 +36,16 @@ import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { toast } from "react-hot-toast";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const SongActionsCell = ({
   row,
@@ -669,9 +679,11 @@ export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
 
 const CommentsActionsCell = ({
   row,
+  userSlug,
   userRole,
 }: {
   row: Row<Comment>;
+  userSlug: string;
   userRole?: string;
 }) => {
   const comment = row.original;
@@ -708,7 +720,6 @@ const CommentsActionsCell = ({
   };
 
   const deleteComment = async () => {
-    if (!confirm("Are you sure you want to delete this comment?")) return;
     startTransition(async () => {
       try {
         const response = await fetch(`/api/comments/${comment.id}`, {
@@ -747,13 +758,43 @@ const CommentsActionsCell = ({
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
-        {isAdmin && (
+        {(isAdmin || userSlug === row.original.userSlug) && (
           <DropdownMenuItem
             className="cursor-pointer text-red-500 hover:text-red-600"
-            onClick={deleteComment}
             disabled={isPending}
+            asChild
           >
-            <Trash2 className="mr-2 h-4 w-4" /> Delete Comment
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 p-2 w-full cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                >
+                  <Trash2 className="mr-0.5 h-4 w-4" /> Delete Comment
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Delete Comment</DialogTitle>
+                  <DialogDescription>This cannot be undone!</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4">
+                  Are you sure you want to delete this comment?
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DialogClose>
+                  <Button
+                    onClick={() => deleteComment()}
+                    className="bg-red-600 hover:bg-red-400 hover:text-foreground cursor-pointer"
+                  >
+                    Delete
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
@@ -819,6 +860,12 @@ export const getCommentColumns = (userRole?: string): ColumnDef<Comment>[] => [
   },
   {
     id: "actions",
-    cell: ({ row }) => <CommentsActionsCell row={row} userRole={userRole} />,
+    cell: ({ row }) => (
+      <CommentsActionsCell
+        row={row}
+        userRole={userRole}
+        userSlug={row.original.userSlug}
+      />
+    ),
   },
 ];

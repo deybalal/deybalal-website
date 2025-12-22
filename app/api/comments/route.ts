@@ -96,10 +96,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const songTitle = await prisma.song.findUnique({ where: { id: songId } });
+    const songTitle = await prisma.song.findUnique({
+      where: { id: songId ? songId : "noId" },
+    });
 
     const albumTitle = await prisma.album.findUnique({
-      where: { id: albumId },
+      where: { id: albumId ? albumId : "noId" },
     });
 
     const postTitle = songId

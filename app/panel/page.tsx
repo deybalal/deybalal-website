@@ -39,6 +39,10 @@ export default async function PanelPage({
     commentsCount,
   ] = await Promise.all([
     prisma.song.findMany({
+      where:
+        userRole === "administrator" || userRole === "moderator"
+          ? {}
+          : { userId: session?.user?.id },
       orderBy: { createdAt: "desc" },
       skip: (songsPage - 1) * pageSize,
       take: pageSize,
@@ -49,16 +53,22 @@ export default async function PanelPage({
       take: pageSize,
     }),
     prisma.album.findMany({
+      where:
+        userRole === "administrator" || userRole === "moderator"
+          ? {}
+          : { userId: session?.user?.id },
       orderBy: { createdAt: "desc" },
       skip: (albumsPage - 1) * pageSize,
       take: pageSize,
     }),
     prisma.playlist.findMany({
+      where: { userId: session?.user?.id },
       orderBy: { createdAt: "desc" },
       skip: (playlistsPage - 1) * pageSize,
       take: pageSize,
     }),
     prisma.user.findMany({
+      where: userRole === "administrator" ? {} : { id: session?.user?.id },
       orderBy: { createdAt: "desc" },
       skip: (usersPage - 1) * pageSize,
       take: pageSize,
@@ -70,7 +80,11 @@ export default async function PanelPage({
     prisma.user.count(),
     prisma.comment.findMany({
       where: {
-        isDeleted: false,
+        OR: [
+          userRole === "administrator" || userRole === "moderator"
+            ? { isDeleted: false }
+            : { userId: session?.user?.id, isDeleted: false },
+        ],
       },
       orderBy: { createdAt: "desc" },
       skip: (commentsPage - 1) * pageSize,

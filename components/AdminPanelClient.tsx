@@ -159,7 +159,7 @@ export default function AdminPanelClient({
         ))}
       </div>
 
-      <Tabs defaultValue="songs" className="space-y-6">
+      <Tabs defaultValue="songs" className="space-y-6 pb-24">
         <TabsList className="glass px-2 py-4 bg-background/40 backdrop-blur-xl border border-white/10 w-fit">
           <TabsTrigger
             value="songs"
@@ -198,15 +198,13 @@ export default function AdminPanelClient({
               <span>Users</span>
             </TabsTrigger>
           )}
-          {userRole !== "user" && (
-            <TabsTrigger
-              value="comments"
-              className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span>Comments</span>
-            </TabsTrigger>
-          )}
+          <TabsTrigger
+            value="comments"
+            className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span>Comments</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="songs" className="space-y-4">
@@ -323,23 +321,21 @@ export default function AdminPanelClient({
           </TabsContent>
         )}
 
-        {userRole !== "user" && (
-          <TabsContent value="comments" className="space-y-4">
-            <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-              <h2 className="text-xl font-semibold">Comments Management</h2>
-            </div>
-            <div className="glass rounded-lg border border-white/10 overflow-hidden">
-              <DataTable
-                columns={getCommentColumns(userRole)}
-                data={comments}
-                searchKey="content"
-                pageCount={Math.ceil(commentsCount / pageSize)}
-                pageIndex={currentPage.comments - 1}
-                onPageChange={(page) => onPageChange("comments", page + 1)}
-              />
-            </div>
-          </TabsContent>
-        )}
+        <TabsContent value="comments" className="space-y-4">
+          <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
+            <h2 className="text-xl font-semibold">Comments Management</h2>
+          </div>
+          <div className="glass rounded-lg border border-white/10 overflow-hidden">
+            <DataTable
+              columns={getCommentColumns(userRole)}
+              data={comments}
+              searchKey="content"
+              pageCount={Math.ceil(commentsCount / pageSize)}
+              pageIndex={currentPage.comments - 1}
+              onPageChange={(page) => onPageChange("comments", page + 1)}
+            />
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );

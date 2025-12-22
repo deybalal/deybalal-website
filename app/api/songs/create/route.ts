@@ -129,6 +129,7 @@ export async function POST(request: Request) {
         lyrics: validatedData.lyrics,
         syncedLyrics: validatedData.syncedLyrics,
         slug: slug,
+        userId: session.user.id,
       },
     });
 

@@ -34,6 +34,9 @@ model Song {
   albumId String?
   album   Album?  @relation(fields: [albumId], references: [id])
 
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
   artists Artist[]
 
   playlists Playlist[]
@@ -65,6 +68,9 @@ model Album {
   artistId String?
   artist   Artist? @relation(fields: [artistId], references: [id])
 
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
   songs    Song[]
   comments Comment[]
 
@@ -83,8 +89,8 @@ model Playlist {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   songs Song[]
 
@@ -192,6 +198,8 @@ model User {
   follows       Follow[]
   comments      Comment[]
   notifications Notification[]
+  songs         Song[]
+  albums        Album[]
 
   @@map("user")
 }
