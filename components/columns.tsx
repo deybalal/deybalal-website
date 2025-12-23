@@ -145,11 +145,13 @@ const SongActionsCell = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem>
-          <Link href={`/panel/edit/${song.id}`} className="w-full">
-            Edit Song
-          </Link>
-        </DropdownMenuItem>
+        {canApprove && (
+          <DropdownMenuItem>
+            <Link href={`/panel/edit/${song.id}`} className="w-full">
+              Edit Song
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem>
           <Link href={`/panel/edit/lyrics/${song.id}`} className="w-full">
             Edit Lyrics
