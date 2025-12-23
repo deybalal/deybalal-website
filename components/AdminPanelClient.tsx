@@ -10,6 +10,7 @@ import {
   getPlaylistColumns,
   getUserColumns,
   getCommentColumns,
+  getLyricsSuggestionColumns,
 } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,7 @@ import {
   Plus,
   Users,
   MessageCircle,
+  FileText,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -30,6 +32,7 @@ import {
   Playlist,
   User as PrismaUser,
   Comment,
+  LyricsSuggestion,
 } from "@prisma/client";
 
 interface AdminPanelClientProps {
@@ -54,7 +57,18 @@ interface AdminPanelClientProps {
     playlists: number;
     users: number;
     comments: number;
+    suggestions: number;
   };
+  suggestions: (LyricsSuggestion & {
+    song: {
+      title: string;
+      artist: string;
+      lyrics: string | null;
+      syncedLyrics: string | null;
+    };
+    user: { name: string; email: string };
+  })[];
+  suggestionsCount: number;
 }
 
 export default function AdminPanelClient({
@@ -73,6 +87,8 @@ export default function AdminPanelClient({
   currentPage,
   comments,
   commentsCount,
+  suggestions,
+  suggestionsCount,
 }: AdminPanelClientProps) {
   const stats = [
     {
@@ -110,6 +126,12 @@ export default function AdminPanelClient({
       value: commentsCount,
       icon: MessageCircle,
       color: "text-yellow-500",
+    },
+    {
+      title: "Lyrics Suggestions",
+      value: suggestionsCount,
+      icon: FileText,
+      color: "text-cyan-500",
     },
   ];
 
@@ -204,6 +226,13 @@ export default function AdminPanelClient({
           >
             <MessageCircle className="h-4 w-4" />
             <span>Comments</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="suggestions"
+            className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+          >
+            <FileText className="h-4 w-4" />
+            <span>Lyrics Suggestions</span>
           </TabsTrigger>
         </TabsList>
 
@@ -333,6 +362,24 @@ export default function AdminPanelClient({
               pageCount={Math.ceil(commentsCount / pageSize)}
               pageIndex={currentPage.comments - 1}
               onPageChange={(page) => onPageChange("comments", page + 1)}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="suggestions" className="space-y-4">
+          <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
+            <h2 className="text-xl font-semibold">
+              Lyrics Suggestions Management
+            </h2>
+          </div>
+          <div className="glass rounded-lg border border-white/10 overflow-hidden">
+            <DataTable
+              columns={getLyricsSuggestionColumns(userRole)}
+              data={suggestions}
+              searchKey="song_title"
+              pageCount={Math.ceil(suggestionsCount / pageSize)}
+              pageIndex={currentPage.suggestions - 1}
+              onPageChange={(page) => onPageChange("suggestions", page + 1)}
             />
           </div>
         </TabsContent>

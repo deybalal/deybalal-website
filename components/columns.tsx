@@ -8,9 +8,27 @@ import {
   Playlist,
   User as PrismaUser,
   Comment,
+  LyricsSuggestion,
 } from "@prisma/client";
 import { Song as PlayerSong } from "@/types/types";
-import { MoreHorizontal, CheckCircle2, XCircle, Star } from "lucide-react";
+import {
+  MoreHorizontal,
+  CheckCircle2,
+  XCircle,
+  Star,
+  Eye,
+  Check,
+  X,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import LyricsDiff from "./admin/LyricsDiff";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -839,5 +857,202 @@ export const getCommentColumns = (userRole?: string): ColumnDef<Comment>[] => [
         userSlug={row.original.userSlug}
       />
     ),
+  },
+];
+
+const SuggestionActionsCell = ({
+  row,
+  userRole,
+}: {
+  row: Row<
+    LyricsSuggestion & {
+      song: {
+        title: string;
+        artist: string;
+        lyrics: string | null;
+        syncedLyrics: string | null;
+      };
+      user: { name: string; email: string };
+    }
+  >;
+  userRole?: string;
+}) => {
+  const suggestion = row.original;
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const handleModerate = async (status: "APPROVED" | "REJECTED") => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(
+          `/api/lyrics/suggestions/${suggestion.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
+          }
+        );
+        const result = await response.json();
+        if (result.success) {
+          toast.success(`Suggestion ${status.toLowerCase()} successfully`);
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to update suggestion");
+        }
+      } catch (error) {
+        console.error("Error updating suggestion:", error);
+        toast.error("An error occurred while updating suggestion");
+      }
+    });
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Eye className="h-4 w-4" /> View Diff
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Lyrics Suggestion for {suggestion.song.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-semibold">Suggested by:</span>{" "}
+                {suggestion.user.name} ({suggestion.user.email})
+              </div>
+              <div>
+                <span className="font-semibold">Song:</span>{" "}
+                {suggestion.song.title} - {suggestion.song.artist}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-medium">Lyrics Diff</h4>
+              <LyricsDiff
+                oldLyrics={suggestion.song.lyrics}
+                newLyrics={suggestion.lyrics}
+              />
+            </div>
+            {suggestion.syncedLyrics && (
+              <div className="space-y-2">
+                <h4 className="font-medium">Synced Lyrics Diff</h4>
+                <LyricsDiff
+                  oldLyrics={suggestion.song.syncedLyrics}
+                  newLyrics={suggestion.syncedLyrics}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter className="gap-2">
+            {(userRole === "administrator" || userRole === "moderator") && (
+              <>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleModerate("REJECTED")}
+                  disabled={isPending || suggestion.status !== "PENDING"}
+                >
+                  <X className="mr-2 h-4 w-4" /> Reject
+                </Button>
+                <Button
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={() => handleModerate("APPROVED")}
+                  disabled={isPending || suggestion.status !== "PENDING"}
+                >
+                  <Check className="mr-2 h-4 w-4" /> Approve
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export const getLyricsSuggestionColumns = (
+  userRole?: string
+): ColumnDef<
+  LyricsSuggestion & {
+    song: {
+      title: string;
+      artist: string;
+      lyrics: string | null;
+      syncedLyrics: string | null;
+    };
+    user: { name: string; email: string };
+  }
+>[] => [
+  {
+    id: "song_title",
+    accessorFn: (row) => row.song.title,
+    header: "Song",
+    cell: ({ row }) => (
+      <div className="font-medium">
+        {row.original.song.title}
+        <div className="text-xs text-muted-foreground">
+          {row.original.song.artist}
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: "user_name",
+    accessorFn: (row) => row.user.name,
+    header: "Suggested By",
+    cell: ({ row }) => (
+      <div className="text-sm">
+        {row.original.user.name}
+        <div className="text-xs text-muted-foreground">
+          {row.original.user.email}
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      return (
+        <div className="flex items-center gap-2">
+          {status === "APPROVED" ? (
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          ) : status === "REJECTED" ? (
+            <XCircle className="h-4 w-4 text-red-500" />
+          ) : (
+            <div className="h-4 w-4 rounded-full border-2 border-yellow-500 border-t-transparent animate-spin" />
+          )}
+          <span
+            className={`text-sm font-medium ${
+              status === "APPROVED"
+                ? "text-green-500"
+                : status === "REJECTED"
+                ? "text-red-500"
+                : "text-yellow-500"
+            }`}
+          >
+            {status}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Date",
+    cell: ({ row }) => (
+      <div className="text-sm">
+        {new Date(row.original.createdAt).toLocaleDateString()}
+      </div>
+    ),
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <SuggestionActionsCell row={row} userRole={userRole} />,
   },
 ];

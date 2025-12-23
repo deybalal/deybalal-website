@@ -4,16 +4,22 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-hot-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface LyricsEditorProps {
   songId: string;
+  userRole: string;
 }
 
-export default function LyricsEditor({ songId }: LyricsEditorProps) {
+export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
   const [lyrics, setLyrics] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const router = useRouter();
+
+  const isAdmin = userRole === "administrator" || userRole === "moderator";
 
   useEffect(() => {
     const fetchSong = async () => {
@@ -39,17 +45,26 @@ export default function LyricsEditor({ songId }: LyricsEditorProps) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/songs/${songId}`, {
-        method: "PUT",
+      const endpoint = isAdmin ? `/api/songs/${songId}` : `/api/lyrics/suggest`;
+      const method = isAdmin ? "PUT" : "POST";
+      const body = isAdmin ? { lyrics } : { songId, lyrics };
+
+      const res = await fetch(endpoint, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lyrics }),
+        body: JSON.stringify(body),
       });
 
       const result = await res.json();
       if (res.ok && result.success) {
-        toast.success("Lyrics updated successfully");
+        toast.success(
+          isAdmin
+            ? "Lyrics updated successfully"
+            : "Lyrics suggestion submitted for review"
+        );
+        router.push("/panel");
       } else {
-        throw new Error(result.message || "Failed to update lyrics");
+        throw new Error(result.message || "Failed to save lyrics");
       }
     } catch (error) {
       console.error("Error saving lyrics:", error);
@@ -70,10 +85,16 @@ export default function LyricsEditor({ songId }: LyricsEditorProps) {
   return (
     <div className="space-y-4 w-full max-w-3xl">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Edit Lyrics</h2>
+        <h2 className="text-xl font-semibold">
+          {isAdmin ? "Edit Lyrics" : "Suggest Lyrics Changes"}
+        </h2>
         <Button onClick={handleSave} disabled={saving}>
-          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Lyrics
+          {saving ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : isAdmin ? null : (
+            <Send className="mr-2 h-4 w-4" />
+          )}
+          {isAdmin ? "Save Lyrics" : "Submit Suggestion"}
         </Button>
       </div>
       <Textarea

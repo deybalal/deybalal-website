@@ -39,8 +39,9 @@ model Song {
 
   artists Artist[]
 
-  playlists Playlist[]
-  comments  Comment[]
+  playlists   Playlist[]
+  comments    Comment[]
+  suggestions LyricsSuggestion[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -152,6 +153,23 @@ model Comment {
   @@index([albumId])
 }
 
+model LyricsSuggestion {
+  id           String           @id @default(cuid())
+  songId       String
+  song         Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lyrics       String?
+  syncedLyrics String?
+  status       SuggestionStatus @default(PENDING)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([songId])
+  @@index([userId])
+  @@index([status])
+}
+
 model Notification {
   id        String   @id @default(cuid())
   userId    String
@@ -171,6 +189,12 @@ enum Role {
   user
   moderator
   administrator
+}
+
+enum SuggestionStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model User {
@@ -200,6 +224,7 @@ model User {
   notifications Notification[]
   songs         Song[]
   albums        Album[]
+  suggestions   LyricsSuggestion[]
 
   @@map("user")
 }

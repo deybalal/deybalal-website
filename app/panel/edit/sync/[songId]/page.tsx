@@ -12,12 +12,9 @@ import {
   Save,
   Play,
   Pause,
-  SkipForward,
-  SkipBack,
   Timer,
-  Check,
-  MoveRight,
   ArrowRight,
+  LoaderPinwheel,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -165,8 +162,8 @@ export default function SyncLyricsPage({
 
       const data = await res.json();
       if (data.success) {
-        toast.success("Synced lyrics saved!");
-        router.back();
+        toast.success(data.message || "Synced lyrics saved!");
+        router.push("/panel");
       } else {
         toast.error("Failed to save");
       }
@@ -210,8 +207,10 @@ export default function SyncLyricsPage({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black text-white">
-        Loading...
+      <div className="size-full flex items-center justify-center">
+        <p className="animate-spin">
+          <LoaderPinwheel size={60} />
+        </p>
       </div>
     );
   }

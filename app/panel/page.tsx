@@ -21,6 +21,7 @@ export default async function PanelPage({
   const playlistsPage = Number(params.playlistsPage) || 1;
   const usersPage = Number(params.usersPage) || 1;
   const commentsPage = Number(params.commentsPage) || 1;
+  const suggestionsPage = Number(params.suggestionsPage) || 1;
 
   const pageSize = 20;
 
@@ -37,6 +38,8 @@ export default async function PanelPage({
     usersCount,
     comments,
     commentsCount,
+    suggestions,
+    suggestionsCount,
   ] = await Promise.all([
     prisma.song.findMany({
       where:
@@ -91,6 +94,35 @@ export default async function PanelPage({
       take: pageSize,
     }),
     prisma.comment.count(),
+    prisma.lyricsSuggestion.findMany({
+      where: {
+        OR: [
+          userRole === "administrator" || userRole === "moderator"
+            ? { status: "PENDING" }
+            : { userId: session?.user?.id },
+        ],
+      },
+      include: {
+        song: {
+          select: {
+            title: true,
+            artist: true,
+            lyrics: true,
+            syncedLyrics: true,
+          },
+        },
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (suggestionsPage - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.lyricsSuggestion.count(),
   ]);
 
   return (
@@ -116,7 +148,10 @@ export default async function PanelPage({
         playlists: playlistsPage,
         users: usersPage,
         comments: commentsPage,
+        suggestions: suggestionsPage,
       }}
+      suggestions={suggestions}
+      suggestionsCount={suggestionsCount}
     />
   );
 }
