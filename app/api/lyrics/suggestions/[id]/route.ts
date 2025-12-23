@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { Prisma } from "@prisma/client";
 
 export async function PUT(
   request: Request,
@@ -51,13 +52,17 @@ export async function PUT(
     }
 
     if (status === "APPROVED") {
-      // Update the song with new lyrics
+      // Update the song with new lyrics based on type
+      const updateData: Prisma.SongUpdateInput = {};
+      if (suggestion.type === "LYRICS") {
+        updateData.lyrics = suggestion.lyrics;
+      } else if (suggestion.type === "SYNCED") {
+        updateData.syncedLyrics = suggestion.syncedLyrics;
+      }
+
       await prisma.song.update({
         where: { id: suggestion.songId },
-        data: {
-          lyrics: suggestion.lyrics ?? suggestion.song.lyrics,
-          syncedLyrics: suggestion.syncedLyrics ?? suggestion.song.syncedLyrics,
-        },
+        data: updateData,
       });
     }
 

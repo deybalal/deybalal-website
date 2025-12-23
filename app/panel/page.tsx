@@ -98,7 +98,19 @@ export default async function PanelPage({
       where: {
         OR: [
           userRole === "administrator" || userRole === "moderator"
-            ? { status: "PENDING" }
+            ? {
+                OR: [
+                  {
+                    status: "PENDING",
+                  },
+                  {
+                    status: "APPROVED",
+                  },
+                  {
+                    status: "REJECTED",
+                  },
+                ],
+              }
             : { userId: session?.user?.id },
         ],
       },

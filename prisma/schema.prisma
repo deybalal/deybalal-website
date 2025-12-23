@@ -161,6 +161,7 @@ model LyricsSuggestion {
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   lyrics       String?
   syncedLyrics String?
+  type         SuggestionType   @default(LYRICS)
   status       SuggestionStatus @default(PENDING)
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
@@ -195,6 +196,11 @@ enum SuggestionStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum SuggestionType {
+  LYRICS
+  SYNCED
 }
 
 model User {

@@ -67,6 +67,7 @@ export async function PUT(
           songId: id,
           userId: session.user.id,
           syncedLyrics: body.syncedLyrics,
+          type: "SYNCED",
           status: "PENDING",
         },
       });

@@ -931,14 +931,16 @@ const SuggestionActionsCell = ({
                 {suggestion.song.title} - {suggestion.song.artist}
               </div>
             </div>
-            <div className="space-y-2">
-              <h4 className="font-medium">Lyrics Diff</h4>
-              <LyricsDiff
-                oldLyrics={suggestion.song.lyrics}
-                newLyrics={suggestion.lyrics}
-              />
-            </div>
-            {suggestion.syncedLyrics && (
+            {suggestion.type === "LYRICS" && (
+              <div className="space-y-2">
+                <h4 className="font-medium">Lyrics Diff</h4>
+                <LyricsDiff
+                  oldLyrics={suggestion.song.lyrics}
+                  newLyrics={suggestion.lyrics}
+                />
+              </div>
+            )}
+            {suggestion.type === "SYNCED" && (
               <div className="space-y-2">
                 <h4 className="font-medium">Synced Lyrics Diff</h4>
                 <LyricsDiff
@@ -1012,6 +1014,18 @@ export const getLyricsSuggestionColumns = (
         </div>
       </div>
     ),
+  },
+  {
+    accessorKey: "type",
+    header: "Type",
+    cell: ({ row }) => {
+      const type = row.getValue("type") as string;
+      return (
+        <div className="text-sm font-medium">
+          {type === "LYRICS" ? "Lyrics" : "Synced Lyrics"}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "status",

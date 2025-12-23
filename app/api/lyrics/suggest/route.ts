@@ -32,6 +32,7 @@ export async function POST(request: Request) {
         userId: session.user.id,
         lyrics,
         syncedLyrics,
+        type: "LYRICS",
         status: "PENDING",
       },
     });
