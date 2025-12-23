@@ -57,6 +57,12 @@ export async function PUT(
 
     const userRole = (session.user as { role?: string }).role;
 
+    if (userRole !== "administrator" && userRole !== "moderator") {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized! Only admins can do that." },
+        { status: 401 }
+      );
+    }
     // Check if song exists
     const existingSong = await prisma.song.findUnique({
       where: { id },

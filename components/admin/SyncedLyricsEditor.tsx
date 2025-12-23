@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface SyncedLyricsEditorProps {
   songId: string;
@@ -13,6 +14,7 @@ interface SyncedLyricsEditorProps {
 export default function SyncedLyricsEditor({
   songId,
 }: SyncedLyricsEditorProps) {
+  const router = useRouter();
   const [syncedLyrics, setSyncedLyrics] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -41,7 +43,7 @@ export default function SyncedLyricsEditor({
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/songs/${songId}`, {
+      const res = await fetch(`/api/lyrics/edit/synced/${songId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ syncedLyrics }),
@@ -49,7 +51,8 @@ export default function SyncedLyricsEditor({
 
       const result = await res.json();
       if (res.ok && result.success) {
-        toast.success("Synced lyrics updated successfully");
+        toast.success(result.message || "Synced lyrics updated successfully");
+        router.push("/panel");
       } else {
         throw new Error(result.message || "Failed to update synced lyrics");
       }

@@ -7,6 +7,7 @@ import { CommentSection } from "@/components/CommentSection";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Metadata } from "next";
 import { Music } from "lucide-react";
+import { LyricsControl } from "@/components/LyricsControl";
 
 export const dynamic = "force-dynamic";
 
@@ -99,6 +100,11 @@ export default async function SongDetailPage({
     <div className="space-y-12 pb-24 w-full flex-1">
       <SongDetailClient song={song} isUserLoggedIn={isUserLoggedIn} />
       <div className="max-w-4xl mx-auto px-6 my-12 pb-28 w-full flex-1">
+        <LyricsControl
+          songId={song.id}
+          hasLyrics={!!song.lyrics}
+          hasSyncedLyrics={!!song.syncedLyrics}
+        />
         <div className="flex items-center justify-between bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
           <div className="space-y-1">
             <h3 className="text-lg font-semibold">Share this song</h3>

@@ -154,7 +154,7 @@ export default function SyncLyricsPage({
         })
         .join("\n");
 
-      const res = await fetch(`/api/lyrics/synced/${songId}`, {
+      const res = await fetch(`/api/lyrics/edit/synced/${songId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ syncedLyrics: lrc }),

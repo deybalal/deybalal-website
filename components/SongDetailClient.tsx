@@ -11,6 +11,7 @@ import Lyrics from "@/components/Lyrics";
 import Link from "next/link";
 import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
 import { toast } from "react-hot-toast";
+import { useLyricsStore } from "@/hooks/useLyricsStore";
 
 interface SongDetailClientProps {
   song: Song;
@@ -28,6 +29,7 @@ export default function SongDetailClient({
   const currentSong = usePlayerStore((state) => state.currentSong);
   const play = usePlayerStore((state) => state.play);
   const pause = usePlayerStore((state) => state.pause);
+  const { lyricsMode } = useLyricsStore();
 
   const isCurrentSong = currentSong?.id === song.id;
 
@@ -99,21 +101,23 @@ export default function SongDetailClient({
     }
   };
 
-  const hasLyrics = !!song.syncedLyrics || !!song.lyrics;
+  const showLyrics =
+    lyricsMode !== "hidden" && (!!song.syncedLyrics || !!song.lyrics);
+  const showSynced = lyricsMode === "synced" && !!song.syncedLyrics;
 
   return (
     <div
       className={`h-[calc(100dvh-120px)] w-full flex-1 flex justify-center m-0 mx-auto p-0 transition-all duration-500 ${
-        hasLyrics
+        showLyrics
           ? "max-w-7xl flex flex-col lg:grid lg:grid-cols-2 lg:gap-12 px-2"
           : "max-w-4xl flex flex-col items-center justify-center"
       }`}
     >
       {/* Lyrics Column (Left on Desktop) */}
-      {hasLyrics && (
+      {showLyrics && (
         <div className="hidden lg:block h-[calc(100dvh-120px)] bg-card/30 rounded-3xl p-6 border border-white/5 shadow-xl">
           <Lyrics
-            lrc={song.syncedLyrics}
+            lrc={showSynced ? song.syncedLyrics : null}
             plainLyrics={song.lyrics}
             songId={song.id}
           />
@@ -123,7 +127,7 @@ export default function SongDetailClient({
       {/* Main Content (Right or Center) */}
       <div
         className={`flex flex-col items-center justify-between w-full h-full py-2 ${
-          hasLyrics
+          showLyrics
             ? "lg:h-[calc(100dvh-120px)] lg:justify-center lg:gap-8"
             : ""
         }`}
@@ -131,7 +135,7 @@ export default function SongDetailClient({
         {/* Art */}
         <div
           className={`w-full aspect-square bg-card rounded-2xl shadow-2xl neon-box relative overflow-hidden group transition-all duration-500 ${
-            hasLyrics ? "max-w-[90vw] lg:max-w-sm" : "max-w-md"
+            showLyrics ? "max-w-[90vw] lg:max-w-sm" : "max-w-md"
           }`}
         >
           {song.coverArt ? (
@@ -149,10 +153,10 @@ export default function SongDetailClient({
           <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
           {/* Mobile Lyrics Overlay */}
-          {hasLyrics && (
+          {showLyrics && (
             <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[2px] p-4 lg:hidden overflow-hidden rounded-2xl">
               <Lyrics
-                lrc={song.syncedLyrics}
+                lrc={showSynced ? song.syncedLyrics : null}
                 plainLyrics={song.lyrics}
                 songId={song.id}
               />

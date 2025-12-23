@@ -45,14 +45,10 @@ export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const endpoint = isAdmin ? `/api/songs/${songId}` : `/api/lyrics/suggest`;
-      const method = isAdmin ? "PUT" : "POST";
-      const body = isAdmin ? { lyrics } : { songId, lyrics };
-
-      const res = await fetch(endpoint, {
-        method,
+      const res = await fetch(`/api/lyrics/edit/${songId}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ lyrics }),
       });
 
       const result = await res.json();
