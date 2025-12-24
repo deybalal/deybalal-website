@@ -130,6 +130,33 @@ export async function POST(request: Request) {
         syncedLyrics: validatedData.syncedLyrics,
         slug: slug,
         userId: session.user.id,
+        contributors: {
+          create: [
+            {
+              userId: session.user.id,
+              type: "add",
+              percentage: 100,
+            },
+            ...(validatedData.lyrics
+              ? [
+                  {
+                    userId: session.user.id,
+                    type: "lyrics",
+                    percentage: 100,
+                  },
+                ]
+              : []),
+            ...(validatedData.syncedLyrics
+              ? [
+                  {
+                    userId: session.user.id,
+                    type: "sync",
+                    percentage: 100,
+                  },
+                ]
+              : []),
+          ],
+        },
       },
     });
 

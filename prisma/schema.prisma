@@ -25,6 +25,8 @@ model Song {
   index               Int     @default(autoincrement())
   lyrics              String?
   syncedLyrics        String?
+  lyricsSource        String?
+  lyricsSourceUrl     String?
   playCount           Int     @default(0)
   isDisabled          Boolean @default(false)
   disabledDescription String?
@@ -39,9 +41,10 @@ model Song {
 
   artists Artist[]
 
-  playlists   Playlist[]
-  comments    Comment[]
-  suggestions LyricsSuggestion[]
+  playlists    Playlist[]
+  comments     Comment[]
+  suggestions  LyricsSuggestion[]
+  contributors Contributor[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -231,8 +234,25 @@ model User {
   songs         Song[]
   albums        Album[]
   suggestions   LyricsSuggestion[]
+  contributors  Contributor[]
 
   @@map("user")
+}
+
+model Contributor {
+  id         String   @id @default(cuid())
+  songId     String
+  song       Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String // "add", "lyrics", "sync"
+  percentage Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([songId, userId, type])
+  @@index([songId])
+  @@index([userId])
 }
 
 model Session {

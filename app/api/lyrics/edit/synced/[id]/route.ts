@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
+import { updateContributorPercentages } from "@/lib/contributors";
+
 export const dynamic = "force-dynamic";
 
 export async function PUT(
@@ -48,16 +50,25 @@ export async function PUT(
 
     if (isAdmin) {
       // Update the song's synced lyrics directly
-      const updatedSong = await prisma.song.update({
-        where: { id },
-        data: {
-          syncedLyrics: body.syncedLyrics,
-        },
+      await prisma.$transaction(async (tx) => {
+        await updateContributorPercentages({
+          songId: id,
+          userId: session.user.id,
+          type: "sync",
+          newContent: body.syncedLyrics,
+          tx,
+        });
+
+        await tx.song.update({
+          where: { id },
+          data: {
+            syncedLyrics: body.syncedLyrics,
+          },
+        });
       });
 
       return NextResponse.json({
         success: true,
-        data: updatedSong,
         message: "Synced lyrics updated successfully",
       });
     } else {

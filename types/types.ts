@@ -21,6 +21,18 @@ export interface Song {
   size?: number;
   playCount?: number;
   lastPlayedAt?: number;
+  contributors?: Contributor[];
+}
+
+export interface Contributor {
+  id: string;
+  type: string;
+  percentage: number;
+  user: {
+    userSlug: string;
+    image: string | null;
+    name: string;
+  };
 }
 
 export type Artist = {

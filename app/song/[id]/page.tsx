@@ -8,6 +8,8 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { Metadata } from "next";
 import { Music } from "lucide-react";
 import { LyricsControl } from "@/components/LyricsControl";
+import { Contributors } from "@/components/Contributors";
+import { Contributor } from "@/types/types";
 
 export const dynamic = "force-dynamic";
 
@@ -52,7 +54,20 @@ export default async function SongDetailPage({
 
   const songData = await prisma.song.findUnique({
     where: { id },
-    include: { artists: true },
+    include: {
+      artists: true,
+      contributors: {
+        include: {
+          user: {
+            select: {
+              userSlug: true,
+              image: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!songData) {
@@ -104,7 +119,11 @@ export default async function SongDetailPage({
           songId={song.id}
           hasLyrics={!!song.lyrics}
           hasSyncedLyrics={!!song.syncedLyrics}
+          contributors={songData.contributors as unknown as Contributor[]}
         />
+        {/* <Contributors
+          contributors={songData.contributors as unknown as Contributor[]}
+        /> */}
         <div className="flex items-center justify-between bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
           <div className="space-y-1">
             <h3 className="text-lg font-semibold">Share this song</h3>

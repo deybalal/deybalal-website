@@ -14,17 +14,21 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Contributors } from "./Contributors";
+import { Contributor } from "@/types/types";
 
 interface LyricsControlProps {
   songId: string;
   hasLyrics: boolean;
   hasSyncedLyrics: boolean;
+  contributors: Contributor[];
 }
 
 export const LyricsControl: React.FC<LyricsControlProps> = ({
   songId,
   hasLyrics,
   hasSyncedLyrics,
+  contributors,
 }) => {
   const { lyricsMode, setLyricsMode } = useLyricsStore();
 
@@ -114,6 +118,18 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
             </Link>
           </Button>
         )}
+      </div>
+
+      <div className="flex justify-center">
+        <div className="h-px bg-foreground/50 w-10/12 mt-4 mb-2"></div>
+      </div>
+
+      <div className="mb-4">
+        <div className="my-4">
+          <h3 className="text-lg font-semibold">Contributers</h3>
+          <p className="text-sm text-gray-400">Contributers of this song</p>
+        </div>
+        <Contributors contributors={contributors} />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Prisma } from "@prisma/client";
+import { updateContributorPercentages } from "@/lib/contributors";
 
 export async function PUT(
   request: Request,
@@ -54,15 +55,31 @@ export async function PUT(
     if (status === "APPROVED") {
       // Update the song with new lyrics based on type
       const updateData: Prisma.SongUpdateInput = {};
+
       if (suggestion.type === "LYRICS") {
         updateData.lyrics = suggestion.lyrics;
       } else if (suggestion.type === "SYNCED") {
         updateData.syncedLyrics = suggestion.syncedLyrics;
       }
 
-      await prisma.song.update({
-        where: { id: suggestion.songId },
-        data: updateData,
+      await prisma.$transaction(async (tx) => {
+        // Handle contributors using the new utility (MUST BE CALLED BEFORE SONG UPDATE)
+        await updateContributorPercentages({
+          songId: suggestion.songId,
+          userId: suggestion.userId,
+          type: suggestion.type === "LYRICS" ? "lyrics" : "sync",
+          newContent:
+            (suggestion.type === "LYRICS"
+              ? suggestion.lyrics
+              : suggestion.syncedLyrics) || "",
+          tx,
+        });
+
+        // Update song lyrics
+        await tx.song.update({
+          where: { id: suggestion.songId },
+          data: updateData,
+        });
       });
     }
 
