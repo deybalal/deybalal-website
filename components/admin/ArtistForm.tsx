@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast";
+import { Artist } from "@/types/types";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -26,7 +27,11 @@ const formSchema = z.object({
 
 type ArtistFormValues = z.infer<typeof formSchema>;
 
-export default function ArtistForm() {
+interface ArtistFormProps {
+  onSuccess?: (artist: Artist) => void;
+}
+
+export default function ArtistForm({ onSuccess }: ArtistFormProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -57,6 +62,9 @@ export default function ArtistForm() {
 
       toast.success("Artist created successfully");
       form.reset();
+      if (onSuccess) {
+        onSuccess(result.data);
+      }
     } catch {
       toast.error("Failed to create artist");
     } finally {

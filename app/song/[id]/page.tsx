@@ -8,7 +8,6 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { Metadata } from "next";
 import { Music } from "lucide-react";
 import { LyricsControl } from "@/components/LyricsControl";
-import { Contributors } from "@/components/Contributors";
 import { Contributor } from "@/types/types";
 
 export const dynamic = "force-dynamic";
