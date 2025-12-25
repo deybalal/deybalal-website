@@ -45,6 +45,7 @@ model Song {
   comments     Comment[]
   suggestions  LyricsSuggestion[]
   contributors Contributor[]
+  crew         SongCrew[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -54,6 +55,16 @@ model Song {
   @@index([albumId])
   @@index([createdAt])
   @@index([slug])
+}
+
+model SongCrew {
+  id     String @id @default(cuid())
+  songId String
+  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+  role   String
+  name   String
+
+  @@index([songId])
 }
 
 model Album {

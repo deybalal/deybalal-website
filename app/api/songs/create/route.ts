@@ -26,6 +26,14 @@ const songSchema = z.object({
   syncedLyrics: z.string().optional(),
   slug: z.string().optional(),
   tempCoverArt: z.string().optional(),
+  crew: z
+    .array(
+      z.object({
+        role: z.string().min(1),
+        name: z.string().min(1),
+      })
+    )
+    .optional(),
 });
 
 function slugify(text: string) {
@@ -156,6 +164,9 @@ export async function POST(request: Request) {
                 ]
               : []),
           ],
+        },
+        crew: {
+          create: validatedData.crew || [],
         },
       },
     });

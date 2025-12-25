@@ -16,7 +16,7 @@ export async function GET(
 
     const song = await prisma.song.findUnique({
       where: { id },
-      include: { artists: true },
+      include: { artists: true, crew: true },
     });
 
     if (!song) {
@@ -66,7 +66,7 @@ export async function PUT(
     // Check if song exists
     const existingSong = await prisma.song.findUnique({
       where: { id },
-      include: { artists: true },
+      include: { artists: true, crew: true },
     });
 
     if (!existingSong) {
@@ -108,6 +108,10 @@ export async function PUT(
               ? body.isFeatured
               : existingSong.isFeatured
             : existingSong.isFeatured,
+        crew: {
+          deleteMany: {},
+          create: body.crew || [],
+        },
       },
     });
 

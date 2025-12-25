@@ -1,4 +1,4 @@
-import SongForm from "@/components/admin/SongForm";
+import SongFormEdit from "@/components/admin/SongFormEdit";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
@@ -36,7 +36,7 @@ export default async function EditSongPage({ params }: EditSongPageProps) {
           Edit Song
         </h1>
         <div className="bg-card p-6 rounded-lg border border-border md:w-xl xl:w-3xl">
-          <SongForm songId={songId} mode="edit" />
+          <SongFormEdit songId={songId} mode="edit" />
         </div>
       </div>
     </div>

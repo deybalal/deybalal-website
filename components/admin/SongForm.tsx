@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Image from "next/image";
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "react-hot-toast";
 import { Album } from "@/types/types";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -76,6 +76,14 @@ const formSchema = z.object({
   filename: z.string().optional(),
 
   tempCoverArt: z.string().optional(),
+  crew: z
+    .array(
+      z.object({
+        role: z.string().min(1, "Role is required"),
+        name: z.string().min(1, "Name is required"),
+      })
+    )
+    .optional(),
 });
 
 type SongFormValues = z.infer<typeof formSchema>;
@@ -88,7 +96,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   const [uploading, setUploading] = useState(false);
   const [openArtist, setOpenArtist] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0); // Key to force file input reset
-  const [fetchingData, setFetchingData] = useState(false);
+
   const [step, setStep] = useState(1);
   const [openCreateArtist, setOpenCreateArtist] = useState(false);
 
@@ -110,7 +118,13 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       filename: "",
 
       tempCoverArt: "",
+      crew: [],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "crew",
   });
 
   useEffect(() => {
@@ -150,7 +164,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   useEffect(() => {
     if (mode === "edit" && songId) {
       const fetchSongData = async () => {
-        setFetchingData(true);
         try {
           const res = await fetch(`/api/songs/${songId}`);
           if (res.ok) {
@@ -178,6 +191,9 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               form.setValue("year", song.year || 0);
               form.setValue("duration", song.duration || 0);
               form.setValue("filename", song.filename || "");
+              if (song.crew) {
+                form.setValue("crew", song.crew);
+              }
             } else {
               toast.error("Failed to fetch song data");
             }
@@ -186,7 +202,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
           console.error("Error fetching song:", error);
           toast.error("Failed to fetch song data");
         } finally {
-          setFetchingData(false);
+          // setFetchingData(false);
         }
       };
 
@@ -491,7 +507,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
     <div className="space-y-6">
       {/* Steps Indicator */}
       <div className="flex items-center justify-between px-10">
-        {[1, 2, 3].map((s) => (
+        {[1, 2, 3, 4].map((s) => (
           <div key={s} className="flex flex-col items-center gap-2">
             <div
               className={cn(
@@ -511,7 +527,13 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                 step === s ? "text-primary" : "text-muted-foreground"
               )}
             >
-              {s === 1 ? "Artist" : s === 2 ? "Upload" : "Details"}
+              {s === 1
+                ? "Artist"
+                : s === 2
+                ? "Upload"
+                : s === 3
+                ? "Details"
+                : "Crew"}
             </span>
           </div>
         ))}
@@ -527,14 +549,18 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
             ? "Select Artist"
             : step === 2
             ? "Upload Song"
-            : "Song Details"}
+            : step === 3
+            ? "Song Details"
+            : "Crew Members"}
         </h3>
         <p className="text-sm text-muted-foreground">
           {step === 1
             ? "Start by selecting the main artist for this song. If the artist doesn't exist yet, you can create a new one right here."
             : step === 2
             ? "Upload the MP3 file for the song. We'll automatically extract metadata like title, album, and duration to save you time."
-            : "Review the extracted details and fill in any missing information. Add cover art and ensure everything looks correct before saving."}
+            : step === 3
+            ? "Review the extracted details and fill in any missing information. Add cover art and ensure everything looks correct before saving."
+            : "Add crew members who worked on this song (e.g., Mix & Master, Producer, Graphic Designer)."}
         </p>
       </div>
 
@@ -1007,28 +1033,90 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
             </div>
           )}
 
-          <div className="flex justify-between pt-6 border-t">
-            {step > 1 ? (
-              <Button type="button" variant="outline" onClick={prevStep}>
-                Back
-              </Button>
-            ) : (
-              <div></div> // Spacer
-            )}
+          {/* Step 4: Crew */}
+          {step === 4 && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="flex items-center justify-between">
+                <FormLabel className="text-lg font-semibold">
+                  Crew Members
+                </FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => append({ role: "", name: "" })}
+                >
+                  Add Member
+                </Button>
+              </div>
 
-            {step < 3 ? (
+              <div className="space-y-4">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex gap-4 items-end">
+                    <FormField
+                      control={form.control}
+                      name={`crew.${index}.role`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Role</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. Mix & Master" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`crew.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. John Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="mb-2 text-destructive hover:text-destructive/90"
+                      onClick={() => remove(index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              {fields.length === 0 && (
+                <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+                  No crew members added yet.
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex justify-between pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={prevStep}
+              disabled={step === 1}
+            >
+              Previous
+            </Button>
+
+            {step < 4 ? (
               <Button type="button" onClick={nextStep}>
-                Next Step
+                Next
               </Button>
             ) : (
-              <Button type="submit" disabled={loading || fetchingData}>
-                {loading
-                  ? mode === "edit"
-                    ? "Updating..."
-                    : "Creating..."
-                  : mode === "edit"
-                  ? "Update Song"
-                  : "Create Song"}
+              <Button type="submit" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {mode === "create" ? "Create Song" : "Update Song"}
               </Button>
             )}
           </div>

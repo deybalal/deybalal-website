@@ -9,6 +9,7 @@ import { Metadata } from "next";
 import { Music } from "lucide-react";
 import { LyricsControl } from "@/components/LyricsControl";
 import { Contributor } from "@/types/types";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,7 @@ export default async function SongDetailPage({
           },
         },
       },
+      crew: true,
     },
   });
 
@@ -77,7 +79,15 @@ export default async function SongDetailPage({
     );
   }
 
-  if (!songData.isActive) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (
+    !songData.isActive &&
+    session?.user.role !== "administrator" &&
+    session?.user.role !== "moderator"
+  ) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] w-full text-gray-400">
         <Music className="w-16 h-16 mb-4 opacity-50" />
@@ -85,10 +95,6 @@ export default async function SongDetailPage({
       </div>
     );
   }
-
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
 
   const isUserLoggedIn = !!session?.user;
   const userSlug = session?.user.userSlug;
@@ -122,6 +128,29 @@ export default async function SongDetailPage({
           source={songData.lyricsSource}
           sourceUrl={songData.lyricsSourceUrl}
         />
+
+        {songData.crew && songData.crew.length > 0 && (
+          <div className="flex flex-col gap-4 bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
+            <h3 className="text-lg font-semibold">Song Credits</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {songData.crew.map((member) => (
+                <Link
+                  href={`/crew/${encodeURIComponent(member.name)}`}
+                  key={member.id}
+                  className="flex flex-col group hover:bg-white/5 p-2 rounded-lg transition-colors"
+                >
+                  <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                    {member.role}
+                  </span>
+                  <span className="font-medium text-lg group-hover:underline">
+                    {member.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* <Contributors
           contributors={songData.contributors as unknown as Contributor[]}
         /> */}
