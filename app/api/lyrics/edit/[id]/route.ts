@@ -36,6 +36,8 @@ export async function PUT(
       );
     }
 
+    const { source, sourceUrl } = body;
+
     // Check if song exists
     const existingSong = await prisma.song.findUnique({
       where: { id },
@@ -63,6 +65,8 @@ export async function PUT(
           where: { id },
           data: {
             lyrics: body.lyrics,
+            lyricsSource: source,
+            lyricsSourceUrl: sourceUrl,
           },
         });
       });
@@ -80,6 +84,12 @@ export async function PUT(
           lyrics: body.lyrics,
           type: "LYRICS",
           status: "PENDING",
+          lyricsSource: existingSong.lyricsSource
+            ? existingSong.lyricsSource
+            : source,
+          lyricsSourceUrl: existingSong.lyricsSourceUrl
+            ? existingSong.lyricsSourceUrl
+            : sourceUrl,
         },
       });
 

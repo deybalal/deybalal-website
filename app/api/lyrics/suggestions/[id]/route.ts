@@ -58,6 +58,8 @@ export async function PUT(
 
       if (suggestion.type === "LYRICS") {
         updateData.lyrics = suggestion.lyrics;
+        updateData.lyricsSource = suggestion.lyricsSource;
+        updateData.lyricsSourceUrl = suggestion.lyricsSourceUrl;
       } else if (suggestion.type === "SYNCED") {
         updateData.syncedLyrics = suggestion.syncedLyrics;
       }

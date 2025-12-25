@@ -157,17 +157,19 @@ model Comment {
 }
 
 model LyricsSuggestion {
-  id           String           @id @default(cuid())
-  songId       String
-  song         Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
-  userId       String
-  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lyrics       String?
-  syncedLyrics String?
-  type         SuggestionType   @default(LYRICS)
-  status       SuggestionStatus @default(PENDING)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  id              String           @id @default(cuid())
+  songId          String
+  song            Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lyrics          String?
+  syncedLyrics    String?
+  type            SuggestionType   @default(LYRICS)
+  status          SuggestionStatus @default(PENDING)
+  lyricsSource    String?
+  lyricsSourceUrl String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   @@index([songId])
   @@index([userId])

@@ -120,6 +120,8 @@ export default async function SongDetailPage({
           hasLyrics={!!song.lyrics}
           hasSyncedLyrics={!!song.syncedLyrics}
           contributors={songData.contributors as unknown as Contributor[]}
+          source={songData.lyricsSource}
+          sourceUrl={songData.lyricsSourceUrl}
         />
         {/* <Contributors
           contributors={songData.contributors as unknown as Contributor[]}

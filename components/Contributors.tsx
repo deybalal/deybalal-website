@@ -30,9 +30,9 @@ export const Contributors = ({ contributors }: ContributorsProps) => {
       {Object.entries(grouped).map(([type, users]) => (
         <div
           key={type}
-          className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 hover:border-white/20 transition-all group"
+          className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-foreground/10 hover:border-foreground/20 transition-all group"
         >
-          <div className="flex items-center gap-2 mb-4 text-gray-400 group-hover:text-white transition-colors">
+          <div className="flex items-center gap-2 mb-4 text-gray-400 group-hover:text-foreground transition-colors">
             {typeLabels[type]?.icon}
             <span className="text-sm font-medium uppercase tracking-wider">
               {typeLabels[type]?.label || type}
@@ -49,7 +49,7 @@ export const Contributors = ({ contributors }: ContributorsProps) => {
                   href={`/u/${c.user.userSlug}`}
                   className="flex items-center gap-3 group/user"
                 >
-                  <div className="relative size-10 rounded-full overflow-hidden border-2 border-white/10 group-hover/user:border-indigo-500 transition-colors">
+                  <div className="relative size-10 rounded-full overflow-hidden border-2 border-foreground/10 group-hover/user:border-indigo-500 transition-colors">
                     {c.user.image ? (
                       <Image
                         src={c.user.image}
@@ -64,7 +64,7 @@ export const Contributors = ({ contributors }: ContributorsProps) => {
                     )}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-white group-hover/user:text-indigo-400 transition-colors line-clamp-1">
+                    <span className="text-sm font-semibold text-foreground group-hover/user:text-indigo-400 transition-colors line-clamp-1">
                       {c.user.name}
                     </span>
                     <span className="text-xs text-gray-500">
@@ -78,7 +78,7 @@ export const Contributors = ({ contributors }: ContributorsProps) => {
                     <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
                       {c.percentage}%
                     </span>
-                    <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className="w-16 h-1 bg-foreborder-foreground/5 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-indigo-500 rounded-full"
                         style={{ width: `${c.percentage}%` }}

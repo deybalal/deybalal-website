@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-hot-toast";
 import { Loader2, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface LyricsEditorProps {
   songId: string;
@@ -14,6 +16,9 @@ interface LyricsEditorProps {
 
 export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
   const [lyrics, setLyrics] = useState("");
+  const [source, setSource] = useState("");
+  const [sourceUrl, setSourceUrl] = useState("");
+  const [isSourceExist, setIsSourceExist] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -29,6 +34,12 @@ export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
           const result = await res.json();
           if (result.success) {
             setLyrics(result.data.lyrics || "");
+            setSource(result.data.lyricsSource || "");
+
+            if (result.data.lyricsSource) {
+              setIsSourceExist(true);
+            }
+            setSourceUrl(result.data.lyricsSourceUrl || "");
           }
         }
       } catch (error) {
@@ -48,7 +59,7 @@ export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
       const res = await fetch(`/api/lyrics/edit/${songId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lyrics }),
+        body: JSON.stringify({ lyrics, source, sourceUrl }),
       });
 
       const result = await res.json();
@@ -98,6 +109,22 @@ export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
         onChange={(e) => setLyrics(e.target.value)}
         placeholder="Enter song lyrics here..."
         className="min-h-[500px] font-mono text-sm"
+      />
+
+      <Label>Source</Label>
+      <Input
+        onChange={(e) => setSource(e.target.value)}
+        value={source}
+        disabled={!isAdmin && isSourceExist}
+        placeholder="e.g. Spotify"
+      />
+
+      <Label>Source URL</Label>
+      <Input
+        onChange={(e) => setSourceUrl(e.target.value)}
+        value={sourceUrl}
+        disabled={!isAdmin && isSourceExist}
+        placeholder="e.g. https://open.spotify.com/track/6R4JZJZJZJZJZJZJZJZJZJ"
       />
     </div>
   );
