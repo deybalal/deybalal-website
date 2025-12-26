@@ -513,8 +513,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
     }
   };
 
-  console.log("artists ", artists);
-
   const nextStep = () => {
     if (step === 1 && selectedArtists.length === 0) {
       toast.error("Please select at least one artist");
@@ -595,6 +593,14 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
+          onKeyDown={(e) => {
+            if (
+              e.key === "Enter" &&
+              (e.target as HTMLElement).tagName !== "TEXTAREA"
+            ) {
+              e.preventDefault();
+            }
+          }}
           className="space-y-6 w-full"
         >
           {/* Step 1: Artist Selection */}
@@ -614,7 +620,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                         <DialogTrigger asChild>
                           <Button
                             variant="secondary"
-                            className="h-12 px-6 ml-3"
+                            className="h-12 px-6 ml-3 cursor-pointer"
                             type="button"
                           >
                             Create New Artist
@@ -678,7 +684,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                                   remaining.map((a) => a.name).join(", ")
                                 );
                               }}
-                              className="hover:text-destructive ml-1"
+                              className="hover:text-destructive ml-1 cursor-pointer"
                             >
                               ×
                             </button>
@@ -692,11 +698,12 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
+                              type="button"
                               variant="outline"
                               role="combobox"
                               aria-expanded={openArtist}
                               className={cn(
-                                "w-full justify-between h-12",
+                                "w-full justify-between h-12 cursor-pointer",
                                 selectedArtists.length === 0 &&
                                   "text-muted-foreground"
                               )}
@@ -979,13 +986,17 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="cursor-pointer">
                               <SelectValue placeholder="Select an album" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {albums.map((album) => (
-                              <SelectItem key={album.id} value={album.id}>
+                              <SelectItem
+                                key={album.id}
+                                value={album.id}
+                                className="cursor-pointer"
+                              >
                                 {album.name}
                               </SelectItem>
                             ))}
@@ -1082,7 +1093,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                                     newGenres.map((g) => g.id)
                                   );
                                 }}
-                                className="ml-1 hover:text-destructive"
+                                className="ml-1 hover:text-destructive cursor-pointer"
                               >
                                 ×
                               </button>
@@ -1093,10 +1104,11 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
+                                type="button"
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={openGenre}
-                                className="w-full justify-between"
+                                className="w-full justify-between cursor-pointer"
                               >
                                 Select genres...
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -1137,7 +1149,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                                 type="button"
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 px-2 text-xs hover:bg-primary/10 hover:text-primary"
+                                className="h-8 px-2 text-xs hover:bg-primary/10 hover:text-primary cursor-pointer"
                                 onClick={() => setOpenCreateGenre(true)}
                               >
                                 <Plus className="w-3 h-3 mr-1" /> New Genre
@@ -1168,6 +1180,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                                           newGenres.map((g) => g.id)
                                         );
                                       }}
+                                      className="cursor-pointer"
                                     >
                                       <Check
                                         className={cn(
@@ -1209,6 +1222,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => append({ role: "", name: "" })}
+                  className="cursor-pointer"
                 >
                   Add Member
                 </Button>
@@ -1247,7 +1261,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="mb-2 text-destructive hover:text-destructive/90"
+                      className="mb-2 text-destructive hover:text-destructive/90 cursor-pointer"
                       onClick={() => remove(index)}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -1269,16 +1283,18 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               variant="outline"
               onClick={prevStep}
               disabled={step === 1}
+              className="cursor-pointer"
             >
               Previous
             </Button>
 
             {step < 4 ? (
               <Button
+                key="next-button"
                 type="button"
                 onClick={nextStep}
                 className={cn(
-                  "transition-colors",
+                  "transition-colors cursor-pointer",
                   ((step === 1 && selectedArtists.length > 0) ||
                     (step === 2 && form.getValues("filename")) ||
                     (step === 3 && form.getValues("title"))) &&
@@ -1289,10 +1305,11 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               </Button>
             ) : (
               <Button
+                key="submit-button"
                 type="submit"
                 disabled={loading}
                 className={cn(
-                  "transition-colors",
+                  "transition-colors cursor-pointer",
                   form.getValues("title") &&
                     form.getValues("artist") &&
                     form.getValues("filename") &&

@@ -113,7 +113,10 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={(e) => {
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
         className="space-y-4 max-w-md"
       >
         <FormField

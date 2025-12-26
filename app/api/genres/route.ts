@@ -37,16 +37,18 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name } = body;
+    const { name, slug } = body;
 
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
-    const slug = slugify(name);
+    const slugy = slugify(slug);
+
+    console.log("slug ", slugy);
 
     const existingGenre = await prisma.genre.findUnique({
-      where: { slug },
+      where: { slug: slugy },
     });
 
     if (existingGenre) {
@@ -59,7 +61,7 @@ export async function POST(req: Request) {
     const genre = await prisma.genre.create({
       data: {
         name,
-        slug,
+        slug: slugy,
       },
     });
 

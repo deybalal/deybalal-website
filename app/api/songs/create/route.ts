@@ -34,6 +34,7 @@ const songSchema = z.object({
       })
     )
     .optional(),
+  genreIds: z.array(z.string()).optional(),
 });
 
 function slugify(text: string) {
@@ -167,6 +168,9 @@ export async function POST(request: Request) {
         },
         crew: {
           create: validatedData.crew || [],
+        },
+        genres: {
+          connect: validatedData.genreIds?.map((id) => ({ id })) || [],
         },
       },
     });

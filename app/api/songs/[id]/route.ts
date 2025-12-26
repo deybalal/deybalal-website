@@ -16,7 +16,7 @@ export async function GET(
 
     const song = await prisma.song.findUnique({
       where: { id },
-      include: { artists: true, crew: true },
+      include: { artists: true, crew: true, genres: true },
     });
 
     if (!song) {
@@ -111,6 +111,10 @@ export async function PUT(
         crew: {
           deleteMany: {},
           create: body.crew || [],
+        },
+        genres: {
+          set: [],
+          connect: body.genreIds?.map((id: string) => ({ id })) || [],
         },
       },
     });
