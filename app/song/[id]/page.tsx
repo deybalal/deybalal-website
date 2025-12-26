@@ -56,6 +56,7 @@ export default async function SongDetailPage({
     where: { id },
     include: {
       artists: true,
+      genres: true,
       contributors: {
         include: {
           user: {
@@ -78,6 +79,8 @@ export default async function SongDetailPage({
       </div>
     );
   }
+
+  console.log(songData);
 
   const session = await auth.api.getSession({
     headers: await headers(),

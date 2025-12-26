@@ -9,7 +9,10 @@ import {
   User as PrismaUser,
   Comment,
   LyricsSuggestion,
+  Genre,
+  Badge,
 } from "@prisma/client";
+import Image from "next/image";
 import { Song as PlayerSong } from "@/types/types";
 import {
   MoreHorizontal,
@@ -19,7 +22,11 @@ import {
   Eye,
   Check,
   X,
+  ListMusic,
+  HelpCircle,
+  LucideIcon,
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +35,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import ManageBadgesDialog from "./admin/ManageBadgesDialog";
 import LyricsDiff from "./admin/LyricsDiff";
 import Link from "next/link";
 
@@ -49,6 +57,7 @@ import { toast } from "react-hot-toast";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import DialogAlert from "./DialogAlert";
+import { cn } from "@/lib/utils";
 
 const SongActionsCell = ({
   row,
@@ -543,6 +552,116 @@ export const getAlbumColumns = (userRole?: string): ColumnDef<Album>[] => [
   },
 ];
 
+const PlaylistActionsCell = ({ row }: { row: Row<Playlist> }) => {
+  const playlist = row.original;
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const deletePlaylist = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/playlists/${playlist.id}`, {
+          method: "DELETE",
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success("Playlist deleted successfully");
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to delete playlist");
+        }
+      } catch (error) {
+        console.error("Error deleting playlist:", error);
+        toast.error("An error occurred while deleting playlist");
+      }
+    });
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem
+          className="cursor-pointer text-red-500 hover:text-red-600"
+          disabled={isPending}
+          asChild
+        >
+          <DialogAlert
+            title="Delete Playlist"
+            description="Are you sure you want to delete this Playlist?"
+            fnButton="Delete"
+            fn={deletePlaylist}
+          />
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
+  {
+    accessorKey: "coverArt",
+    header: "Cover",
+    cell: ({ row }) => {
+      const coverArt = row.getValue("coverArt") as string;
+      return (
+        <div className="relative w-10 h-10 rounded overflow-hidden">
+          {coverArt ? (
+            <Image
+              src={coverArt}
+              alt={row.getValue("name")}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-muted flex items-center justify-center">
+              <ListMusic className="w-4 h-4 text-muted-foreground" />
+            </div>
+          )}
+        </div>
+      );
+    },
+  },
+  { accessorKey: "name", header: "Name" },
+  {
+    accessorKey: "isPrivate",
+    header: "Visibility",
+    cell: ({ row }) => {
+      const isPrivate = row.getValue("isPrivate") as boolean;
+      return (
+        <span
+          className={cn(
+            "px-2 py-1 rounded-full text-xs font-medium",
+            isPrivate
+              ? "bg-yellow-500/10 text-yellow-500"
+              : "bg-green-500/10 text-green-500"
+          )}
+        >
+          {isPrivate ? "Private" : "Public"}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ row }) => (
+      <div className="font-medium">
+        {new Date(row.getValue("createdAt")).toLocaleDateString()}
+      </div>
+    ),
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <PlaylistActionsCell row={row} />,
+  },
+];
+
 const UserActionsCell = ({
   row,
   userRole,
@@ -602,6 +721,30 @@ const UserActionsCell = ({
     });
   };
 
+  const toggleVerified = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/users/${user.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isVerified: !user.isVerified }),
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success(
+            `User ${user.isVerified ? "unverified" : "verified"} successfully`
+          );
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to update user status");
+        }
+      } catch (error) {
+        console.error("Error updating user status:", error);
+        toast.error("An error occurred while updating user status");
+      }
+    });
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -630,6 +773,21 @@ const UserActionsCell = ({
               </DropdownMenuPortal>
             </DropdownMenuSub>
             <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={toggleVerified}
+              disabled={isPending}
+            >
+              {user.isVerified ? "Unverify User" : "Verify User"}
+            </DropdownMenuItem>
+            <ManageBadgesDialog user={user}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(e) => e.preventDefault()}
+              >
+                Manage Badges
+              </DropdownMenuItem>
+            </ManageBadgesDialog>
+            <DropdownMenuItem
               className="cursor-pointer text-red-500 hover:text-red-600"
               onClick={toggleBanned}
               disabled={isPending}
@@ -644,45 +802,36 @@ const UserActionsCell = ({
 };
 
 export const getUserColumns = (userRole?: string): ColumnDef<PrismaUser>[] => [
-  { accessorKey: "name", header: "Name" },
-  { accessorKey: "email", header: "Email" },
   {
-    accessorKey: "role",
-    header: "Role",
+    accessorKey: "name",
+    header: "Name",
     cell: ({ row }) => (
-      <span className="capitalize font-medium">
-        {row.getValue("role") as string}
-      </span>
+      <div className="flex items-center gap-2">
+        {row.original.image && (
+          <div className="relative w-8 h-8 rounded-full overflow-hidden">
+            <Image
+              src={row.original.image}
+              alt={row.original.name}
+              fill
+              className="object-cover"
+            />
+          </div>
+        )}
+        <span>{row.original.name}</span>
+        {row.original.isVerified && (
+          <CheckCircle2 className="w-4 h-4 text-blue-500" />
+        )}
+      </div>
     ),
   },
   {
-    accessorKey: "isBanned",
-    header: "Status",
-    cell: ({ row }) => {
-      const isBanned = row.getValue("isBanned") as boolean;
-      return (
-        <div className="flex items-center gap-2">
-          {isBanned ? (
-            <XCircle className="h-4 w-4 text-red-500" />
-          ) : (
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-          )}
-          <span className="text-sm font-medium">
-            {isBanned ? "Banned" : "Active"}
-          </span>
-        </div>
-      );
-    },
+    accessorKey: "email",
+    header: "Email",
   },
   {
-    id: "actions",
-    cell: ({ row }) => <UserActionsCell row={row} userRole={userRole} />,
+    accessorKey: "role",
+    header: "Role",
   },
-];
-
-export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
-  { accessorKey: "name", header: "Name" },
-  { accessorKey: "description", header: "Description" },
   {
     accessorKey: "createdAt",
     header: "Created At",
@@ -691,6 +840,10 @@ export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
         {new Date(row.getValue("createdAt")).toLocaleDateString()}
       </div>
     ),
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <UserActionsCell row={row} userRole={userRole} />,
   },
 ];
 
@@ -1070,5 +1223,183 @@ export const getLyricsSuggestionColumns = (
   {
     id: "actions",
     cell: ({ row }) => <SuggestionActionsCell row={row} userRole={userRole} />,
+  },
+];
+
+const GenreActionsCell = ({
+  row,
+  userRole,
+}: {
+  row: Row<Genre>;
+  userRole?: string;
+}) => {
+  const genre = row.original;
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const isAdmin = userRole === "administrator";
+
+  const deleteGenre = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/genres/${genre.id}`, {
+          method: "DELETE",
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success("Genre deleted successfully");
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to delete genre");
+        }
+      } catch (error) {
+        console.error("Error deleting genre:", error);
+        toast.error("An error occurred while deleting genre");
+      }
+    });
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem>
+          <Link href={`/panel/edit/genre/${genre.id}`} className="w-full">
+            Edit Genre
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem
+            className="cursor-pointer text-red-500 hover:text-red-600"
+            disabled={isPending}
+            asChild
+          >
+            <DialogAlert
+              title="Delete Genre"
+              description="Are you sure you want to delete this Genre?"
+              fnButton="Delete"
+              fn={deleteGenre}
+            />
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export const getGenreColumns = (userRole?: string): ColumnDef<Genre>[] => [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "slug", header: "Slug" },
+
+  {
+    id: "actions",
+    cell: ({ row }) => <GenreActionsCell row={row} userRole={userRole} />,
+  },
+];
+
+const BadgeActionsCell = ({
+  row,
+  userRole,
+}: {
+  row: Row<Badge>;
+  userRole?: string;
+}) => {
+  const badge = row.original;
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const isAdmin = userRole === "administrator";
+
+  const deleteBadge = async () => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/badges/${badge.id}`, {
+          method: "DELETE",
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast.success("Badge deleted successfully");
+          router.refresh();
+        } else {
+          toast.error(result.message || "Failed to delete badge");
+        }
+      } catch (error) {
+        console.error("Error deleting badge:", error);
+        toast.error("An error occurred while deleting badge");
+      }
+    });
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem>
+          <Link href={`/panel/edit/badge/${badge.id}`} className="w-full">
+            Edit Badge
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem
+            className="cursor-pointer text-red-500 hover:text-red-600"
+            disabled={isPending}
+            asChild
+          >
+            <DialogAlert
+              title="Delete Badge"
+              description="Are you sure you want to delete this Badge?"
+              fnButton="Delete"
+              fn={deleteBadge}
+            />
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export const getBadgeColumns = (userRole?: string): ColumnDef<Badge>[] => [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "slug", header: "Slug" },
+  { accessorKey: "description", header: "Description" },
+  {
+    accessorKey: "icon",
+    header: "Icon",
+    cell: ({ row }) => {
+      const icon = row.getValue("icon") as string;
+      const IconComponent = icon
+        ? ((LucideIcons as Record<string, unknown>)[icon] as
+            | LucideIcon
+            | undefined)
+        : null;
+      return (
+        <div className="flex items-center justify-center w-8 h-8 rounded-md border bg-muted">
+          {IconComponent ? (
+            <IconComponent className="w-5 h-5" />
+          ) : (
+            icon && <HelpCircle className="w-5 h-5 text-muted-foreground" />
+          )}
+          {!icon && <span className="text-xs text-muted-foreground">None</span>}
+        </div>
+      );
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <BadgeActionsCell row={row} userRole={userRole} />,
   },
 ];

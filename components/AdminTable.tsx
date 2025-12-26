@@ -9,6 +9,8 @@ import {
   getUserColumns,
   getCommentColumns,
   getLyricsSuggestionColumns,
+  getGenreColumns,
+  getBadgeColumns,
 } from "@/components/columns";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -19,7 +21,9 @@ type TableType =
   | "playlists"
   | "users"
   | "comments"
-  | "suggestions";
+  | "suggestions"
+  | "genres"
+  | "badges";
 
 interface AdminTableProps {
   data: any[];
@@ -72,6 +76,14 @@ export default function AdminTable({
     case "suggestions":
       columns = getLyricsSuggestionColumns(userRole);
       searchKey = "song_title";
+      break;
+    case "genres":
+      columns = getGenreColumns(userRole);
+      searchKey = "name";
+      break;
+    case "badges":
+      columns = getBadgeColumns(userRole);
+      searchKey = "name";
       break;
   }
 

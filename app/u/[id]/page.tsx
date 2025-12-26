@@ -5,7 +5,8 @@ import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Music } from "lucide-react";
+import { Music, CheckCircle2, HelpCircle, LucideIcon } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 
 export default async function PublicProfilePage({
   params,
@@ -25,6 +26,11 @@ export default async function PublicProfilePage({
       playlists: {
         where: {
           isPrivate: false,
+        },
+      },
+      badges: {
+        include: {
+          badge: true,
         },
       },
     },
@@ -65,7 +71,38 @@ export default async function PublicProfilePage({
             </div>
           )}
         </div>
-        <h1 className="text-3xl font-bold">{user.name}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-3xl font-bold">{user.name}</h1>
+          {user.isVerified && (
+            <CheckCircle2 className="w-6 h-6 text-blue-500 fill-blue-500/10" />
+          )}
+        </div>
+
+        {user.badges.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2">
+            {user.badges.map(({ badge }) => {
+              const IconComponent = badge.icon
+                ? ((LucideIcons as Record<string, unknown>)[badge.icon] as
+                    | LucideIcon
+                    | undefined)
+                : null;
+              return (
+                <div
+                  key={badge.id}
+                  className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full border border-primary/20 text-sm font-medium"
+                  title={badge.description || badge.name}
+                >
+                  {IconComponent ? (
+                    <IconComponent className="w-3.5 h-3.5" />
+                  ) : (
+                    badge.icon && <HelpCircle className="w-3.5 h-3.5" />
+                  )}
+                  {badge.name}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">

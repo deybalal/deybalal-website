@@ -24,8 +24,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "react-hot-toast";
-import { Album } from "@/types/types";
-import { Check, ChevronsUpDown, Trash2, Loader2 } from "lucide-react";
+import { Album, Genre } from "@prisma/client";
+import { Check, ChevronsUpDown, Trash2, Loader2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -49,6 +49,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import ArtistForm from "./ArtistForm";
+import GenreForm from "./GenreForm";
 import { useRouter } from "next/navigation";
 
 interface Artist {
@@ -74,6 +75,7 @@ const formSchema = z.object({
   year: z.number().min(0).optional(),
   duration: z.number().min(0).optional(),
   filename: z.string().optional(),
+  genreIds: z.array(z.string()).optional(),
 
   tempCoverArt: z.string().optional(),
   crew: z
@@ -91,14 +93,18 @@ type SongFormValues = z.infer<typeof formSchema>;
 export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const [selectedArtists, setSelectedArtists] = useState<Artist[]>([]); // Track selected artists
+  const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [openArtist, setOpenArtist] = useState(false);
+  const [openGenre, setOpenGenre] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0); // Key to force file input reset
 
   const [step, setStep] = useState(1);
   const [openCreateArtist, setOpenCreateArtist] = useState(false);
+  const [openCreateGenre, setOpenCreateGenre] = useState(false);
 
   const router = useRouter();
 
@@ -119,6 +125,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
 
       tempCoverArt: "",
       crew: [],
+      genreIds: [],
     },
   });
 
@@ -156,8 +163,21 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       }
     };
 
+    const fetchGenres = async () => {
+      try {
+        const res = await fetch("/api/genres");
+        if (res.ok) {
+          const result = await res.json();
+          setGenres(result);
+        }
+      } catch (error) {
+        console.error("Failed to fetch genres", error);
+      }
+    };
+
     fetchAlbums();
     fetchArtists();
+    fetchGenres();
   }, [openArtist]);
 
   // Fetch song data in edit mode
@@ -193,6 +213,13 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               form.setValue("filename", song.filename || "");
               if (song.crew) {
                 form.setValue("crew", song.crew);
+              }
+              if (song.genres) {
+                setSelectedGenres(song.genres);
+                form.setValue(
+                  "genreIds",
+                  song.genres.map((g: Genre) => g.id)
+                );
               }
             } else {
               toast.error("Failed to fetch song data");
@@ -248,6 +275,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       if (mode === "create") {
         form.reset();
         setSelectedArtists([]);
+        setSelectedGenres([]);
         setFileInputKey((prev) => prev + 1); // Reset file inputs by changing key
       }
       setStep(1);
@@ -747,6 +775,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                                       } else {
                                         form.setValue("artistEn", "");
                                       }
+                                      setOpenArtist(false);
                                     }}
                                   >
                                     <Check
@@ -1028,6 +1057,141 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                       )}
                     />
                   </div>
+                  <FormField
+                    control={form.control}
+                    name="genreIds"
+                    render={() => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Genres</FormLabel>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {selectedGenres.map((genre) => (
+                            <div
+                              key={genre.id}
+                              className="flex items-center gap-1 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm"
+                            >
+                              {genre.name}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newGenres = selectedGenres.filter(
+                                    (g) => g.id !== genre.id
+                                  );
+                                  setSelectedGenres(newGenres);
+                                  form.setValue(
+                                    "genreIds",
+                                    newGenres.map((g) => g.id)
+                                  );
+                                }}
+                                className="ml-1 hover:text-destructive"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <Popover open={openGenre} onOpenChange={setOpenGenre}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openGenre}
+                                className="w-full justify-between"
+                              >
+                                Select genres...
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <Dialog
+                            open={openCreateGenre}
+                            onOpenChange={setOpenCreateGenre}
+                          >
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Create New Genre</DialogTitle>
+                              </DialogHeader>
+                              <GenreForm
+                                onSuccess={(newGenre) => {
+                                  setGenres((prev) => [...prev, newGenre]);
+                                  setSelectedGenres((prev) => [
+                                    ...prev,
+                                    newGenre,
+                                  ]);
+                                  form.setValue("genreIds", [
+                                    ...(form.getValues("genreIds") || []),
+                                    newGenre.id,
+                                  ]);
+                                  setOpenCreateGenre(false);
+                                  setOpenGenre(false);
+                                }}
+                              />
+                            </DialogContent>
+                          </Dialog>
+                          <PopoverContent className="w-[400px] p-0">
+                            <div className="flex items-center justify-between p-2 border-b">
+                              <span className="text-xs font-medium text-muted-foreground px-2">
+                                Genres
+                              </span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 px-2 text-xs hover:bg-primary/10 hover:text-primary"
+                                onClick={() => setOpenCreateGenre(true)}
+                              >
+                                <Plus className="w-3 h-3 mr-1" /> New Genre
+                              </Button>
+                            </div>
+                            <Command>
+                              <CommandInput placeholder="Search genre..." />
+                              <CommandList>
+                                <CommandEmpty>No genre found.</CommandEmpty>
+                                <CommandGroup>
+                                  {genres.map((genre) => (
+                                    <CommandItem
+                                      key={genre.id}
+                                      value={genre.name}
+                                      onSelect={() => {
+                                        const isSelected = selectedGenres.some(
+                                          (g) => g.id === genre.id
+                                        );
+                                        const newGenres = isSelected
+                                          ? selectedGenres.filter(
+                                              (g) => g.id !== genre.id
+                                            )
+                                          : [...selectedGenres, genre];
+
+                                        setSelectedGenres(newGenres);
+                                        form.setValue(
+                                          "genreIds",
+                                          newGenres.map((g) => g.id)
+                                        );
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          selectedGenres.some(
+                                            (g) => g.id === genre.id
+                                          )
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+
+                                      {genre.name}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -1110,11 +1274,31 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
             </Button>
 
             {step < 4 ? (
-              <Button type="button" onClick={nextStep}>
+              <Button
+                type="button"
+                onClick={nextStep}
+                className={cn(
+                  "transition-colors",
+                  ((step === 1 && selectedArtists.length > 0) ||
+                    (step === 2 && form.getValues("filename")) ||
+                    (step === 3 && form.getValues("title"))) &&
+                    "bg-green-600 hover:bg-green-700 text-white border-green-700"
+                )}
+              >
                 Next
               </Button>
             ) : (
-              <Button type="submit" disabled={loading}>
+              <Button
+                type="submit"
+                disabled={loading}
+                className={cn(
+                  "transition-colors",
+                  form.getValues("title") &&
+                    form.getValues("artist") &&
+                    form.getValues("filename") &&
+                    "bg-green-600 hover:bg-green-700 text-white border-green-700"
+                )}
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {mode === "create" ? "Create Song" : "Update Song"}
               </Button>

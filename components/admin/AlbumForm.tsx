@@ -31,6 +31,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import Image from "next/image";
+import { Genre } from "@prisma/client";
 
 interface Artist {
   id: string;
@@ -45,13 +46,17 @@ const formSchema = z.object({
   artistId: z.string().optional(), // Will be set automatically when artist is selected
   coverArt: z.string().optional(),
   releaseDate: z.string().optional(),
+  genreIds: z.array(z.string()).optional(),
 });
 
 export default function AlbumForm() {
   const [loading, setLoading] = useState(false);
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
   const [uploading, setUploading] = useState(false);
   const [openArtist, setOpenArtist] = useState(false);
+  const [openGenre, setOpenGenre] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,6 +67,7 @@ export default function AlbumForm() {
       artistId: "",
       coverArt: "",
       releaseDate: "",
+      genreIds: [],
     },
   });
 
@@ -79,7 +85,19 @@ export default function AlbumForm() {
         console.error("Failed to fetch artists", error);
       }
     };
+    const fetchGenres = async () => {
+      try {
+        const res = await fetch("/api/genres");
+        if (res.ok) {
+          const result = await res.json();
+          setGenres(result);
+        }
+      } catch (error) {
+        console.error("Failed to fetch genres", error);
+      }
+    };
     fetchArtists();
+    fetchGenres();
   }, []);
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -283,6 +301,100 @@ export default function AlbumForm() {
                   {...field}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="genreIds"
+          render={() => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Genres</FormLabel>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {selectedGenres.map((genre) => (
+                  <div
+                    key={genre.id}
+                    className="flex items-center gap-1 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm"
+                  >
+                    {genre.name}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newGenres = selectedGenres.filter(
+                          (g) => g.id !== genre.id
+                        );
+                        setSelectedGenres(newGenres);
+                        form.setValue(
+                          "genreIds",
+                          newGenres.map((g) => g.id)
+                        );
+                      }}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <Popover open={openGenre} onOpenChange={setOpenGenre}>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openGenre}
+                      className="w-full justify-between"
+                    >
+                      Select genres...
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search genre..." />
+                    <CommandList>
+                      <CommandEmpty>No genre found.</CommandEmpty>
+                      <CommandGroup>
+                        {genres.map((genre) => (
+                          <CommandItem
+                            key={genre.id}
+                            value={genre.name}
+                            onSelect={() => {
+                              const isSelected = selectedGenres.some(
+                                (g) => g.id === genre.id
+                              );
+                              const newGenres = isSelected
+                                ? selectedGenres.filter(
+                                    (g) => g.id !== genre.id
+                                  )
+                                : [...selectedGenres, genre];
+
+                              setSelectedGenres(newGenres);
+                              form.setValue(
+                                "genreIds",
+                                newGenres.map((g) => g.id)
+                              );
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedGenres.some((g) => g.id === genre.id)
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+
+                            {genre.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}

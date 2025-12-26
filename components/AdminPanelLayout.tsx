@@ -11,6 +11,8 @@ import {
   Users,
   MessageCircle,
   FileText,
+  Tags,
+  Award,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -127,6 +129,18 @@ export default function AdminPanelLayout({
       href: "/panel/suggestions",
       icon: FileText,
       active: pathname.startsWith("/panel/suggestions"),
+    },
+    {
+      label: "Genres",
+      href: "/panel/genres",
+      icon: Tags,
+      active: pathname.startsWith("/panel/genres"),
+    },
+    {
+      label: "Badges",
+      href: "/panel/badges",
+      icon: Award,
+      active: pathname.startsWith("/panel/badges"),
     },
   ];
 

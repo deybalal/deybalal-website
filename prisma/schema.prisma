@@ -46,6 +46,8 @@ model Song {
   suggestions  LyricsSuggestion[]
   contributors Contributor[]
   crew         SongCrew[]
+  genres       Genre[]
+  playHistory  PlayHistory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -88,6 +90,7 @@ model Album {
 
   songs    Song[]
   comments Comment[]
+  genres   Genre[]
 
   @@index([artistName])
   @@index([artistId])
@@ -232,6 +235,7 @@ model User {
   playlists     Playlist[]
   isPrivate     Boolean    @default(true)
   isBanned      Boolean    @default(false)
+  isVerified    Boolean    @default(false)
 
   artistId String?
   artist   Artist? @relation(fields: [artistId], references: [id])
@@ -248,6 +252,8 @@ model User {
   albums        Album[]
   suggestions   LyricsSuggestion[]
   contributors  Contributor[]
+  playHistory   PlayHistory[]
+  badges        UserBadge[]
 
   @@map("user")
 }
@@ -314,4 +320,58 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Genre {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  songs  Song[]
+  albums Album[]
+
+  @@index([slug])
+}
+
+model PlayHistory {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  songId   String
+  song     Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  playedAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([songId])
+  @@index([playedAt])
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users UserBadge[]
+
+  @@index([slug])
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  awardedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([badgeId])
 }

@@ -11,6 +11,8 @@ import {
   getUserColumns,
   getCommentColumns,
   getLyricsSuggestionColumns,
+  getGenreColumns,
+  getBadgeColumns,
 } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +25,8 @@ import {
   Users,
   MessageCircle,
   FileText,
+  Tags,
+  Award,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -33,6 +37,8 @@ import {
   User as PrismaUser,
   Comment,
   LyricsSuggestion,
+  Genre,
+  Badge,
 } from "@prisma/client";
 
 interface AdminPanelClientProps {
@@ -58,6 +64,8 @@ interface AdminPanelClientProps {
     users: number;
     comments: number;
     suggestions: number;
+    genres: number;
+    badges: number;
   };
   suggestions: (LyricsSuggestion & {
     song: {
@@ -69,6 +77,10 @@ interface AdminPanelClientProps {
     user: { name: string; email: string };
   })[];
   suggestionsCount: number;
+  genres: Genre[];
+  genresCount: number;
+  badges: Badge[];
+  badgesCount: number;
 }
 
 export default function AdminPanelClient({
@@ -89,6 +101,10 @@ export default function AdminPanelClient({
   commentsCount,
   suggestions,
   suggestionsCount,
+  genres,
+  genresCount,
+  badges,
+  badgesCount,
 }: AdminPanelClientProps) {
   const stats = [
     {
@@ -233,6 +249,20 @@ export default function AdminPanelClient({
           >
             <FileText className="h-4 w-4" />
             <span>Lyrics Suggestions</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="genres"
+            className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+          >
+            <Tags className="h-4 w-4" />
+            <span>Genres</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="badges"
+            className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+          >
+            <Award className="h-4 w-4" />
+            <span>Badges</span>
           </TabsTrigger>
         </TabsList>
 
@@ -380,6 +410,54 @@ export default function AdminPanelClient({
               pageCount={Math.ceil(suggestionsCount / pageSize)}
               pageIndex={currentPage.suggestions - 1}
               onPageChange={(page) => onPageChange("suggestions", page + 1)}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="genres" className="space-y-4">
+          <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
+            <h2 className="text-xl font-semibold">Genres Library</h2>
+            <Button
+              asChild
+              className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+            >
+              <Link href="/panel/new/genre">
+                <Plus className="mr-2 h-4 w-4" /> Add New Genre
+              </Link>
+            </Button>
+          </div>
+          <div className="glass rounded-lg border border-white/10 overflow-hidden">
+            <DataTable
+              columns={getGenreColumns(userRole)}
+              data={genres}
+              searchKey="name"
+              pageCount={Math.ceil(genresCount / pageSize)}
+              pageIndex={currentPage.genres - 1}
+              onPageChange={(page) => onPageChange("genres", page + 1)}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="badges" className="space-y-4">
+          <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
+            <h2 className="text-xl font-semibold">Badges Library</h2>
+            <Button
+              asChild
+              className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+            >
+              <Link href="/panel/new/badge">
+                <Plus className="mr-2 h-4 w-4" /> Add New Badge
+              </Link>
+            </Button>
+          </div>
+          <div className="glass rounded-lg border border-white/10 overflow-hidden">
+            <DataTable
+              columns={getBadgeColumns(userRole)}
+              data={badges}
+              searchKey="name"
+              pageCount={Math.ceil(badgesCount / pageSize)}
+              pageIndex={currentPage.badges - 1}
+              onPageChange={(page) => onPageChange("badges", page + 1)}
             />
           </div>
         </TabsContent>
