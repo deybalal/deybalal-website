@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import AdminTable from "@/components/AdminTable";
 
-export default async function PanelPage({
+export default async function ArtistsPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -21,38 +21,34 @@ export default async function PanelPage({
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
-  const [songs, songsCount] = await Promise.all([
-    prisma.song.findMany({
-      where:
-        userRole === "administrator" || userRole === "moderator"
-          ? {}
-          : { userId: session?.user?.id },
+  const [artists, artistsCount] = await Promise.all([
+    prisma.artist.findMany({
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.song.count(),
+    prisma.artist.count(),
   ]);
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-        <h2 className="text-xl font-semibold">Songs Library</h2>
+        <h2 className="text-xl font-semibold">Artists Library</h2>
         <Button
           asChild
           className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
         >
-          <Link href="/panel/new/song">
-            <Plus className="mr-2 h-4 w-4" /> Add New Song
+          <Link href="/panel/new/artist">
+            <Plus className="mr-2 h-4 w-4" /> Add New Artist
           </Link>
         </Button>
       </div>
       <div className="glass rounded-lg border border-white/10 overflow-hidden">
         <AdminTable
-          type="songs"
+          type="artists"
           userRole={userRole}
-          data={songs}
-          pageCount={Math.ceil(songsCount / pageSize)}
+          data={artists}
+          pageCount={Math.ceil(artistsCount / pageSize)}
           pageIndex={page - 1}
         />
       </div>

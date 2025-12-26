@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import React from "react";
+import { prisma } from "@/lib/prisma";
+import AdminPanelLayout from "@/components/AdminPanelLayout";
 
 export default async function ProtectedLayout({
   children,
@@ -16,5 +18,40 @@ export default async function ProtectedLayout({
     return redirect("/login");
   }
 
-  return <>{children}</>;
+  const userRole = (session?.user as { role?: string })?.role;
+
+  const [
+    songsCount,
+    artistsCount,
+    albumsCount,
+    playlistsCount,
+    usersCount,
+    commentsCount,
+    suggestionsCount,
+  ] = await Promise.all([
+    prisma.song.count(),
+    prisma.artist.count(),
+    prisma.album.count(),
+    prisma.playlist.count(),
+    prisma.user.count(),
+    prisma.comment.count(),
+    prisma.lyricsSuggestion.count(),
+  ]);
+
+  return (
+    <AdminPanelLayout
+      userRole={userRole}
+      stats={{
+        songsCount,
+        artistsCount,
+        albumsCount,
+        playlistsCount,
+        usersCount,
+        commentsCount,
+        suggestionsCount,
+      }}
+    >
+      {children}
+    </AdminPanelLayout>
+  );
 }
