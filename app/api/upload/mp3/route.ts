@@ -47,9 +47,11 @@ export async function POST(request: Request) {
       // Ignore if exists
     }
 
-    // Create a unique filename to avoid overwriting
-    const safeFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, "-");
-    const filepath = path.join(uploadDir, safeFilename);
+    // Create a temporary filename
+    const tempFilename = `temp_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(7)}.mp3`;
+    const filepath = path.join(uploadDir, tempFilename);
 
     await writeFile(filepath, buffer);
 
@@ -71,7 +73,7 @@ export async function POST(request: Request) {
         }
 
         const ext = picture.format === "image/jpeg" ? "jpg" : "png";
-        const tempCoverFilename = `temp_${safeFilename}.${ext}`;
+        const tempCoverFilename = `temp_${tempFilename}.${ext}`;
         const tempCoverFilepath = path.join(coverDir, tempCoverFilename);
 
         await writeFile(tempCoverFilepath, picture.data);
@@ -83,13 +85,13 @@ export async function POST(request: Request) {
       // Continue even if metadata parsing fails, but warn
     }
 
-    const publicPath = `/assets/mp3/${safeFilename}`;
+    const publicPath = `/assets/mp3/${tempFilename}`;
 
     return NextResponse.json({
       success: true,
       data: {
         filePath: publicPath,
-        filename: safeFilename,
+        filename: tempFilename,
         coverArt: coverArtPath,
         tempCoverArt: tempCoverArtPath,
         metadata: {
