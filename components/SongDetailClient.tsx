@@ -227,6 +227,18 @@ export default function SongDetailClient({
                 {song.album}
               </p>
             )}
+            {song.genres && song.genres.length > 0 && (
+              <div className="flex flex-wrap gap-2 justify-center mt-2">
+                {song.genres.map((genre) => (
+                  <span
+                    key={genre.id}
+                    className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground"
+                  >
+                    {genre.name}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="flex gap-2 justify-center mt-4">
               {!song.lyrics && (
                 <Link href={`/panel/edit/lyrics/${song.id}`}>

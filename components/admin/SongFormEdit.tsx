@@ -49,6 +49,12 @@ interface Artist {
   nameEn?: string | null;
 }
 
+interface Genre {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 interface SongFormProps {
   songId?: string;
   mode?: "create" | "edit";
@@ -76,6 +82,7 @@ const formSchema = z.object({
       })
     )
     .optional(),
+  genreIds: z.array(z.string()).optional(),
 });
 
 type SongFormValues = z.infer<typeof formSchema>;
@@ -87,6 +94,9 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [openArtist, setOpenArtist] = useState(false);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
+  const [openGenre, setOpenGenre] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0); // Key to force file input reset
   const [fetchingData, setFetchingData] = useState(false);
 
@@ -109,6 +119,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
 
       tempCoverArt: "",
       crew: [],
+      genreIds: [],
     },
   });
 
@@ -150,9 +161,23 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
       }
     };
 
+    const fetchGenres = async () => {
+      try {
+        const res = await fetch("/api/genres");
+        if (res.ok) {
+          const result = await res.json();
+          // The genres API returns the array directly
+          setGenres(Array.isArray(result) ? result : result.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch genres", error);
+      }
+    };
+
     fetchAlbums();
     fetchArtists();
-  }, [openArtist]);
+    fetchGenres();
+  }, [openArtist, openGenre]);
 
   // Fetch song data in edit mode
   useEffect(() => {
@@ -188,6 +213,13 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
               form.setValue("filename", song.filename || "");
               if (song.crew) {
                 form.setValue("crew", song.crew);
+              }
+              if (song.genres) {
+                setSelectedGenres(song.genres);
+                form.setValue(
+                  "genreIds",
+                  song.genres.map((g: Genre) => g.id)
+                );
               }
             } else {
               toast.error("Failed to fetch song data");
@@ -316,8 +348,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
         throw new Error(result.message || "Failed to upload file");
       }
 
-      const { filePath, filename, metadata, coverArt, tempCoverArt } =
-        result.data;
+      const { filename, metadata, coverArt, tempCoverArt } = result.data;
 
       form.setValue("filename", filename);
 
@@ -566,7 +597,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
         <FormField
           control={form.control}
           name="artist"
-          render={({ field }) => (
+          render={() => (
             <FormItem className="flex flex-col">
               <FormLabel>
                 Artists{" "}
@@ -807,6 +838,119 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                   }}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="genreIds"
+          render={() => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Genres</FormLabel>
+
+              {/* Display selected genres as badges */}
+              {selectedGenres.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {selectedGenres.map((genre) => (
+                    <div
+                      key={genre.id}
+                      className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm"
+                    >
+                      <span>{genre.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = selectedGenres.filter(
+                            (g) => g.id !== genre.id
+                          );
+                          setSelectedGenres(updated);
+                          form.setValue(
+                            "genreIds",
+                            updated.map((g) => g.id)
+                          );
+                        }}
+                        className="hover:text-destructive"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <Popover open={openGenre} onOpenChange={setOpenGenre}>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openGenre}
+                      className={cn(
+                        "w-full justify-between",
+                        selectedGenres.length === 0 && "text-muted-foreground"
+                      )}
+                    >
+                      {selectedGenres.length > 0
+                        ? `${selectedGenres.length} genre(s) selected`
+                        : "Select genres"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search genre..." />
+                    <CommandList>
+                      <CommandEmpty>No genre found.</CommandEmpty>
+                      <CommandGroup>
+                        {genres.map((genre) => (
+                          <CommandItem
+                            value={genre.name}
+                            key={genre.id}
+                            onSelect={() => {
+                              const isSelected = selectedGenres.some(
+                                (g) => g.id === genre.id
+                              );
+
+                              if (isSelected) {
+                                // Remove genre
+                                const updated = selectedGenres.filter(
+                                  (g) => g.id !== genre.id
+                                );
+                                setSelectedGenres(updated);
+                                form.setValue(
+                                  "genreIds",
+                                  updated.map((g) => g.id)
+                                );
+                              } else {
+                                // Add genre
+                                const updated = [...selectedGenres, genre];
+                                setSelectedGenres(updated);
+                                form.setValue(
+                                  "genreIds",
+                                  updated.map((g) => g.id)
+                                );
+                              }
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedGenres.some((g) => g.id === genre.id)
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {genre.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}

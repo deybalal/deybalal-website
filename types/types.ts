@@ -22,6 +22,13 @@ export interface Song {
   playCount?: number;
   lastPlayedAt?: number;
   contributors?: Contributor[];
+  genres?: Genre[];
+}
+
+export interface Genre {
+  id: string;
+  name: string;
+  slug: string;
 }
 
 export interface Contributor {

@@ -117,6 +117,7 @@ export default async function SongDetailPage({
       ...artist,
       songs: [], // Artist songs not needed for this view
     })),
+    genres: songData.genres,
   };
 
   return (

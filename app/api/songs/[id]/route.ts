@@ -111,14 +111,18 @@ export async function PUT(
               ? body.isFeatured
               : existingSong.isFeatured
             : existingSong.isFeatured,
-        crew: {
-          deleteMany: {},
-          create: body.crew || [],
-        },
-        genres: {
-          set: [],
-          connect: body.genreIds?.map((id: string) => ({ id })) || [],
-        },
+        ...(body.crew && {
+          crew: {
+            deleteMany: {},
+            create: body.crew,
+          },
+        }),
+        ...(body.genreIds && {
+          genres: {
+            set: [],
+            connect: body.genreIds.map((id: string) => ({ id })),
+          },
+        }),
       },
     });
 

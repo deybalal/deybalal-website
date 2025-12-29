@@ -514,12 +514,12 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   };
 
   const nextStep = () => {
-    if (step === 1 && selectedArtists.length === 0) {
-      toast.error("Please select at least one artist");
+    if (step === 1 && !form.getValues("filename")) {
+      toast.error("Please upload an MP3 file");
       return;
     }
-    if (step === 2 && !form.getValues("filename")) {
-      toast.error("Please upload an MP3 file");
+    if (step === 2 && selectedArtists.length === 0) {
+      toast.error("Please select at least one artist");
       return;
     }
     setStep((prev) => prev + 1);
@@ -554,9 +554,9 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               )}
             >
               {s === 1
-                ? "Artist"
-                : s === 2
                 ? "Upload"
+                : s === 2
+                ? "Artist"
                 : s === 3
                 ? "Details"
                 : "Crew"}
@@ -572,18 +572,18 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
             TIP
           </span>
           {step === 1
-            ? "Select Artist"
-            : step === 2
             ? "Upload Song"
+            : step === 2
+            ? "Select Artist"
             : step === 3
             ? "Song Details"
             : "Crew Members"}
         </h3>
         <p className="text-sm text-muted-foreground">
           {step === 1
-            ? "Start by selecting the main artist for this song. If the artist doesn't exist yet, you can create a new one right here."
-            : step === 2
             ? "Upload the MP3 file for the song. We'll automatically extract metadata like title, album, and duration to save you time."
+            : step === 2
+            ? "Start by selecting the main artist for this song. If the artist doesn't exist yet, you can create a new one right here."
             : step === 3
             ? "Review the extracted details and fill in any missing information. Add cover art and ensure everything looks correct before saving."
             : "Add crew members who worked on this song (e.g., Mix & Master, Producer, Graphic Designer)."}
@@ -603,8 +603,81 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
           }}
           className="space-y-6 w-full"
         >
-          {/* Step 1: Artist Selection */}
+          {/* Step 1: MP3 Upload */}
           {step === 1 && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+              <FormItem>
+                <FormLabel className="text-lg font-semibold">
+                  Upload MP3 File
+                </FormLabel>
+                <div
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center gap-4 transition-colors",
+                    uploading
+                      ? "border-primary bg-primary/5"
+                      : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+                  )}
+                >
+                  <FormControl>
+                    <Input
+                      key={`mp3-${fileInputKey}`}
+                      type="file"
+                      accept=".mp3,audio/mpeg"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                      className="hidden"
+                      id="mp3-upload"
+                    />
+                  </FormControl>
+                  <label
+                    htmlFor="mp3-upload"
+                    className="cursor-pointer flex flex-col items-center gap-2"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
+                      {uploading ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" x2="12" y1="3" y2="15" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className="text-lg font-medium">
+                      {uploading
+                        ? "Uploading & Extracting..."
+                        : form.getValues("filename")
+                        ? "File Uploaded!"
+                        : "Click to Upload MP3"}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {form.getValues("filename") ||
+                        "Supported format: .mp3 (Max 20MB)"}
+                    </span>
+                  </label>
+                </div>
+                {uploading && (
+                  <p className="text-center text-sm text-muted-foreground animate-pulse">
+                    Please wait while we process the audio file...
+                  </p>
+                )}
+              </FormItem>
+            </div>
+          )}
+
+          {/* Step 2: Artist Selection */}
+          {step === 2 && (
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               <FormField
                 control={form.control}
@@ -808,79 +881,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                   </FormItem>
                 )}
               />
-            </div>
-          )}
-
-          {/* Step 2: MP3 Upload */}
-          {step === 2 && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-              <FormItem>
-                <FormLabel className="text-lg font-semibold">
-                  Upload MP3 File
-                </FormLabel>
-                <div
-                  className={cn(
-                    "border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center gap-4 transition-colors",
-                    uploading
-                      ? "border-primary bg-primary/5"
-                      : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
-                  )}
-                >
-                  <FormControl>
-                    <Input
-                      key={`mp3-${fileInputKey}`}
-                      type="file"
-                      accept=".mp3,audio/mpeg"
-                      onChange={handleFileUpload}
-                      disabled={uploading}
-                      className="hidden"
-                      id="mp3-upload"
-                    />
-                  </FormControl>
-                  <label
-                    htmlFor="mp3-upload"
-                    className="cursor-pointer flex flex-col items-center gap-2"
-                  >
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
-                      {uploading ? (
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="32"
-                          height="32"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="17 8 12 3 7 8" />
-                          <line x1="12" x2="12" y1="3" y2="15" />
-                        </svg>
-                      )}
-                    </div>
-                    <span className="text-lg font-medium">
-                      {uploading
-                        ? "Uploading & Extracting..."
-                        : form.getValues("filename")
-                        ? "File Uploaded!"
-                        : "Click to Upload MP3"}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {form.getValues("filename") ||
-                        "Supported format: .mp3 (Max 20MB)"}
-                    </span>
-                  </label>
-                </div>
-                {uploading && (
-                  <p className="text-center text-sm text-muted-foreground animate-pulse">
-                    Please wait while we process the audio file...
-                  </p>
-                )}
-              </FormItem>
             </div>
           )}
 
