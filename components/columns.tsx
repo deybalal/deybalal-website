@@ -1374,30 +1374,7 @@ const BadgeActionsCell = ({
 
 export const getBadgeColumns = (userRole?: string): ColumnDef<Badge>[] => [
   { accessorKey: "name", header: "Name" },
-  { accessorKey: "slug", header: "Slug" },
   { accessorKey: "description", header: "Description" },
-  {
-    accessorKey: "icon",
-    header: "Icon",
-    cell: ({ row }) => {
-      const icon = row.getValue("icon") as string;
-      const IconComponent = icon
-        ? ((LucideIcons as Record<string, unknown>)[icon] as
-            | LucideIcon
-            | undefined)
-        : null;
-      return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-md border bg-muted">
-          {IconComponent ? (
-            <IconComponent className="w-5 h-5" />
-          ) : (
-            icon && <HelpCircle className="w-5 h-5 text-muted-foreground" />
-          )}
-          {!icon && <span className="text-xs text-muted-foreground">None</span>}
-        </div>
-      );
-    },
-  },
   {
     id: "actions",
     cell: ({ row }) => <BadgeActionsCell row={row} userRole={userRole} />,

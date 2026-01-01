@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import * as LucideIcons from "lucide-react";
-import { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,20 +12,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-hot-toast";
 import { Badge } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { slugify } from "@/lib/utils";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  slug: z.string().min(1, "Slug is required"),
   description: z.string().optional(),
-  icon: z.string().optional(),
 });
 
 type BadgeFormValues = z.infer<typeof formSchema>;
@@ -45,9 +39,7 @@ export default function BadgeForm({ initialData }: BadgeFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || "",
-      slug: initialData?.slug || "",
       description: initialData?.description || "",
-      icon: initialData?.icon || "",
     },
   });
 
@@ -64,9 +56,11 @@ export default function BadgeForm({ initialData }: BadgeFormProps) {
       });
 
       const result = await res.json();
-      if (!res.ok || !result.success) {
-        toast.error(result.message || "Failed to save badge");
-        throw new Error(result.message || "Failed to save badge");
+      if (!res.ok || result.success === false) {
+        const errorMessage =
+          result.error || result.message || "Failed to save badge";
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
 
       toast.success(
@@ -87,9 +81,6 @@ export default function BadgeForm({ initialData }: BadgeFormProps) {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
     form.setValue("name", name);
-    if (!initialData) {
-      form.setValue("slug", slugify(name));
-    }
   };
 
   return (
@@ -98,40 +89,6 @@ export default function BadgeForm({ initialData }: BadgeFormProps) {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4 max-w-md"
       >
-        <FormField
-          control={form.control}
-          name="icon"
-          render={({ field }) => {
-            const IconComponent = (LucideIcons as Record<string, unknown>)[
-              field.value || "Badge"
-            ] as LucideIcon | undefined;
-            return (
-              <FormItem>
-                <FormLabel>Badge Icon (Lucide Name)</FormLabel>
-                <FormControl>
-                  <div className="flex items-center gap-4">
-                    <Input
-                      placeholder="e.g. Award, Star, Shield"
-                      {...field}
-                      className="flex-1"
-                    />
-                    <div className="flex items-center justify-center w-10 h-10 rounded-md border bg-muted">
-                      {IconComponent ? (
-                        <IconComponent className="w-6 h-6" />
-                      ) : (
-                        <LucideIcons.HelpCircle className="w-6 h-6 text-muted-foreground" />
-                      )}
-                    </div>
-                  </div>
-                </FormControl>
-                <FormDescription>
-                  Enter a valid Lucide icon name.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
-        />
         <FormField
           control={form.control}
           name="name"
@@ -145,22 +102,6 @@ export default function BadgeForm({ initialData }: BadgeFormProps) {
                   onChange={handleNameChange}
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="slug"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Slug</FormLabel>
-              <FormControl>
-                <Input placeholder="badge-slug" {...field} />
-              </FormControl>
-              <FormDescription>
-                Unique identifier for the badge.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

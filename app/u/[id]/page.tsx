@@ -5,8 +5,7 @@ import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Music, CheckCircle2, HelpCircle, LucideIcon } from "lucide-react";
-import * as LucideIcons from "lucide-react";
+import { Music, CheckCircle2 } from "lucide-react";
 
 export default async function PublicProfilePage({
   params,
@@ -81,22 +80,18 @@ export default async function PublicProfilePage({
         {user.badges.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2">
             {user.badges.map(({ badge }) => {
-              const IconComponent = badge.icon
-                ? ((LucideIcons as Record<string, unknown>)[badge.icon] as
-                    | LucideIcon
-                    | undefined)
-                : null;
               return (
                 <div
                   key={badge.id}
-                  className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full border border-primary/20 text-sm font-medium"
+                  className="flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full border border-primary/20 text-sm font-medium"
                   title={badge.description || badge.name}
                 >
-                  {IconComponent ? (
-                    <IconComponent className="w-3.5 h-3.5" />
-                  ) : (
-                    badge.icon && <HelpCircle className="w-3.5 h-3.5" />
-                  )}
+                  <Image
+                    src="/images/verified.svg"
+                    alt={badge.description || badge.name}
+                    width={30}
+                    height={30}
+                  />
                   {badge.name}
                 </div>
               );

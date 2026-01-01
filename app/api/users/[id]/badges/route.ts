@@ -51,12 +51,14 @@ export async function POST(
 
       // Create new badges
       if (badgeIds && badgeIds.length > 0) {
-        await tx.userBadge.createMany({
-          data: badgeIds.map((badgeId: string) => ({
-            userId: id,
-            badgeId,
-          })),
-        });
+        for (const badgeId of badgeIds) {
+          await tx.userBadge.create({
+            data: {
+              userId: id,
+              badgeId,
+            },
+          });
+        }
       }
     });
 

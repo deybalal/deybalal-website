@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { slugify } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -37,16 +36,14 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, description, icon } = body;
+    const { name, description } = body;
 
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
-    const slug = slugify(name);
-
     const existingBadge = await prisma.badge.findUnique({
-      where: { slug },
+      where: { name },
     });
 
     if (existingBadge) {
@@ -59,9 +56,7 @@ export async function POST(req: Request) {
     const badge = await prisma.badge.create({
       data: {
         name,
-        slug,
         description,
-        icon,
       },
     });
 
