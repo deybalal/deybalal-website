@@ -87,18 +87,36 @@ export async function PUT(
         titleEn: body.titleEn ?? existingSong.titleEn ?? null,
         artist: body.artist,
         artistEn: body.artistEn ?? existingSong.artistEn ?? null,
-        artists: {
-          set: [], // Disconnect all existing
-          connect: body.artistIds?.map((id: string) => ({ id })) || [], // Connect new ones
-        },
-        albumId:
-          (body.albumId ? body.albumId : null) ?? existingSong.albumId ?? null,
-        albumName: body.albumName ?? existingSong.albumName ?? null,
-        coverArt: body.coverArt ?? existingSong.coverArt ?? null,
-        year: body.year ?? existingSong.year ?? null,
-        duration: body.duration ?? existingSong.duration ?? null,
-        lyrics: body.lyrics ?? existingSong.lyrics ?? null,
-        syncedLyrics: body.syncedLyrics ?? existingSong.syncedLyrics ?? null,
+        ...(body.artistIds && {
+          artists: {
+            set: [], // Disconnect all existing
+            connect: body.artistIds?.map((id: string) => ({ id })) || [], // Connect new ones
+          },
+        }),
+        ...(body.albumId && {
+          albumId:
+            (body.albumId ? body.albumId : null) ??
+            existingSong.albumId ??
+            null,
+        }),
+        ...(body.albumName && {
+          albumName: body.albumName ?? existingSong.albumName ?? null,
+        }),
+        ...(body.coverArt && {
+          coverArt: body.coverArt ?? existingSong.coverArt ?? null,
+        }),
+        ...(body.year && {
+          year: body.year ?? existingSong.year ?? null,
+        }),
+        ...(body.duration && {
+          duration: body.duration ?? existingSong.duration ?? null,
+        }),
+        ...(body.lyrics && {
+          lyrics: body.lyrics ?? existingSong.lyrics ?? null,
+        }),
+        ...(body.syncedLyrics && {
+          syncedLyrics: body.syncedLyrics ?? existingSong.syncedLyrics ?? null,
+        }),
         isActive:
           body.isActive !== undefined
             ? userRole === "moderator" || userRole === "administrator"

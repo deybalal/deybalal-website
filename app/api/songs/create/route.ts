@@ -115,6 +115,10 @@ export async function POST(request: Request) {
       }
     }
 
+    if (!finalCoverArt) {
+      finalCoverArt = "/images/cover.png";
+    }
+
     const song = await prisma.song.create({
       data: {
         title: validatedData.title,

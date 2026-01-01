@@ -140,7 +140,7 @@ export default function SongDetailClient({
         >
           {song.coverArt ? (
             <Image
-              src={song.coverArt || ""}
+              src={song.coverArt || "/images/cover.png"}
               alt={song.title || "Song"}
               fill
               className="object-cover"
@@ -222,11 +222,19 @@ export default function SongDetailClient({
                 Unknown Artist
               </p>
             )}
-            {song.album && (
-              <p className="text-sm text-muted-foreground/70 mt-1 line-clamp-1">
-                {song.album}
-              </p>
-            )}
+            {song.album &&
+              (song.albumId ? (
+                <Link
+                  href={`/album/${song.albumId}`}
+                  className="text-sm text-foreground/80 hover:text-foreground mt-1 line-clamp-1"
+                >
+                  {song.album}
+                </Link>
+              ) : (
+                <p className="text-sm text-muted-foreground/70 mt-1 line-clamp-1">
+                  {song.album}
+                </p>
+              ))}
             {song.genres && song.genres.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-center mt-2">
                 {song.genres.map((genre) => (
