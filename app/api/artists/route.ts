@@ -20,6 +20,7 @@ export async function GET() {
         name: true,
         nameEn: true,
         image: true,
+        isVerified: true,
       },
     });
 

@@ -47,6 +47,7 @@ export type Artist = {
   name: string;
   image: string | null;
   songs: Song[];
+  isVerified: boolean;
 };
 
 export type Playlist = {
