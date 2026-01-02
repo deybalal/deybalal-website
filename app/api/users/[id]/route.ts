@@ -124,6 +124,9 @@ export async function PUT(
       data: {
         role: body.role,
         isBanned: body.isBanned,
+        isVerified: body.isVerified,
+        isUserAnArtist: body.isUserAnArtist,
+        artistId: body.artistId,
       },
     });
 

@@ -26,7 +26,6 @@ import {
   HelpCircle,
   LucideIcon,
 } from "lucide-react";
-import * as LucideIcons from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +35,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import ManageBadgesDialog from "./admin/ManageBadgesDialog";
+import AssignArtistDialog from "./admin/AssignArtistDialog";
 import LyricsDiff from "./admin/LyricsDiff";
 import Link from "next/link";
 
@@ -218,7 +218,24 @@ const SongActionsCell = ({
 };
 
 export const getSongColumns = (userRole?: string): ColumnDef<Song>[] => [
-  { accessorKey: "title", header: "Title" },
+  {
+    accessorKey: "title",
+    header: "Title",
+    cell: ({ row }) => {
+      const { id, title } = row.original;
+
+      return (
+        <Link
+          href={`/song/${id}`}
+          className="w-full"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {title}
+        </Link>
+      );
+    },
+  },
   { accessorKey: "artist", header: "Artist" },
   { accessorKey: "albumName", header: "Album" },
   {
@@ -787,6 +804,14 @@ const UserActionsCell = ({
                 Manage Badges
               </DropdownMenuItem>
             </ManageBadgesDialog>
+            <AssignArtistDialog user={user}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(e) => e.preventDefault()}
+              >
+                Assign to Artist
+              </DropdownMenuItem>
+            </AssignArtistDialog>
             <DropdownMenuItem
               className="cursor-pointer text-red-500 hover:text-red-600"
               onClick={toggleBanned}

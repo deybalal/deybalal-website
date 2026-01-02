@@ -223,19 +223,20 @@ enum SuggestionType {
 }
 
 model User {
-  id            String     @id
-  name          String
-  email         String     @unique
-  emailVerified Boolean    @default(false)
-  image         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  playlists     Playlist[]
-  isPrivate     Boolean    @default(true)
-  isBanned      Boolean    @default(false)
-  isVerified    Boolean    @default(false)
+  id             String     @id
+  name           String
+  email          String     @unique
+  emailVerified  Boolean    @default(false)
+  image          String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  sessions       Session[]
+  accounts       Account[]
+  playlists      Playlist[]
+  isPrivate      Boolean    @default(false)
+  isBanned       Boolean    @default(false)
+  isVerified     Boolean    @default(false)
+  isUserAnArtist Boolean    @default(false)
 
   artistId String?
   artist   Artist? @relation(fields: [artistId], references: [id])

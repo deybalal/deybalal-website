@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -51,6 +51,7 @@ import {
 import ArtistForm from "./ArtistForm";
 import GenreForm from "./GenreForm";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 interface Artist {
   id: string;
@@ -249,6 +250,27 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       form.setValue("artistEn", "");
     }
   }, [selectedArtists, form]);
+
+  // Filter albums based on selected artists
+  const filteredAlbums = useMemo(() => {
+    if (selectedArtists.length === 0) return [];
+    const selectedArtistIds = selectedArtists.map((a) => a.id);
+    return albums.filter((album) =>
+      album.artistId ? selectedArtistIds.includes(album.artistId) : false
+    );
+  }, [albums, selectedArtists]);
+
+  // Clear album selection if it's no longer in the filtered list
+  useEffect(() => {
+    const currentAlbumId = form.getValues("albumId");
+    if (
+      currentAlbumId &&
+      !filteredAlbums.some((a) => a.id === currentAlbumId)
+    ) {
+      form.setValue("albumId", "");
+      form.setValue("albumName", "");
+    }
+  }, [filteredAlbums, form]);
 
   async function onSubmit(values: SongFormValues) {
     setLoading(true);
@@ -450,9 +472,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
           // Set both album name and ID
           form.setValue("albumId", matchingAlbum.id);
           form.setValue("albumName", matchingAlbum.name);
-        } else {
-          // If no match found, just set the name
-          form.setValue("albumName", metadata.album);
         }
       }
 
@@ -757,7 +776,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                                   remaining.map((a) => a.name).join(", ")
                                 );
                               }}
-                              className="hover:text-destructive ml-1 cursor-pointer"
+                              className="ml-1 cursor-pointer hover:text-destructive"
                             >
                               ×
                             </button>
@@ -982,7 +1001,17 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                       <FormItem>
                         <FormLabel>Album</FormLabel>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            const selectedAlbum = filteredAlbums.find(
+                              (a) => a.id === value
+                            );
+                            if (selectedAlbum) {
+                              form.setValue("albumName", selectedAlbum.name);
+                            } else {
+                              form.setValue("albumName", "");
+                            }
+                          }}
                           value={field.value}
                         >
                           <FormControl>
@@ -991,7 +1020,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {albums.map((album) => (
+                            {filteredAlbums.map((album) => (
                               <SelectItem
                                 key={album.id}
                                 value={album.id}
@@ -1002,19 +1031,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                             ))}
                           </SelectContent>
                         </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="albumName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Album Name (Optional override)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Album Name" {...field} />
-                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

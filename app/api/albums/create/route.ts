@@ -58,6 +58,24 @@ export async function POST(request: Request) {
 
     const validatedData = albumSchema.parse(body);
 
+    // Artist Restriction Check
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isUserAnArtist: true, artistId: true },
+    });
+
+    if (user?.isUserAnArtist && user.artistId) {
+      if (validatedData.artistId !== user.artistId) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "As an artist, you can only create albums for yourself.",
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     if (!validatedData) {
       return NextResponse.json(
         { success: false, message: "Name is required!" },

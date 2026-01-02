@@ -57,6 +57,11 @@ export default async function SongDetailPage({
     include: {
       artists: true,
       genres: true,
+      album: {
+        select: {
+          name: true,
+        },
+      },
       contributors: {
         include: {
           user: {
@@ -105,7 +110,7 @@ export default async function SongDetailPage({
   // Map Prisma result to match Song type
   const song = {
     ...songData,
-    album: songData.albumName,
+    album: songData?.album?.name ?? null,
     coverArt: songData.coverArt || null,
     lyrics: songData.lyrics || null,
     syncedLyrics: songData.syncedLyrics || null,

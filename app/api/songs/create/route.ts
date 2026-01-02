@@ -66,6 +66,31 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validatedData = songSchema.parse(body);
 
+    // Artist Restriction Check
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isUserAnArtist: true, artistId: true },
+    });
+
+    if (user?.isUserAnArtist && user.artistId) {
+      // If user is an artist, they can only create songs where they are the singer
+      // We check if artistIds contains their artistId and ONLY their artistId (or at least includes it)
+      // The requirement says "only send new songs... where themself are the singer"
+      // This usually means artistIds should be [user.artistId]
+      if (
+        !validatedData.artistIds ||
+        !validatedData.artistIds.includes(user.artistId)
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "As an artist, you can only create songs for yourself.",
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     const slug =
       validatedData.slug ||
       slugify(

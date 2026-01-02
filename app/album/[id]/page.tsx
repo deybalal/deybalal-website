@@ -9,6 +9,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import Link from "next/link";
 
 export async function generateMetadata({
   params,
@@ -104,7 +105,7 @@ export default async function AlbumDetailPage({
   }));
 
   return (
-    <div className="space-y-8 relative">
+    <div className="space-y-8 relative h-max">
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-linear-to-b from-accent/10 via-background to-background pointer-events-none -z-10 h-[500px]" />
 
@@ -136,7 +137,10 @@ export default async function AlbumDetailPage({
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-foreground/60 text-sm md:text-base">
-            <div className="flex items-center gap-2">
+            <Link
+              href={`/artist/${album.artistId}`}
+              className="flex items-center gap-2"
+            >
               {album.artist?.image && (
                 <div className="w-6 h-6 rounded-full overflow-hidden relative">
                   <Image
@@ -150,7 +154,7 @@ export default async function AlbumDetailPage({
               <span className="font-bold text-foreground hover:text-accent cursor-pointer transition-colors">
                 {album.artistName}
               </span>
-            </div>
+            </Link>
             {album.releaseDate && (
               <>
                 <span className="w-1 h-1 rounded-full bg-gray-500" />
