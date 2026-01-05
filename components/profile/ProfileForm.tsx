@@ -30,6 +30,7 @@ interface ProfileFormProps {
     image: string | null;
     userSlug: string;
     isPrivate: boolean;
+    downloadPreference?: number | null;
   };
 }
 

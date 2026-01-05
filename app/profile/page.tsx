@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileForm from "@/components/profile/ProfileForm";
+import DownloadPreferenceForm from "@/components/profile/DownloadPreferenceForm";
 import SessionsList from "@/components/profile/SessionsList";
 import {
   Card,
@@ -30,6 +31,7 @@ export default async function ProfilePage() {
       image: true,
       userSlug: true,
       isPrivate: true,
+      downloadPreference: true,
     },
   });
 
@@ -48,6 +50,9 @@ export default async function ProfilePage() {
         </TabsList>
 
         <TabsContent value="general">
+          <DownloadPreferenceForm
+            initialPreference={user.downloadPreference || 128}
+          />
           <Card>
             <CardHeader>
               <CardTitle>Profile Information</CardTitle>

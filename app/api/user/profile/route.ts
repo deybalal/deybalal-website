@@ -7,8 +7,9 @@ import { z } from "zod";
 export const dynamic = "force-dynamic";
 
 const profileSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Name is required").optional(),
   isPrivate: z.boolean().optional(),
+  downloadPreference: z.number().optional(),
 });
 
 export async function PATCH(request: Request) {
@@ -30,14 +31,22 @@ export async function PATCH(request: Request) {
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        name: validatedData.name,
-        isPrivate: validatedData.isPrivate,
+        ...(validatedData.name && { name: validatedData.name }),
+        ...(validatedData.isPrivate !== undefined && {
+          isPrivate: validatedData.isPrivate,
+        }),
+        ...(validatedData.downloadPreference !== undefined && {
+          downloadPreference: validatedData.downloadPreference,
+        }),
       },
     });
 
     return NextResponse.json({
       success: true,
-      data: updatedUser,
+      data: {
+        isPrivate: updatedUser.isPrivate,
+        downloadPreference: updatedUser.downloadPreference,
+      },
       message: "Profile updated successfully",
     });
   } catch (error) {
