@@ -3,10 +3,23 @@ import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { rename } from "fs/promises";
+import { unlink, stat } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { createNotification, notifyFollowers } from "@/lib/notifications";
+import { exec } from "child_process";
+import { promisify } from "util";
+import { slugify } from "@/lib/utils";
+
+const execAsync = promisify(exec);
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
+}
 
 export const dynamic = "force-dynamic";
 
@@ -174,56 +187,102 @@ export async function PUT(
         }
       }
 
-      // 3. Handle file renaming if it's a temp file
-      if (existingSong.filename?.startsWith("temp_")) {
-        try {
-          const uploadDir = path.join(process.cwd(), "public/assets/mp3");
-          const oldPath = path.join(uploadDir, existingSong.filename);
+      // 3. Generate 128 and 320 quality MP3s and cleanup source
+      try {
+        const uploadDir = path.join(process.cwd(), "public/assets/mp3");
+        const sourceFilename = existingSong.filename;
 
-          if (existsSync(oldPath)) {
-            // Generate proper filename: singer-songName.mp3
-            const artistName = (
-              updatedSong.artistEn ||
-              updatedSong.artist ||
-              "artist"
-            )
-              .toLowerCase()
-              .replace(/[^a-z0-9]/g, "-")
-              .replace(/-+/g, "-");
-            const songName = (
-              updatedSong.titleEn ||
-              updatedSong.title ||
-              "song"
-            )
-              .toLowerCase()
-              .replace(/[^a-z0-9]/g, "-")
-              .replace(/-+/g, "-");
+        if (sourceFilename) {
+          const sourcePath = path.join(uploadDir, sourceFilename);
 
-            const baseFilename = `${artistName}-${songName}`;
-            let newFilename = `${baseFilename}.mp3`;
-            let newPath = path.join(uploadDir, newFilename);
+          if (existsSync(sourcePath)) {
+            // Generate unique base filename
+            const artistSlug = slugify(
+              updatedSong.artistEn || updatedSong.artist || "artist"
+            );
+            const titleSlug = slugify(
+              updatedSong.titleEn || updatedSong.title || "song"
+            );
+            const baseFilename = `${artistSlug}-${titleSlug}`;
+
+            let finalBaseName = baseFilename;
             let counter = 1;
-
-            while (existsSync(newPath)) {
-              newFilename = `${baseFilename}${counter}.mp3`;
-              newPath = path.join(uploadDir, newFilename);
+            // Ensure the new filenames don't collide with existing ones
+            while (
+              existsSync(path.join(uploadDir, `${finalBaseName}-128.mp3`)) ||
+              existsSync(path.join(uploadDir, `${finalBaseName}-320.mp3`))
+            ) {
+              finalBaseName = `${baseFilename}${counter}`;
               counter++;
             }
 
-            await rename(oldPath, newPath);
+            const filename128 = `${finalBaseName}-128.mp3`;
+            const filename320 = `${finalBaseName}-320.mp3`;
+            const path128 = path.join(uploadDir, filename128);
+            const path320 = path.join(uploadDir, filename320);
 
-            // Update the song record with the new filename and uri
+            const coverPath = updatedSong.coverArt
+              ? path.join(process.cwd(), "public", updatedSong.coverArt)
+              : null;
+            const hasCover = coverPath && existsSync(coverPath);
+
+            const metadataArgs = [
+              `-metadata title="${updatedSong.title.replace(/"/g, '\\"')}"`,
+              `-metadata artist="${updatedSong.artist.replace(/"/g, '\\"')}"`,
+              updatedSong.albumName
+                ? `-metadata album="${updatedSong.albumName.replace(
+                    /"/g,
+                    '\\"'
+                  )}"`
+                : "",
+              updatedSong.year ? `-metadata date="${updatedSong.year}"` : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+
+            const coverArgs = hasCover
+              ? `-i "${coverPath}" -map 0:a -map 1:v -c:v copy -id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)"`
+              : "-map 0:a";
+
+            // Generate 128kbps
+            await execAsync(
+              `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -metadata comment="${process.env.BETTER_AUTH_URL}" -b:a 128k -y "${path128}"`
+            );
+
+            // Generate 320kbps
+            await execAsync(
+              `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -metadata comment="${process.env.BETTER_AUTH_URL}"  -b:a 320k -y "${path320}"`
+            );
+
+            // Get file sizes
+            const stats128 = await stat(path128);
+            const stats320 = await stat(path320);
+
+            // Update database with new filenames, uri and links
             await prisma.song.update({
               where: { id },
               data: {
-                filename: newFilename,
-                uri: `/assets/mp3/${newFilename}`,
+                filename: filename128,
+                uri: `/assets/mp3/${filename128}`,
+                links: {
+                  "128": {
+                    url: `/assets/mp3/${filename128}`,
+                    size: formatFileSize(stats128.size),
+                  },
+                  "320": {
+                    url: `/assets/mp3/${filename320}`,
+                    size: formatFileSize(stats320.size),
+                  },
+                },
               },
             });
+
+            // Delete the original source file (it's no longer needed)
+            await unlink(sourcePath);
           }
-        } catch (err) {
-          console.error("Failed to rename file on approval:", err);
         }
+      } catch (err) {
+        console.error("Failed to process MP3 qualities on approval:", err);
       }
     }
 

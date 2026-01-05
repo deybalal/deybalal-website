@@ -20,6 +20,27 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check if user is a verified artist
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isUserAnArtist: true, isVerified: true, role: true },
+    });
+
+    if (
+      user?.isUserAnArtist &&
+      user.isVerified &&
+      user.role !== "administrator" &&
+      user.role !== "moderator"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Verified artists cannot create new artists.",
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const { name, nameEn, image } = body;
 

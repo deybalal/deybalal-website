@@ -7,6 +7,7 @@ import { existsSync } from "fs";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { createNotification } from "@/lib/notifications";
+import { slugify } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -38,16 +39,6 @@ const songSchema = z.object({
     .optional(),
   genreIds: z.array(z.string()).optional(),
 });
-
-function slugify(text: string) {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-");
-}
 
 export async function POST(request: Request) {
   try {
@@ -96,7 +87,9 @@ export async function POST(request: Request) {
     const slug =
       validatedData.slug ||
       slugify(
-        `${validatedData.artist}-${
+        `${
+          validatedData.artistEn ? validatedData.artistEn : validatedData.artist
+        }-${
           validatedData.titleEn ? validatedData.titleEn : validatedData.title
         }`
       );

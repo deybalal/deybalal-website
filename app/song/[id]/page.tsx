@@ -6,10 +6,11 @@ import { auth } from "@/lib/auth";
 import { CommentSection } from "@/components/CommentSection";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Metadata } from "next";
-import { Music } from "lucide-react";
+import { Music, Download } from "lucide-react";
 import { LyricsControl } from "@/components/LyricsControl";
 import { Contributor } from "@/types/types";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -123,12 +124,78 @@ export default async function SongDetailPage({
       songs: [], // Artist songs not needed for this view
     })),
     genres: songData.genres,
+    links: songData.links as unknown as Record<
+      number,
+      { url: string; size: string }
+    >,
   };
 
   return (
     <div className="space-y-12 pb-24 w-full flex-1">
       <SongDetailClient song={song} isUserLoggedIn={isUserLoggedIn} />
       <div className="max-w-4xl mx-auto px-6 my-12 pb-28 w-full flex-1">
+        {song.links && (
+          <div className="bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold">Download Song</h3>
+              <p className="text-sm text-gray-400">
+                Choose your preferred quality
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {song.links[128] && (
+                <Button
+                  asChild
+                  className="bg-purple-600 hover:bg-purple-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-6 group transition-all"
+                >
+                  <a
+                    href={song.links[128].url}
+                    download={`${song.artist} - ${song.title} (128kbps).mp3`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
+                        <Download className="w-5 h-5" />
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold text-lg">128 kbps</span>
+                        <span className="text-xs opacity-80">
+                          Standard Quality
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
+                      {song.links[128].size}
+                    </span>
+                  </a>
+                </Button>
+              )}
+              {song.links[320] && (
+                <Button
+                  asChild
+                  className="bg-green-600 hover:bg-green-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-6 group transition-all"
+                >
+                  <a
+                    href={song.links[320].url}
+                    download={`${song.artist} - ${song.title} (320kbps).mp3`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
+                        <Download className="w-5 h-5" />
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold text-lg">320 kbps</span>
+                        <span className="text-xs opacity-80">High Quality</span>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
+                      {song.links[320].size}
+                    </span>
+                  </a>
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
         <LyricsControl
           songId={song.id}
           hasLyrics={!!song.lyrics}

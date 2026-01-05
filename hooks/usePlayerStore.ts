@@ -45,7 +45,7 @@ interface PlayerState {
 const getBestUri = (song: Song, preference: number): string => {
   if (!song.links) return song.uri;
   // Try to find exact match
-  if (song.links[preference]) return song.links[preference];
+  if (song.links[preference]) return song.links[preference].url;
   // Fallback to any available link
   const availableQualities = Object.keys(song.links)
     .map(Number)
@@ -53,11 +53,9 @@ const getBestUri = (song: Song, preference: number): string => {
   if (availableQualities.length > 0) {
     // Try to find the closest quality without exceeding preference if possible,
     // or just the highest available if preference is high.
-    // For simplicity, let's pick the highest available that is <= preference,
-    // or just the highest available if all are higher.
     const bestMatch =
       availableQualities.find((q) => q <= preference) || availableQualities[0];
-    return song.links[bestMatch];
+    return song.links[bestMatch].url;
   }
   return song.uri;
 };
