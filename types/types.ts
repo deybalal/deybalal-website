@@ -1,5 +1,6 @@
 export interface Song {
   uri: string;
+  links?: Record<number, string>;
   localUri?: string;
   filename: string;
   title: string | undefined;

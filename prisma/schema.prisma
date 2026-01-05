@@ -32,6 +32,7 @@ model Song {
   disabledDescription String?
   isActive            Boolean @default(false)
   isFeatured          Boolean @default(false)
+  links               Json?
 
   albumId String?
   album   Album?  @relation(fields: [albumId], references: [id])
@@ -223,20 +224,21 @@ enum SuggestionType {
 }
 
 model User {
-  id             String     @id
-  name           String
-  email          String     @unique
-  emailVerified  Boolean    @default(false)
-  image          String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  sessions       Session[]
-  accounts       Account[]
-  playlists      Playlist[]
-  isPrivate      Boolean    @default(false)
-  isBanned       Boolean    @default(false)
-  isVerified     Boolean    @default(false)
-  isUserAnArtist Boolean    @default(false)
+  id                 String     @id
+  name               String
+  email              String     @unique
+  emailVerified      Boolean    @default(false)
+  image              String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  playlists          Playlist[]
+  isPrivate          Boolean    @default(false)
+  isBanned           Boolean    @default(false)
+  isVerified         Boolean    @default(false)
+  isUserAnArtist     Boolean    @default(false)
+  downloadPreference Int        @default(128)
 
   artistId String?
   artist   Artist? @relation(fields: [artistId], references: [id])

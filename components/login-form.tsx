@@ -19,6 +19,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { redirect } from "next/navigation";
+import { usePlayerStore } from "@/hooks/usePlayerStore";
 
 export function LoginForm({
   className,
@@ -26,6 +27,9 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const setDownloadPreference = usePlayerStore(
+    (state) => state.setDownloadPreference
+  );
 
   const loginHandler = async (e: FormEvent) => {
     e.preventDefault();
@@ -41,6 +45,9 @@ export function LoginForm({
 
     if (response.success) {
       toast.success("Login successful!");
+      if (response.downloadPreference) {
+        setDownloadPreference(response.downloadPreference);
+      }
       redirect("/panel");
     } else {
       toast.error(`Something went wrong! ${response.message}`);

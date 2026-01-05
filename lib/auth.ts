@@ -25,6 +25,9 @@ export const auth = betterAuth({
       isBanned: {
         type: "boolean",
       },
+      downloadPreference: {
+        type: "number",
+      },
     },
   },
   socialProviders: {

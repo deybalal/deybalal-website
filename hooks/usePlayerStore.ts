@@ -17,6 +17,7 @@ interface PlayerState {
   progress: number;
   duration: number;
   activeId: string | null;
+  downloadPreference: number;
 
   play: () => void;
   pause: () => void;
@@ -33,12 +34,33 @@ interface PlayerState {
   seekTo: number | null;
   setSeekTo: (time: number | null) => void;
   setActiveId: (id: string) => void;
+  setDownloadPreference: (pref: number) => void;
 
   isShuffling: boolean;
   repeatMode: "off" | "all" | "one";
   toggleShuffle: () => void;
   setRepeatMode: (mode: "off" | "all" | "one") => void;
 }
+
+const getBestUri = (song: Song, preference: number): string => {
+  if (!song.links) return song.uri;
+  // Try to find exact match
+  if (song.links[preference]) return song.links[preference];
+  // Fallback to any available link
+  const availableQualities = Object.keys(song.links)
+    .map(Number)
+    .sort((a, b) => b - a); // Higher quality first
+  if (availableQualities.length > 0) {
+    // Try to find the closest quality without exceeding preference if possible,
+    // or just the highest available if preference is high.
+    // For simplicity, let's pick the highest available that is <= preference,
+    // or just the highest available if all are higher.
+    const bestMatch =
+      availableQualities.find((q) => q <= preference) || availableQualities[0];
+    return song.links[bestMatch];
+  }
+  return song.uri;
+};
 
 export const usePlayerStore = create<PlayerState>()(
   persist<PlayerState>(
@@ -55,13 +77,15 @@ export const usePlayerStore = create<PlayerState>()(
       isShuffling: false,
       repeatMode: "off",
       activeId: null,
+      downloadPreference: 128,
 
       play: () => set({ isPlaying: true, activeId: TAB_ID }),
       pause: () => set({ isPlaying: false }),
 
       setSong: (song, play) => {
+        const uri = getBestUri(song, get().downloadPreference);
         set({
-          currentSong: song,
+          currentSong: { ...song, uri },
           isPlaying: play === false ? false : true,
           progress: 0,
           activeId: play === false ? get().activeId : TAB_ID,
@@ -69,11 +93,16 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       setQueue: (songs, startIndex = 0) => {
+        const pref = get().downloadPreference;
+        const songsWithUri = songs.map((s) => ({
+          ...s,
+          uri: getBestUri(s, pref),
+        }));
         set({
-          queue: songs,
-          priorityQueue: [], // Clear priority queue when setting new context? Or keep it? Usually clear or keep depends on UX. Let's clear for now to avoid confusion.
+          queue: songsWithUri,
+          priorityQueue: [],
           currentIndex: startIndex,
-          currentSong: songs[startIndex] || null,
+          currentSong: songsWithUri[startIndex] || null,
           isPlaying: true,
           progress: 0,
           activeId: TAB_ID,
@@ -81,14 +110,16 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       addToQueue: (song) => {
+        const uri = getBestUri(song, get().downloadPreference);
         set((state) => ({
-          priorityQueue: [...state.priorityQueue, song],
+          priorityQueue: [...state.priorityQueue, { ...song, uri }],
         }));
       },
 
       playNext: (song) => {
+        const uri = getBestUri(song, get().downloadPreference);
         set((state) => ({
-          priorityQueue: [song, ...state.priorityQueue],
+          priorityQueue: [{ ...song, uri }, ...state.priorityQueue],
         }));
       },
 
@@ -99,15 +130,23 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       next: () => {
-        const { queue, priorityQueue, currentIndex, isShuffling, repeatMode } =
-          get();
+        const {
+          queue,
+          priorityQueue,
+          currentIndex,
+          isShuffling,
+          repeatMode,
+          downloadPreference,
+        } = get();
 
-        // 1. Check Priority Queue
         if (priorityQueue.length > 0) {
           const nextSong = priorityQueue[0];
           const newPriorityQueue = priorityQueue.slice(1);
           set({
-            currentSong: nextSong,
+            currentSong: {
+              ...nextSong,
+              uri: getBestUri(nextSong, downloadPreference),
+            },
             priorityQueue: newPriorityQueue,
             isPlaying: true,
             activeId: TAB_ID,
@@ -115,15 +154,12 @@ export const usePlayerStore = create<PlayerState>()(
           return;
         }
 
-        // 2. Check Regular Queue
         if (queue.length === 0) return;
 
         let nextIndex = -1;
 
         if (isShuffling) {
-          // Simple random shuffle
           nextIndex = Math.floor(Math.random() * queue.length);
-          // Try to avoid same song if queue > 1
           if (queue.length > 1 && nextIndex === currentIndex) {
             nextIndex = (nextIndex + 1) % queue.length;
           }
@@ -136,25 +172,32 @@ export const usePlayerStore = create<PlayerState>()(
         }
 
         if (nextIndex !== -1) {
+          const nextSong = queue[nextIndex];
           set({
             currentIndex: nextIndex,
-            currentSong: queue[nextIndex],
+            currentSong: {
+              ...nextSong,
+              uri: getBestUri(nextSong, downloadPreference),
+            },
             isPlaying: true,
             activeId: TAB_ID,
           });
         } else {
-          // End of queue and not repeating
           set({ isPlaying: false });
         }
       },
 
       prev: () => {
-        const { queue, currentIndex } = get();
+        const { queue, currentIndex, downloadPreference } = get();
 
         if (currentIndex > 0) {
+          const prevSong = queue[currentIndex - 1];
           set({
             currentIndex: currentIndex - 1,
-            currentSong: queue[currentIndex - 1],
+            currentSong: {
+              ...prevSong,
+              uri: getBestUri(prevSong, downloadPreference),
+            },
             isPlaying: true,
             activeId: TAB_ID,
           });
@@ -166,6 +209,8 @@ export const usePlayerStore = create<PlayerState>()(
       setDuration: (duration) => set({ duration }),
       setSeekTo: (seekTo) => set({ seekTo }),
       setActiveId: (id) => set({ activeId: id }),
+      setDownloadPreference: (downloadPreference) =>
+        set({ downloadPreference }),
 
       toggleShuffle: () =>
         set((state) => ({ isShuffling: !state.isShuffling })),
@@ -185,6 +230,7 @@ export const usePlayerStore = create<PlayerState>()(
           isShuffling: state.isShuffling,
           repeatMode: state.repeatMode,
           activeId: state.activeId,
+          downloadPreference: state.downloadPreference,
         } as PlayerState),
     }
   )

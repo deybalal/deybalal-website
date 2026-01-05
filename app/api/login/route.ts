@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
     if (login.user) {
       return NextResponse.json({
         success: true,
+        downloadPreference: login.user.downloadPreference,
         message: "Sign In Successful!",
       });
     } else {

@@ -19,6 +19,7 @@ const songSchema = z.object({
   albumId: z.string().optional(),
   albumName: z.string().optional(),
   uri: z.string().optional(),
+  links: z.record(z.string(), z.string()).optional(),
   coverArt: z.string().optional(),
   year: z.number().min(0).optional(),
   duration: z.number().min(0).optional(),
@@ -161,6 +162,7 @@ export async function POST(request: Request) {
           (validatedData.filename
             ? `/assets/mp3/${validatedData.filename}`
             : ""),
+        links: validatedData.links || undefined,
         coverArt: finalCoverArt,
         year: validatedData.year || 0,
         duration: validatedData.duration || 0,
