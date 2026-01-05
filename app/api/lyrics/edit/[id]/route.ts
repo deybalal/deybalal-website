@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
 import { updateContributorPercentages } from "@/lib/contributors";
+import { createNotification } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -91,6 +92,15 @@ export async function PUT(
             ? existingSong.lyricsSourceUrl
             : sourceUrl,
         },
+      });
+
+      // Notify the user that their suggestion was received
+      await createNotification({
+        userId: session.user.id,
+        type: "LYRICS_SUBMITTED",
+        title: "Lyrics Submitted",
+        message: `Your lyrics suggestion for "${existingSong.title}" has been received and is awaiting moderation.`,
+        link: `/song/${id}`,
       });
 
       return NextResponse.json({

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { createNotification } from "@/lib/notifications";
 
 export async function PUT(
   request: Request,
@@ -48,6 +49,19 @@ export async function PUT(
             : existingComment.isActive,
       },
     });
+
+    // Notify the user if their comment was approved
+    if (updatedComment.isActive && !existingComment.isActive) {
+      await createNotification({
+        userId: existingComment.userId,
+        type: "COMMENT_APPROVED",
+        title: "Comment Approved!",
+        message: `Your comment on "${existingComment.postTitle}" has been approved.`,
+        link: existingComment.songId
+          ? `/song/${existingComment.songId}`
+          : `/album/${existingComment.albumId}`,
+      });
+    }
 
     return NextResponse.json({
       success: true,

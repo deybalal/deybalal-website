@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { rename } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
+import { createNotification, notifyFollowers } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -144,59 +145,104 @@ export async function PUT(
       },
     });
 
-    // Handle file renaming if song is being activated
+    // Handle notifications and file renaming if song is being activated
     if (
       (userRole === "moderator" || userRole === "administrator") &&
       body.isActive === true &&
-      !existingSong.isActive &&
-      existingSong.filename?.startsWith("temp_")
+      !existingSong.isActive
     ) {
-      try {
-        const uploadDir = path.join(process.cwd(), "public/assets/mp3");
-        const oldPath = path.join(uploadDir, existingSong.filename);
+      // 1. Notify the user who submitted the song
+      await createNotification({
+        userId: existingSong.userId,
+        type: "SONG_APPROVED",
+        title: "Song Approved!",
+        message: `Your song "${updatedSong.title}" has been approved and is now live.`,
+        link: `/song/${updatedSong.id}`,
+      });
 
-        if (existsSync(oldPath)) {
-          // Generate proper filename: singer-songName.mp3
-          const artistName = (
-            updatedSong.artistEn ||
-            updatedSong.artist ||
-            "artist"
-          )
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, "-")
-            .replace(/-+/g, "-");
-          const songName = (updatedSong.titleEn || updatedSong.title || "song")
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, "-")
-            .replace(/-+/g, "-");
-
-          const baseFilename = `${artistName}-${songName}`;
-          let newFilename = `${baseFilename}.mp3`;
-          let newPath = path.join(uploadDir, newFilename);
-          let counter = 1;
-
-          while (existsSync(newPath)) {
-            newFilename = `${baseFilename}${counter}.mp3`;
-            newPath = path.join(uploadDir, newFilename);
-            counter++;
-          }
-
-          await rename(oldPath, newPath);
-
-          // Update the song record with the new filename and uri
-          await prisma.song.update({
-            where: { id },
-            data: {
-              filename: newFilename,
-              uri: `/assets/mp3/${newFilename}`,
-            },
+      // 2. Notify followers of each artist
+      const artistIds = body.artistIds || existingSong.artists.map((a) => a.id);
+      if (artistIds && artistIds.length > 0) {
+        for (const artistId of artistIds) {
+          await notifyFollowers({
+            artistId,
+            type: "NEW_RELEASE",
+            title: "New Music Released!",
+            message: `${updatedSong.artist} just released a new song: ${updatedSong.title}`,
+            link: `/song/${updatedSong.id}`,
           });
         }
-      } catch (err) {
-        console.error("Failed to rename file on approval:", err);
-        // We don't want to fail the whole request if renaming fails,
-        // but it's a significant issue.
       }
+
+      // 3. Handle file renaming if it's a temp file
+      if (existingSong.filename?.startsWith("temp_")) {
+        try {
+          const uploadDir = path.join(process.cwd(), "public/assets/mp3");
+          const oldPath = path.join(uploadDir, existingSong.filename);
+
+          if (existsSync(oldPath)) {
+            // Generate proper filename: singer-songName.mp3
+            const artistName = (
+              updatedSong.artistEn ||
+              updatedSong.artist ||
+              "artist"
+            )
+              .toLowerCase()
+              .replace(/[^a-z0-9]/g, "-")
+              .replace(/-+/g, "-");
+            const songName = (
+              updatedSong.titleEn ||
+              updatedSong.title ||
+              "song"
+            )
+              .toLowerCase()
+              .replace(/[^a-z0-9]/g, "-")
+              .replace(/-+/g, "-");
+
+            const baseFilename = `${artistName}-${songName}`;
+            let newFilename = `${baseFilename}.mp3`;
+            let newPath = path.join(uploadDir, newFilename);
+            let counter = 1;
+
+            while (existsSync(newPath)) {
+              newFilename = `${baseFilename}${counter}.mp3`;
+              newPath = path.join(uploadDir, newFilename);
+              counter++;
+            }
+
+            await rename(oldPath, newPath);
+
+            // Update the song record with the new filename and uri
+            await prisma.song.update({
+              where: { id },
+              data: {
+                filename: newFilename,
+                uri: `/assets/mp3/${newFilename}`,
+              },
+            });
+          }
+        } catch (err) {
+          console.error("Failed to rename file on approval:", err);
+        }
+      }
+    }
+
+    // Handle rejection notification (if isDisabled is set to true)
+    if (
+      (userRole === "moderator" || userRole === "administrator") &&
+      body.isDisabled === true &&
+      !existingSong.isDisabled
+    ) {
+      await createNotification({
+        userId: existingSong.userId,
+        type: "SONG_REJECTED",
+        title: "Song Submission Update",
+        message: `Your song submission "${
+          updatedSong.title
+        }" was not approved. ${
+          body.disabledDescription ? `Reason: ${body.disabledDescription}` : ""
+        }`,
+      });
     }
 
     return NextResponse.json({ success: true, data: updatedSong });

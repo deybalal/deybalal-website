@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Prisma } from "@prisma/client";
 import { updateContributorPercentages } from "@/lib/contributors";
+import { createNotification } from "@/lib/notifications";
 
 export async function PUT(
   request: Request,
@@ -88,6 +89,18 @@ export async function PUT(
     const updatedSuggestion = await prisma.lyricsSuggestion.update({
       where: { id },
       data: { status },
+    });
+
+    // Notify the user about the status update
+    await createNotification({
+      userId: suggestion.userId,
+      type: status === "APPROVED" ? "LYRICS_APPROVED" : "LYRICS_REJECTED",
+      title: status === "APPROVED" ? "Lyrics Approved!" : "Lyrics Update",
+      message:
+        status === "APPROVED"
+          ? `Your lyrics suggestion for "${suggestion.song.title}" has been approved.`
+          : `Your lyrics suggestion for "${suggestion.song.title}" was not approved.`,
+      link: `/song/${suggestion.songId}`,
     });
 
     return NextResponse.json({ success: true, data: updatedSuggestion });

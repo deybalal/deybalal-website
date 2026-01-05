@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(request: Request) {
   try {
@@ -35,6 +36,22 @@ export async function POST(request: Request) {
         type: "LYRICS",
         status: "PENDING",
       },
+      include: {
+        song: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    });
+
+    // Notify the user that their suggestion was received
+    await createNotification({
+      userId: session.user.id,
+      type: "LYRICS_SUBMITTED",
+      title: "Lyrics Submitted",
+      message: `Your lyrics suggestion for "${suggestion.song.title}" has been received and is awaiting moderation.`,
+      link: `/song/${songId}`,
     });
 
     return NextResponse.json({ success: true, data: suggestion });

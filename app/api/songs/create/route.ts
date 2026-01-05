@@ -6,6 +6,7 @@ import path from "path";
 import { existsSync } from "fs";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { createNotification } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -204,19 +205,14 @@ export async function POST(request: Request) {
       },
     });
 
-    // Notify followers of each artist
-    if (validatedData.artistIds && validatedData.artistIds.length > 0) {
-      const { notifyFollowers } = await import("@/lib/notifications");
-      for (const artistId of validatedData.artistIds) {
-        await notifyFollowers({
-          artistId,
-          type: "NEW_RELEASE",
-          title: "New Music Released!",
-          message: `${validatedData.artist} just released a new song: ${validatedData.title}`,
-          link: `/song/${song.id}`,
-        });
-      }
-    }
+    // Notify the user that their submission was received
+    await createNotification({
+      userId: session.user.id,
+      type: "SONG_SUBMITTED",
+      title: "Song Submitted",
+      message: `Your song "${song.title}" has been submitted and is awaiting moderation.`,
+      link: `/song/${song.id}`,
+    });
 
     return NextResponse.json({ success: true, data: song });
   } catch (error) {
