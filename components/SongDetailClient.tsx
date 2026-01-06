@@ -16,11 +16,13 @@ import { useLyricsStore } from "@/hooks/useLyricsStore";
 interface SongDetailClientProps {
   song: Song;
   isUserLoggedIn: boolean;
+  isInstrumental: boolean;
 }
 
 export default function SongDetailClient({
   song,
   isUserLoggedIn,
+  isInstrumental,
 }: SongDetailClientProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -248,41 +250,43 @@ export default function SongDetailClient({
                 ))}
               </div>
             )}
-            <div className="flex gap-2 justify-center mt-4">
-              {!song.lyrics && (
-                <Link href={`/panel/edit/lyrics/${song.id}`}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs cursor-pointer"
-                  >
-                    Add Lyrics
-                  </Button>
-                </Link>
-              )}
-              {song.lyrics && !song.syncedLyrics && (
-                <Link href={`/panel/edit/sync/${song.id}`}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs cursor-pointer"
-                  >
-                    Sync Lyrics
-                  </Button>
-                </Link>
-              )}
-              {song.lyrics && !song.syncedLyrics && (
-                <Link href={`/panel/edit/synced/${song.id}`}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs cursor-pointer"
-                  >
-                    Paste Synced Lyrics
-                  </Button>
-                </Link>
-              )}
-            </div>
+            {!isInstrumental && (
+              <div className="flex gap-2 justify-center mt-4">
+                {!song.lyrics && (
+                  <Link href={`/panel/edit/lyrics/${song.id}`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs cursor-pointer"
+                    >
+                      Add Lyrics
+                    </Button>
+                  </Link>
+                )}
+                {song.lyrics && !song.syncedLyrics && (
+                  <Link href={`/panel/edit/sync/${song.id}`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs cursor-pointer"
+                    >
+                      Sync Lyrics
+                    </Button>
+                  </Link>
+                )}
+                {song.lyrics && !song.syncedLyrics && (
+                  <Link href={`/panel/edit/synced/${song.id}`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs cursor-pointer"
+                    >
+                      Paste Synced Lyrics
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="mt-2">

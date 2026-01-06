@@ -130,9 +130,17 @@ export default async function SongDetailPage({
     >,
   };
 
+  const isInstrumental = songData.genres.some(
+    (genre) => genre.slug === "instrumental"
+  );
+
   return (
     <div className="space-y-12 pb-24 w-full flex-1">
-      <SongDetailClient song={song} isUserLoggedIn={isUserLoggedIn} />
+      <SongDetailClient
+        song={song}
+        isUserLoggedIn={isUserLoggedIn}
+        isInstrumental={isInstrumental}
+      />
       <div className="max-w-4xl mx-auto px-6 my-12 pb-28 w-full flex-1">
         {song.links && (
           <div className="bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
@@ -227,6 +235,7 @@ export default async function SongDetailPage({
           contributors={songData.contributors as unknown as Contributor[]}
           source={songData.lyricsSource}
           sourceUrl={songData.lyricsSourceUrl}
+          isInstrumental={isInstrumental}
         />
 
         {songData.crew && songData.crew.length > 0 && (

@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Type,
   ExternalLink,
+  Music,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ interface LyricsControlProps {
   contributors: Contributor[];
   source: string | null;
   sourceUrl: string | null;
+  isInstrumental: boolean;
 }
 
 export const LyricsControl: React.FC<LyricsControlProps> = ({
@@ -34,6 +36,7 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
   contributors,
   source,
   sourceUrl,
+  isInstrumental,
 }) => {
   const { lyricsMode, setLyricsMode } = useLyricsStore();
 
@@ -51,79 +54,94 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
         <p className="text-sm text-gray-400">Customize how you view lyrics</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-        {modes.map(({ mode, label, icon: Icon }) => (
-          <Button
-            key={mode}
-            variant={lyricsMode === mode ? "default" : "secondary"}
-            className={cn(
-              "flex items-center gap-2 h-11 transition-all",
-              lyricsMode === mode
-                ? "bg-primary text-primary-foreground"
-                : "bg-white/5 hover:bg-white/10"
-            )}
-            onClick={() => setLyricsMode(mode)}
-          >
-            <Icon className="w-4 h-4" />
-            {label}
-          </Button>
-        ))}
-      </div>
+      {isInstrumental ? (
+        <div className="flex items-center justify-center p-8 bg-white/5 rounded-xl border border-white/10 mb-6">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Music className="w-6 h-6 text-primary" />
+            </div>
+            <h4 className="text-lg font-medium">
+              Instrumental music. Enjoy the beat!
+            </h4>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            {modes.map(({ mode, label, icon: Icon }) => (
+              <Button
+                key={mode}
+                variant={lyricsMode === mode ? "default" : "secondary"}
+                className={cn(
+                  "flex items-center gap-2 h-11 transition-all",
+                  lyricsMode === mode
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-white/5 hover:bg-white/10"
+                )}
+                onClick={() => setLyricsMode(mode)}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </Button>
+            ))}
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        <Button
-          asChild
-          variant="secondary"
-          className="bg-white/5 hover:bg-white/10 flex items-center gap-2 h-11"
-        >
-          <Link href={`/panel/edit/lyrics/${songId}`}>
-            {hasLyrics ? (
-              <>
-                <FileEdit className="w-4 h-4" />
-                Edit Lyrics
-              </>
-            ) : (
-              <>
-                <PlusCircle className="w-4 h-4" />
-                Add Lyrics
-              </>
-            )}
-          </Link>
-        </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <Button
+              asChild
+              variant="secondary"
+              className="bg-white/5 hover:bg-white/10 flex items-center gap-2 h-11"
+            >
+              <Link href={`/panel/edit/lyrics/${songId}`}>
+                {hasLyrics ? (
+                  <>
+                    <FileEdit className="w-4 h-4" />
+                    Edit Lyrics
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="w-4 h-4" />
+                    Add Lyrics
+                  </>
+                )}
+              </Link>
+            </Button>
 
-        <Button
-          asChild
-          variant="secondary"
-          className="bg-white/5 hover:bg-white/10 flex items-center gap-2 h-11"
-        >
-          <Link href={`/panel/edit/sync/${songId}`}>
-            {hasSyncedLyrics ? (
-              <>
-                <RefreshCw className="w-4 h-4" />
-                Re-Synced Lyrics
-              </>
-            ) : (
-              <>
-                <Timer className="w-4 h-4" />
-                Sync The Lyrics
-              </>
-            )}
-          </Link>
-        </Button>
+            <Button
+              asChild
+              variant="secondary"
+              className="bg-white/5 hover:bg-white/10 flex items-center gap-2 h-11"
+            >
+              <Link href={`/panel/edit/sync/${songId}`}>
+                {hasSyncedLyrics ? (
+                  <>
+                    <RefreshCw className="w-4 h-4" />
+                    Re-Synced Lyrics
+                  </>
+                ) : (
+                  <>
+                    <Timer className="w-4 h-4" />
+                    Sync The Lyrics
+                  </>
+                )}
+              </Link>
+            </Button>
 
-        {hasSyncedLyrics && (
-          <Button
-            asChild
-            variant="secondary"
-            className="bg-white/5 hover:bg-white/10 flex items-center gap-2 h-11"
-          >
-            <Link href={`/panel/edit/synced/${songId}`}>
-              <Type className="w-4 h-4" />
-              Edit Synced Lyrics Text
-            </Link>
-          </Button>
-        )}
-      </div>
+            {hasSyncedLyrics && (
+              <Button
+                asChild
+                variant="secondary"
+                className="bg-white/5 hover:bg-white/10 flex items-center gap-2 h-11"
+              >
+                <Link href={`/panel/edit/synced/${songId}`}>
+                  <Type className="w-4 h-4" />
+                  Edit Synced Lyrics Text
+                </Link>
+              </Button>
+            )}
+          </div>
+        </>
+      )}
 
       <div className="flex justify-center">
         <div className="h-px bg-foreground/50 w-10/12 mt-4 mb-2"></div>
