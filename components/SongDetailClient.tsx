@@ -238,12 +238,13 @@ export default function SongDetailClient({
             {song.genres && song.genres.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-center mt-2">
                 {song.genres.map((genre) => (
-                  <span
+                  <Link
                     key={genre.id}
-                    className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground"
+                    href={`/genres/${genre.slug}`}
+                    className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
                   >
                     {genre.name}
-                  </span>
+                  </Link>
                 ))}
               </div>
             )}

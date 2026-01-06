@@ -1,6 +1,6 @@
 export default function PlaylistSkeleton() {
   return (
-    <div className="space-y-8 animate-pulse">
+    <div className="space-y-8 animate-pulse w-full">
       <div className="flex gap-8">
         <div className="w-64 h-64 bg-muted rounded-lg" />
         <div className="flex-1 space-y-4">

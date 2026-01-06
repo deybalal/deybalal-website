@@ -30,7 +30,7 @@ export default function AlbumPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-8 container">
         <h1 className="text-4xl font-bold text-white neon-text">Albums</h1>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {[...Array(10)].map((_, i) => (
@@ -45,7 +45,7 @@ export default function AlbumPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 container">
       <h1 className="text-4xl font-bold text-white neon-text">Albums</h1>
 
       {albums.length === 0 ? (

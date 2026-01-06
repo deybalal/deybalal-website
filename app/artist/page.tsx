@@ -33,7 +33,7 @@ export default function ArtistPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-8 container">
         <h1 className="text-4xl font-bold text-white neon-text">Artists</h1>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
           {[...Array(10)].map((_, i) => (
@@ -48,7 +48,7 @@ export default function ArtistPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 container">
       <h1 className="text-4xl font-bold text-white neon-text">Artists</h1>
 
       {artists.length === 0 ? (
@@ -59,7 +59,7 @@ export default function ArtistPage() {
             <Link
               href={`/artist/${artist.id}`}
               key={artist.id}
-              className="w-64"
+              className="w-full"
             >
               <Card className="group relative overflow-hidden bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center">

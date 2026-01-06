@@ -100,6 +100,19 @@ const PlayerBar = () => {
     setProgress(value[0]); // Optimistic update
   };
 
+  const handleQualityChange = async (quality: number) => {
+    setDownloadPreference(quality);
+    try {
+      await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ downloadPreference: quality }),
+      });
+    } catch (error) {
+      console.error("Failed to sync download preference:", error);
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -266,7 +279,7 @@ const PlayerBar = () => {
             {qualities.map((q) => (
               <DropdownMenuItem
                 key={q.value}
-                onClick={() => setDownloadPreference(q.value)}
+                onClick={() => handleQualityChange(q.value)}
                 className={`cursor-pointer ${
                   downloadPreference === q.value
                     ? "text-primary font-bold"
@@ -328,7 +341,7 @@ const PlayerBar = () => {
                         downloadPreference === q.value ? "default" : "outline"
                       }
                       size="sm"
-                      onClick={() => setDownloadPreference(q.value)}
+                      onClick={() => handleQualityChange(q.value)}
                       className="text-[12px] h-7 px-2 cursor-pointer"
                     >
                       {q.label.split(" ")[0]}
