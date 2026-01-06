@@ -20,7 +20,7 @@ const songSchema = z.object({
   albumId: z.string().optional(),
   albumName: z.string().optional(),
   uri: z.string().optional(),
-  links: z.record(z.string(), z.string()).optional(),
+  links: z.record(z.string(), z.any()).optional(),
   coverArt: z.string().optional(),
   year: z.number().min(0).optional(),
   duration: z.number().min(0).optional(),

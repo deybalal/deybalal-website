@@ -216,8 +216,10 @@ export async function PUT(
               counter++;
             }
 
+            const filename64 = `${finalBaseName}-64.mp3`;
             const filename128 = `${finalBaseName}-128.mp3`;
             const filename320 = `${finalBaseName}-320.mp3`;
+            const path64 = path.join(uploadDir, filename64);
             const path128 = path.join(uploadDir, filename128);
             const path320 = path.join(uploadDir, filename320);
 
@@ -244,6 +246,11 @@ export async function PUT(
               ? `-i "${coverPath}" -map 0:a -map 1:v -c:v copy -id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)"`
               : "-map 0:a";
 
+            // Generate 64kbps
+            await execAsync(
+              `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -metadata comment="${process.env.BETTER_AUTH_URL}" -b:a 64k -y "${path64}"`
+            );
+
             // Generate 128kbps
             await execAsync(
               `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -metadata comment="${process.env.BETTER_AUTH_URL}" -b:a 128k -y "${path128}"`
@@ -255,6 +262,7 @@ export async function PUT(
             );
 
             // Get file sizes
+            const stats64 = await stat(path64);
             const stats128 = await stat(path128);
             const stats320 = await stat(path320);
 
@@ -265,13 +273,20 @@ export async function PUT(
                 filename: filename128,
                 uri: `/assets/mp3/${filename128}`,
                 links: {
+                  "64": {
+                    url: `/assets/mp3/${filename64}`,
+                    size: formatFileSize(stats64.size),
+                    bytes: stats64.size,
+                  },
                   "128": {
                     url: `/assets/mp3/${filename128}`,
                     size: formatFileSize(stats128.size),
+                    bytes: stats128.size,
                   },
                   "320": {
                     url: `/assets/mp3/${filename320}`,
                     size: formatFileSize(stats320.size),
+                    bytes: stats320.size,
                   },
                 },
               },

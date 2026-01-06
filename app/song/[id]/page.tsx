@@ -142,7 +142,31 @@ export default async function SongDetailPage({
                 Choose your preferred quality
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {song.links[64] && (
+                <Button
+                  asChild
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-6 group transition-all"
+                >
+                  <a
+                    href={song.links[64].url}
+                    download={`${song.artist} - ${song.title} (64kbps).mp3`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
+                        <Download className="w-5 h-5" />
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="font-bold text-lg">64 kbps</span>
+                        <span className="text-xs opacity-80">Low Quality</span>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
+                      {song.links[64].size}
+                    </span>
+                  </a>
+                </Button>
+              )}
               {song.links[128] && (
                 <Button
                   asChild
