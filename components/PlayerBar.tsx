@@ -1,6 +1,6 @@
 "use client";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Play,
   Pause,
@@ -18,6 +18,7 @@ import {
   User,
   Search,
   Menu,
+  Settings,
 } from "lucide-react";
 import {
   Sheet,
@@ -27,8 +28,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import DynamicDarkModeToggle from "@/components/DynamicDarkModeToggle";
-import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { formatTime } from "@/lib/utils";
@@ -56,6 +62,8 @@ const PlayerBar = () => {
     repeatMode,
     toggleShuffle,
     setRepeatMode,
+    downloadPreference,
+    setDownloadPreference,
   } = usePlayerStore();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -68,6 +76,12 @@ const PlayerBar = () => {
     { name: "Artists", href: "/artist", icon: Mic2 },
     { name: "Playlists", href: "/playlists", icon: ListMusic },
     { name: "Favorites", href: "/favorites", icon: Heart },
+  ];
+
+  const qualities = [
+    { label: "64 kbps", value: 64 },
+    { label: "128 kbps", value: 128 },
+    { label: "320 kbps", value: 320 },
   ];
 
   const togglePlay = () => {
@@ -231,9 +245,40 @@ const PlayerBar = () => {
         />
       </div>
 
-      {/* Volume */}
+      {/* Volume & Quality */}
       <NotificationCenter />
       <div className="hidden md:flex items-center justify-end w-1/4 gap-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs font-bold text-gray-400 hover:text-white gap-1 px-2 h-8 cursor-pointer"
+            >
+              <Settings size={14} />
+              {downloadPreference}k
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="bg-background/95 backdrop-blur-xl border-white/10"
+          >
+            {qualities.map((q) => (
+              <DropdownMenuItem
+                key={q.value}
+                onClick={() => setDownloadPreference(q.value)}
+                className={`cursor-pointer ${
+                  downloadPreference === q.value
+                    ? "text-primary font-bold"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {q.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <div className="flex items-center gap-2">
           <Volume2 size={20} className="text-gray-400" />
           <Slider
@@ -271,6 +316,26 @@ const PlayerBar = () => {
               </SheetDescription>
             </SheetHeader>
             <div className="flex flex-col py-4">
+              <div className="px-6 pb-4 border-b border-white/5">
+                <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-3 text-center">
+                  Audio Quality
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  {qualities.map((q) => (
+                    <Button
+                      key={q.value}
+                      variant={
+                        downloadPreference === q.value ? "default" : "outline"
+                      }
+                      size="sm"
+                      onClick={() => setDownloadPreference(q.value)}
+                      className="text-[12px] h-7 px-2 cursor-pointer"
+                    >
+                      {q.label.split(" ")[0]}
+                    </Button>
+                  ))}
+                </div>
+              </div>
               {navItems.map((item) => (
                 <Link
                   key={item.name}

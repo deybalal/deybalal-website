@@ -207,8 +207,18 @@ export const usePlayerStore = create<PlayerState>()(
       setDuration: (duration) => set({ duration }),
       setSeekTo: (seekTo) => set({ seekTo }),
       setActiveId: (id) => set({ activeId: id }),
-      setDownloadPreference: (downloadPreference) =>
-        set({ downloadPreference }),
+      setDownloadPreference: (downloadPreference) => {
+        const { currentSong } = get();
+        if (currentSong) {
+          const newUri = getBestUri(currentSong, downloadPreference);
+          set({
+            downloadPreference,
+            currentSong: { ...currentSong, uri: newUri },
+          });
+        } else {
+          set({ downloadPreference });
+        }
+      },
 
       toggleShuffle: () =>
         set((state) => ({ isShuffling: !state.isShuffling })),
