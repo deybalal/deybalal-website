@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SongCard from "@/components/SongCard";
 import AlbumCard from "@/components/AlbumCard";
@@ -10,7 +11,7 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
-}) {
+}): Promise<Metadata> {
   const { slug } = await params;
   const genre = await prisma.genre.findUnique({
     where: { slug },
@@ -22,9 +23,23 @@ export async function generateMetadata({
     };
   }
 
+  const title = `${genre.name} Music`;
+  const description = `Discover and listen to the best ${genre.name} songs and albums on Dey Music.`;
+
   return {
-    title: `${genre.name} | Music Player`,
-    description: `Listen to the best ${genre.name} songs and albums.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      siteName: "Dey Music",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 

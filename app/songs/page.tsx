@@ -3,6 +3,13 @@ import SongCard from "@/components/SongCard";
 import { prisma } from "@/lib/prisma";
 import { Song as PrismaSong, Artist as PrismaArtist } from "@prisma/client";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Most Played Songs",
+  description: "Discover the most popular and trending songs on Dey Music.",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function SongsPage({

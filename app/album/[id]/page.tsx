@@ -23,21 +23,24 @@ export async function generateMetadata({
 
   if (!album) return { title: "Album Not Found" };
 
+  const title = `${album.name} by ${album.artistName}`;
+  const description = `Listen to ${album.name} by ${album.artistName} on Dey Music. Explore all tracks from this album.`;
   const ogImageUrl = `/api/og/album/${id}`;
 
   return {
-    title: `${album.name} - ${album.artistName}`,
-    description: `Listen to ${album.name} by ${album.artistName} on Dey`,
+    title,
+    description,
     openGraph: {
-      title: album.name,
-      description: `Listen to ${album.name} by ${album.artistName} on Dey`,
+      title,
+      description,
       images: [ogImageUrl],
       type: "music.album",
+      siteName: "Dey Music",
     },
     twitter: {
       card: "summary_large_image",
-      title: album.name,
-      description: `Listen to ${album.name} by ${album.artistName} on Dey`,
+      title,
+      description,
       images: [ogImageUrl],
     },
   };
@@ -102,6 +105,10 @@ export default async function AlbumDetailPage({
     year: song.year.toString(),
     duration: song.duration,
     id: song.id,
+    links: song.links as Record<
+      number,
+      { url: string; size: string; bytes: number }
+    > | null,
   }));
 
   return (

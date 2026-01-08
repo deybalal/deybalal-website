@@ -3,6 +3,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ProfileClient from "@/components/profile/ProfileClient";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Account Settings",
+  description: "Manage your Dey Music account settings and preferences.",
+};
 
 export default async function ProfilePage() {
   const session = await auth.api.getSession({

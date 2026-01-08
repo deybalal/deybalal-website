@@ -6,6 +6,40 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Music, CheckCircle2 } from "lucide-react";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const user = await prisma.user.findFirst({
+    where: { userSlug: id },
+  });
+
+  if (!user) return { title: "User Not Found" };
+
+  const title = `${user.name} (@${user.userSlug})`;
+  const description = `View ${user.name}'s profile and public playlists on Dey Music.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: user.image ? [user.image] : [],
+      type: "profile",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      images: user.image ? [user.image] : [],
+    },
+  };
+}
 
 export default async function PublicProfilePage({
   params,

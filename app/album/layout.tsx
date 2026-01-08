@@ -1,11 +1,11 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Liked Songs",
-  description: "Your personal collection of favorite songs on Dey Music.",
+  title: "Albums",
+  description: "Explore the latest albums and collections on Dey Music.",
 };
 
-export default function FavoritesLayout({
+export default function AlbumLayout({
   children,
 }: {
   children: React.ReactNode;

@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import AdminTable from "@/components/AdminTable";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Playlists",
+};
 
 export default async function PlaylistsPage({
   searchParams,

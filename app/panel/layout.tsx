@@ -4,6 +4,15 @@ import { redirect } from "next/navigation";
 import React from "react";
 import { prisma } from "@/lib/prisma";
 import AdminPanelLayout from "@/components/AdminPanelLayout";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Admin Panel",
+    template: "%s | Admin Panel",
+  },
+  description: "Dey Music Admin Panel for managing songs, artists, and users.",
+};
 
 export default async function ProtectedLayout({
   children,

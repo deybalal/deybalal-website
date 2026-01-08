@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Metadata } from "next";
 import SongList from "@/components/SongList";
 import AlbumCard from "@/components/AlbumCard";
 import { User } from "lucide-react";
@@ -7,6 +8,47 @@ import { Song, Album } from "@/types/types";
 import ArtistPlayButton from "@/components/ArtistPlayButton";
 import Pagination from "@/components/Pagination";
 import { FollowButton } from "@/components/FollowButton";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const decodedId = decodeURIComponent(id);
+
+  let artist = await prisma.artist.findUnique({
+    where: { id: decodedId },
+  });
+
+  if (!artist) {
+    artist = await prisma.artist.findUnique({
+      where: { name: decodedId },
+    });
+  }
+
+  if (!artist) return { title: "Artist Not Found" };
+
+  const title = `${artist.name} | Artist`;
+  const description = `Explore songs and albums by ${artist.name} on Dey Music.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: artist.image ? [artist.image] : [],
+      type: "profile",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      images: artist.image ? [artist.image] : [],
+    },
+  };
+}
 
 export default async function ArtistDetailPage({
   params,
@@ -77,6 +119,7 @@ export default async function ArtistDetailPage({
         id: artist!.id,
         name: artist!.name,
         image: artist!.image,
+        isVerified: artist.isVerified,
         songs: [], // Empty array since we don't need nested song data
       },
     ],
@@ -90,6 +133,10 @@ export default async function ArtistDetailPage({
     year: song.year.toString(),
     duration: song.duration,
     id: song.id,
+    links: song.links as Record<
+      number,
+      { url: string; size: string; bytes: number }
+    > | null,
   }));
 
   // Map Prisma albums to our app's Album type

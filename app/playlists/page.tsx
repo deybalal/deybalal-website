@@ -6,6 +6,13 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Playlists",
+  description: "Manage and listen to your custom playlists on Dey Music.",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function PlaylistsPage() {
@@ -38,6 +45,10 @@ export default async function PlaylistsPage() {
       syncedLyrics: song.syncedLyrics || null,
       filename: song.filename || "",
       year: song.year.toString(),
+      links: song.links as Record<
+        number,
+        { url: string; size: string; bytes: number }
+      > | null,
       createdAt: song.createdAt.getTime(),
       updatedAt: song.updatedAt.getTime(),
       artists: [], // Minimal artist info for playlist view

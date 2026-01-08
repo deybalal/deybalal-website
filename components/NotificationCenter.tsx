@@ -45,9 +45,6 @@ export function NotificationCenter() {
 
   useEffect(() => {
     fetchNotifications();
-    // Poll for new notifications every 6 minutes and a half
-    const interval = setInterval(fetchNotifications, 400000);
-    return () => clearInterval(interval);
   }, []);
 
   const markAsRead = async (id: string) => {

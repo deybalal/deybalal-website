@@ -2,6 +2,11 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import AdminTable from "@/components/AdminTable";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Suggestions",
+};
 
 export default async function SuggestionsPage({
   searchParams,

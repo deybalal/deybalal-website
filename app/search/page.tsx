@@ -1,4 +1,10 @@
 import SearchInterface from "@/components/SearchInterface";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Search",
+  description: "Search for songs, artists, and albums on Dey Music.",
+};
 
 export default function SearchPage() {
   return (

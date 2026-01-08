@@ -2,9 +2,11 @@ import Pagination from "@/components/Pagination";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Genres | Music Player",
-  description: "Browse music by genre and mood.",
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Genres",
+  description: "Browse music by your favorite genres and moods on Dey Music.",
 };
 
 export default async function GenresPage({

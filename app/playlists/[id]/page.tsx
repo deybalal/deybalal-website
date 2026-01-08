@@ -20,27 +20,25 @@ export async function generateMetadata({
 
   if (!playlist) return { title: "Playlist Not Found" };
 
+  const creator = playlist.user?.name || "User";
+  const title = `${playlist.name} by ${creator}`;
+  const description = `Listen to ${playlist.name}, a curated playlist by ${creator} on Dey Music.`;
   const ogImageUrl = `/api/og/playlist/${id}`;
 
   return {
-    title: `${playlist.name} - Playlist`,
-    description: `Listen to ${playlist.name} by ${
-      playlist.user?.name || "User"
-    } on Dey`,
+    title,
+    description,
     openGraph: {
-      title: playlist.name,
-      description: `Listen to ${playlist.name} by ${
-        playlist.user?.name || "User"
-      } on Dey`,
+      title,
+      description,
       images: [ogImageUrl],
       type: "music.playlist",
+      siteName: "Dey Music",
     },
     twitter: {
       card: "summary_large_image",
-      title: playlist.name,
-      description: `Listen to ${playlist.name} by ${
-        playlist.user?.name || "User"
-      } on Dey`,
+      title,
+      description,
       images: [ogImageUrl],
     },
   };
@@ -105,6 +103,10 @@ export default async function PlaylistDetailPage({
       comment: null,
       date: null,
       isFavorite: false,
+      links: song.links as Record<
+        number,
+        { url: string; size: string; bytes: number }
+      > | null,
     })),
   };
 

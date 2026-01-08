@@ -6,6 +6,14 @@ import { prisma } from "@/lib/prisma";
 import { Song as PrismaSong, Artist as PrismaArtist } from "@prisma/client";
 import SectionHeader from "@/components/ui/SectionHeader";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home - Music Player",
+  description:
+    "Welcome to Dey Music. Explore the latest songs, featured artists, and popular genres.",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function Home() {

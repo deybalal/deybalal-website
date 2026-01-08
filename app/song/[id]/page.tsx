@@ -22,25 +22,30 @@ export async function generateMetadata({
   const { id } = await params;
   const song = await prisma.song.findUnique({
     where: { id },
+    include: { artists: true },
   });
 
   if (!song) return { title: "Song Not Found" };
 
+  const artistNames = song.artists.map((a) => a.name).join(", ");
+  const title = `${song.title} by ${artistNames}`;
+  const description = `Listen to ${song.title} by ${artistNames} on Dey Music. Stream and download in high quality.`;
   const ogImageUrl = `/api/og/song/${id}`;
 
   return {
-    title: `${song.title} - ${song.artist}`,
-    description: `Listen to ${song.title} by ${song.artist} on Dey`,
+    title,
+    description,
     openGraph: {
-      title: song.title,
-      description: `Listen to ${song.title} by ${song.artist} on Dey`,
+      title,
+      description,
       images: [ogImageUrl],
       type: "music.song",
+      siteName: "Dey Music",
     },
     twitter: {
       card: "summary_large_image",
-      title: song.title,
-      description: `Listen to ${song.title} by ${song.artist} on Dey`,
+      title,
+      description,
       images: [ogImageUrl],
     },
   };

@@ -14,9 +14,23 @@ export async function generateMetadata({
   const { name } = await params;
   const decodedName = decodeURIComponent(name);
 
+  const title = `${decodedName} | Crew Profile`;
+  const description = `Explore songs and contributions by ${decodedName} on Dey Music.`;
+
   return {
-    title: `${decodedName} - Crew Profile`,
-    description: `Songs by ${decodedName} on Dey`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      siteName: "Dey Music",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 
@@ -61,6 +75,10 @@ export default async function CrewPage({
         filename: contribution.song.filename || "",
         year: contribution.song.year.toString(),
         date: contribution.song.createdAt.getTime(),
+        links: contribution.song.links as Record<
+          number,
+          { url: string; size: string; bytes: number }
+        > | null,
         artists: contribution.song.artists.map((artist) => ({
           ...artist,
           songs: [],
