@@ -7,6 +7,7 @@ import { Song as PrismaSong, Artist as PrismaArtist } from "@prisma/client";
 import SectionHeader from "@/components/ui/SectionHeader";
 
 import { Metadata } from "next";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Home - Music Player",
@@ -379,6 +380,7 @@ export default async function Home() {
           </div>
         </section>
       )}
+      <Footer />
     </div>
   );
 }
