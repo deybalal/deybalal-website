@@ -1,3 +1,4 @@
+import Pagination from "@/components/Pagination";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -6,15 +7,27 @@ export const metadata = {
   description: "Browse music by genre and mood.",
 };
 
-export default async function GenresPage() {
+export default async function GenresPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const pageSize = 20;
+
   const genres = await prisma.genre.findMany({
     orderBy: { name: "asc" },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
     include: {
       _count: {
         select: { songs: true, albums: true },
       },
     },
   });
+
+  const totalGenres = await prisma.genre.count();
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
@@ -50,6 +63,11 @@ export default async function GenresPage() {
           No genres found. Check back later!
         </div>
       )}
+
+      <Pagination
+        currentPage={page}
+        totalPages={Math.ceil(totalGenres / pageSize)}
+      />
     </div>
   );
 }

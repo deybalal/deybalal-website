@@ -126,7 +126,7 @@ export default async function SongDetailPage({
     genres: songData.genres,
     links: songData.links as unknown as Record<
       number,
-      { url: string; size: string }
+      { url: string; size: string; bytes: number }
     >,
   };
 

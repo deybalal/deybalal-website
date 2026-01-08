@@ -1,12 +1,21 @@
 import AlbumCard from "@/components/AlbumCard";
+import ArtistCard from "@/components/ArtistCard";
+import GenreCard from "@/components/GenreCard";
 import SongCard from "@/components/SongCard";
 import { prisma } from "@/lib/prisma";
 import { Song as PrismaSong, Artist as PrismaArtist } from "@prisma/client";
+import SectionHeader from "@/components/ui/SectionHeader";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [featuredSongsData, songsData, albumsData] = await Promise.all([
+  const [
+    featuredSongsData,
+    newSongsData,
+    albumsData,
+    mostPlayedSongsData,
+    genresData,
+  ] = await Promise.all([
     prisma.song.findMany({
       where: { isActive: true, isFeatured: true },
       orderBy: { createdAt: "desc" },
@@ -16,7 +25,7 @@ export default async function Home() {
     prisma.song.findMany({
       where: { isActive: true },
       orderBy: { createdAt: "desc" },
-      take: 20,
+      take: 14,
       include: { artists: true },
     }),
     prisma.album.findMany({
@@ -25,7 +34,35 @@ export default async function Home() {
       orderBy: { createdAt: "desc" },
       take: 10,
     }),
+    prisma.song.findMany({
+      where: { isActive: true },
+      orderBy: { playCount: "desc" },
+      take: 20,
+      include: { artists: true },
+    }),
+    prisma.genre.findMany({
+      include: { _count: { select: { songs: true } } },
+      orderBy: { songs: { _count: "desc" } },
+      take: 10,
+    }),
+    prisma.song.findMany({
+      where: { isActive: true },
+      orderBy: { playlists: { _count: "desc" } },
+      take: 20,
+      include: { artists: true },
+    }),
   ]);
+
+  // Extract unique artists from most played songs as a proxy for "Most Played Artists"
+  const artistMap = new Map<string, PrismaArtist>();
+  mostPlayedSongsData.forEach((song) => {
+    song.artists.forEach((artist) => {
+      if (!artistMap.has(artist.id)) {
+        artistMap.set(artist.id, artist);
+      }
+    });
+  });
+  const mostPlayedArtists = Array.from(artistMap.values()).slice(0, 10);
 
   type PrismaSongWithArtists = PrismaSong & { artists: PrismaArtist[] };
 
@@ -43,10 +80,15 @@ export default async function Home() {
       ...artist,
       songs: [],
     })),
+    links: song.links as Record<
+      number,
+      { url: string; size: string; bytes: number }
+    > | null,
   });
 
   const featuredSongs = featuredSongsData.map(mapSong);
-  const songs = songsData.map(mapSong);
+  const newSongs = newSongsData.map(mapSong);
+  const mostPlayedSongs = mostPlayedSongsData.map(mapSong);
 
   const albums = albumsData.map((album) => ({
     ...album,
@@ -66,13 +108,28 @@ export default async function Home() {
       createdAt: song.createdAt.getTime(),
       updatedAt: song.updatedAt.getTime(),
       artists: [],
+      links: song.links as Record<
+        number,
+        { url: string; size: string; bytes: number }
+      > | null,
     })),
   }));
 
+  const genreColors = [
+    "bg-purple-500",
+    "bg-blue-500",
+    "bg-pink-500",
+    "bg-green-500",
+    "bg-orange-500",
+    "bg-red-500",
+    "bg-teal-500",
+    "bg-indigo-500",
+  ];
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-12 pb-20 h-max">
       {/* Hero Section - Premium Music Platform Design */}
-      <section className="relative min-h-[600px] lg:min-h-[700px] rounded-2xl md:rounded-3xl overflow-hidden flex items-center px-6 py-16 md:px-12 lg:px-16 group">
+      <section className="relative min-h-[500px] lg:min-h-[600px] rounded-2xl md:rounded-3xl overflow-hidden flex items-center px-6 py-12 md:px-12 lg:px-16 group">
         {/* Animated Gradient Background */}
         <div className="absolute inset-0 bg-linear-to-br from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-900 dark:via-purple-900 dark:to-fuchsia-900 animate-gradient-slow" />
 
@@ -222,10 +279,7 @@ export default async function Home() {
       {/* Featured Songs */}
       {featuredSongs.length > 0 && (
         <section>
-          <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center">
-            <span className="w-2 h-8 bg-blue-500 mr-3 rounded-full shadow-[0_0_10px_#3b82f6]"></span>
-            Featured Songs
-          </h2>
+          <SectionHeader title="Featured Songs" color="bg-blue-500" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {featuredSongs.map((song) => (
               <SongCard key={song.id} song={song} />
@@ -234,15 +288,12 @@ export default async function Home() {
         </section>
       )}
 
-      {/* Trending Songs */}
+      {/* New Releases (Previously Trending/New) */}
       <section>
-        <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center">
-          <span className="w-2 h-8 bg-accent mr-3 rounded-full shadow-[0_0_10px_var(--accent)]"></span>
-          Trending Songs
-        </h2>
+        <SectionHeader title="New Releases" color="bg-green-500" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {songs.length > 0 ? (
-            songs.map((song) => <SongCard key={song.id} song={song} />)
+          {newSongs.length > 0 ? (
+            newSongs.map((song) => <SongCard key={song.id} song={song} />)
           ) : (
             <p className="text-gray-500 col-span-full">
               No songs found. Add some in the Admin Panel!
@@ -251,12 +302,45 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* New Releases */}
-      <section className="pb-32">
-        <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center">
-          <span className="w-2 h-8 bg-purple-500 mr-3 rounded-full shadow-[0_0_10px_purple]"></span>
-          New Albums
-        </h2>
+      {/* Most Played Artists */}
+      {mostPlayedArtists.length > 0 && (
+        <section>
+          <SectionHeader
+            title="Most Played Artists"
+            color="bg-pink-500"
+            href="/artist"
+          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {mostPlayedArtists.map((artist) => (
+              <ArtistCard key={artist.id} artist={artist} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Most Played Songs */}
+      <section>
+        <SectionHeader
+          title="Most Played Songs"
+          color="bg-orange-500"
+          href="/songs"
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {mostPlayedSongs.length > 0 ? (
+            mostPlayedSongs.map((song) => (
+              <SongCard key={song.id} song={song} />
+            ))
+          ) : (
+            <p className="text-gray-500 col-span-full">
+              No songs found. Start listening to see them here!
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* New Albums */}
+      <section>
+        <SectionHeader title="New Albums" color="bg-teal-500" href="/album" />
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {albums.length > 0 ? (
             albums.map((album) => <AlbumCard key={album.id} album={album} />)
@@ -267,6 +351,26 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {/* Genres */}
+      {genresData.length > 0 && (
+        <section>
+          <SectionHeader
+            title="Popular Genres"
+            color="bg-purple-500"
+            href="/genres"
+          />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {genresData.map((genre, index) => (
+              <GenreCard
+                key={genre.id}
+                genre={genre}
+                color={genreColors[index % genreColors.length]}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
