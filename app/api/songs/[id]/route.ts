@@ -190,6 +190,7 @@ export async function PUT(
       // 3. Generate 128 and 320 quality MP3s and cleanup source
       try {
         const uploadDir = path.join(process.cwd(), "public/assets/mp3");
+        const uploadDirOgg = path.join(process.cwd(), "public/assets/ogg");
         const sourceFilename = existingSong.filename;
 
         if (sourceFilename) {
@@ -216,9 +217,12 @@ export async function PUT(
               counter++;
             }
 
+            const filenameOgg = `${updatedSong.id}.ogg`;
             const filename64 = `${finalBaseName}-64.mp3`;
             const filename128 = `${finalBaseName}-128.mp3`;
             const filename320 = `${finalBaseName}-320.mp3`;
+
+            const pathOgg = path.join(uploadDirOgg, filenameOgg);
             const path64 = path.join(uploadDir, filename64);
             const path128 = path.join(uploadDir, filename128);
             const path320 = path.join(uploadDir, filename320);
@@ -246,6 +250,15 @@ export async function PUT(
               ? `-i "${coverPath}" -map 0:a -map 1:v -c:v copy -id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)"`
               : "-map 0:a";
 
+            const startingPoint =
+              (updatedSong.duration / 2 + 30 > updatedSong.duration
+                ? 0
+                : updatedSong.duration / 2) || 0;
+
+            await execAsync(
+              `ffmpeg -i "${sourcePath}" -ss ${startingPoint} -t 30 -c:a libvorbis -b:a 64k "${pathOgg}"`
+            );
+
             // Generate 64kbps
             await execAsync(
               `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -metadata comment="${process.env.BETTER_AUTH_URL}" -b:a 64k -y "${path64}"`
@@ -272,6 +285,7 @@ export async function PUT(
               data: {
                 filename: filename128,
                 uri: `/assets/mp3/${filename128}`,
+                ogg: `/assets/ogg/${filenameOgg}`,
                 links: {
                   "64": {
                     url: `/assets/mp3/${filename64}`,

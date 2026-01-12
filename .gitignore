@@ -10,7 +10,12 @@
 !.yarn/releases
 !.yarn/versions
 
-public/assets/
+public/assets/cover/*.jpg
+public/assets/cover/*.png
+public/assets/mp3/*.mp3
+public/assets/ogg/*.ogg
+public/assets/*.ts
+
 
 # testing
 /coverage
