@@ -1063,6 +1063,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     <FormField
                       control={form.control}
                       name="duration"
+                      disabled
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Duration (s)</FormLabel>

@@ -10,6 +10,7 @@ import { createNotification, notifyFollowers } from "@/lib/notifications";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { slugify } from "@/lib/utils";
+import { parseFile } from "music-metadata";
 
 const execAsync = promisify(exec);
 
@@ -279,11 +280,14 @@ export async function PUT(
             const stats128 = await stat(path128);
             const stats320 = await stat(path320);
 
+            const duration = (await parseFile(sourcePath)).format.duration;
+
             // Update database with new filenames, uri and links
             await prisma.song.update({
               where: { id },
               data: {
                 filename: filename128,
+                duration,
                 uri: `/assets/mp3/${filename128}`,
                 ogg: `/assets/ogg/${filenameOgg}`,
                 links: {
