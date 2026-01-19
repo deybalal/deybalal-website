@@ -186,10 +186,18 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       prev: () => {
-        const { queue, currentIndex, downloadPreference } = get();
+        const { queue, currentIndex, downloadPreference, progress } = get();
+
+        if (progress > 5) {
+          set({
+            seekTo: 0,
+          });
+          return;
+        }
 
         if (currentIndex > 0) {
           const prevSong = queue[currentIndex - 1];
+
           set({
             currentIndex: currentIndex - 1,
             currentSong: {
