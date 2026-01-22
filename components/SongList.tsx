@@ -33,7 +33,7 @@ const SongList = ({ songs, onRemove }: SongListProps) => {
           <span className="w-8 text-center text-gray-500 group-hover:text-destructive transition-transform duration-1000">
             {i + 1}
           </span>
-          <div className="relative w-10 h-10 bg-gray-800 mr-4 rounded overflow-hidden shrink-0">
+          <div className="relative w-10 h-10 bg-gray-800 me-4 rounded overflow-hidden shrink-0">
             {song.coverArt && (
               <Image
                 src={song.coverArt}
@@ -49,7 +49,7 @@ const SongList = ({ songs, onRemove }: SongListProps) => {
             </h4>
             <p className="text-gray-400 text-sm truncate">{song.artist}</p>
           </div>
-          <span className="text-gray-500 text-sm ml-4">
+          <span className="text-gray-500 text-sm ms-4">
             {formatTime(song.duration)}
           </span>
           {onRemove && (
@@ -58,7 +58,7 @@ const SongList = ({ songs, onRemove }: SongListProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="ml-2 text-muted-foreground hover:text-white"
+                  className="ms-2 text-muted-foreground hover:text-white"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <MoreHorizontal size={16} />
@@ -71,7 +71,7 @@ const SongList = ({ songs, onRemove }: SongListProps) => {
                     setQueue(songs, i);
                   }}
                 >
-                  <Play className="mr-2 h-4 w-4" />
+                  <Play className="me-2 h-4 w-4" />
                   Play
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -81,7 +81,7 @@ const SongList = ({ songs, onRemove }: SongListProps) => {
                   }}
                   className="text-red-500 focus:text-red-500"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 className="me-2 h-4 w-4" />
                   Remove from Playlist
                 </DropdownMenuItem>
               </DropdownMenuContent>

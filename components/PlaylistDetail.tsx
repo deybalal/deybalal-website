@@ -48,7 +48,7 @@ export default function PlaylistDetail({
             </div>
             {currentUserId === playlist.userId && (
               <div className="flex items-center gap-2 bg-black/20 p-2 rounded-lg backdrop-blur-sm border border-white/10">
-                <div className="flex items-center gap-2 mr-2">
+                <div className="flex items-center gap-2 me-2">
                   {playlist.isPrivate ? (
                     <Lock size={16} className="text-red-400" />
                   ) : (

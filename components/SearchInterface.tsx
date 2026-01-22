@@ -106,7 +106,7 @@ export default function SearchInterface({
         <div className="w-full max-w-3xl relative group">
           <div className="absolute -inset-0.5 bg-linear-to-r from-indigo-500 to-purple-600 rounded-full opacity-30 group-hover:opacity-75 blur transition duration-500"></div>
           <div className="relative flex items-center bg-zinc-900/90 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl">
-            <Search className="w-6 h-6 text-zinc-400 ml-6" />
+            <Search className="w-6 h-6 text-zinc-400 ms-6" />
             <Input
               placeholder="Songs, artists, albums..."
               className="flex-1 py-6 px-4 border-none bg-transparent! focus-visible:ring-0 text-lg sm:text-xl placeholder:text-zinc-500 font-medium tracking-tight h-14 sm:h-16"
@@ -120,7 +120,7 @@ export default function SearchInterface({
                   setQuery("");
                   setResults(null);
                 }}
-                className="mr-4 p-2 hover:bg-white/10 rounded-full transition-colors"
+                className="me-4 p-2 hover:bg-white/10 rounded-full transition-colors"
               >
                 <X className="w-5 h-5 text-zinc-400 hover:text-white transition-colors" />
               </button>
@@ -145,7 +145,7 @@ export default function SearchInterface({
                         key={i}
                         className="flex items-center p-3 rounded-xl bg-white/5"
                       >
-                        <div className="w-14 h-14 rounded-lg bg-white/10 mr-4" />
+                        <div className="w-14 h-14 rounded-lg bg-white/10 me-4" />
                         <div className="flex-1 space-y-2">
                           <div className="h-4 w-48 bg-white/10 rounded" />
                           <div className="h-3 w-32 bg-white/10 rounded" />
@@ -203,7 +203,7 @@ export default function SearchInterface({
                 {results.songs.length > 0 && (
                   <section>
                     <h3 className="text-2xl font-bold text-white mb-6 tracking-tight flex items-center">
-                      <Music className="w-6 h-6 mr-3 text-indigo-400" />
+                      <Music className="w-6 h-6 me-3 text-indigo-400" />
                       Songs
                     </h3>
                     <div className="space-y-2">
@@ -214,7 +214,7 @@ export default function SearchInterface({
                           onClick={handleLinkClick}
                           className="flex items-center p-3 rounded-xl hover:bg-white/10 transition-all duration-200 group border border-transparent hover:border-white/5"
                         >
-                          <div className="relative w-14 h-14 rounded-lg overflow-hidden mr-4 shadow-lg bg-zinc-800 shrink-0 group-hover:scale-105 transition-transform duration-300">
+                          <div className="relative w-14 h-14 rounded-lg overflow-hidden me-4 shadow-lg bg-zinc-800 shrink-0 group-hover:scale-105 transition-transform duration-300">
                             {song.coverArt ? (
                               <Image
                                 src={song.coverArt}
@@ -249,7 +249,7 @@ export default function SearchInterface({
                 {results.artists.length > 0 && (
                   <section>
                     <h3 className="text-2xl font-bold text-white mb-6 tracking-tight flex items-center">
-                      <Mic2 className="w-6 h-6 mr-3 text-purple-400" />
+                      <Mic2 className="w-6 h-6 me-3 text-purple-400" />
                       Artists
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -290,7 +290,7 @@ export default function SearchInterface({
                 {results.albums.length > 0 && (
                   <section>
                     <h3 className="text-2xl font-bold text-white mb-6 tracking-tight flex items-center">
-                      <Disc className="w-6 h-6 mr-3 text-pink-400" />
+                      <Disc className="w-6 h-6 me-3 text-pink-400" />
                       Albums
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -331,7 +331,7 @@ export default function SearchInterface({
                 {results.playlists.length > 0 && (
                   <section>
                     <h3 className="text-2xl font-bold text-white mb-6 tracking-tight flex items-center">
-                      <ListMusic className="w-6 h-6 mr-3 text-emerald-400" />
+                      <ListMusic className="w-6 h-6 me-3 text-emerald-400" />
                       Playlists
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">

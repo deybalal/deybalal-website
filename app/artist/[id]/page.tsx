@@ -167,13 +167,13 @@ export default async function ArtistDetailPage({
             <User size={64} className="text-gray-500" />
           )}
         </div>
-        <div className="text-center md:text-left">
+        <div className="text-center md:text-start">
           <h1 className="text-5xl md:text-7xl font-bold text-white neon-text mb-4">
             {artist.name}
           </h1>
           <div className="flex items-center justify-center md:justify-start gap-4 mb-2">
             <p className="text-gray-400 text-lg">
-              {artist._count.songs} Songs • {albums.length} Albums
+              {artist._count.songs} آهنگ • {albums.length} آلبوم
             </p>
             <ArtistPlayButton songs={songs} />
             <FollowButton artistId={artist.id} />

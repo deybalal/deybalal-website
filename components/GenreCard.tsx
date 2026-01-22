@@ -19,7 +19,7 @@ const GenreCard = ({ genre, color = "bg-purple-500" }: GenreCardProps) => {
         <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
 
         <CardContent className="relative h-full flex flex-col justify-end p-6">
-          <h3 className="text-2xl font-bold text-white mb-1 group-hover:translate-x-1 transition-transform">
+          <h3 className="text-2xl font-bold text-white mb-1 group-hover:translate-s-1 transition-transform">
             {genre.name}
           </h3>
           {genre._count && (
@@ -30,7 +30,7 @@ const GenreCard = ({ genre, color = "bg-purple-500" }: GenreCardProps) => {
         </CardContent>
 
         {/* Decorative Circle */}
-        <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+        <div className="absolute -top-4 -end-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
       </Card>
     </Link>
   );

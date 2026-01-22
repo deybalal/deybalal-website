@@ -138,7 +138,7 @@ export function CommentSection({
               className="rounded-full px-8 font-semibold"
             >
               {isSubmitting && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
               )}
               Post Comment
             </Button>

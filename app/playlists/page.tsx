@@ -64,7 +64,7 @@ export default async function PlaylistsPage() {
   return (
     <div className="space-y-8 w-full pb-24">
       <div className="flex items-center">
-        <h1 className="text-4xl font-bold text-white neon-text mr-5">
+        <h1 className="text-4xl font-bold text-white neon-text ml-5">
           Playlists
         </h1>
         <Button asChild variant="outline">

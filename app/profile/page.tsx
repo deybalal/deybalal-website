@@ -36,7 +36,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto py-10 px-4 md:px-8 mb-24 h-max">
+    <div className="container mx-auto py-10 ps-4 pe-4 md:ps-8 md:pe-8 mb-24 h-max">
       <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
       <ProfileClient user={user} />
     </div>

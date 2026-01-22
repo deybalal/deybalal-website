@@ -13,7 +13,7 @@ const SectionHeader = ({
   <div className="flex items-center justify-between mb-6">
     <h2 className="text-2xl font-bold text-foreground flex items-center">
       <span
-        className={`w-2 h-8 ${color} mr-3 rounded-full shadow-[0_0_10px_currentColor]`}
+        className={`w-2 h-8 ${color} me-3 rounded-full shadow-[0_0_10px_currentColor]`}
         style={{ color: color.replace("bg-", "") }}
       ></span>
       {title}
@@ -23,7 +23,7 @@ const SectionHeader = ({
         href={href}
         className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center transition-colors"
       >
-        Show more <ChevronRight className="w-4 h-4 ml-1" />
+        Show more <ChevronRight className="w-4 h-4 ms-1 rtl:rotate-180" />
       </Link>
     )}
   </div>

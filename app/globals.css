@@ -54,6 +54,10 @@ body {
   overflow-x: hidden;
 }
 
+.rtl {
+  direction: rtl;
+}
+
 /* Glassmorphism Utilities */
 .glass {
   background: var(--glass-bg);

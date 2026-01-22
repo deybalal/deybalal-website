@@ -62,7 +62,7 @@ export function FollowButton({ artistId }: FollowButtonProps) {
         size="sm"
         className="rounded-full px-6"
       >
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
         Loading
       </Button>
     );
@@ -77,11 +77,11 @@ export function FollowButton({ artistId }: FollowButtonProps) {
       className="rounded-full px-6 font-semibold transition-all hover:scale-105 active:scale-95"
     >
       {isToggling ? (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
       ) : isFollowing ? (
-        <UserCheck className="mr-2 h-4 w-4" />
+        <UserCheck className="ml-2 h-4 w-4" />
       ) : (
-        <UserPlus className="mr-2 h-4 w-4" />
+        <UserPlus className="ml-2 h-4 w-4" />
       )}
       {isFollowing ? "Following" : "Follow"}
     </Button>

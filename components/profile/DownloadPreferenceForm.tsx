@@ -114,9 +114,9 @@ export default function DownloadPreferenceForm({
           className="h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-primary/20 transition-all duration-300 group"
         >
           {isLoading ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="w-4 h-4 me-2 animate-spin" />
           ) : (
-            <Save className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+            <Save className="w-4 h-4 me-2 group-hover:scale-110 transition-transform" />
           )}
           Save Preference
         </Button>

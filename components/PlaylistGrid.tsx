@@ -89,7 +89,7 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
                   )}
                   {/* Favorites Badge */}
                   {playlist.isFavorite && (
-                    <div className="absolute top-2 left-2 bg-yellow-500/90 backdrop-blur-sm rounded-full p-1.5">
+                    <div className="absolute top-2 start-2 bg-yellow-500/90 backdrop-blur-sm rounded-full p-1.5">
                       <Star size={16} className="text-white fill-white" />
                     </div>
                   )}
@@ -114,7 +114,7 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
           </Link>
 
           {/* Three dots menu - visible on mobile, on hover for desktop */}
-          <div className="absolute top-2 right-6 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
+          <div className="absolute top-2 end-6 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -133,7 +133,7 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
                     handleCopyLink(playlist.id);
                   }}
                 >
-                  <LinkIcon className="mr-2 h-4 w-4" />
+                  <LinkIcon className="me-2 h-4 w-4" />
                   Copy Link
                 </DropdownMenuItem>
                 {!playlist.isFavorite && (

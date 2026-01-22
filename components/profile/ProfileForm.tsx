@@ -95,7 +95,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
       >
         <div className="mb-8 text-xl">
           For changing your avatar, You should Logout and Login againg with
-          Instagram! <Instagram className="inline-block ml-1 text-purple-500" />
+          Instagram! <Instagram className="inline-block mr-1 text-purple-500" />
         </div>
 
         {mounted && user?.userSlug && (

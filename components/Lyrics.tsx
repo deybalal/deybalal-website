@@ -87,7 +87,7 @@ export default function Lyrics({
 
   return (
     <div
-      className="h-full w-full overflow-y-auto px-4 py-10 no-scrollbar scrollbar-hide mask-gradient"
+      className="h-full w-full overflow-y-auto ps-4 pe-4 py-10 no-scrollbar scrollbar-hide mask-gradient"
       ref={scrollContainerRef}
       onScroll={handleUserScroll}
       style={{

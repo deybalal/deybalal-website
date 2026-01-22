@@ -30,9 +30,12 @@ export default function QueueDrawer() {
           <ListMusic className="w-5 h-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-8/12 sm:w-[400px] overflow-y-auto">
+      <SheetContent
+        side="left"
+        className="w-8/12 sm:w-[400px] overflow-y-auto "
+      >
         <SheetHeader className="mb-6">
-          <SheetTitle>Play Queue</SheetTitle>
+          <SheetTitle className="text-left">Play Queue</SheetTitle>
         </SheetHeader>
 
         <div className="space-y-6">

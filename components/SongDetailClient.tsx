@@ -109,15 +109,15 @@ export default function SongDetailClient({
 
   return (
     <div
-      className={`h-[calc(100dvh-120px)] w-full flex-1 flex justify-center m-0 mx-auto p-0 transition-all duration-500 ${
+      className={`h-[calc(100dvh-120px)] w-full flex-1 flex justify-center m-0 ms-auto me-auto p-0 transition-all duration-500 ${
         showLyrics
-          ? "max-w-7xl flex flex-col lg:grid lg:grid-cols-2 lg:gap-12 px-2"
+          ? "max-w-7xl flex flex-col lg:grid lg:grid-cols-2 lg:gap-12 ps-2 pe-2"
           : "max-w-4xl flex flex-col items-center justify-center"
       }`}
     >
       {/* Lyrics Column (Left on Desktop) */}
       {showLyrics && (
-        <div className="hidden lg:block h-[calc(100dvh-120px)] bg-card/30 rounded-3xl p-6 border border-white/5 shadow-xl">
+        <div className="hidden lg:block h-[calc(100dvh-120px)] bg-card/30 rounded-3xl ps-6 pe-6 pt-6 pb-6 border border-white/5 shadow-xl">
           <Lyrics
             lrc={showSynced ? song.syncedLyrics : null}
             plainLyrics={song.lyrics}
@@ -156,7 +156,7 @@ export default function SongDetailClient({
 
           {/* Mobile Lyrics Overlay */}
           {showLyrics && (
-            <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[2px] p-4 lg:hidden overflow-hidden rounded-2xl">
+            <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[2px] ps-4 pe-4 pt-4 pb-4 lg:hidden overflow-hidden rounded-2xl">
               <Lyrics
                 lrc={showSynced ? song.syncedLyrics : null}
                 plainLyrics={song.lyrics}
@@ -167,7 +167,7 @@ export default function SongDetailClient({
         </div>
 
         {/* Info */}
-        <div className="flex justify-between w-full px-4">
+        <div className="flex justify-between w-full ps-4 pe-4">
           <div className="mt-2">
             {isUserLoggedIn ? (
               <AddToPlaylistDialog
@@ -191,7 +191,7 @@ export default function SongDetailClient({
               </Button>
             )}
           </div>
-          <div className="text-center flex-1 min-w-0 px-2">
+          <div className="text-center flex-1 min-w-0 ps-2 pe-2">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
               {song.title}
             </h1>
@@ -243,7 +243,7 @@ export default function SongDetailClient({
                   <Link
                     key={genre.id}
                     href={`/genres/${genre.slug}`}
-                    className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
+                    className="text-[10px] uppercase tracking-wider ps-2 pe-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
                   >
                     {genre.name}
                   </Link>

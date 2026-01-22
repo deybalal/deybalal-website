@@ -142,13 +142,13 @@ const PlayerBar = () => {
   if (!currentSong) return null; // Or return a disabled state
 
   return (
-    <div className="fixed bottom-0 left-0 w-full h-20 md:h-24 glass z-50 px-4 md:px-8 flex items-center justify-between bg-black/40 backdrop-blur-md border-t border-white/10 transition-all duration-300">
+    <div className="fixed bottom-0 start-0 w-full h-20 md:h-24 glass z-50 px-4 md:px-8 flex items-center justify-between bg-black/40 backdrop-blur-md border-t border-white/10 transition-all duration-300">
       {/* Song Info */}
       <Link
         href={`/song/${currentSong.id}`}
         className="flex items-center flex-1 min-w-0 md:w-1/4 md:max-w-none pr-2 md:pr-0"
       >
-        <div className="w-12 h-12 md:w-14 md:h-14 bg-gray-800 rounded-md neon-box mr-3 md:mr-4 shrink-0 relative overflow-hidden">
+        <div className="w-12 h-12 md:w-14 md:h-14 bg-gray-800 rounded-md neon-box ml-3 md:ml-4 shrink-0 relative overflow-hidden">
           <Image
             src={currentSong.coverArt || "/images/cover.png"}
             alt="Cover"
@@ -170,27 +170,31 @@ const PlayerBar = () => {
       </Link>
 
       {/* Controls */}
-      <div className="flex items-center justify-end flex-none mr-2 md:mr-0 md:flex-col md:items-center md:w-1/2 md:max-w-2xl xl:max-w-3xl md:px-4 md:static md:translate-x-0">
+      <div className="flex items-center justify-end flex-none ml-2 md:ml-0 md:flex-col md:items-center md:w-1/2 md:max-w-2xl xl:max-w-3xl md:px-4 md:static md:translate-x-0">
         <div className="flex items-center gap-4 md:gap-6 mb-1 md:mb-2">
           <Button
             variant="ghost"
             size="icon"
-            className={`hidden md:inline-flex  hover:bg-transparent cursor-pointer ${
-              isShuffling
+            className={`hidden md:inline-flex hover:bg-transparent cursor-pointer ${
+              repeatMode !== "off"
                 ? "text-foreground"
                 : "text-gray-400 hover:text-foreground"
             }`}
-            onClick={toggleShuffle}
+            onClick={toggleRepeat}
           >
-            <Shuffle size={20} />
+            {repeatMode === "one" ? (
+              <Repeat1 size={20} />
+            ) : (
+              <Repeat size={20} />
+            )}
           </Button>
           <Button
             variant="ghost"
             size="icon"
             className="text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
-            onClick={prev}
+            onClick={next}
           >
-            <SkipBack size={20} className="md:w-6 md:h-6" />
+            <SkipForward size={20} className="md:w-6 md:h-6" />
           </Button>
           <div className="relative group">
             {isPlaying && (
@@ -212,30 +216,26 @@ const PlayerBar = () => {
             variant="ghost"
             size="icon"
             className="text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
-            onClick={next}
+            onClick={prev}
           >
-            <SkipForward size={20} className="md:w-6 md:h-6" />
+            <SkipBack size={20} className="md:w-6 md:h-6" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className={`hidden md:inline-flex hover:bg-transparent cursor-pointer ${
-              repeatMode !== "off"
+            className={`hidden md:inline-flex  hover:bg-transparent cursor-pointer ${
+              isShuffling
                 ? "text-foreground"
                 : "text-gray-400 hover:text-foreground"
             }`}
-            onClick={toggleRepeat}
+            onClick={toggleShuffle}
           >
-            {repeatMode === "one" ? (
-              <Repeat1 size={20} />
-            ) : (
-              <Repeat size={20} />
-            )}
+            <Shuffle size={20} />
           </Button>
         </div>
         {/* Progress Bar */}
         <div className="w-64 md:w-full items-center gap-2 md:gap-3 text-[10px] md:text-xs text-gray-400 hidden md:flex">
-          <span>{formatTime(progress)}</span>
+          <span>{formatTime(duration)}</span>
           <Slider
             value={[progress]}
             onValueChange={handleSeek}
@@ -243,12 +243,12 @@ const PlayerBar = () => {
             step={1}
             className="w-full cursor-pointer h-1.5"
           />
-          <span>{formatTime(duration)}</span>
+          <span>{formatTime(progress)}</span>
         </div>
       </div>
 
       {/* Mobile Progress Bar */}
-      <div className="absolute top-0 left-0 w-full md:hidden">
+      <div className="absolute top-0 start-0 w-full md:hidden">
         <Slider
           value={[progress]}
           onValueChange={handleSeek}
@@ -317,8 +317,8 @@ const PlayerBar = () => {
             </Button>
           </SheetTrigger>
           <SheetContent
-            side="right"
-            className="w-64 bg-background/95 backdrop-blur-xl border-l border-white/10 p-0"
+            side="left"
+            className="w-64 bg-background/95 backdrop-blur-xl border-s border-white/10 p-0"
           >
             <SheetHeader className="p-6 border-b border-white/5">
               <SheetTitle className="text-center text-xl font-bold text-foreground">
@@ -357,7 +357,7 @@ const PlayerBar = () => {
                   className="flex items-center justify-end px-6 py-4 text-gray-400 hover:text-foreground hover:bg-white/5 transition-colors"
                 >
                   <span className="font-medium">{item.name}</span>
-                  <item.icon className="w-5 h-5 ml-4" />
+                  <item.icon className="w-5 h-5 me-4" />
                 </Link>
               ))}
               <div className="flex py-3 transition-colors duration-200 relative justify-end items-end rtl flex-row-reverse gap-4">

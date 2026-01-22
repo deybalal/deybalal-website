@@ -27,7 +27,7 @@ export default function SongProgressSlider({ song }: SongProgressSliderProps) {
   };
 
   return (
-    <div className="w-full px-4">
+    <div className="w-full ps-4 pe-4">
       <Slider
         value={[displayProgress]}
         onValueChange={handleSeek}

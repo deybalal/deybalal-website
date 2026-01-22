@@ -58,7 +58,7 @@ export default async function SongsPage({
   const songs = songsData.map(mapSong);
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8 h-max">
+    <div className="container mx-auto ps-4 pe-4 py-8 space-y-8 h-max">
       <div className="space-y-2">
         <h1 className="text-4xl font-bold tracking-tight">Most Played Songs</h1>
         <p className="text-muted-foreground text-lg">

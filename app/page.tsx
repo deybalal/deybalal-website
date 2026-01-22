@@ -150,14 +150,14 @@ export default async function Home() {
         <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
 
         {/* Floating Orbs/Blur Effects */}
-        <div className="absolute top-20 right-20 w-96 h-96 bg-purple-500/30 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-20 left-20 w-80 h-80 bg-fuchsia-500/30 rounded-full blur-[100px] animate-pulse delay-1000" />
+        <div className="absolute top-20 end-20 w-96 h-96 bg-purple-500/30 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-20 start-20 w-80 h-80 bg-fuchsia-500/30 rounded-full blur-[100px] animate-pulse delay-1000" />
 
         {/* Content Container */}
         <div className="relative z-10 w-full max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-12">
             {/* Left Content */}
-            <div className="flex-1 space-y-6 md:space-y-8 text-center lg:text-left">
+            <div className="flex-1 space-y-6 md:space-y-8 text-center lg:text-start">
               {/* Premium Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />

@@ -87,12 +87,12 @@ const SongCard = ({ song }: SongCardProps) => {
                       {isPlaying && song.id === currentSong?.id ? (
                         <Pause
                           fill="currentColor"
-                          className="text-purple-600 dark:text-black w-7 h-7 ml-1"
+                          className="text-purple-600 dark:text-black w-7 h-7 ms-1"
                         />
                       ) : (
                         <Play
                           fill="currentColor"
-                          className="text-purple-600 dark:text-black w-7 h-7 ml-1"
+                          className="text-purple-600 dark:text-black w-7 h-7 ms-1"
                         />
                       )}
                     </div>
@@ -173,7 +173,7 @@ const SongCard = ({ song }: SongCardProps) => {
             toast.success("Playing now!");
           }}
         >
-          <PlayCircle className="w-4 h-4 mr-2" />
+          <PlayCircle className="w-4 h-4 me-2" />
           Play Now
         </ContextMenuItem>
         <ContextMenuItem
@@ -182,7 +182,7 @@ const SongCard = ({ song }: SongCardProps) => {
             toast.success("Playing next");
           }}
         >
-          <PlayCircle className="w-4 h-4 mr-2" />
+          <PlayCircle className="w-4 h-4 me-2" />
           Play Next
         </ContextMenuItem>
         <ContextMenuItem
@@ -191,7 +191,7 @@ const SongCard = ({ song }: SongCardProps) => {
             toast.success("Added to queue");
           }}
         >
-          <ListPlus className="w-4 h-4 mr-2" />
+          <ListPlus className="w-4 h-4 me-2" />
           Add to Queue
         </ContextMenuItem>
       </ContextMenuContent>

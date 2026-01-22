@@ -30,7 +30,7 @@ export default function Pagination({
   };
 
   return (
-    <div className="flex items-center justify-center space-x-2 py-4">
+    <div className="flex items-center justify-center gap-2 py-4">
       <Button
         variant="outline"
         size="sm"
@@ -38,7 +38,7 @@ export default function Pagination({
         disabled={currentPage <= 1}
         className="glass"
       >
-        <ChevronLeft className="h-4 w-4 mr-1" />
+        <ChevronLeft className="h-4 w-4 me-1 rtl:rotate-180" />
         Previous
       </Button>
       <div className="text-sm font-medium text-white px-4">
@@ -52,7 +52,7 @@ export default function Pagination({
         className="glass"
       >
         Next
-        <ChevronRight className="h-4 w-4 ml-1" />
+        <ChevronRight className="h-4 w-4 ms-1 rtl:rotate-180" />
       </Button>
     </div>
   );
