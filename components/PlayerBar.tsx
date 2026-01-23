@@ -235,11 +235,11 @@ const PlayerBar = () => {
         </div>
         {/* Progress Bar */}
         <div className="w-64 md:w-full items-center gap-2 md:gap-3 text-[10px] md:text-xs text-gray-400 hidden md:flex">
-          <span>{formatTime(duration)}</span>
+          <span>{formatTime(duration || currentSong.duration)}</span>
           <Slider
             value={[progress]}
             onValueChange={handleSeek}
-            max={duration || 100}
+            max={duration || currentSong.duration || 100}
             step={1}
             className="w-full cursor-pointer h-1.5"
           />

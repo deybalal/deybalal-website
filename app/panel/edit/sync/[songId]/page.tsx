@@ -51,6 +51,7 @@ export default function SyncLyricsPage({
     duration,
     setSeekTo,
     setProgress,
+    setDuration,
   } = usePlayerStore();
 
   const [song, setSongData] = useState<Song | null>(null);
@@ -73,6 +74,7 @@ export default function SyncLyricsPage({
 
           // Set player song
           setSong(info, false);
+          setDuration(info.duration);
 
           if (info.syncedLyrics) {
             // Parse LRC
@@ -245,7 +247,6 @@ export default function SyncLyricsPage({
           <Save size={30} />
         </Button>
       </header>
-
       {/* Main Content */}
       <div className="flex-1 overflow-hidden flex flex-col md:flex-row pb-32">
         {/* Left Side: Cover & Info (Desktop) */}
@@ -324,13 +325,12 @@ export default function SyncLyricsPage({
           </div>
         </div>
       </div>
-
       {/* Floating Controls */}
       <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 p-4 pb-8 md:pb-4 z-50">
         <div className="max-w-4xl mx-auto flex flex-col gap-4">
           {/* Progress Bar */}
           <div className="flex items-center gap-3 text-xs text-gray-400">
-            <span className="w-10 text-right">{formatTime(progress)}</span>
+            <span className="w-10">{formatTime(duration)}</span>
             <Slider
               value={[progress]}
               onValueChange={handleSeek}
@@ -338,7 +338,7 @@ export default function SyncLyricsPage({
               step={0.1}
               className="flex-1 h-2"
             />
-            <span className="w-10">{formatTime(duration)}</span>
+            <span className="w-10 text-right">{formatTime(progress)}</span>
           </div>
 
           {/* Buttons */}

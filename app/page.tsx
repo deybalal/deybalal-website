@@ -136,7 +136,7 @@ export default async function Home() {
   ];
 
   return (
-    <div className="space-y-12 pb-20 h-max">
+    <div className="space-y-12 pb-20 h-max container">
       {/* Hero Section - Premium Music Platform Design */}
       <section className="relative min-h-[500px] lg:min-h-[600px] rounded-2xl md:rounded-3xl overflow-hidden flex items-center px-6 py-12 md:px-12 lg:px-16 group">
         {/* Animated Gradient Background */}

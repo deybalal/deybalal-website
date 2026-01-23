@@ -19,7 +19,9 @@ export default function SongProgressSlider({ song }: SongProgressSliderProps) {
 
   const isCurrentSong = currentSong?.id === song?.id;
   const displayProgress = isCurrentSong ? progress : 0;
-  const displayDuration = isCurrentSong ? duration : song?.duration || 0;
+  // Use store duration if it's the current song and duration is set, otherwise fallback to song.duration
+  const displayDuration =
+    isCurrentSong && duration > 0 ? duration : song?.duration || 0;
 
   const handleSeek = (value: number[]) => {
     setProgress(value[0]);
@@ -37,8 +39,8 @@ export default function SongProgressSlider({ song }: SongProgressSliderProps) {
         disabled={!isCurrentSong}
       />
       <div className="flex justify-between text-sm text-muted-foreground cursor-pointer">
-        <span>{formatTime(displayProgress)}</span>
         <span>{formatTime(displayDuration)}</span>
+        <span>{formatTime(displayProgress)}</span>
       </div>
     </div>
   );

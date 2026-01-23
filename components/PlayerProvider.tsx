@@ -11,7 +11,7 @@ const PlayerProvider = () => {
     volume,
     next,
     setProgress,
-    setDuration,
+    // setDuration,
     seekTo,
     setSeekTo,
     activeId,
@@ -93,11 +93,15 @@ const PlayerProvider = () => {
     }
   };
 
-  const handleLoadedMetadata = () => {
-    if (audioRef.current && activeId === TAB_ID) {
-      setDuration(audioRef.current.duration);
-    }
-  };
+  // const handleLoadedMetadata = () => {
+  //   console.log("audioRef.current ", audioRef.current);
+  //   console.log("activeId ", activeId);
+  //   console.log("TAB_ID ", TAB_ID);
+
+  //   if (audioRef.current && activeId === TAB_ID) {
+  //     setDuration(audioRef.current.duration);
+  //   }
+  // };
 
   const handleEnded = () => {
     if (activeId !== TAB_ID) return;
@@ -132,7 +136,7 @@ const PlayerProvider = () => {
     <audio
       ref={audioRef}
       onTimeUpdate={handleTimeUpdate}
-      onLoadedMetadata={handleLoadedMetadata}
+      // onLoadedMetadata={handleLoadedMetadata}
       onEnded={handleEnded}
       className="hidden"
     />

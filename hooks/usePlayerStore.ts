@@ -68,7 +68,7 @@ export const usePlayerStore = create<PlayerState>()(
       queue: [],
       priorityQueue: [],
       currentIndex: -1,
-      volume: 75,
+      volume: 100,
       progress: 0,
       duration: 0,
       seekTo: null,
@@ -86,6 +86,7 @@ export const usePlayerStore = create<PlayerState>()(
           currentSong: { ...song, uri },
           isPlaying: play === false ? false : true,
           progress: 0,
+          duration: song.duration || 0,
           activeId: play === false ? get().activeId : TAB_ID,
         });
       },
@@ -96,13 +97,15 @@ export const usePlayerStore = create<PlayerState>()(
           ...s,
           uri: getBestUri(s, pref),
         }));
+        const currentSong = songsWithUri[startIndex] || null;
         set({
           queue: songsWithUri,
           priorityQueue: [],
           currentIndex: startIndex,
-          currentSong: songsWithUri[startIndex] || null,
+          currentSong,
           isPlaying: true,
           progress: 0,
+          duration: currentSong?.duration || 0,
           activeId: TAB_ID,
         });
       },
@@ -147,6 +150,8 @@ export const usePlayerStore = create<PlayerState>()(
             },
             priorityQueue: newPriorityQueue,
             isPlaying: true,
+            progress: 0,
+            duration: nextSong.duration || 0,
             activeId: TAB_ID,
           });
           return;
@@ -178,6 +183,8 @@ export const usePlayerStore = create<PlayerState>()(
               uri: getBestUri(nextSong, downloadPreference),
             },
             isPlaying: true,
+            progress: 0,
+            duration: nextSong.duration || 0,
             activeId: TAB_ID,
           });
         } else {
@@ -205,6 +212,8 @@ export const usePlayerStore = create<PlayerState>()(
               uri: getBestUri(prevSong, downloadPreference),
             },
             isPlaying: true,
+            progress: 0,
+            duration: prevSong.duration || 0,
             activeId: TAB_ID,
           });
         }
