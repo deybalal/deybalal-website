@@ -109,7 +109,7 @@ export function NotificationCenter() {
         align="end"
       >
         <div className="p-4 border-b border-white/5 flex items-center justify-between">
-          <h4 className="font-bold text-lg">Notifications</h4>
+          <h4 className="font-bold text-lg">اعلان ها</h4>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
@@ -117,7 +117,7 @@ export function NotificationCenter() {
               onClick={markAllAsRead}
               className="text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
             >
-              Mark all as read
+              خواندن همه
             </Button>
           )}
         </div>
@@ -179,7 +179,7 @@ export function NotificationCenter() {
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <Bell className="w-12 h-12 mb-4 opacity-20" />
-              <p>No notifications yet</p>
+              <p>هنوز هیچ اعلانی نداری!</p>
             </div>
           )}
         </ScrollArea>

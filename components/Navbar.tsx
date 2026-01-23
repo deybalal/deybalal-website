@@ -14,20 +14,20 @@ import DynamicDarkModeToggle from "@/components/DynamicDarkModeToggle";
 
 const Navbar = () => {
   const navItems = [
-    { name: "Home", href: "/", icon: Home },
-    { name: "Search", href: "/search", icon: Search },
-    { name: "Dashboard", href: "/panel", icon: LayoutDashboard },
-    { name: "Albums", href: "/album", icon: Disc },
-    { name: "Artists", href: "/artist", icon: Mic2 },
-    { name: "Playlists", href: "/playlists", icon: ListMusic },
-    { name: "Favorites", href: "/favorites", icon: Heart },
-    { name: "Profile", href: "/profile", icon: User },
+    { name: "صفحه اصلی", href: "/", icon: Home },
+    { name: "جستوجو", href: "/search", icon: Search },
+    { name: "داشبورد", href: "/panel", icon: LayoutDashboard },
+    { name: "آلبوم ها", href: "/album", icon: Disc },
+    { name: "خواننده ها", href: "/artist", icon: Mic2 },
+    { name: "پلی لیست ها", href: "/playlists", icon: ListMusic },
+    { name: "موردعلاقه ها", href: "/favorites", icon: Heart },
+    { name: "پروفایل", href: "/profile", icon: User },
   ];
 
   return (
     <nav className="fixed hover:bg-background/90 top-0 start-0 h-screen w-20 hidden md:flex flex-col items-center py-8 z-50 transition-all duration-300 hover:w-64 group overflow-hidden border-e border-white/5">
       <div className="mb-10 text-2xl font-bold text-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-        Music Player
+        دی بلال
       </div>
 
       <div className="flex flex-col gap-6 w-full group-hover:bg-background/90 flex-1">

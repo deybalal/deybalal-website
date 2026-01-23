@@ -110,7 +110,7 @@ export default function SyncLyricsPage({
     if (songId) {
       fetchSong();
     }
-  }, [songId, setSong]);
+  }, [songId, setSong, setDuration]);
 
   // Handle tapping a line to sync it
   const handleTapLine = (index: number) => {
@@ -357,10 +357,10 @@ export default function SyncLyricsPage({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setSeekTo(progress - 5)}
+                onClick={() => setSeekTo(progress + 5)}
                 className="text-gray-300 hover:text-white flex flex-col items-center justify-center size-10 p-1 cursor-pointer"
               >
-                <ArrowLeft size={20} />
+                <ArrowRight size={20} />
                 <span className="text-xs m-0 p-0">5s</span>
               </Button>
 
@@ -379,10 +379,10 @@ export default function SyncLyricsPage({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setSeekTo(progress + 5)}
+                onClick={() => setSeekTo(progress - 5)}
                 className="text-gray-300 hover:text-white flex flex-col items-center justify-center size-10 p-1 cursor-pointer"
               >
-                <ArrowRight size={20} />
+                <ArrowLeft size={20} />
                 <span className="text-xs m-0 p-0">5s</span>
               </Button>
             </div>
@@ -406,8 +406,8 @@ export default function SyncLyricsPage({
             </Button>
           </div>
 
-          <div className="text-center text-xs text-zinc-500 font-mono">
-            Current Time: {progress.toFixed(2)}s
+          <div className="text-center text-base text-zinc-500 font-mono">
+            Current Time: {progress.toFixed(2)}s | {formatTime(progress)}
           </div>
         </div>
       </div>

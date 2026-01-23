@@ -18,7 +18,7 @@ function DarkModeToggle() {
           <Sun className="w-6 h-6 min-w-[24px]" />
         )}
         <span className="ml-4 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap font-medium">
-          {theme === "light" ? "Dark Mode" : "Light Mode"}
+          {theme === "light" ? "حالت شب" : "حالت روز"}
         </span>
       </button>
     </div>

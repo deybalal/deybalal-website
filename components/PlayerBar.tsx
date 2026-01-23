@@ -69,13 +69,14 @@ const PlayerBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { name: "Home", href: "/", icon: Home },
-    { name: "Search", href: "/search", icon: Search },
-    { name: "Dashboard", href: "/panel", icon: User },
-    { name: "Albums", href: "/album", icon: Disc },
-    { name: "Artists", href: "/artist", icon: Mic2 },
-    { name: "Playlists", href: "/playlists", icon: ListMusic },
-    { name: "Favorites", href: "/favorites", icon: Heart },
+    { name: "صفحه اصلی", href: "/", icon: Home },
+    { name: "جستوجو", href: "/search", icon: Search },
+    { name: "حساب", href: "/panel", icon: User },
+    { name: "آلبوم ها", href: "/album", icon: Disc },
+    { name: "خواننده ها", href: "/artist", icon: Mic2 },
+    { name: "پلی لیست ها", href: "/playlists", icon: ListMusic },
+    { name: "موردعلاقه ها", href: "/favorites", icon: Heart },
+    { name: "پروفایل", href: "/profile", icon: User },
   ];
 
   const qualities = [
@@ -170,6 +171,7 @@ const PlayerBar = () => {
       </Link>
 
       {/* Controls */}
+      <NotificationCenter />
       <div className="flex items-center justify-end flex-none ml-2 md:ml-0 md:flex-col md:items-center md:w-1/2 md:max-w-2xl xl:max-w-3xl md:px-4 md:static md:translate-x-0">
         <div className="flex items-center gap-4 md:gap-6 mb-1 md:mb-2">
           <Button
@@ -259,7 +261,6 @@ const PlayerBar = () => {
       </div>
 
       {/* Volume & Quality */}
-      <NotificationCenter />
       <div className="hidden md:flex items-center justify-end w-1/4 gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -322,16 +323,16 @@ const PlayerBar = () => {
           >
             <SheetHeader className="p-6 border-b border-white/5">
               <SheetTitle className="text-center text-xl font-bold text-foreground">
-                Music Player
+                دی بلال
               </SheetTitle>
               <SheetDescription className="text-center text-xs text-muted-foreground">
-                Navigate through your library
+                آهنگ لری
               </SheetDescription>
             </SheetHeader>
             <div className="flex flex-col py-4">
               <div className="px-6 pb-4 border-b border-white/5">
                 <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-3 text-center">
-                  Audio Quality
+                  کیفیت پخش آنلاین
                 </p>
                 <div className="flex items-center justify-center gap-2">
                   {qualities.map((q) => (
@@ -354,10 +355,10 @@ const PlayerBar = () => {
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-end px-6 py-4 text-gray-400 hover:text-foreground hover:bg-white/5 transition-colors"
+                  className="flex items-center justify-start px-6 py-4 text-gray-400 hover:text-foreground hover:bg-white/5 transition-colors"
                 >
-                  <span className="font-medium">{item.name}</span>
                   <item.icon className="w-5 h-5 me-4" />
+                  <span className="font-medium">{item.name}</span>
                 </Link>
               ))}
               <div className="flex py-3 transition-colors duration-200 relative justify-end items-end rtl flex-row-reverse gap-4">
