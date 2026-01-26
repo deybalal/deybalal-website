@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Liked Songs",
-  description: "Your personal collection of favorite songs on دی بلال.",
+  title: "موردعلاقه ها",
+  description: "آهنگ های مورد علاقه ی شما در پلتفرم دی بلال",
 };
 
 export default function FavoritesLayout({

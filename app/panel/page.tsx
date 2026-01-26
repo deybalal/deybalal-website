@@ -8,7 +8,7 @@ import AdminTable from "@/components/AdminTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashboard",
+  title: "حساب کاربری",
 };
 
 export default async function PanelPage({
@@ -42,13 +42,13 @@ export default async function PanelPage({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-        <h2 className="text-xl font-semibold">Songs Library</h2>
+        <h2 className="text-xl font-semibold">مدیریت آهنگ ها</h2>
         <Button
           asChild
           className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
         >
           <Link href="/panel/new/song">
-            <Plus className="mr-2 h-4 w-4" /> Add New Song
+            <Plus className="mr-2 h-4 w-4" /> ارسال آهنگ جدید
           </Link>
         </Button>
       </div>

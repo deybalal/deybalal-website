@@ -27,10 +27,10 @@ export async function generateMetadata({
     });
   }
 
-  if (!artist) return { title: "Artist Not Found" };
+  if (!artist) return { title: "خواننده پیدا نشد!" };
 
-  const title = `${artist.name} | Artist`;
-  const description = `Explore songs and albums by ${artist.name} on دی بلال.`;
+  const title = `${artist.name} | خواننده`;
+  const description = `شنونده ی آهنگ ها و آلبوم های ${artist.name} در پلتفرم دی بلال باشید.`;
 
   return {
     title,
@@ -106,7 +106,7 @@ export default async function ArtistDetailPage({
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-gray-400">
         <User className="w-16 h-16 mb-4 opacity-50" />
-        <h2 className="text-2xl font-bold">Artist not found</h2>
+        <h2 className="text-2xl font-bold">خواننده پیدا نشد!</h2>
       </div>
     );
   }
@@ -152,7 +152,7 @@ export default async function ArtistDetailPage({
   }));
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 w-[95%]">
       {/* Header */}
       <div className="flex flex-col items-center md:items-start gap-6">
         <div className="w-48 h-48 rounded-full bg-gray-800 flex items-center justify-center overflow-hidden shadow-2xl neon-box relative">
@@ -171,19 +171,19 @@ export default async function ArtistDetailPage({
           <h1 className="text-5xl md:text-7xl font-bold text-white neon-text mb-4">
             {artist.name}
           </h1>
-          <div className="flex items-center justify-center md:justify-start gap-4 mb-2">
+          <div className="flex items-center justify-center md:justify-start gap-8 md:gap-4 mb-2 flex-col md:flex-row">
             <p className="text-gray-400 text-lg">
               {artist._count.songs} آهنگ • {albums.length} آلبوم
             </p>
-            <ArtistPlayButton songs={songs} />
             <FollowButton artistId={artist.id} />
+            <ArtistPlayButton songs={songs} />
           </div>
         </div>
       </div>
 
       {/* Popular Songs */}
       <section>
-        <h2 className="text-2xl font-bold text-foreground mb-6">Songs</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">آهنگ ها</h2>
         {songs.length > 0 ? (
           <div className="bg-foreground/5 rounded-2xl p-6 border border-white/5">
             <SongList songs={songs} />
@@ -193,13 +193,15 @@ export default async function ArtistDetailPage({
             />
           </div>
         ) : (
-          <p className="text-gray-500">No songs found for this artist.</p>
+          <p className="text-gray-500">
+            هیچ آهنگی از این خواننده در پلتفرم دی بلال موجود نیست!
+          </p>
         )}
       </section>
 
       {/* Albums */}
       <section className="pb-24">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Discography</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">آلبوم ها</h2>
         {albums.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {albums.map((album) => (
@@ -207,7 +209,9 @@ export default async function ArtistDetailPage({
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No albums found for this artist.</p>
+          <p className="text-gray-500">
+            هیچ آلبومی از این خواننده در پلتفرم دی بلال موجود نیست!
+          </p>
         )}
       </section>
     </div>

@@ -40,43 +40,43 @@ export default function AdminPanelLayout({
 
   const statItems = [
     {
-      title: "Total Songs",
+      title: "تعداد آهنگ ها",
       value: stats.songsCount,
       icon: Music2,
       color: "text-blue-500",
     },
     {
-      title: "Total Artists",
+      title: "تعداد خواننده ها",
       value: stats.artistsCount,
       icon: Mic2,
       color: "text-green-500",
     },
     {
-      title: "Total Albums",
+      title: "تعداد آلبوم ها",
       value: stats.albumsCount,
       icon: Disc,
       color: "text-purple-500",
     },
     {
-      title: "Total Playlists",
+      title: "تعداد پلی لیست ها",
       value: stats.playlistsCount,
       icon: ListMusic,
       color: "text-orange-500",
     },
     {
-      title: "Total Users",
+      title: "تعداد کاربران",
       value: stats.usersCount,
       icon: Users,
       color: "text-red-500",
     },
     {
-      title: "Total Comments",
+      title: "تعداد نظرات",
       value: stats.commentsCount,
       icon: MessageCircle,
       color: "text-yellow-500",
     },
     {
-      title: "Lyrics Suggestions",
+      title: "تعداد متن آهنگ ارسالی",
       value: stats.suggestionsCount,
       icon: FileText,
       color: "text-cyan-500",
@@ -85,25 +85,25 @@ export default function AdminPanelLayout({
 
   const tabs = [
     {
-      label: "Songs",
+      label: "آهنگ ها",
       href: "/panel",
       icon: Music2,
       active: pathname === "/panel",
     },
     {
-      label: "Artists",
+      label: "خواننده ها",
       href: "/panel/artists",
       icon: Mic2,
       active: pathname.startsWith("/panel/artists"),
     },
     {
-      label: "Albums",
+      label: "آلبوم ها",
       href: "/panel/albums",
       icon: Disc,
       active: pathname.startsWith("/panel/albums"),
     },
     {
-      label: "Playlists",
+      label: "پلی لیست ها",
       href: "/panel/playlists",
       icon: ListMusic,
       active: pathname.startsWith("/panel/playlists"),
@@ -111,37 +111,50 @@ export default function AdminPanelLayout({
     ...(userRole !== "user"
       ? [
           {
-            label: "Users",
+            label: "کاربران",
             href: "/panel/users",
             icon: Users,
             active: pathname.startsWith("/panel/users"),
           },
         ]
       : []),
+    ...(userRole !== "user"
+      ? [
+          {
+            label: "نظرات",
+            href: "/panel/comments",
+            icon: MessageCircle,
+            active: pathname.startsWith("/panel/comments"),
+          },
+        ]
+      : []),
+
     {
-      label: "Comments",
-      href: "/panel/comments",
-      icon: MessageCircle,
-      active: pathname.startsWith("/panel/comments"),
-    },
-    {
-      label: "Lyrics Suggestions",
+      label: "متن آهنگ ها",
       href: "/panel/suggestions",
       icon: FileText,
       active: pathname.startsWith("/panel/suggestions"),
     },
-    {
-      label: "Genres",
-      href: "/panel/genres",
-      icon: Tags,
-      active: pathname.startsWith("/panel/genres"),
-    },
-    {
-      label: "Badges",
-      href: "/panel/badges",
-      icon: Award,
-      active: pathname.startsWith("/panel/badges"),
-    },
+    ...(userRole !== "user"
+      ? [
+          {
+            label: "سبک ها",
+            href: "/panel/genres",
+            icon: Tags,
+            active: pathname.startsWith("/panel/genres"),
+          },
+        ]
+      : []),
+    ...(userRole !== "user"
+      ? [
+          {
+            label: "نشان ها",
+            href: "/panel/badges",
+            icon: Award,
+            active: pathname.startsWith("/panel/badges"),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -149,15 +162,15 @@ export default function AdminPanelLayout({
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold text-foreground neon-text tracking-tight">
-            Admin Dashboard
+            حساب کاربری
           </h1>
           <p className="text-muted-foreground mt-2 text-lg">
-            Manage your music library content with ease.
+            مدیریت آهنگ ها، آلبوم ها، پلی لیست ها، متن آهنگ ها و...
           </p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" className="glass hover:bg-white/10">
-            <Link href="/">Back to App</Link>
+            <Link href="/">برگشت</Link>
           </Button>
         </div>
       </div>

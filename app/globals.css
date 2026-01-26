@@ -58,6 +58,10 @@ body {
   direction: rtl;
 }
 
+.ltr {
+  direction: ltr;
+}
+
 /* Glassmorphism Utilities */
 .glass {
   background: var(--glass-bg);

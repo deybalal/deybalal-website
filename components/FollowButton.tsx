@@ -42,13 +42,15 @@ export function FollowButton({ artistId }: FollowButtonProps) {
       if (data.success) {
         setIsFollowing(data.isFollowing);
         toast.success(
-          data.isFollowing ? "Followed artist" : "Unfollowed artist"
+          data.isFollowing
+            ? "به لیست دنبال شده های شما اضافه شد!"
+            : "از لیست دنبال شده های شما حذف شد!"
         );
       } else {
-        toast.error(data.message || "Failed to toggle follow");
+        toast.error(data.message || "خطا در تغییر وضعیت دنبال شدن!");
       }
     } catch {
-      toast.error("An error occurred");
+      toast.error("خطایی پیش آمد!");
     } finally {
       setIsToggling(false);
     }
@@ -63,7 +65,7 @@ export function FollowButton({ artistId }: FollowButtonProps) {
         className="rounded-full px-6"
       >
         <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-        Loading
+        صبر...
       </Button>
     );
   }
@@ -83,7 +85,7 @@ export function FollowButton({ artistId }: FollowButtonProps) {
       ) : (
         <UserPlus className="ml-2 h-4 w-4" />
       )}
-      {isFollowing ? "Following" : "Follow"}
+      {isFollowing ? "دنبال شده" : "دنبال کردن"}
     </Button>
   );
 }

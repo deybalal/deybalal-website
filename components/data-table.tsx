@@ -26,6 +26,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey?: string;
+  searchKeyTitle?: string;
   pageCount?: number;
   pageIndex?: number;
   onPageChange?: (pageIndex: number) => void;
@@ -35,6 +36,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey = "title",
+  searchKeyTitle = "نام",
   pageCount,
   pageIndex,
   onPageChange,
@@ -75,7 +77,7 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center py-4 px-2">
         <Input
-          placeholder={`Filter ${searchKey}...`}
+          placeholder={`جستوجو با ${searchKeyTitle}...`}
           value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn(searchKey)?.setFilterValue(event.target.value)
@@ -126,7 +128,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  بدون نتیجه.
                 </TableCell>
               </TableRow>
             )}
@@ -140,7 +142,7 @@ export function DataTable<TData, TValue>({
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          Previous
+          قبلی
         </Button>
         <Button
           variant="outline"
@@ -148,7 +150,7 @@ export function DataTable<TData, TValue>({
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          Next
+          بعدی
         </Button>
       </div>
     </div>

@@ -202,9 +202,20 @@ export default function SongDetailClient({
                     <React.Fragment key={artist.id}>
                       <Link
                         href={`/artist/${artist.id}`}
-                        className="text-lg md:text-xl text-muted-foreground hover:scale-110 hover:text-foreground transition-transform"
+                        className="flex items-center text-lg md:text-xl text-muted-foreground hover:scale-110 hover:text-foreground transition-transform"
                       >
-                        {artist.name}
+                        {artist.name}{" "}
+                        {artist.isVerified ? (
+                          <Image
+                            className="mt-1"
+                            src="/images/verified.svg"
+                            width={20}
+                            height={20}
+                            alt="خواننده ی تایید شده"
+                          />
+                        ) : (
+                          ""
+                        )}
                       </Link>
                       {index < song.artists.length - 1 && (
                         <span className="text-lg md:text-xl text-muted-foreground">

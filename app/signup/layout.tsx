@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sign Up",
-  description: "Create a new دی بلال account and start your musical journey.",
+  title: "ثبت نام",
+  description: "ثبت نام در پلتفرم دی بلال",
 };
 
 export default function SignupLayout({

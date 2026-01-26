@@ -38,13 +38,13 @@ export default async function ArtistsPage({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-        <h2 className="text-xl font-semibold">Artists Library</h2>
+        <h2 className="text-xl font-semibold">مدیریت خواننده ها</h2>
         <Button
           asChild
           className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
         >
           <Link href="/panel/new/artist">
-            <Plus className="mr-2 h-4 w-4" /> Add New Artist
+            <Plus className="mr-2 h-4 w-4" /> افزودن خواننده جدید
           </Link>
         </Button>
       </div>

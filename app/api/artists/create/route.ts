@@ -68,6 +68,7 @@ export async function POST(req: Request) {
         name,
         nameEn,
         image,
+        userId: session.user.id,
       },
     });
 

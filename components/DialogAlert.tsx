@@ -37,12 +37,12 @@ function DialogAlert({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>This cannot be undone!</DialogDescription>
+          <DialogDescription>این اقدام غیرقابل بازگشت است!</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">{description}</div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">لغو</Button>
           </DialogClose>
           <Button
             onClick={() => fn()}

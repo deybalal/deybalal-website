@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,49 +7,44 @@ datasource db {
 }
 
 model Song {
-  id                  String  @id @default(cuid())
-  slug                String  @unique
+  id                  String             @id @default(cuid())
+  slug                String             @unique
   title               String
   titleEn             String
   artist              String
   artistEn            String
   albumName           String?
   coverArt            String?
-  year                Int     @default(0)
-  duration            Int     @default(0)
+  year                Int                @default(0)
+  duration            Int                @default(0)
   uri                 String
-  ogg                 String?
   filename            String?
-  index               Int     @default(autoincrement())
+  index               Int                @default(autoincrement())
   lyrics              String?
   syncedLyrics        String?
+  playCount           Int                @default(0)
+  isDisabled          Boolean            @default(false)
+  disabledDescription String?
+  isActive            Boolean            @default(false)
+  isFeatured          Boolean            @default(false)
+  albumId             String?
+  userId              String
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
   lyricsSource        String?
   lyricsSourceUrl     String?
-  playCount           Int     @default(0)
-  isDisabled          Boolean @default(false)
-  disabledDescription String?
-  isActive            Boolean @default(false)
-  isFeatured          Boolean @default(false)
   links               Json?
-
-  albumId String?
-  album   Album?  @relation(fields: [albumId], references: [id])
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  artists Artist[]
-
-  playlists    Playlist[]
-  comments     Comment[]
-  suggestions  LyricsSuggestion[]
-  contributors Contributor[]
-  crew         SongCrew[]
-  genres       Genre[]
-  playHistory  PlayHistory[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  ogg                 String?
+  comments            Comment[]
+  contributors        Contributor[]
+  suggestions         LyricsSuggestion[]
+  playHistory         PlayHistory[]
+  album               Album?             @relation(fields: [albumId], references: [id])
+  user                User               @relation(fields: [userId], references: [id])
+  crew                SongCrew[]
+  artists             Artist[]           @relation("ArtistToSong")
+  genres              Genre[]            @relation("GenreToSong")
+  playlists           Playlist[]         @relation("PlaylistToSong")
 
   @@index([title])
   @@index([artist])
@@ -64,35 +56,32 @@ model Song {
 model SongCrew {
   id     String @id @default(cuid())
   songId String
-  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
   role   String
   name   String
+  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
 
   @@index([songId])
 }
 
 model Album {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   name         String
   artistName   String
   artistNameEn String
   coverArt     String?
   releaseDate  Int?
-  duration     Int      @default(0)
-  isActive     Boolean  @default(true)
-  isFeatured   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  artistId String?
-  artist   Artist? @relation(fields: [artistId], references: [id])
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  songs    Song[]
-  comments Comment[]
-  genres   Genre[]
+  duration     Int       @default(0)
+  isActive     Boolean   @default(true)
+  isFeatured   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  artistId     String?
+  userId       String
+  artist       Artist?   @relation(fields: [artistId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+  comments     Comment[]
+  songs        Song[]
+  genres       Genre[]   @relation("AlbumToGenre")
 
   @@index([artistName])
   @@index([artistId])
@@ -108,11 +97,9 @@ model Playlist {
   isPrivate   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  songs Song[]
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  songs       Song[]   @relation("PlaylistToSong")
 
   @@index([createdAt])
   @@index([isFavorite])
@@ -120,30 +107,32 @@ model Playlist {
 }
 
 model Artist {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  nameEn    String?
-  image     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  name       String   @unique
+  nameEn     String?
+  image      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isVerified Boolean  @default(false)
+  albums     Album[]
+  followers  Follow[]
+  users      User[]
+  songs      Song[]   @relation("ArtistToSong")
 
-  isVerified Boolean @default(false)
-
-  songs     Song[]
-  albums    Album[]
-  users     User[]
-  followers Follow[]
+  userId String?
+  user   User?   @relation("ArtistCreator", fields: [userId], references: [id])
 
   @@index([nameEn])
+  @@index([userId])
 }
 
 model Follow {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   artistId  String
-  artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, artistId])
   @@index([userId])
@@ -151,21 +140,20 @@ model Follow {
 }
 
 model Comment {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   content   String
   userId    String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userSlug  String
   songId    String?
-  song      Song?   @relation(fields: [songId], references: [id], onDelete: Cascade)
   albumId   String?
-  album     Album?  @relation(fields: [albumId], references: [id], onDelete: Cascade)
   postTitle String
-  isActive  Boolean @default(false)
-  isDeleted Boolean @default(false)
-
+  isActive  Boolean  @default(false)
+  isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  album     Album?   @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  song      Song?    @relation(fields: [songId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([songId])
@@ -175,17 +163,17 @@ model Comment {
 model LyricsSuggestion {
   id              String           @id @default(cuid())
   songId          String
-  song            Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
   userId          String
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   lyrics          String?
   syncedLyrics    String?
-  type            SuggestionType   @default(LYRICS)
   status          SuggestionStatus @default(PENDING)
-  lyricsSource    String?
-  lyricsSourceUrl String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+  type            SuggestionType   @default(LYRICS)
+  lyricsSource    String?
+  lyricsSourceUrl String?
+  song            Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([songId])
   @@index([userId])
@@ -195,69 +183,50 @@ model LyricsSuggestion {
 model Notification {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String // e.g., "NEW_RELEASE", "COMMENT_REPLY"
+  type      String
   title     String
   message   String
   link      String?
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([isRead])
 }
 
-enum Role {
-  user
-  moderator
-  administrator
-}
-
-enum SuggestionStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum SuggestionType {
-  LYRICS
-  SYNCED
-}
-
 model User {
-  id                 String     @id
+  id                 String             @id
   name               String
-  email              String     @unique
-  emailVerified      Boolean    @default(false)
+  email              String             @unique
+  emailVerified      Boolean            @default(false)
   image              String?
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  sessions           Session[]
-  accounts           Account[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  isPrivate          Boolean            @default(false)
+  isBanned           Boolean            @default(false)
+  artistId           String?
+  userIndex          Int                @unique @default(autoincrement())
+  userSlug           String             @unique @default(nanoid(10)) @db.VarChar(10)
+  role               Role               @default(user)
+  isVerified         Boolean            @default(false)
+  isUserAnArtist     Boolean            @default(false)
+  downloadPreference Int                @default(128)
+  albums             Album[]
+  comments           Comment[]
+  contributors       Contributor[]
+  follows            Follow[]
+  suggestions        LyricsSuggestion[]
+  notifications      Notification[]
+  playHistory        PlayHistory[]
   playlists          Playlist[]
-  isPrivate          Boolean    @default(false)
-  isBanned           Boolean    @default(false)
-  isVerified         Boolean    @default(false)
-  isUserAnArtist     Boolean    @default(false)
-  downloadPreference Int        @default(128)
+  songs              Song[]
+  badges             UserBadge[]
+  accounts           Account[]
+  sessions           Session[]
+  artist             Artist?            @relation(fields: [artistId], references: [id])
 
-  artistId String?
-  artist   Artist? @relation(fields: [artistId], references: [id])
-
-  userIndex Int    @unique @default(autoincrement())
-  userSlug  String @unique @default(nanoid(10)) @db.VarChar(10)
-
-  role Role @default(user)
-
-  follows       Follow[]
-  comments      Comment[]
-  notifications Notification[]
-  songs         Song[]
-  albums        Album[]
-  suggestions   LyricsSuggestion[]
-  contributors  Contributor[]
-  playHistory   PlayHistory[]
-  badges        UserBadge[]
+  createdArtists Artist[] @relation("ArtistCreator")
 
   @@map("user")
 }
@@ -265,13 +234,13 @@ model User {
 model Contributor {
   id         String   @id @default(cuid())
   songId     String
-  song       Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type       String // "add", "lyrics", "sync"
+  type       String
   percentage Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  song       Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([songId, userId, type])
   @@index([songId])
@@ -281,7 +250,7 @@ model Contributor {
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
@@ -289,7 +258,6 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
@@ -299,7 +267,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -309,6 +276,7 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("account")
@@ -327,15 +295,13 @@ model Verification {
 }
 
 model Genre {
-  id   String @id @default(cuid())
-  name String @unique
-  slug String @unique
-
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  songs  Song[]
-  albums Album[]
+  albums    Album[]  @relation("AlbumToGenre")
+  songs     Song[]   @relation("GenreToSong")
 
   @@index([slug])
 }
@@ -343,10 +309,10 @@ model Genre {
 model PlayHistory {
   id       String   @id @default(cuid())
   userId   String
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   songId   String
-  song     Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
   playedAt DateTime @default(now())
+  song     Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([songId])
@@ -354,24 +320,40 @@ model PlayHistory {
 }
 
 model Badge {
-  id          String   @id @default(cuid())
-  name        String   @unique
+  id          String      @id @default(cuid())
+  name        String      @unique
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  users UserBadge[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  users       UserBadge[]
 }
 
 model UserBadge {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   badgeId   String
-  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
   awardedAt DateTime @default(now())
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, badgeId])
   @@index([userId])
   @@index([badgeId])
+}
+
+enum Role {
+  user
+  moderator
+  administrator
+}
+
+enum SuggestionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SuggestionType {
+  LYRICS
+  SYNCED
 }

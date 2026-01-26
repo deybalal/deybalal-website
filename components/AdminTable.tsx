@@ -51,17 +51,20 @@ export default function AdminTable({
 
   let columns;
   let searchKey = "name";
+  let searchKeyTitle = "نام";
 
   switch (type) {
     case "songs":
       columns = getSongColumns(userRole);
       searchKey = "title";
+      searchKeyTitle = "عنوان آهنگ";
       break;
     case "artists":
       columns = getArtistColumns(userRole);
       break;
     case "albums":
       columns = getAlbumColumns(userRole);
+      searchKeyTitle = "نام آلبوم";
       break;
     case "playlists":
       columns = getPlaylistColumns();
@@ -72,18 +75,22 @@ export default function AdminTable({
     case "comments":
       columns = getCommentColumns(userRole);
       searchKey = "content";
+      searchKeyTitle = "متن";
       break;
     case "suggestions":
       columns = getLyricsSuggestionColumns(userRole);
       searchKey = "song_title";
+      searchKeyTitle = "عنوان آهنگ";
       break;
     case "genres":
       columns = getGenreColumns(userRole);
       searchKey = "name";
+      searchKeyTitle = "نام سبک";
       break;
     case "badges":
       columns = getBadgeColumns(userRole);
       searchKey = "name";
+      searchKeyTitle = "نام نشان";
       break;
   }
 
@@ -92,6 +99,7 @@ export default function AdminTable({
       columns={columns}
       data={data}
       searchKey={searchKey}
+      searchKeyTitle={searchKeyTitle}
       pageCount={pageCount}
       pageIndex={pageIndex}
       onPageChange={onPageChange}

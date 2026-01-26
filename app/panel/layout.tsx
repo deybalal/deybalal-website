@@ -8,10 +8,10 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {
-    default: "Admin Panel",
-    template: "%s | Admin Panel",
+    default: "حساب کاربری",
+    template: "%s | حساب کاربری",
   },
-  description: "دی بلال Admin Panel for managing songs, artists, and users.",
+  description: "حساب کاربری در پلتفرم دی بلال",
 };
 
 export default async function ProtectedLayout({

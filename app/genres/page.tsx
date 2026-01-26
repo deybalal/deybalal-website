@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Genres",
-  description: "Browse music by your favorite genres and moods on دی بلال.",
+  title: "سبک ها",
+  description: "آهنگ ها یا آلبوم های سبک موردعلاقه ی خود را پیدا کنید.",
 };
 
 export default async function GenresPage({
@@ -34,9 +34,9 @@ export default async function GenresPage({
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight">Genres & Moods</h1>
+        <h1 className="text-4xl font-bold tracking-tight">سبک ها</h1>
         <p className="text-muted-foreground text-lg">
-          Explore music by your favorite genres and moods.
+          آهنگ ها یا آلبوم های سبک موردعلاقه ی خود را پیدا کنید.
         </p>
       </div>
 
@@ -53,7 +53,7 @@ export default async function GenresPage({
                 {genre.name}
               </h3>
               <p className="text-sm text-muted-foreground font-medium mt-1">
-                {genre._count.songs} Songs • {genre._count.albums} Albums
+                {genre._count.songs} آهنگ • {genre._count.albums} آلبوم
               </p>
             </div>
           </Link>
@@ -62,7 +62,7 @@ export default async function GenresPage({
 
       {genres.length === 0 && (
         <div className="text-center py-20 text-muted-foreground">
-          No genres found. Check back later!
+          فعلا هیچ سبکی ساخته نشده !
         </div>
       )}
 

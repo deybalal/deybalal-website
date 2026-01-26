@@ -1,9 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Login",
-  description:
-    "Sign in to your دی بلال account to access your playlists and favorites.",
+  title: "ورود به حساب کاربری",
+  description: "ورود به حساب کاربری در پلتفرم دی بلال",
 };
 
 export default function LoginLayout({

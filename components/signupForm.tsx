@@ -41,10 +41,12 @@ export function SignupForm({
     const response = await request.json();
 
     if (response.success) {
-      toast.success("Account Created!");
+      toast.success(
+        response.message ? response.message : "حساب کاربری ساخته شد!"
+      );
       redirect("/panel");
     } else {
-      toast.error(`Something went wrong! ${response.message}`);
+      toast.error(`خطا! ${response.message}`);
     }
   };
 
@@ -52,24 +54,27 @@ export function SignupForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Sign Up</CardTitle>
-          <CardDescription>Sign Up to use our services</CardDescription>
+          <CardTitle className="text-xl">ثبت نام</CardTitle>
+          <CardDescription>
+            برای ارسال نظر، ساخت و مدیریت پلی لیست، ارسال آهنگ و متن آهنگ و...
+            ثبت نام کنید و وارد حساب کاربری خود شوید!
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={submitHandler}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="name">Name</FieldLabel>
+                <FieldLabel htmlFor="name">نام</FieldLabel>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="Enter your name"
+                  placeholder="نام خود را وارد کنید"
                   required
                   onChange={(e) => setName(e.target.value)}
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">ایمیل</FieldLabel>
                 <Input
                   id="email"
                   type="email"
@@ -79,19 +84,19 @@ export function SignupForm({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <FieldLabel htmlFor="password">رمز</FieldLabel>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Min 8 characters"
+                  placeholder="حداقل 8 کاراکتر"
                   required
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </Field>
               <Field>
-                <Button type="submit">Sign Up</Button>
+                <Button type="submit">ثبت نام</Button>
                 <FieldDescription className="text-center">
-                  Already have an account? <Link href="/signup">Login</Link>
+                  قبلا ثبت نام کرده اید؟ <Link href="/login">ورود به حساب</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -99,8 +104,7 @@ export function SignupForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By Signing Up, you agree to our <a href="#">Terms of Service</a> and{" "}
-        <a href="#">Privacy Policy</a>.
+        با ثبت نام، شما <a href="/tos">شرایط و قوانین</a> را میپذیرید.
       </FieldDescription>
     </div>
   );

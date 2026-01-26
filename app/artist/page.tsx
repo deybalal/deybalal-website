@@ -34,7 +34,7 @@ export default function ArtistPage() {
   if (loading) {
     return (
       <div className="space-y-8 container">
-        <h1 className="text-4xl font-bold text-white neon-text">Artists</h1>
+        <h1 className="text-4xl font-bold text-white neon-text">خواننده ها</h1>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
           {[...Array(10)].map((_, i) => (
             <div
@@ -49,10 +49,10 @@ export default function ArtistPage() {
 
   return (
     <div className="space-y-8 container">
-      <h1 className="text-4xl font-bold text-white neon-text">Artists</h1>
+      <h1 className="text-4xl font-bold text-white neon-text">خواننده ها</h1>
 
       {artists.length === 0 ? (
-        <div className="text-gray-400 text-lg">No artists found.</div>
+        <div className="text-gray-400 text-lg">خواننده ای پیدا نشد!</div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
           {artists.map((artist) => (
@@ -96,7 +96,7 @@ export default function ArtistPage() {
                     </div>
                   </h3>
 
-                  <p className="text-gray-400 text-sm">Artist</p>
+                  <p className="text-gray-400 text-sm">خواننده</p>
                 </CardContent>
               </Card>
             </Link>

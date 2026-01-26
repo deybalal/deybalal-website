@@ -23,8 +23,6 @@ import {
   Check,
   X,
   ListMusic,
-  HelpCircle,
-  LucideIcon,
 } from "lucide-react";
 import {
   Dialog,
@@ -84,16 +82,14 @@ const SongActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success(
-            `Song ${song.isActive ? "deactivated" : "approved"} successfully`
-          );
+          toast.success(`آهنگ ${song.isActive ? "غیرفعال" : "تایید"} شد!`);
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to update song status");
+          toast.error(result.message || "خطا در تغییر وضعیت آهنگ");
         }
       } catch (error) {
         console.error("Error updating song status:", error);
-        toast.error("An error occurred while updating song status");
+        toast.error("خطا در تغییر وضعیت آهنگ");
       }
     });
   };
@@ -109,17 +105,19 @@ const SongActionsCell = ({
         const result = await response.json();
         if (result.success) {
           toast.success(
-            `Song ${
-              song.isFeatured ? "removed from featured" : "marked as featured"
-            } successfully`
+            `${
+              song.isFeatured
+                ? "آهنگ از لیست برگزیده ها حذف شد!"
+                : "آهنگ به لیست برگزیده ها اضافه شد!"
+            }`
           );
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to update song status");
+          toast.error(result.message || "خطا در تغییر وضعیت آهنگ");
         }
       } catch (error) {
         console.error("Error updating song status:", error);
-        toast.error("An error occurred while updating song status");
+        toast.error("خطا در تغییر وضعیت آهنگ");
       }
     });
   };
@@ -132,38 +130,38 @@ const SongActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success("Song deleted successfully");
+          toast.success("آهنگ حذف شد!");
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to delete song");
+          toast.error(result.message || "خطا در حذف آهنگ");
         }
       } catch (error) {
         console.error("Error deleting song:", error);
-        toast.error("An error occurred while deleting song");
+        toast.error("خطا در حذف آهنگ");
       }
     });
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir="rtl">
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
+          <span className="sr-only">باز کردن منو</span>
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-center">مدیریت</DropdownMenuLabel>
         {canApprove && (
           <DropdownMenuItem>
             <Link href={`/panel/edit/${song.id}`} className="w-full">
-              Edit Song
+              ویرایش آهنگ
             </Link>
           </DropdownMenuItem>
         )}
         <DropdownMenuItem>
           <Link href={`/panel/edit/lyrics/${song.id}`} className="w-full">
-            Edit Lyrics
+            ویرایش متن
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -173,7 +171,7 @@ const SongActionsCell = ({
             onClick={toggleActive}
             disabled={isPending}
           >
-            {song.isActive ? "Deactivate Song" : "Approve Song"}
+            {song.isActive ? "غیرفعال سازی آهنگ" : "تایید آهنگ"}
           </DropdownMenuItem>
         )}
         {isAdmin && (
@@ -182,7 +180,7 @@ const SongActionsCell = ({
             onClick={toggleFeatured}
             disabled={isPending}
           >
-            {song.isFeatured ? "Remove from Featured" : "Mark as Featured"}
+            {song.isFeatured ? "حذف از برگزیده ها" : "انتخاب به عنوان برگزیده"}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -193,10 +191,10 @@ const SongActionsCell = ({
             asChild
           >
             <DialogAlert
-              title="Delete Song"
-              description="Are you sure you want to delete this Song?"
+              title="حذف آهنگ"
+              description="آیا از حذف کردن این آهنگ مطمئن هستید؟?"
               fn={deleteSong}
-              fnButton="Delete"
+              fnButton="حذف"
             />
           </DropdownMenuItem>
         )}
@@ -205,11 +203,11 @@ const SongActionsCell = ({
           className="cursor-pointer"
           onClick={() => setSong(song as unknown as PlayerSong)}
         >
-          Play Song
+          پخش آهنگ
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Link href={`/song/${song.id}`} className="w-full">
-            Show Song Page
+            نمایش آهنگ
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -220,7 +218,7 @@ const SongActionsCell = ({
 export const getSongColumns = (userRole?: string): ColumnDef<Song>[] => [
   {
     accessorKey: "title",
-    header: "Title",
+    header: "عنوان",
     cell: ({ row }) => {
       const { id, title } = row.original;
 
@@ -236,11 +234,11 @@ export const getSongColumns = (userRole?: string): ColumnDef<Song>[] => [
       );
     },
   },
-  { accessorKey: "artist", header: "Artist" },
-  { accessorKey: "albumName", header: "Album" },
+  { accessorKey: "artist", header: "خواننده" },
+  { accessorKey: "albumName", header: "آلبوم" },
   {
     accessorKey: "isActive",
-    header: "Status",
+    header: "وضعیت",
     cell: ({ row }) => {
       const isActive = row.getValue("isActive") as boolean;
       const isFeatured = row.original.isFeatured;
@@ -252,7 +250,7 @@ export const getSongColumns = (userRole?: string): ColumnDef<Song>[] => [
             <XCircle className="h-4 w-4 text-yellow-500" />
           )}
           <span className="text-sm font-medium">
-            {isActive ? "Active" : "Pending"}
+            {isActive ? "تایید شده" : "در انتظار"}
           </span>
           {isFeatured && (
             <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
@@ -263,7 +261,7 @@ export const getSongColumns = (userRole?: string): ColumnDef<Song>[] => [
   },
   {
     accessorKey: "duration",
-    header: "Duration",
+    header: "زمان",
     cell: ({ row }) => {
       const duration = parseFloat(row.getValue("duration"));
       const minutes = Math.floor(duration / 60);
@@ -306,17 +304,15 @@ const ArtistActionsCell = ({
         const result = await response.json();
         if (result.success) {
           toast.success(
-            `Artist ${
-              artist.isVerified ? "unverified" : "verified"
-            } successfully`
+            `اکانت خواننده ${artist.isVerified ? "غیر رسمی" : "رسمی"} شد!`
           );
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to update artist status");
+          toast.error(result.message || "خطا در تغییر وضعیت اکانت خواننده!");
         }
       } catch (error) {
         console.error("Error updating artist status:", error);
-        toast.error("An error occurred while updating artist status");
+        toast.error("خطا در تغییر وضعیت اکانت خواننده!");
       }
     });
   };
@@ -342,14 +338,14 @@ const ArtistActionsCell = ({
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir="rtl">
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-center">مدیریت</DropdownMenuLabel>
         {canApprove && (
           <DropdownMenuItem
             className="cursor-pointer"
@@ -380,10 +376,31 @@ const ArtistActionsCell = ({
 };
 
 export const getArtistColumns = (userRole?: string): ColumnDef<Artist>[] => [
-  { accessorKey: "name", header: "Name" },
+  { accessorKey: "name", header: "نام" },
+  {
+    accessorKey: "nameEn",
+    header: "فتست",
+    cell: ({ row }) => {
+      const isVerified = row.getValue("isVerified") as boolean;
+      console.log(row.original);
+
+      return (
+        <div className="flex items-center gap-2">
+          {isVerified ? (
+            <CheckCircle2 className="h-4 w-4 text-blue-500" />
+          ) : (
+            <XCircle className="h-4 w-4 text-gray-500" />
+          )}
+          <span className="text-sm font-medium">
+            {isVerified ? "اکانت رسمی" : "اکانت غیر رسمی"}
+          </span>
+        </div>
+      );
+    },
+  },
   {
     accessorKey: "isVerified",
-    header: "Status",
+    header: "وضعیت",
     cell: ({ row }) => {
       const isVerified = row.getValue("isVerified") as boolean;
       return (
@@ -394,7 +411,7 @@ export const getArtistColumns = (userRole?: string): ColumnDef<Artist>[] => [
             <XCircle className="h-4 w-4 text-gray-500" />
           )}
           <span className="text-sm font-medium">
-            {isVerified ? "Verified" : "Unverified"}
+            {isVerified ? "اکانت رسمی" : "اکانت غیر رسمی"}
           </span>
         </div>
       );
@@ -430,16 +447,14 @@ const AlbumActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success(
-            `Album ${album.isActive ? "deactivated" : "approved"} successfully`
-          );
+          toast.success(`آلبوم ${album.isActive ? "غیرفعال" : "تایید"} شد!`);
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to update album status");
+          toast.error(result.message || "خطا در تغییر وضعیت آلبوم");
         }
       } catch (error) {
         console.error("Error updating album status:", error);
-        toast.error("An error occurred while updating album status");
+        toast.error("خطا در تغییر وضعیت آلبوم");
       }
     });
   };
@@ -455,17 +470,19 @@ const AlbumActionsCell = ({
         const result = await response.json();
         if (result.success) {
           toast.success(
-            `Album ${
-              album.isFeatured ? "removed from featured" : "marked as featured"
-            } successfully`
+            `آلبوم ${
+              album.isFeatured
+                ? "از لیست برگزینه ها حذف "
+                : "به لیست برگزینه ها اضافه "
+            } شد`
           );
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to update album status");
+          toast.error(result.message || "خطا در تغییر وضعیت آلبوم");
         }
       } catch (error) {
         console.error("Error updating album status:", error);
-        toast.error("An error occurred while updating album status");
+        toast.error("خطا در تغییر وضعیت آلبوم");
       }
     });
   };
@@ -478,34 +495,34 @@ const AlbumActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success("Album deleted successfully");
+          toast.success("آلبوم با موفقیت حذف شد!");
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to delete album");
+          toast.error(result.message || "خطا در حذف آلبوم");
         }
       } catch (error) {
         console.error("Error deleting album:", error);
-        toast.error("An error occurred while deleting album");
+        toast.error("خطا در حذف آلبوم");
       }
     });
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir="rtl">
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-center">مدیریت</DropdownMenuLabel>
         {canApprove && (
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={toggleActive}
             disabled={isPending}
           >
-            {album.isActive ? "Deactivate Album" : "Approve Album"}
+            {album.isActive ? "غیرفعالسازی آلبوم" : "تایید آلبوم"}
           </DropdownMenuItem>
         )}
         {isAdmin && (
@@ -514,7 +531,7 @@ const AlbumActionsCell = ({
             onClick={toggleFeatured}
             disabled={isPending}
           >
-            {album.isFeatured ? "Remove from Featured" : "Mark as Featured"}
+            {album.isFeatured ? "حذف از برگزیده ها" : "انتخاب به عنوان برگزیده"}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -525,9 +542,9 @@ const AlbumActionsCell = ({
             asChild
           >
             <DialogAlert
-              title="Delete Album"
-              description="Are you sure you want to delete this Album?"
-              fnButton="Delete"
+              title="حذف آلبوم"
+              description="آیا از حذف این آلبوم مطمئن هستید؟"
+              fnButton="حذف"
               fn={deleteAlbum}
             />
           </DropdownMenuItem>
@@ -538,11 +555,11 @@ const AlbumActionsCell = ({
 };
 
 export const getAlbumColumns = (userRole?: string): ColumnDef<Album>[] => [
-  { accessorKey: "name", header: "Name" },
-  { accessorKey: "artistName", header: "Artist" },
+  { accessorKey: "name", header: "نام" },
+  { accessorKey: "artistName", header: "خواننده" },
   {
     accessorKey: "isActive",
-    header: "Status",
+    header: "وضعیت",
     cell: ({ row }) => {
       const isActive = row.getValue("isActive") as boolean;
       const isFeatured = row.original.isFeatured;
@@ -554,7 +571,7 @@ export const getAlbumColumns = (userRole?: string): ColumnDef<Album>[] => [
             <XCircle className="h-4 w-4 text-yellow-500" />
           )}
           <span className="text-sm font-medium">
-            {isActive ? "Active" : "Pending"}
+            {isActive ? "منتشر شده" : "در انتظار"}
           </span>
           {isFeatured && (
             <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
@@ -595,14 +612,14 @@ const PlaylistActionsCell = ({ row }: { row: Row<Playlist> }) => {
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir="rtl">
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-center">مدیریت</DropdownMenuLabel>
         <DropdownMenuItem
           className="cursor-pointer text-red-500 hover:text-red-600"
           disabled={isPending}
@@ -623,7 +640,7 @@ const PlaylistActionsCell = ({ row }: { row: Row<Playlist> }) => {
 export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
   {
     accessorKey: "coverArt",
-    header: "Cover",
+    header: "عکس",
     cell: ({ row }) => {
       const coverArt = row.getValue("coverArt") as string;
       return (
@@ -644,10 +661,10 @@ export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
       );
     },
   },
-  { accessorKey: "name", header: "Name" },
+  { accessorKey: "name", header: "نام" },
   {
     accessorKey: "isPrivate",
-    header: "Visibility",
+    header: "نمایش",
     cell: ({ row }) => {
       const isPrivate = row.getValue("isPrivate") as boolean;
       return (
@@ -666,10 +683,12 @@ export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
   },
   {
     accessorKey: "createdAt",
-    header: "Created At",
+    header: "ساخته شده در",
     cell: ({ row }) => (
       <div className="font-medium">
-        {new Date(row.getValue("createdAt")).toLocaleDateString()}
+        {new Date(row.getValue("createdAt")).toLocaleDateString("fa-IR", {
+          numberingSystem: "latn",
+        })}
       </div>
     ),
   },
@@ -763,14 +782,14 @@ const UserActionsCell = ({
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir="rtl">
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-center">مدیریت</DropdownMenuLabel>
         {isAdmin && (
           <>
             <DropdownMenuSub>
@@ -829,7 +848,7 @@ const UserActionsCell = ({
 export const getUserColumns = (userRole?: string): ColumnDef<PrismaUser>[] => [
   {
     accessorKey: "name",
-    header: "Name",
+    header: "نام",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         {row.original.image && (
@@ -851,18 +870,20 @@ export const getUserColumns = (userRole?: string): ColumnDef<PrismaUser>[] => [
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: "ایمیل",
   },
   {
     accessorKey: "role",
-    header: "Role",
+    header: "نقش",
   },
   {
     accessorKey: "createdAt",
-    header: "Created At",
+    header: "ساخته شده در",
     cell: ({ row }) => (
       <div className="font-medium">
-        {new Date(row.getValue("createdAt")).toLocaleDateString()}
+        {new Date(row.getValue("createdAt")).toLocaleDateString("fa-IR", {
+          numberingSystem: "latn",
+        })}
       </div>
     ),
   },
@@ -935,14 +956,14 @@ const CommentsActionsCell = ({
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir="rtl">
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-center">مدیریت</DropdownMenuLabel>
         {canApprove && (
           <DropdownMenuItem
             className="cursor-pointer"
@@ -973,10 +994,10 @@ const CommentsActionsCell = ({
 };
 
 export const getCommentColumns = (userRole?: string): ColumnDef<Comment>[] => [
-  { accessorKey: "content", header: "Comment" },
+  { accessorKey: "content", header: "نظر" },
   {
     accessorKey: "postTitle",
-    header: "Post Title",
+    header: "آهنگ/آلبوم",
     cell: ({ row }) => {
       const rowOriginal = row.original;
 
@@ -998,20 +1019,24 @@ export const getCommentColumns = (userRole?: string): ColumnDef<Comment>[] => [
   },
   {
     accessorKey: "createdAt",
-    header: "Created At",
+    header: "ارسال شده در",
     cell: ({ row }) => {
       const createdAt = row.getValue("createdAt") as string;
       return (
         <div className="flex items-center gap-2">
-          {new Date(createdAt).toLocaleDateString()}{" "}
-          {new Date(createdAt).toLocaleTimeString()}
+          {new Date(createdAt).toLocaleDateString("fa-IR", {
+            numberingSystem: "latn",
+          })}{" "}
+          {new Date(createdAt).toLocaleTimeString("fa-IR", {
+            numberingSystem: "latn",
+          })}
         </div>
       );
     },
   },
   {
     accessorKey: "isActive",
-    header: "Status",
+    header: "وضعیت",
     cell: ({ row }) => {
       const isActive = row.getValue("isActive") as boolean;
       return (
@@ -1022,7 +1047,7 @@ export const getCommentColumns = (userRole?: string): ColumnDef<Comment>[] => [
             <XCircle className="h-4 w-4 text-gray-500" />
           )}
           <span className="text-sm font-medium">
-            {isActive ? "Verified" : "Unverified"}
+            {isActive ? "تایید شده" : "در انتظار تایید"}
           </span>
         </div>
       );
@@ -1172,20 +1197,25 @@ export const getLyricsSuggestionColumns = (
   {
     id: "song_title",
     accessorFn: (row) => row.song.title,
-    header: "Song",
+    header: "آهنگ",
     cell: ({ row }) => (
-      <div className="font-medium">
+      <Link
+        href={`/song/${row.original.songId}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-medium"
+      >
         {row.original.song.title}
         <div className="text-xs text-muted-foreground">
           {row.original.song.artist}
         </div>
-      </div>
+      </Link>
     ),
   },
   {
     id: "user_name",
     accessorFn: (row) => row.user.name,
-    header: "Suggested By",
+    header: "ارسال شده توسط",
     cell: ({ row }) => (
       <div className="text-sm">
         {row.original.user.name}
@@ -1197,19 +1227,19 @@ export const getLyricsSuggestionColumns = (
   },
   {
     accessorKey: "type",
-    header: "Type",
+    header: "نوع",
     cell: ({ row }) => {
       const type = row.getValue("type") as string;
       return (
         <div className="text-sm font-medium">
-          {type === "LYRICS" ? "Lyrics" : "Synced Lyrics"}
+          {type === "LYRICS" ? "متن" : "متن سینک شده"}
         </div>
       );
     },
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: "وضعیت",
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       return (
@@ -1230,7 +1260,7 @@ export const getLyricsSuggestionColumns = (
                 : "text-yellow-500"
             }`}
           >
-            {status}
+            {status === "APPROVED" ? "تایید شده" : "رد شده"}
           </span>
         </div>
       );
@@ -1238,10 +1268,16 @@ export const getLyricsSuggestionColumns = (
   },
   {
     accessorKey: "createdAt",
-    header: "Date",
+    header: "تاریخ",
     cell: ({ row }) => (
       <div className="text-sm">
-        {new Date(row.original.createdAt).toLocaleDateString()}
+        {new Date(row.original.createdAt).toLocaleDateString("fa-IR", {
+          numberingSystem: "latn",
+        })}{" "}
+        -{" "}
+        {new Date(row.original.createdAt).toLocaleTimeString("fa-IR", {
+          numberingSystem: "latn",
+        })}
       </div>
     ),
   },
@@ -1285,18 +1321,18 @@ const GenreActionsCell = ({
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir="rtl">
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
+          <span className="sr-only">باز کردن منو</span>
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-center">مدیریت</DropdownMenuLabel>
         <DropdownMenuItem>
           <Link href={`/panel/edit/genre/${genre.id}`} className="w-full">
-            Edit Genre
+            ویرایش سبک
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -1307,9 +1343,9 @@ const GenreActionsCell = ({
             asChild
           >
             <DialogAlert
-              title="Delete Genre"
-              description="Are you sure you want to delete this Genre?"
-              fnButton="Delete"
+              title="حذف سبک"
+              description="آیا از حذف کردن این سبک اطمینان دارید؟"
+              fnButton="حذف"
               fn={deleteGenre}
             />
           </DropdownMenuItem>
@@ -1320,8 +1356,24 @@ const GenreActionsCell = ({
 };
 
 export const getGenreColumns = (userRole?: string): ColumnDef<Genre>[] => [
-  { accessorKey: "name", header: "Name" },
-  { accessorKey: "slug", header: "Slug" },
+  { accessorKey: "name", header: "نام" },
+  {
+    accessorKey: "slug",
+    header: "آدرس(slug)",
+    cell: ({ row }) => (
+      <Link
+        href={`/genres/${row.original.slug}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="ltr text-left"
+      >
+        <span className="text-sm text-red-200">
+          {process.env.NEXT_PUBLIC_DEPLOYED_URL}
+        </span>
+        <span className="text-sm text-green-400">/{row.original.slug}</span>
+      </Link>
+    ),
+  },
 
   {
     id: "actions",
@@ -1363,18 +1415,18 @@ const BadgeActionsCell = ({
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu dir="rtl">
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
+          <span className="sr-only">باز کردن منو</span>
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-center">مدیریت</DropdownMenuLabel>
         <DropdownMenuItem>
           <Link href={`/panel/edit/badge/${badge.id}`} className="w-full">
-            Edit Badge
+            ویرایش نشان
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -1385,9 +1437,9 @@ const BadgeActionsCell = ({
             asChild
           >
             <DialogAlert
-              title="Delete Badge"
-              description="Are you sure you want to delete this Badge?"
-              fnButton="Delete"
+              title="حذف نشان"
+              description="از حذف کردن این نشان اطمینان دارید؟"
+              fnButton="حذف"
               fn={deleteBadge}
             />
           </DropdownMenuItem>
@@ -1398,8 +1450,8 @@ const BadgeActionsCell = ({
 };
 
 export const getBadgeColumns = (userRole?: string): ColumnDef<Badge>[] => [
-  { accessorKey: "name", header: "Name" },
-  { accessorKey: "description", header: "Description" },
+  { accessorKey: "name", header: "نام" },
+  { accessorKey: "description", header: "توضیح کوتاه" },
   {
     id: "actions",
     cell: ({ row }) => <BadgeActionsCell row={row} userRole={userRole} />,

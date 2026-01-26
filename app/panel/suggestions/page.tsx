@@ -70,7 +70,9 @@ export default async function SuggestionsPage({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-        <h2 className="text-xl font-semibold">Lyrics Suggestions Management</h2>
+        <h2 className="text-xl font-semibold">
+          مدیریت متن آهنگ های ارسالی توسط کاربران
+        </h2>
       </div>
       <div className="glass rounded-lg border border-white/10 overflow-hidden">
         <AdminTable

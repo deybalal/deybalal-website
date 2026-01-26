@@ -14,8 +14,8 @@ export async function generateMetadata({
   const { name } = await params;
   const decodedName = decodeURIComponent(name);
 
-  const title = `${decodedName} | Crew Profile`;
-  const description = `Explore songs and contributions by ${decodedName} on دی بلال.`;
+  const title = `${decodedName} | پروفایل`;
+  const description = `آهنگ هایی که ${decodedName} در آنها مشارکت داشته را در پلتفرم دی بلال ببینید.`;
 
   return {
     title,
@@ -94,9 +94,7 @@ export default async function CrewPage({
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-bold">{decodedName}</h1>
-        <p className="text-muted-foreground">
-          Contributed to {songs.length} song{songs.length !== 1 ? "s" : ""}
-        </p>
+        <p className="text-muted-foreground">مشارکت در {songs.length} آهنگ</p>
       </div>
 
       {songs.length > 0 ? (
@@ -107,7 +105,7 @@ export default async function CrewPage({
         </div>
       ) : (
         <div className="text-center py-20 text-muted-foreground">
-          No songs found for this crew member.
+          آهنگی موجود نیست!
         </div>
       )}
     </div>

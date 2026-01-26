@@ -19,12 +19,12 @@ export async function generateMetadata({
 
   if (!genre) {
     return {
-      title: "Genre Not Found",
+      title: "سبک پیدا نشد!",
     };
   }
 
-  const title = `${genre.name} Music`;
-  const description = `Discover and listen to the best ${genre.name} songs and albums on دی بلال.`;
+  const title = `آهنگ های ${genre.name}`;
+  const description = `آهنگ های ${genre.name} را در پلتفرم دی بلال پیدا کنید!`;
 
   return {
     title,
@@ -125,7 +125,7 @@ export default async function GenrePage({
             {genre.name}
           </h1>
           <p className="text-xl text-muted-foreground font-medium">
-            {songs.length} Songs • {genre.albums.length} Albums
+            {songs.length} آهنگ • {genre.albums.length} آلبوم
           </p>
         </div>
       </div>
@@ -134,9 +134,9 @@ export default async function GenrePage({
       {songs.length > 0 && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold tracking-tight">Top Songs</h2>
+            <h2 className="text-2xl font-bold tracking-tight">محبوب ترین ها</h2>
             <p className="text-sm text-muted-foreground">
-              Showing {skip + 1}-{Math.min(skip + pageSize, totalSongs)} of{" "}
+              نمایش {skip + 1}-{Math.min(skip + pageSize, totalSongs)} از{" "}
               {totalSongs}
             </p>
           </div>
@@ -158,7 +158,7 @@ export default async function GenrePage({
                 }
               >
                 <Link href={`/genres/${slug}?page=${currentPage - 1}`}>
-                  Previous
+                  قبلی
                 </Link>
               </Button>
               <div className="flex items-center gap-2">
@@ -187,7 +187,7 @@ export default async function GenrePage({
                 }
               >
                 <Link href={`/genres/${slug}?page=${currentPage + 1}`}>
-                  Next
+                  بعدی
                 </Link>
               </Button>
             </div>
@@ -198,7 +198,7 @@ export default async function GenrePage({
       {/* Albums Section */}
       {genre.albums.length > 0 && (
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold tracking-tight">Popular Albums</h2>
+          <h2 className="text-2xl font-bold tracking-tight">آلبوم های محبوب</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {genre.albums.map((album) => (
               <AlbumCard
@@ -236,7 +236,7 @@ export default async function GenrePage({
 
       {songs.length === 0 && genre.albums.length === 0 && (
         <div className="text-center py-20 text-muted-foreground">
-          No content found for this genre yet.
+          آهنگ یا آلبومی یافت نشد!
         </div>
       )}
     </div>
