@@ -21,7 +21,7 @@ export async function GET(
 
     if (!album) {
       return NextResponse.json(
-        { success: false, message: "Album not found" },
+        { success: false, message: "آلبوم پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -29,7 +29,7 @@ export async function GET(
     return NextResponse.json({ success: true, data: album });
   } catch {
     return NextResponse.json(
-      { success: false, message: "Failed to fetch album" },
+      { success: false, message: "خطا در دریافت آلبوم" },
       { status: 500 }
     );
   }
@@ -49,7 +49,7 @@ export async function PUT(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -63,7 +63,7 @@ export async function PUT(
 
     if (!existingAlbum) {
       return NextResponse.json(
-        { success: false, message: "Album not found" },
+        { success: false, message: "آلبوم پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -96,7 +96,7 @@ export async function PUT(
   } catch (error) {
     console.error("Error updating album:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update album" },
+      { success: false, message: "خطا در ویرایش آلبوم" },
       { status: 500 }
     );
   }
@@ -115,7 +115,7 @@ export async function DELETE(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -124,7 +124,10 @@ export async function DELETE(
 
     if (userRole !== "administrator") {
       return NextResponse.json(
-        { success: false, message: "Only administrators can delete albums" },
+        {
+          success: false,
+          message: "فقط مدیریت پلتفرم میتواند آلبوم ها را حذف کند!",
+        },
         { status: 403 }
       );
     }
@@ -135,12 +138,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Album deleted successfully",
+      message: "آلبوم حذف شد!",
     });
   } catch (error) {
     console.error("Error deleting album:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to delete album" },
+      { success: false, message: "خطا در حذف آلبوم" },
       { status: 500 }
     );
   }

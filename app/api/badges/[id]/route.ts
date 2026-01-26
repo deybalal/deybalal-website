@@ -15,7 +15,10 @@ export async function PUT(
     const userRole = (session?.user as { role?: string })?.role;
 
     if (userRole !== "administrator") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "خطا! این اقدام مخصوص مدیریت است!" },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -23,7 +26,7 @@ export async function PUT(
     const { name, description } = body;
 
     if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ error: "نام اجباری است!" }, { status: 400 });
     }
 
     // Check if another badge has the same name
@@ -38,7 +41,7 @@ export async function PUT(
 
     if (existingBadge) {
       return NextResponse.json(
-        { error: "Badge with this name already exists" },
+        { error: "این نشان از قبل وجود دارد!" },
         { status: 400 }
       );
     }
@@ -54,10 +57,7 @@ export async function PUT(
     return NextResponse.json({ success: true, data: badge });
   } catch (error) {
     console.error("Error updating badge:", error);
-    return NextResponse.json(
-      { error: "Failed to update badge" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "خطا در ویرایش عنوان" }, { status: 500 });
   }
 }
 
@@ -73,7 +73,10 @@ export async function DELETE(
     const userRole = (session?.user as { role?: string })?.role;
 
     if (userRole !== "administrator") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "خطا! این اقدام مخصوص مدیریت است!" },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -86,7 +89,7 @@ export async function DELETE(
   } catch (error) {
     console.error("Error deleting badge:", error);
     return NextResponse.json(
-      { error: "Failed to delete badge" },
+      { success: false, message: "خطا در حذف نشان" },
       { status: 500 }
     );
   }

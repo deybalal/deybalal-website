@@ -11,7 +11,7 @@ export async function GET() {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -30,7 +30,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching notifications:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "خطا در دریافت اعلان ها" },
       { status: 500 }
     );
   }
@@ -44,7 +44,7 @@ export async function PATCH(request: Request) {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -63,13 +63,13 @@ export async function PATCH(request: Request) {
       });
       return NextResponse.json({
         success: true,
-        message: "All notifications marked as read",
+        message: "همه ی اعلان ها خوانده شدند!",
       });
     }
 
     if (!id) {
       return NextResponse.json(
-        { success: false, message: "Notification ID is required" },
+        { success: false, message: "آیدی اعلان اجباری است!" },
         { status: 400 }
       );
     }
@@ -80,7 +80,7 @@ export async function PATCH(request: Request) {
 
     if (!notification || notification.userId !== session.user.id) {
       return NextResponse.json(
-        { success: false, message: "Notification not found" },
+        { success: false, message: "اعلان پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -92,12 +92,12 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Notification marked as read",
+      message: "اعلان خوانده شد!",
     });
   } catch (error) {
     console.error("Error updating notification:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "خطا در ویرایش اعلان!" },
       { status: 500 }
     );
   }

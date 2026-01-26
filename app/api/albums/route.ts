@@ -32,7 +32,7 @@ export async function GET() {
   } catch (error) {
     console.error((error as Error).message);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch albums" },
+      { success: false, message: "خطا در دریافت آلبوم ها" },
       { status: 500 }
     );
   }
@@ -64,7 +64,7 @@ export async function POST() {
 
     if (!albums) {
       return NextResponse.json(
-        { success: false, message: "No albums exist yet!" },
+        { success: false, message: "هنوز هیچ آلبومی وجود نداره!" },
         { status: 400 }
       );
     }
@@ -72,7 +72,7 @@ export async function POST() {
   } catch (error) {
     console.error((error as Error).message);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch albums" },
+      { success: false, message: "خطا در دریافت آلبوم ها" },
       { status: 500 }
     );
   }

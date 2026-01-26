@@ -18,14 +18,15 @@ export async function POST(request: NextRequest) {
         isPrivate: true,
         isBanned: false,
         callbackURL: "/panel",
+        downloadPreference: 128,
       },
     });
 
     if (signUp.user) {
       await prisma.playlist.create({
         data: {
-          name: "Favorites",
-          description: "Your favorite songs",
+          name: "موردعلاقه ها",
+          description: "آهنگ های موردعلاقه شما",
           isFavorite: true,
           duration: 0,
           userId: signUp.user.id,
@@ -35,16 +36,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Sign Up Successful!",
+      message: "ثبت نام با موفقیت انجام شد!",
     });
   } catch (error) {
     console.error((error as Error).message);
 
     return NextResponse.json({
       success: false,
-      message: (error as Error).message.includes("prisma")
-        ? "Something went wrong!"
-        : (error as Error).message,
+      message: "Something went wrong!",
     });
   }
 }

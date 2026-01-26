@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -37,6 +37,7 @@ export async function POST(request: Request) {
         description: validatedData.description,
         coverArt: validatedData.coverArt,
         userId: session.user.id,
+        isFavorite: false,
       },
     });
 
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating playlist:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to create playlist" },
+      { success: false, message: "خطا در ساخت پلی لیست!" },
       { status: 500 }
     );
   }

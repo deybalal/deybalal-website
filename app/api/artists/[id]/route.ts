@@ -31,7 +31,7 @@ export async function GET(
 
     if (!artist) {
       return NextResponse.json(
-        { success: false, message: "Artist not found" },
+        { success: false, message: "خواننده پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -39,7 +39,7 @@ export async function GET(
     return NextResponse.json({ success: true, data: artist });
   } catch {
     return NextResponse.json(
-      { success: false, message: "Failed to fetch artist" },
+      { success: false, message: "خطا در دریافت مشخصات خواننده!" },
       { status: 500 }
     );
   }
@@ -59,7 +59,7 @@ export async function PUT(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "ابتدا وارد حساب کاربری شوید." },
         { status: 401 }
       );
     }
@@ -73,7 +73,7 @@ export async function PUT(
 
     if (!existingArtist) {
       return NextResponse.json(
-        { success: false, message: "Artist not found" },
+        { success: false, message: "خواننده پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -98,7 +98,7 @@ export async function PUT(
   } catch (error) {
     console.error("Error updating artist:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update artist" },
+      { success: false, message: "خطا در ویرایش خواننده" },
       { status: 500 }
     );
   }
@@ -117,7 +117,7 @@ export async function DELETE(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "ابتدا وارد حساب کاربری شوید." },
         { status: 401 }
       );
     }
@@ -126,7 +126,10 @@ export async function DELETE(
 
     if (userRole !== "administrator") {
       return NextResponse.json(
-        { success: false, message: "Only administrators can delete artists" },
+        {
+          success: false,
+          message: "فقط مدیریت پلتفرم میتواند خواننده ها را حذف کند!",
+        },
         { status: 403 }
       );
     }
@@ -137,12 +140,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Artist deleted successfully",
+      message: "خواننده حذف شد!",
     });
   } catch (error) {
     console.error("Error deleting artist:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to delete artist" },
+      { success: false, message: "خطا در حذف خواننده" },
       { status: 500 }
     );
   }

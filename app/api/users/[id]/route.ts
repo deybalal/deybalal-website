@@ -13,7 +13,7 @@ export async function GET(
 
     if (!userSlug) {
       return NextResponse.json(
-        { success: false, message: "Invalid user ID" },
+        { success: false, message: "یوزر کاربر نامعتبر است!" },
         { status: 400 }
       );
     }
@@ -45,7 +45,7 @@ export async function GET(
 
     if (!targetUser) {
       return NextResponse.json(
-        { success: false, message: "User not found" },
+        { success: false, message: "کاربر پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -59,7 +59,7 @@ export async function GET(
       // Allow if it's the user themselves
       if (session?.user?.id !== targetUser.id) {
         return NextResponse.json(
-          { success: false, message: "This profile is private" },
+          { success: false, message: "این حساب، خصوصی است!" },
           { status: 403 }
         );
       }
@@ -72,7 +72,7 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch profile" },
+      { success: false, message: "خطا در دریافت پروفایل کاربر!" },
       { status: 500 }
     );
   }
@@ -92,7 +92,7 @@ export async function PUT(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -101,7 +101,10 @@ export async function PUT(
 
     if (userRole !== "administrator") {
       return NextResponse.json(
-        { success: false, message: "Only administrators can manage users" },
+        {
+          success: false,
+          message: "فقط مدیریت پلتفرم میتواند کاربران را مدیریت کند!",
+        },
         { status: 403 }
       );
     }
@@ -113,7 +116,7 @@ export async function PUT(
 
     if (!targetUser) {
       return NextResponse.json(
-        { success: false, message: "User not found" },
+        { success: false, message: "کاربر پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -142,7 +145,7 @@ export async function PUT(
   } catch (error) {
     console.error("Error updating user:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update user" },
+      { success: false, message: "خطا در ویرایش کاربر" },
       { status: 500 }
     );
   }

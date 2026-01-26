@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     });
   } catch {
     return NextResponse.json(
-      { success: false, message: "Failed to fetch songs" },
+      { success: false, message: "خطا در دریافت آهنگ ها" },
       { status: 500 }
     );
   }

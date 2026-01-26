@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Error fetching lyrics suggestions:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch suggestions" },
+      { success: false, message: "خطا در دریافت متن پیشنهادی آهنگ" },
       { status: 500 }
     );
   }

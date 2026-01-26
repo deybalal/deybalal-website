@@ -20,7 +20,7 @@ export async function PATCH(request: Request) {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -47,7 +47,7 @@ export async function PATCH(request: Request) {
         isPrivate: updatedUser.isPrivate,
         downloadPreference: updatedUser.downloadPreference,
       },
-      message: "Profile updated successfully",
+      message: "پروفایل با موفقیت ویرایش شد!",
     });
   } catch (error) {
     console.error("Error updating profile:", error);
@@ -58,7 +58,7 @@ export async function PATCH(request: Request) {
       );
     }
     return NextResponse.json(
-      { success: false, message: "Failed to update profile" },
+      { success: false, message: "خطا در ویرایش پروفایل!" },
       { status: 500 }
     );
   }

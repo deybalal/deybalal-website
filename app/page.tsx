@@ -12,7 +12,7 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Home - Music Player",
   description:
-    "Welcome to Dey Music. Explore the latest songs, featured artists, and popular genres.",
+    "Welcome to دی بلال. Explore the latest songs, featured artists, and popular genres.",
 };
 
 export const dynamic = "force-dynamic";

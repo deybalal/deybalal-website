@@ -3,7 +3,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Search",
-  description: "Search for songs, artists, and albums on Dey Music.",
+  description: "Search for songs, artists, and albums on دی بلال.",
 };
 
 export default function SearchPage() {

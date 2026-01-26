@@ -20,7 +20,7 @@ export async function PUT(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -32,7 +32,7 @@ export async function PUT(
     // Validate that lyrics is provided
     if (!body.lyrics) {
       return NextResponse.json(
-        { success: false, message: "lyrics is required" },
+        { success: false, message: "وارد کردن متن آهنگ اجباری است!" },
         { status: 400 }
       );
     }
@@ -46,7 +46,7 @@ export async function PUT(
 
     if (!existingSong) {
       return NextResponse.json(
-        { success: false, message: "Song not found" },
+        { success: false, message: "آهنگ پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -74,7 +74,7 @@ export async function PUT(
 
       return NextResponse.json({
         success: true,
-        message: "Lyrics updated successfully",
+        message: "ویرایش متن آهنگ با موفقیت انجام شد!",
       });
     } else {
       // Create a suggestion for regular users
@@ -98,21 +98,21 @@ export async function PUT(
       await createNotification({
         userId: session.user.id,
         type: "LYRICS_SUBMITTED",
-        title: "Lyrics Submitted",
-        message: `Your lyrics suggestion for "${existingSong.title}" has been received and is awaiting moderation.`,
+        title: "متن آهنگ ارسال شد!",
+        message: `متن آهنگ "${existingSong.title}" ارسال شد و در انتظار تایید توسط مدیریت پلتفرم است!`,
         link: `/song/${id}`,
       });
 
       return NextResponse.json({
         success: true,
         data: suggestion,
-        message: "Lyrics suggestion submitted for review",
+        message: "متن آهنگ ارسال شد و در انتظار تایید توسط مدیریت پلتفرم است!",
       });
     }
   } catch (error) {
     console.error("Error updating Lyrics:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update Lyrics" },
+      { success: false, message: "خطا در ویرایش متن آهنگ!" },
       { status: 500 }
     );
   }

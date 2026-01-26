@@ -29,7 +29,7 @@ export async function generateMetadata({
 
   const artistNames = song.artists.map((a) => a.name).join(", ");
   const title = `${song.title} by ${artistNames}`;
-  const description = `Listen to ${song.title} by ${artistNames} on Dey Music. Stream and download in high quality.`;
+  const description = `Listen to ${song.title} by ${artistNames} on دی بلال. Stream and download in high quality.`;
   const ogImageUrl = `/api/og/song/${id}`;
 
   return {
@@ -40,7 +40,7 @@ export async function generateMetadata({
       description,
       images: [ogImageUrl],
       type: "music.song",
-      siteName: "Dey Music",
+      siteName: "دی بلال",
     },
     twitter: {
       card: "summary_large_image",

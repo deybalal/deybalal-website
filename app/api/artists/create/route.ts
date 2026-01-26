@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -35,7 +35,8 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "Verified artists cannot create new artists.",
+          message:
+            "شما یک خواننده ی تایید شده هستید و اجازه ی ساخت خواننده ی جدید ندارید!",
         },
         { status: 403 }
       );
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
 
     if (!name) {
       return NextResponse.json(
-        { success: false, message: "Artist name is required" },
+        { success: false, message: "وارد کردن نام خواننده اجباری است!" },
         { status: 400 }
       );
     }
@@ -57,7 +58,7 @@ export async function POST(req: Request) {
 
     if (existingArtist) {
       return NextResponse.json(
-        { success: false, message: "Artist already exists" },
+        { success: false, message: "این خواننده از قبل وجود دارد!" },
         { status: 400 }
       );
     }
@@ -77,7 +78,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error creating artist:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to create artist" },
+      { success: false, message: "خطا در ساخت خواننده" },
       { status: 500 }
     );
   }

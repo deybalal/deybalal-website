@@ -11,7 +11,7 @@ export async function GET() {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -20,7 +20,10 @@ export async function GET() {
 
     if (userRole !== "administrator") {
       return NextResponse.json(
-        { success: false, message: "Only administrators can list users" },
+        {
+          success: false,
+          message: "فقط مدیریت پلتفرم میتواند لیست کاربران را ببیند!",
+        },
         { status: 403 }
       );
     }
@@ -42,7 +45,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch users" },
+      { success: false, message: "خطا در دریافت کاربران!" },
       { status: 500 }
     );
   }

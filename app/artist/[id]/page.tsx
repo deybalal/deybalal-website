@@ -30,7 +30,7 @@ export async function generateMetadata({
   if (!artist) return { title: "Artist Not Found" };
 
   const title = `${artist.name} | Artist`;
-  const description = `Explore songs and albums by ${artist.name} on Dey Music.`;
+  const description = `Explore songs and albums by ${artist.name} on دی بلال.`;
 
   return {
     title,

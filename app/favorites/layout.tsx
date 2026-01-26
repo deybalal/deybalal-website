@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Liked Songs",
-  description: "Your personal collection of favorite songs on Dey Music.",
+  description: "Your personal collection of favorite songs on دی بلال.",
 };
 
 export default function FavoritesLayout({

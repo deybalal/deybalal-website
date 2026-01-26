@@ -18,7 +18,7 @@ export async function PUT(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "ابتدا وارد حساب کاربری شوید." },
         { status: 401 }
       );
     }
@@ -32,7 +32,7 @@ export async function PUT(
 
     if (!existingComment) {
       return NextResponse.json(
-        { success: false, message: "Comment not found" },
+        { success: false, message: "نظر پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -55,8 +55,8 @@ export async function PUT(
       await createNotification({
         userId: existingComment.userId,
         type: "COMMENT_APPROVED",
-        title: "Comment Approved!",
-        message: `Your comment on "${existingComment.postTitle}" has been approved.`,
+        title: "نظر تایید شد!",
+        message: `نظر شما برای "${existingComment.postTitle}" تایید شد!`,
         link: existingComment.songId
           ? `/song/${existingComment.songId}`
           : `/album/${existingComment.albumId}`,
@@ -65,14 +65,12 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      message: `Comment ${
-        updatedComment.isActive ? "unverified" : "verified"
-      } successfully`,
+      message: `نظر ${updatedComment.isActive ? "رد" : "منتشر"} شد!`,
     });
   } catch (error) {
     console.error("Error updating comment:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update comment" },
+      { success: false, message: "خطا در ویرایش نظر" },
       { status: 500 }
     );
   }
@@ -91,7 +89,7 @@ export async function DELETE(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "ابتدا وارد حساب کاربری شوید." },
         { status: 401 }
       );
     }
@@ -110,7 +108,7 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          message: "You are not authorized to delete this comment!",
+          message: "شما اجازه حذف این نظر را ندارید!",
         },
         { status: 403 }
       );
@@ -125,12 +123,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Comment deleted successfully",
+      message: "نظر حذف شد!",
     });
   } catch (error) {
     console.error("Error deleting comment:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to delete comment" },
+      { success: false, message: "خطا در حذف نظر!" },
       { status: 500 }
     );
   }

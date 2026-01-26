@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
     if (!songId && !albumId) {
       return NextResponse.json(
-        { success: false, message: "songId or albumId is required" },
+        { success: false, message: "آیدی آهنگ یا آلبوم اجباری است!" },
         { status: 400 }
       );
     }
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Error fetching comments:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "خطا در دریافت نظرات" },
       { status: 500 }
     );
   }
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "ابتدا وارد حساب کاربری شوید." },
         { status: 401 }
       );
     }
@@ -84,14 +84,14 @@ export async function POST(request: Request) {
 
     if (!content) {
       return NextResponse.json(
-        { success: false, message: "Content is required" },
+        { success: false, message: "متن نظر اجباری است!" },
         { status: 400 }
       );
     }
 
     if (!songId && !albumId) {
       return NextResponse.json(
-        { success: false, message: "songId or albumId is required" },
+        { success: false, message: "آیدی آهنگ یا آلبوم اجباری است!" },
         { status: 400 }
       );
     }
@@ -133,7 +133,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating comment:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "خطا در ذخیره نظر" },
       { status: 500 }
     );
   }
@@ -147,7 +147,7 @@ export async function DELETE(request: Request) {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "ابتدا وارد حساب کاربری شوید." },
         { status: 401 }
       );
     }
@@ -157,7 +157,7 @@ export async function DELETE(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { success: false, message: "Comment ID is required" },
+        { success: false, message: "آیدی نظر اجباری است!" },
         { status: 400 }
       );
     }
@@ -168,7 +168,7 @@ export async function DELETE(request: Request) {
 
     if (!comment) {
       return NextResponse.json(
-        { success: false, message: "Comment not found" },
+        { success: false, message: "نظر پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -179,7 +179,11 @@ export async function DELETE(request: Request) {
       session.user.role !== "administrator"
     ) {
       return NextResponse.json(
-        { success: false, message: "Forbidden" },
+        {
+          success: false,
+          message:
+            "فقط مدیریت پلتفرم یا ارسال کننده ی نظر قادر به حذف نظر هستند!",
+        },
         { status: 403 }
       );
     }
@@ -189,11 +193,11 @@ export async function DELETE(request: Request) {
       data: { isDeleted: true },
     });
 
-    return NextResponse.json({ success: true, message: "Comment deleted" });
+    return NextResponse.json({ success: true, message: "نظر حذف شد!" });
   } catch (error) {
     console.error("Error deleting comment:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "خطا در حذف نظر!" },
       { status: 500 }
     );
   }

@@ -1,15 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Twitter,
-  Send,
-  Link,
-  PhoneCall,
-  BellRing,
-  MessageCircleMore,
-  MessageCircle,
-} from "lucide-react";
+import { Twitter, Send, Link, MessageCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 interface ShareButtonsProps {
@@ -32,7 +24,7 @@ export function ShareButtons({ title, url, type }: ShareButtonsProps) {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(fullUrl);
-    toast.success("Link copied to clipboard");
+    toast.success("لینک کپی شد!");
   };
 
   return (
@@ -42,7 +34,7 @@ export function ShareButtons({ title, url, type }: ShareButtonsProps) {
         size="icon"
         className="cursor-pointer rounded-full hover:bg-blue-500/10 hover:text-blue-400 border-white/10 h-9 w-9"
         onClick={() => window.open(shareLinks.telegram, "_blank")}
-        title="Share on Telegram"
+        title="به اشتراک گذاری در تلگرام"
       >
         <Send className="w-4 h-4" />
       </Button>
@@ -51,7 +43,7 @@ export function ShareButtons({ title, url, type }: ShareButtonsProps) {
         size="icon"
         className="cursor-pointer rounded-full hover:bg-blue-500/10 hover:text-blue-400 border-white/10 h-9 w-9"
         onClick={() => window.open(shareLinks.twitter, "_blank")}
-        title="Share on Twitter"
+        title="به اشتراک گذاری در توییتر"
       >
         <Twitter className="w-4 h-4" />
       </Button>
@@ -60,7 +52,7 @@ export function ShareButtons({ title, url, type }: ShareButtonsProps) {
         size="icon"
         className="cursor-pointer rounded-full hover:bg-green-500/10 hover:text-green-400 border-white/10 h-9 w-9"
         onClick={() => window.open(shareLinks.whatsapp, "_blank")}
-        title="Share on WhatsApp"
+        title="به اشتراک گذاری در واتساپ"
       >
         <MessageCircle className="w-4 h-4" />
       </Button>
@@ -69,7 +61,7 @@ export function ShareButtons({ title, url, type }: ShareButtonsProps) {
         size="icon"
         className="cursor-pointer rounded-full hover:bg-white/10 border-white/10 h-9 w-9"
         onClick={copyToClipboard}
-        title="Copy Link"
+        title="کپی کردن لینک"
       >
         <Link className="w-4 h-4" />
       </Button>

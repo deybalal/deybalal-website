@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
     console.error((error as Error).message);
 
     return NextResponse.json(
-      { success: false, message: "Failed to fetch playlists" },
+      { success: false, message: "خطا در دریافت پلی لیست!" },
       { status: 500 }
     );
   }

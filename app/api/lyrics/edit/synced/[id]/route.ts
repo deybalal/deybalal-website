@@ -20,7 +20,7 @@ export async function PUT(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -32,7 +32,7 @@ export async function PUT(
     // Validate that syncedLyrics is provided
     if (!body.syncedLyrics) {
       return NextResponse.json(
-        { success: false, message: "syncedLyrics is required" },
+        { success: false, message: "خطا! متن آهنگ اجباری است!" },
         { status: 400 }
       );
     }
@@ -44,7 +44,7 @@ export async function PUT(
 
     if (!existingSong) {
       return NextResponse.json(
-        { success: false, message: "Song not found" },
+        { success: false, message: "آهنگ پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -70,7 +70,7 @@ export async function PUT(
 
       return NextResponse.json({
         success: true,
-        message: "Synced lyrics updated successfully",
+        message: "متن سینک شده ی آهنگ با موفقیت ارسال شد!",
       });
     } else {
       // Create a suggestion for regular users
@@ -88,21 +88,22 @@ export async function PUT(
       await createNotification({
         userId: session.user.id,
         type: "LYRICS_SUBMITTED",
-        title: "Synced Lyrics Submitted",
-        message: `Your synced lyrics suggestion for "${existingSong.title}" has been received and is awaiting moderation.`,
+        title: "متن  سینک شده ی آهنگ ارسال شد!",
+        message: `متن سینک شده ی آهنگ "${existingSong.title}" ارسال شد و در انتظار تایید توسط مدیریت پلتفرم است!`,
         link: `/song/${id}`,
       });
 
       return NextResponse.json({
         success: true,
         data: suggestion,
-        message: "Synced lyrics suggestion submitted for review",
+        message:
+          "متن سینک شده ی آهنگ ارسال شد و در انتظار تایید توسط مدیریت پلتفرم است!",
       });
     }
   } catch (error) {
     console.error("Error updating synced lyrics:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update synced lyrics" },
+      { success: false, message: "خطا در ارسال متن سینک شده ی آهنگ!" },
       { status: 500 }
     );
   }

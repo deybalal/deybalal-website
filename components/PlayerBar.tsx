@@ -71,7 +71,7 @@ const PlayerBar = () => {
   const navItems = [
     { name: "صفحه اصلی", href: "/", icon: Home },
     { name: "جستوجو", href: "/search", icon: Search },
-    { name: "حساب", href: "/panel", icon: User },
+    { name: "حساب کاربری", href: "/panel", icon: User },
     { name: "آلبوم ها", href: "/album", icon: Disc },
     { name: "خواننده ها", href: "/artist", icon: Mic2 },
     { name: "پلی لیست ها", href: "/playlists", icon: ListMusic },

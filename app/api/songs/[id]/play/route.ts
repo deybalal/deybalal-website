@@ -21,7 +21,7 @@ export async function POST(
   } catch (error) {
     console.error("Error incrementing play count:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to increment play count" },
+      { success: false, message: "خطا در افزایش میزان پخش آهنگ" },
       { status: 500 }
     );
   }

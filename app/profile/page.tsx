@@ -7,7 +7,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Account Settings",
-  description: "Manage your Dey Music account settings and preferences.",
+  description: "Manage your دی بلال account settings and preferences.",
 };
 
 export default async function ProfilePage() {

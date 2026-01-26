@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -23,24 +23,25 @@ export async function POST(request: Request) {
 
     if (!songId) {
       return NextResponse.json(
-        { success: false, message: "Song ID is required" },
+        { success: false, message: "آیدی آهنگ اجباری است!" },
         { status: 400 }
       );
     }
 
     // Get or create favorites playlist
     let favoritesPlaylist = await prisma.playlist.findFirst({
-      where: { isFavorite: true },
+      where: { isFavorite: true, userId: session.user.id },
       include: { songs: true },
     });
 
     if (!favoritesPlaylist) {
       favoritesPlaylist = await prisma.playlist.create({
         data: {
-          name: "Favorites",
-          description: "Your favorite songs",
+          name: "مورد علاقه ها",
+          description: "آهنگ های موردعلاقه",
           isFavorite: true,
           duration: 0,
+          userId: session.user.id,
         },
         include: { songs: true },
       });
@@ -52,7 +53,10 @@ export async function POST(request: Request) {
     );
     if (songExists) {
       return NextResponse.json(
-        { success: false, message: "Song already in favorites" },
+        {
+          success: false,
+          message: "این آهنگ از قبل در لیست مورد علاقه ها موجود است!",
+        },
         { status: 400 }
       );
     }
@@ -64,7 +68,7 @@ export async function POST(request: Request) {
 
     if (!song) {
       return NextResponse.json(
-        { success: false, message: "Song not found" },
+        { success: false, message: "آهنگ پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -92,12 +96,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Song added to favorites successfully",
+      message: "به لیست مورد علاقه ها اضافه شد!",
     });
   } catch (error) {
     console.error("Error adding song to favorites:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to add song to favorites" },
+      { success: false, message: "خطا در افزودن به مورد علاقه ها!" },
       { status: 500 }
     );
   }

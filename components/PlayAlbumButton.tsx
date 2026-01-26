@@ -23,7 +23,7 @@ export default function PlayAlbumButton({ songs }: PlayAlbumButtonProps) {
       className="bg-accent cursor-pointer text-foreground font-bold px-8 py-3 rounded-full hover:scale-105 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-accent/25"
     >
       <Play fill="currentColor" className="w-5 h-5" />
-      Play Album
+      پخش آلبوم
     </button>
   );
 }

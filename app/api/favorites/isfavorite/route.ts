@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -28,12 +28,13 @@ export async function POST(request: NextRequest) {
     const findSong = await prisma.playlist.findFirst({
       where: {
         isFavorite: true,
+        userId: session.user.id,
         songs: {
           some: {
             id: songId,
           },
         },
-      }, // TODO: check for matching userId
+      },
     });
 
     if (!findSong) {
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Failed to fetch favorites playlist", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch favorites playlist" },
+      { success: false, message: "خطا در دریافت موردعلاقه ها" },
       { status: 500 }
     );
   }

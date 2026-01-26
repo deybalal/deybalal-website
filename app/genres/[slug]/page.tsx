@@ -24,7 +24,7 @@ export async function generateMetadata({
   }
 
   const title = `${genre.name} Music`;
-  const description = `Discover and listen to the best ${genre.name} songs and albums on Dey Music.`;
+  const description = `Discover and listen to the best ${genre.name} songs and albums on دی بلال.`;
 
   return {
     title,
@@ -33,7 +33,7 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
-      siteName: "Dey Music",
+      siteName: "دی بلال",
     },
     twitter: {
       card: "summary",

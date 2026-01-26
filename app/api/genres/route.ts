@@ -18,7 +18,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching genres:", error);
     return NextResponse.json(
-      { error: "Failed to fetch genres" },
+      { error: "خطا در دریافت سبک ها!" },
       { status: 500 }
     );
   }
@@ -33,14 +33,17 @@ export async function POST(req: Request) {
     const userRole = (session?.user as { role?: string })?.role;
 
     if (userRole !== "administrator" && userRole !== "moderator") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "شما مجاز به انجام این کار نیستید!" },
+        { status: 401 }
+      );
     }
 
     const body = await req.json();
     const { name, slug } = body;
 
     if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ error: "نام اجباری است!" }, { status: 400 });
     }
 
     const slugy = slugify(slug);
@@ -53,7 +56,7 @@ export async function POST(req: Request) {
 
     if (existingGenre) {
       return NextResponse.json(
-        { error: "Genre with this name already exists" },
+        { error: "سبک با این نام از قبل وجود دارد!" },
         { status: 400 }
       );
     }
@@ -68,9 +71,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, data: genre });
   } catch (error) {
     console.error("Error creating genre:", error);
-    return NextResponse.json(
-      { error: "Failed to create genre" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "خطا در ساخت سبک" }, { status: 500 });
   }
 }

@@ -16,7 +16,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -27,7 +27,7 @@ export async function POST(
 
     if (!songId) {
       return NextResponse.json(
-        { success: false, message: "Song ID is required" },
+        { success: false, message: "وارد کردن آیدی آهنگ اجباری است!" },
         { status: 400 }
       );
     }
@@ -40,7 +40,7 @@ export async function POST(
 
     if (!playlist) {
       return NextResponse.json(
-        { success: false, message: "Playlist not found" },
+        { success: false, message: "پلی لیست پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -48,7 +48,7 @@ export async function POST(
     // Check if user owns the playlist
     if (playlist.userId !== session.user.id) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 403 }
       );
     }
@@ -57,7 +57,7 @@ export async function POST(
     const songExists = playlist.songs.some((song) => song.id === songId);
     if (songExists) {
       return NextResponse.json(
-        { success: false, message: "Song already in playlist" },
+        { success: false, message: "این آهنگ از قبل در پلی لیست موجود است!" },
         { status: 400 }
       );
     }
@@ -99,12 +99,12 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: "Song added to playlist successfully",
+      message: "آهنگ به پلی لیست اضافه شد!",
     });
   } catch (error) {
     console.error("Error adding song to playlist:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to add song to playlist" },
+      { success: false, message: "خطا در افزودن آهنگ به پلی لیست!" },
       { status: 500 }
     );
   }

@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -23,20 +23,20 @@ export async function POST(request: Request) {
 
     if (!songId) {
       return NextResponse.json(
-        { success: false, message: "Song ID is required" },
+        { success: false, message: "آیدی آهنگ اجباری است!" },
         { status: 400 }
       );
     }
 
     // Find favorites playlist
     const favoritesPlaylist = await prisma.playlist.findFirst({
-      where: { isFavorite: true },
+      where: { isFavorite: true, userId: session.user.id },
       include: { songs: true },
     });
 
     if (!favoritesPlaylist) {
       return NextResponse.json(
-        { success: false, message: "Favorites playlist not found" },
+        { success: false, message: "لیست موردعلاقه ها پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -45,7 +45,10 @@ export async function POST(request: Request) {
     const song = favoritesPlaylist.songs.find((s) => s.id === songId);
     if (!song) {
       return NextResponse.json(
-        { success: false, message: "Song not in favorites" },
+        {
+          success: false,
+          message: "این آهنگ در لیست مورد علاقه های شما نیست!",
+        },
         { status: 400 }
       );
     }
@@ -69,12 +72,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Song removed from favorites successfully",
+      message: "از لیست علاقه مندی ها حذف شد!",
     });
   } catch (error) {
     console.error("Error removing song from favorites:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to remove song from favorites" },
+      { success: false, message: "خطا در حذف از لیست علاقه مندی ها!" },
       { status: 500 }
     );
   }

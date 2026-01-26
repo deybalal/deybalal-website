@@ -21,10 +21,10 @@ export async function generateMetadata({
     where: { id },
   });
 
-  if (!album) return { title: "Album Not Found" };
+  if (!album) return { title: "آلبوم پیدا نشد!" };
 
-  const title = `${album.name} by ${album.artistName}`;
-  const description = `Listen to ${album.name} by ${album.artistName} on Dey Music. Explore all tracks from this album.`;
+  const title = `آلبوم ${album.name} از ${album.artistName} - دی بلال`;
+  const description = `استریم و دانلود آلبوم ${album.name} از ${album.artistName} در پلتفرم دی بلال + متن آهنگ ها.`;
   const ogImageUrl = `/api/og/album/${id}`;
 
   return {
@@ -35,7 +35,7 @@ export async function generateMetadata({
       description,
       images: [ogImageUrl],
       type: "music.album",
-      siteName: "Dey Music",
+      siteName: "دی بلال",
     },
     twitter: {
       card: "summary_large_image",
@@ -68,7 +68,7 @@ export default async function AlbumDetailPage({
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] w-full text-gray-400">
         <Music className="w-16 h-16 mb-4 opacity-50" />
-        <h2 className="text-2xl font-bold">Album not found</h2>
+        <h2 className="text-2xl font-bold">آلبوم پیدا نشد!</h2>
       </div>
     );
   }
@@ -77,7 +77,9 @@ export default async function AlbumDetailPage({
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] w-full text-gray-400">
         <Music className="w-16 h-16 mb-4 opacity-50" />
-        <h2 className="text-2xl font-bold">This album is not active yet!</h2>
+        <h2 className="text-2xl font-bold">
+          این آلبوم هنوز از طرف مدیریت تایید نشده!
+        </h2>
       </div>
     );
   }
@@ -136,7 +138,7 @@ export default async function AlbumDetailPage({
         <div className="flex flex-col gap-4 pb-2 w-full">
           <div className="space-y-1">
             <span className="dark:text-gray-400 text-accent bg-accent/10 dark:bg-accent/90 uppercase tracking-widest text-xs font-bold px-3 py-1 rounded-full w-fit">
-              Album
+              آلبوم
             </span>
             <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-tight neon-text">
               {album.name}
@@ -174,7 +176,7 @@ export default async function AlbumDetailPage({
             <span className="w-1 h-1 rounded-full bg-gray-500" />
             <div className="flex items-center gap-1.5">
               <Music className="w-4 h-4" />
-              <span>{album.songs?.length || 0} songs</span>
+              <span>{album.songs?.length || 0} آهنگ</span>
             </div>
           </div>
 

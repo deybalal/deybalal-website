@@ -6,7 +6,6 @@ import path from "path";
 import { existsSync } from "fs";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { createNotification } from "@/lib/notifications";
 import { slugify } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +13,7 @@ export const dynamic = "force-dynamic";
 const songSchema = z.object({
   title: z.string().min(1),
   titleEn: z.string().optional(),
-  artist: z.string().min(2, "You must enter artist name!"),
+  artist: z.string().min(2, "وارد کردن نام خواننده اجباری است!"),
   artistEn: z.string().optional(),
   artistIds: z.array(z.string()).optional(), // Artist IDs for database relation
   albumId: z.string().optional(),
@@ -50,7 +49,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -77,7 +76,8 @@ export async function POST(request: Request) {
         return NextResponse.json(
           {
             success: false,
-            message: "As an artist, you can only create songs for yourself.",
+            message:
+              "به عنوان یک خواننده ی تایید شده، فقط میتوانید آهنگ های خودتان را ارسال کنید!",
           },
           { status: 403 }
         );
@@ -199,21 +199,11 @@ export async function POST(request: Request) {
         },
       },
     });
-
-    // Notify the user that their submission was received
-    await createNotification({
-      userId: session.user.id,
-      type: "SONG_SUBMITTED",
-      title: "Song Submitted",
-      message: `Your song "${song.title}" has been submitted and is awaiting moderation.`,
-      link: `/song/${song.id}`,
-    });
-
     return NextResponse.json({ success: true, data: song });
   } catch (error) {
     console.error("Error creating song:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to create song" },
+      { success: false, message: "خطا در ارسال آهنگ جدید" },
       { status: 500 }
     );
   }

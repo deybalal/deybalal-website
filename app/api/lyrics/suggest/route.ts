@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
     if (!songId) {
       return NextResponse.json(
-        { success: false, message: "Song ID is required" },
+        { success: false, message: "آیدی آهنگ اجباری است!" },
         { status: 400 }
       );
     }
@@ -49,8 +49,8 @@ export async function POST(request: Request) {
     await createNotification({
       userId: session.user.id,
       type: "LYRICS_SUBMITTED",
-      title: "Lyrics Submitted",
-      message: `Your lyrics suggestion for "${suggestion.song.title}" has been received and is awaiting moderation.`,
+      title: "متن آهنگ ارسال شد!",
+      message: `متن آهنگ "${suggestion.song.title}" ارسال شد و در انتظار تایید توسط مدیریت پلتفرم است!`,
       link: `/song/${songId}`,
     });
 
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error submitting lyrics suggestion:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to submit suggestion" },
+      { success: false, message: "خطا در ارسال متن آهنک" },
       { status: 500 }
     );
   }

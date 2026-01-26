@@ -9,11 +9,11 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: {
-    default: "Dey Music | Your Ultimate Music Destination",
-    template: "%s | Dey Music",
+    default: "دی بلال | Your Ultimate Music Destination",
+    template: "%s | دی بلال",
   },
   description:
-    "Discover, stream, and download your favorite music on Dey Music. The best platform for artists and fans.",
+    "Discover, stream, and download your favorite music on دی بلال. The best platform for artists and fans.",
   keywords: [
     "music",
     "streaming",
@@ -23,29 +23,29 @@ export const metadata: Metadata = {
     "lyrics",
     "download music",
   ],
-  authors: [{ name: "Dey Music Team" }],
+  authors: [{ name: "دی بلال Team" }],
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://dey-music.com",
-    siteName: "Dey Music",
-    title: "Dey Music | Your Ultimate Music Destination",
+    siteName: "دی بلال",
+    title: "دی بلال | Your Ultimate Music Destination",
     description:
-      "Discover, stream, and download your favorite music on Dey Music.",
+      "Discover, stream, and download your favorite music on دی بلال.",
     images: [
       {
         url: "/images/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Dey Music",
+        alt: "دی بلال",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dey Music | Your Ultimate Music Destination",
+    title: "دی بلال | Your Ultimate Music Destination",
     description:
-      "Discover, stream, and download your favorite music on Dey Music.",
+      "Discover, stream, and download your favorite music on دی بلال.",
     images: ["/images/og-image.png"],
   },
 };

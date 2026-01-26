@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, startTransition } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDistanceToNow } from "date-fns";
@@ -75,12 +75,12 @@ export function CommentSection({
       if (data.success) {
         setComments([data.data, ...comments]);
         setContent("");
-        toast.success("Comment posted");
+        toast.success("نظر شما ارسال شد! پس از تایید نمایش داده می شود.");
       } else {
-        toast.error(data.message || "Failed to post comment");
+        toast.error(data.message || "خطا در ارسال نظر!");
       }
     } catch {
-      toast.error("An error occurred");
+      toast.error("خطایی پیش آمد!");
     } finally {
       setIsSubmitting(false);
     }
@@ -94,12 +94,12 @@ export function CommentSection({
       const data = await res.json();
       if (data.success) {
         setComments(comments.filter((c) => c.id !== id));
-        toast.success("Comment deleted");
+        toast.success("نظر حذف شد!");
       } else {
-        toast.error(data.message || "Failed to delete comment");
+        toast.error(data.message || "خطا در حذف نظر!");
       }
     } catch {
-      toast.error("An error occurred");
+      toast.error("خطایی پیش آمد!");
     }
   };
 
@@ -113,20 +113,19 @@ export function CommentSection({
       {!isUserLoggedIn ? (
         <div>
           <p className="text-center text-muted-foreground">
-            Please{" "}
+            لطفا برای ارسال نظر
             <Link
               className="text-xl mx-2 hover:scale-125 hover:font-bold transition-all underline underline-offset-8"
               href="/login"
             >
-              Sign In
-            </Link>{" "}
-            to leave a comment.
+              وارد حساب کاربری شوید.
+            </Link>
           </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <Textarea
-            placeholder="Leave a comment..."
+            placeholder="نظرتان را به اشتراک بگذارید..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="min-h-[100px] bg-foreground/5 border-white/10 focus:border-blue-500/50 transition-all resize-none"
@@ -140,7 +139,7 @@ export function CommentSection({
               {isSubmitting && (
                 <Loader2 className="me-2 h-4 w-4 animate-spin" />
               )}
-              Post Comment
+              ارسال نظر
             </Button>
           </div>
         </form>
@@ -189,7 +188,7 @@ export function CommentSection({
                     {!comment.isActive && (
                       <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[10px] font-medium border border-amber-500/20 flex items-center gap-1">
                         <span className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
-                        Pending
+                        منتظر تایید
                       </span>
                     )}
                   </div>
@@ -197,7 +196,7 @@ export function CommentSection({
                     <div className="cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8">
                       <DialogAlert
                         title=""
-                        description="Are you sure you want to delete this comment?"
+                        description="آیا مطمئنید میخواهید این نظر را حذف کنید؟"
                         fnButton="Delete"
                         fn={() => handleDelete(comment.id)}
                       />
@@ -212,7 +211,7 @@ export function CommentSection({
           ))
         ) : (
           <div className="text-center py-12 text-gray-500 bg-foreground/5 rounded-2xl border border-dashed border-white/10">
-            No comments yet. Be the first to share your thoughts!
+            هنوز هیچ نظری ارسال نشده!
           </div>
         )}
       </div>

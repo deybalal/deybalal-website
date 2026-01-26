@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Email and password are required",
+          message: "وارد کردن ایمیل و رمز اجباری است!",
         },
         { status: 400 }
       );
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     if (login.user && login.token) {
       return NextResponse.json({
         success: true,
-        message: "Sign In Successful!",
+        message: "ورود موفق به حساب کاربری!",
         user: login.user,
         token: login.token,
       });
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid email or password!",
+          message: "ایمیل یا رمز نامعتبر است!",
         },
         { status: 401 }
       );
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: (error as Error).message || "Something went wrong!",
+        message: "Something went wrong!",
       },
       { status: 500 }
     );

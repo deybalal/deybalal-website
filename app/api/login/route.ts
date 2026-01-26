@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Sorry! You have been Blocked!",
+          message: "شما بلاک شده اید!",
         },
         { status: 401 }
       );
@@ -36,13 +36,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         downloadPreference: login.user.downloadPreference,
-        message: "Sign In Successful!",
+        message: "ورود موفق به حساب کاربری!",
       });
     } else {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid email or password!",
+          message: "خطا! ایمیل یا رمز اشتباه است!",
         },
         { status: 401 }
       );
@@ -53,9 +53,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: (error as Error).message.includes("prisma")
-          ? "Something went wrong!"
-          : (error as Error).message,
+        message: "خطایی پیش آمد!",
       },
       { status: 401 }
     );

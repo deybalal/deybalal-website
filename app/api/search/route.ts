@@ -98,9 +98,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Search API Error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "خطا در انجام جستوجو" }, { status: 500 });
   }
 }

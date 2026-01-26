@@ -6,7 +6,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Genres",
-  description: "Browse music by your favorite genres and moods on Dey Music.",
+  description: "Browse music by your favorite genres and moods on دی بلال.",
 };
 
 export default async function GenresPage({

@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -26,14 +26,14 @@ export async function POST(request: Request) {
 
     if (!file) {
       return NextResponse.json(
-        { success: false, message: "No file uploaded" },
+        { success: false, message: "هیچ فایلی انتخاب نشده!" },
         { status: 400 }
       );
     }
 
     if (!file.name.toLowerCase().endsWith(".mp3")) {
       return NextResponse.json(
-        { success: false, message: "Only MP3 files are allowed" },
+        { success: false, message: "فقط فایل های mp3 اجازه ی آپلود دارند!" },
         { status: 400 }
       );
     }
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to upload file" },
+      { success: false, message: "خطا در آپلود آهنگ" },
       { status: 500 }
     );
   }

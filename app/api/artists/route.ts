@@ -37,7 +37,7 @@ export async function GET() {
       } else {
         return NextResponse.json({
           success: false,
-          message: "Something went wrong! Artist from artistId was not found!",
+          message: "خطایی پیش آمد! خواننده ی artistId پیدا نشد!",
         });
       }
     }
@@ -68,7 +68,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching artists:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch artists" },
+      { success: false, message: "خطا در دریافت آهنگ ها" },
       { status: 500 }
     );
   }

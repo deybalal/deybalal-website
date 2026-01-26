@@ -13,7 +13,7 @@ export async function GET() {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -36,7 +36,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching sessions:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch sessions" },
+      { success: false, message: "خطا در دریافت نشست های فعال" },
       { status: 500 }
     );
   }
@@ -50,7 +50,7 @@ export async function DELETE(request: Request) {
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -60,7 +60,7 @@ export async function DELETE(request: Request) {
 
     if (!sessionId) {
       return NextResponse.json(
-        { success: false, message: "Session ID is required" },
+        { success: false, message: "آیدی نشست الزامی است!" },
         { status: 400 }
       );
     }
@@ -72,7 +72,10 @@ export async function DELETE(request: Request) {
 
     if (!targetSession || targetSession.userId !== session.user.id) {
       return NextResponse.json(
-        { success: false, message: "Session not found or unauthorized" },
+        {
+          success: false,
+          message: "نشست پیدا نشد یا مجاز به انجام این کار نیستید!",
+        },
         { status: 404 }
       );
     }
@@ -83,12 +86,12 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Session revoked successfully",
+      message: "نشست پاک شد!",
     });
   } catch (error) {
     console.error("Error revoking session:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to revoke session" },
+      { success: false, message: "خطا در حذف نشست!" },
       { status: 500 }
     );
   }

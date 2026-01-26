@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     default: "Admin Panel",
     template: "%s | Admin Panel",
   },
-  description: "Dey Music Admin Panel for managing songs, artists, and users.",
+  description: "دی بلال Admin Panel for managing songs, artists, and users.",
 };
 
 export default async function ProtectedLayout({

@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "لطفا ابتدا وارد حساب کاربری خود شوید!",
         },
         { status: 401 }
       );
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const albumSchema = z.object({
       name: z.string().min(1),
       artistName: z.string().min(1),
-      nameEn: z.string().min(1, "Artist Name in English is required"),
+      nameEn: z.string().min(1, "نام خواننده اجباری است"),
       artistId: z.string().optional(), // Artist ID for database relation
       coverArt: z.string().optional(),
       releaseDate: z.string().optional(), // Expecting ISO string
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
     if (!name) {
       return NextResponse.json(
-        { success: false, message: "Name is required!" },
+        { success: false, message: "نام خواننده اجباری است" },
         { status: 400 }
       );
     }
@@ -69,7 +69,8 @@ export async function POST(request: Request) {
         return NextResponse.json(
           {
             success: false,
-            message: "As an artist, you can only create albums for yourself.",
+            message:
+              "شما به عنوان یک خواننده ی تایید شده در پلتفرم دی بلال، فقط آهنگ های خودتان را میتوانید منتشر کنید.",
           },
           { status: 403 }
         );
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
 
     if (!validatedData) {
       return NextResponse.json(
-        { success: false, message: "Name is required!" },
+        { success: false, message: "نام خواننده اجباری است" },
         { status: 400 }
       );
     }
@@ -99,10 +100,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: album });
   } catch (error) {
-    console.log("Error");
     console.error("Error creating album:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to create album" },
+      { success: false, message: "خطا در ساخت آلبوم" },
       { status: 500 }
     );
   }

@@ -21,7 +21,7 @@ export async function generateMetadata({
   if (!user) return { title: "User Not Found" };
 
   const title = `${user.name} (@${user.userSlug})`;
-  const description = `View ${user.name}'s profile and public playlists on Dey Music.`;
+  const description = `View ${user.name}'s profile and public playlists on دی بلال.`;
 
   return {
     title,

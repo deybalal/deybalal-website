@@ -10,7 +10,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Playlists",
-  description: "Manage and listen to your custom playlists on Dey Music.",
+  description: "Manage and listen to your custom playlists on دی بلال.",
 };
 
 export const dynamic = "force-dynamic";

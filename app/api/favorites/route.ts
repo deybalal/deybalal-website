@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -78,7 +78,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Failed to fetch favorites playlist", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch favorites playlist" },
+      { success: false, message: "خطا در دریافت لیست علاقه مندی ها" },
       { status: 500 }
     );
   }

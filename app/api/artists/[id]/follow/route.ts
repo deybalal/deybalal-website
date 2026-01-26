@@ -30,7 +30,7 @@ export async function GET(
   } catch (error) {
     console.error("Error checking follow status:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "خطایی پیش آمد!" },
       { status: 500 }
     );
   }
@@ -48,7 +48,7 @@ export async function POST(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "ابتدا وارد حساب کاربری شوید." },
         { status: 401 }
       );
     }
@@ -84,7 +84,7 @@ export async function POST(
   } catch (error) {
     console.error("Error toggling follow status:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "خطایی پیش آمد!" },
       { status: 500 }
     );
   }

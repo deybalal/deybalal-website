@@ -22,7 +22,7 @@ export async function generateMetadata({
 
   const creator = playlist.user?.name || "User";
   const title = `${playlist.name} by ${creator}`;
-  const description = `Listen to ${playlist.name}, a curated playlist by ${creator} on Dey Music.`;
+  const description = `Listen to ${playlist.name}, a curated playlist by ${creator} on دی بلال.`;
   const ogImageUrl = `/api/og/playlist/${id}`;
 
   return {
@@ -33,7 +33,7 @@ export async function generateMetadata({
       description,
       images: [ogImageUrl],
       type: "music.playlist",
-      siteName: "Dey Music",
+      siteName: "دی بلال",
     },
     twitter: {
       card: "summary_large_image",

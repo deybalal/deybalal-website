@@ -16,7 +16,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -27,7 +27,7 @@ export async function POST(
 
     if (!songId) {
       return NextResponse.json(
-        { success: false, message: "Song ID is required" },
+        { success: false, message: "وارد کردن آیدی آهنگ اجباری است!" },
         { status: 400 }
       );
     }
@@ -40,7 +40,7 @@ export async function POST(
 
     if (!playlist) {
       return NextResponse.json(
-        { success: false, message: "Playlist not found" },
+        { success: false, message: "پلی لیست پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -48,7 +48,7 @@ export async function POST(
     // Check if user owns the playlist
     if (playlist.userId !== session.user.id) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 403 }
       );
     }
@@ -57,7 +57,7 @@ export async function POST(
     const songIndex = playlist.songs.findIndex((song) => song.id === songId);
     if (songIndex === -1) {
       return NextResponse.json(
-        { success: false, message: "Song not in playlist" },
+        { success: false, message: "این آهنگ در پلی لیست نیست!" },
         { status: 400 }
       );
     }
@@ -102,12 +102,12 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: "Song removed from playlist successfully",
+      message: "آهنگ از پلی لیست حذف شد!",
     });
   } catch (error) {
     console.error("Error removing song from playlist:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to remove song from playlist" },
+      { success: false, message: "خطا در حذف کردن آهنگ از پلی لیست!" },
       { status: 500 }
     );
   }

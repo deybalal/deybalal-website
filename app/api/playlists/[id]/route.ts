@@ -8,10 +8,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
     const { id } = await params;
 
     const playlist = await prisma.playlist.findUnique({
-      where: { id },
+      where: { id, userId: session?.user.id },
       include: {
         songs: {
           include: {
@@ -24,7 +28,10 @@ export async function GET(
 
     if (!playlist) {
       return NextResponse.json(
-        { success: false, message: "Playlist not found" },
+        {
+          success: false,
+          message: "پلی لیست پیدا نشد! یا مجاز به مشاهده نیستید!",
+        },
         { status: 404 }
       );
     }
@@ -33,7 +40,7 @@ export async function GET(
   } catch (error) {
     console.error("Failed to fetch playlist", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch playlist" },
+      { success: false, message: "خطا در دریافت پلی لیست!" },
       { status: 500 }
     );
   }
@@ -52,7 +59,7 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -67,7 +74,7 @@ export async function DELETE(
 
     if (!playlist) {
       return NextResponse.json(
-        { success: false, message: "Playlist not found" },
+        { success: false, message: "پلی لیست پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -75,7 +82,7 @@ export async function DELETE(
     // Check if user owns the playlist
     if (playlist.userId !== session.user.id) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 403 }
       );
     }
@@ -87,12 +94,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Playlist deleted successfully",
+      message: "پلی لیست حذف شد!",
     });
   } catch (error) {
     console.error("Error deleting playlist:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to delete playlist" },
+      { success: false, message: "خطا در حذف پلی لیست!" },
       { status: 500 }
     );
   }
@@ -111,7 +118,7 @@ export async function PATCH(
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -128,7 +135,7 @@ export async function PATCH(
 
     if (!playlist) {
       return NextResponse.json(
-        { success: false, message: "Playlist not found" },
+        { success: false, message: "پلی لیست پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -136,7 +143,7 @@ export async function PATCH(
     // Check if user owns the playlist
     if (playlist.userId !== session.user.id) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 403 }
       );
     }
@@ -152,12 +159,12 @@ export async function PATCH(
     return NextResponse.json({
       success: true,
       data: updatedPlaylist,
-      message: "Playlist updated successfully",
+      message: "پلی لیست آپدیت شد!",
     });
   } catch (error) {
     console.error("Error updating playlist:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update playlist" },
+      { success: false, message: "خطا در آپدیت پلی لیست!" },
       { status: 500 }
     );
   }

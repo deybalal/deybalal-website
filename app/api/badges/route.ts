@@ -17,7 +17,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching badges:", error);
     return NextResponse.json(
-      { error: "Failed to fetch badges" },
+      { error: "خطا در دریافت نشان ها" },
       { status: 500 }
     );
   }
@@ -32,14 +32,17 @@ export async function POST(req: Request) {
     const userRole = (session?.user as { role?: string })?.role;
 
     if (userRole !== "administrator") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "فقط مدیریت پلتفرم میتواند نشان جدید اضافه کند!" },
+        { status: 401 }
+      );
     }
 
     const body = await req.json();
     const { name, description } = body;
 
     if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ error: "نام اجباری است!" }, { status: 400 });
     }
 
     const existingBadge = await prisma.badge.findUnique({
@@ -48,7 +51,7 @@ export async function POST(req: Request) {
 
     if (existingBadge) {
       return NextResponse.json(
-        { error: "Badge with this name already exists" },
+        { error: "نشان با این نام از قبل وجود دارد!" },
         { status: 400 }
       );
     }
@@ -63,9 +66,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, data: badge });
   } catch (error) {
     console.error("Error creating badge:", error);
-    return NextResponse.json(
-      { error: "Failed to create badge" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "خطا در ساخت نشان!" }, { status: 500 });
   }
 }

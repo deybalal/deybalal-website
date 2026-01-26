@@ -7,7 +7,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Most Played Songs",
-  description: "Discover the most popular and trending songs on Dey Music.",
+  description: "Discover the most popular and trending songs on دی بلال.",
 };
 
 export const dynamic = "force-dynamic";

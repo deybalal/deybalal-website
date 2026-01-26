@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/prisma";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -48,9 +49,11 @@ export async function GET(
               gap: "40px",
             }}
           >
-            <img
+            <Image
               src={coverArtUrl}
               alt=""
+              width={450}
+              height={450}
               style={{
                 width: "450px",
                 height: "450px",

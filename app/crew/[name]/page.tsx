@@ -15,7 +15,7 @@ export async function generateMetadata({
   const decodedName = decodeURIComponent(name);
 
   const title = `${decodedName} | Crew Profile`;
-  const description = `Explore songs and contributions by ${decodedName} on Dey Music.`;
+  const description = `Explore songs and contributions by ${decodedName} on دی بلال.`;
 
   return {
     title,
@@ -24,7 +24,7 @@ export async function generateMetadata({
       title,
       description,
       type: "profile",
-      siteName: "Dey Music",
+      siteName: "دی بلال",
     },
     twitter: {
       card: "summary",

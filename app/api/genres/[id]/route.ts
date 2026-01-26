@@ -16,7 +16,10 @@ export async function PUT(
     const userRole = (session?.user as { role?: string })?.role;
 
     if (userRole !== "administrator" && userRole !== "moderator") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "شما مجاز به انجام این کار نیستید!" },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -24,7 +27,10 @@ export async function PUT(
     const { name } = body;
 
     if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "وارد کردن نام اجباری است!" },
+        { status: 400 }
+      );
     }
 
     const slug = slugify(name);
@@ -41,7 +47,7 @@ export async function PUT(
 
     if (existingGenre) {
       return NextResponse.json(
-        { error: "Genre with this name already exists" },
+        { error: "این سبک از قبل موجود است!" },
         { status: 400 }
       );
     }
@@ -58,7 +64,7 @@ export async function PUT(
   } catch (error) {
     console.error("Error updating genre:", error);
     return NextResponse.json(
-      { error: "Failed to update genre" },
+      { error: "خطا در آپدیت کردن سبک!" },
       { status: 500 }
     );
   }

@@ -17,7 +17,7 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching user badges:", error);
     return NextResponse.json(
-      { error: "Failed to fetch user badges" },
+      { error: "خطا در دریافت نشان ها" },
       { status: 500 }
     );
   }
@@ -35,7 +35,10 @@ export async function POST(
     const userRole = (session?.user as { role?: string })?.role;
 
     if (userRole !== "administrator") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "شما مجاز به انجام این کار نیستید!" },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -66,7 +69,7 @@ export async function POST(
   } catch (error) {
     console.error("Error updating user badges:", error);
     return NextResponse.json(
-      { error: "Failed to update user badges" },
+      { error: "خطا در ویرایش نشان ها" },
       { status: 500 }
     );
   }

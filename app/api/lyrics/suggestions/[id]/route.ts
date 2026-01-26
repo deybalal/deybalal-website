@@ -18,7 +18,7 @@ export async function PUT(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -26,7 +26,7 @@ export async function PUT(
     const userRole = (session.user as { role?: string }).role;
     if (userRole !== "administrator" && userRole !== "moderator") {
       return NextResponse.json(
-        { success: false, message: "Forbidden" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 403 }
       );
     }
@@ -36,7 +36,7 @@ export async function PUT(
 
     if (!["APPROVED", "REJECTED"].includes(status)) {
       return NextResponse.json(
-        { success: false, message: "Invalid status" },
+        { success: false, message: "وضعیت نامعتبر" },
         { status: 400 }
       );
     }
@@ -48,7 +48,7 @@ export async function PUT(
 
     if (!suggestion) {
       return NextResponse.json(
-        { success: false, message: "Suggestion not found" },
+        { success: false, message: "ویرایش پیشنهادی پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -91,15 +91,18 @@ export async function PUT(
       data: { status },
     });
 
+    //         message: `متن سینک شده ی آهنگ "${existingSong.title}" ارسال شد و در انتظار تایید توسط مدیریت پلتفرم است!`,
+
     // Notify the user about the status update
     await createNotification({
       userId: suggestion.userId,
       type: status === "APPROVED" ? "LYRICS_APPROVED" : "LYRICS_REJECTED",
-      title: status === "APPROVED" ? "Lyrics Approved!" : "Lyrics Update",
+      title:
+        status === "APPROVED" ? "متن آهنگ تایید شد!" : "متن آهنگ تایید نشد!",
       message:
         status === "APPROVED"
-          ? `Your lyrics suggestion for "${suggestion.song.title}" has been approved.`
-          : `Your lyrics suggestion for "${suggestion.song.title}" was not approved.`,
+          ? `ویرایش پیشنهادی شما برای آهنگ "${suggestion.song.title}" تایید شد!`
+          : `ویرایش پیشنهادی شما برای آهنگ "${suggestion.song.title}" تایید نشد!`,
       link: `/song/${suggestion.songId}`,
     });
 
@@ -107,7 +110,7 @@ export async function PUT(
   } catch (error) {
     console.error("Error moderating lyrics suggestion:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to moderate suggestion" },
+      { success: false, message: "خطا در مدیریت متن پیشنهادی آهنگ" },
       { status: 500 }
     );
   }

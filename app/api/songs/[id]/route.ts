@@ -39,7 +39,7 @@ export async function GET(
 
     if (!song) {
       return NextResponse.json(
-        { success: false, message: "Song not found" },
+        { success: false, message: "آهنگ پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -48,7 +48,7 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching song:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch song" },
+      { success: false, message: "خطا در دریافت آهنگ!" },
       { status: 500 }
     );
   }
@@ -68,7 +68,7 @@ export async function PUT(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -77,7 +77,7 @@ export async function PUT(
 
     if (userRole !== "administrator" && userRole !== "moderator") {
       return NextResponse.json(
-        { success: false, message: "Unauthorized! Only admins can do that." },
+        { success: false, message: "خطای دسترسی! فقط مدیران میتوانند!." },
         { status: 401 }
       );
     }
@@ -89,7 +89,7 @@ export async function PUT(
 
     if (!existingSong) {
       return NextResponse.json(
-        { success: false, message: "Song not found" },
+        { success: false, message: "آهنگ پیدا نشد!" },
         { status: 404 }
       );
     }
@@ -169,8 +169,8 @@ export async function PUT(
       await createNotification({
         userId: existingSong.userId,
         type: "SONG_APPROVED",
-        title: "Song Approved!",
-        message: `Your song "${updatedSong.title}" has been approved and is now live.`,
+        title: "آهنگ تایید شد!",
+        message: `آهنگ ارسالی شما "${updatedSong.title}" تایید شد! هم اکنون میتوانید از شنیدن این آهنگ لذت ببرید!`,
         link: `/song/${updatedSong.id}`,
       });
 
@@ -181,8 +181,8 @@ export async function PUT(
           await notifyFollowers({
             artistId,
             type: "NEW_RELEASE",
-            title: "New Music Released!",
-            message: `${updatedSong.artist} just released a new song: ${updatedSong.title}`,
+            title: "آهنگ جدید منتشر شد!",
+            message: `${updatedSong.artist} آهنگ جدیدی منتشر کرد: ${updatedSong.title}`,
             link: `/song/${updatedSong.id}`,
           });
         }
@@ -341,7 +341,7 @@ export async function PUT(
   } catch (error) {
     console.error("Error updating song:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to update song" },
+      { success: false, message: "خطا در آپدیت کردن آهنگ" },
       { status: 500 }
     );
   }
@@ -360,7 +360,7 @@ export async function DELETE(
 
     if (!session) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
         { status: 401 }
       );
     }
@@ -369,7 +369,10 @@ export async function DELETE(
 
     if (userRole !== "administrator") {
       return NextResponse.json(
-        { success: false, message: "Only administrators can delete songs" },
+        {
+          success: false,
+          message: "فقط مدیریت پلتفرم میتواند آهنگ ها را حذف کند!",
+        },
         { status: 403 }
       );
     }
@@ -380,12 +383,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Song deleted successfully",
+      message: "آهنگ حذف شد!",
     });
   } catch (error) {
     console.error("Error deleting song:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to delete song" },
+      { success: false, message: "خطا در حذف آهنک!" },
       { status: 500 }
     );
   }

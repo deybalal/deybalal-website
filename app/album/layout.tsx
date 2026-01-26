@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Albums",
-  description: "Explore the latest albums and collections on Dey Music.",
+  title: "آلبوم ها",
+  description: "پخش آنلاین و دانلود آلبوم ها در پلتفرم دی بلال",
 };
 
 export default function AlbumLayout({

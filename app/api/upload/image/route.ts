@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "You should Login first!",
+          message: "ابتدا وارد حساب کاربری شوید.",
         },
         { status: 401 }
       );
@@ -25,14 +25,14 @@ export async function POST(request: Request) {
 
     if (!file) {
       return NextResponse.json(
-        { success: false, message: "No file uploaded" },
+        { success: false, message: "هیچ فایلی انتخاب نشده!" },
         { status: 400 }
       );
     }
 
     if (!file.type.startsWith("image/")) {
       return NextResponse.json(
-        { success: false, message: "Only image files are allowed" },
+        { success: false, message: "فقط عکس ها مجاز هستند!" },
         { status: 400 }
       );
     }
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error uploading image:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to upload image" },
+      { success: false, message: "خطا در آپلود عکس!" },
       { status: 500 }
     );
   }
