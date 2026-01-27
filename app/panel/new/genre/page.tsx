@@ -4,9 +4,9 @@ export default function NewGenrePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">New Genre</h1>
+        <h1 className="text-3xl font-bold tracking-tight">سبک جدید</h1>
         <p className="text-muted-foreground">
-          Create a new genre to categorize songs and albums.
+          یک سبک (ژانر) جدید برای آهنگ ها و آلبوم ها بسازید!
         </p>
       </div>
       <GenreForm />

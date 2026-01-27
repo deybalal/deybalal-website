@@ -150,9 +150,9 @@ export default async function SongDetailPage({
         {song.links && (
           <div className="bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold">Download Song</h3>
+              <h3 className="text-lg font-semibold">دانلود آهنگ</h3>
               <p className="text-sm text-gray-400">
-                Choose your preferred quality
+                کیفیت مورد نظرتان را انتخاب کنید:
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -171,7 +171,7 @@ export default async function SongDetailPage({
                       </div>
                       <div className="flex flex-col items-start">
                         <span className="font-bold text-lg">64 kbps</span>
-                        <span className="text-xs opacity-80">Low Quality</span>
+                        <span className="text-xs opacity-80">کیفیت پایین</span>
                       </div>
                     </div>
                     <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
@@ -195,9 +195,7 @@ export default async function SongDetailPage({
                       </div>
                       <div className="flex flex-col items-start">
                         <span className="font-bold text-lg">128 kbps</span>
-                        <span className="text-xs opacity-80">
-                          Standard Quality
-                        </span>
+                        <span className="text-xs opacity-80">کیفیت متوسط</span>
                       </div>
                     </div>
                     <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
@@ -221,7 +219,7 @@ export default async function SongDetailPage({
                       </div>
                       <div className="flex flex-col items-start">
                         <span className="font-bold text-lg">320 kbps</span>
-                        <span className="text-xs opacity-80">High Quality</span>
+                        <span className="text-xs opacity-80">کیفیت عالی</span>
                       </div>
                     </div>
                     <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
@@ -245,7 +243,7 @@ export default async function SongDetailPage({
 
         {songData.crew && songData.crew.length > 0 && (
           <div className="flex flex-col gap-4 bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
-            <h3 className="text-lg font-semibold">Song Credits</h3>
+            <h3 className="text-lg font-semibold">دست اندرکاران این آهنگ</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {songData.crew.map((member) => (
                 <Link
@@ -270,9 +268,9 @@ export default async function SongDetailPage({
         /> */}
         <div className="flex items-center justify-between bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold">Share this song</h3>
+            <h3 className="text-lg font-semibold">به اشتراک گذاری</h3>
             <p className="text-sm text-gray-400">
-              Spread the music with your friends
+              به اشتراک گذاری با دوستان و آشنایان در شبکه های اجتماعی
             </p>
           </div>
           <ShareButtons

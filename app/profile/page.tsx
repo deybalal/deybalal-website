@@ -6,8 +6,8 @@ import ProfileClient from "@/components/profile/ProfileClient";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Account Settings",
-  description: "Manage your دی بلال account settings and preferences.",
+  title: "مدیریت حساب کاربری",
+  description: "مدیریت و تغییر تنظیمات حساب کاربری در پلتفرم دی بلال.",
 };
 
 export default async function ProfilePage() {
@@ -37,7 +37,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="container mx-auto py-10 ps-4 pe-4 md:ps-8 md:pe-8 mb-24 h-max">
-      <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
+      <h1 className="text-3xl font-bold mb-8">تنظیمات حساب کاربری</h1>
       <ProfileClient user={user} />
     </div>
   );

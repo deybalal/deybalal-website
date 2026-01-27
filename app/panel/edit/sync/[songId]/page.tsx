@@ -97,11 +97,11 @@ export default function SyncLyricsPage({
             setSynced([]);
           }
         } else {
-          toast.error("Failed to load song");
+          toast.error("خطا در بارگذاری آهنگ");
         }
       } catch (error) {
         console.error(error);
-        toast.error("Error loading song");
+        toast.error("خطا در بارگذاری آهنگ");
       } finally {
         setLoading(false);
       }
@@ -164,14 +164,16 @@ export default function SyncLyricsPage({
 
       const data = await res.json();
       if (data.success) {
-        toast.success(data.message || "Synced lyrics saved!");
+        toast.success(
+          data.message || "ذخیره شد و پس از تایید نمایش داده می شود!"
+        );
         router.push("/panel");
       } else {
-        toast.error("Failed to save");
+        toast.error(data.message || "خطا در ذخیره!");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Error saving lyrics");
+      toast.error("خطا در ذخیره!");
     }
   };
 
@@ -220,7 +222,7 @@ export default function SyncLyricsPage({
   if (!song) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black text-white">
-        Song not found
+        آهنگ پیدا نشد!
       </div>
     );
   }
@@ -237,7 +239,7 @@ export default function SyncLyricsPage({
         >
           <ArrowLeft size={24} />
         </Button>
-        <h1 className="text-lg font-bold">Sync Lyrics</h1>
+        <h1 className="text-lg font-bold">همگام سازی متن آهنگ</h1>
         <Button
           variant="ghost"
           size="icon"
@@ -407,7 +409,7 @@ export default function SyncLyricsPage({
           </div>
 
           <div className="text-center text-base text-zinc-500 font-mono">
-            Current Time: {progress.toFixed(2)}s | {formatTime(progress)}
+            زمان: {progress.toFixed(2)}s | {formatTime(progress)}
           </div>
         </div>
       </div>

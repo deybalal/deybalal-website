@@ -19,10 +19,10 @@ export default async function EditSongPage({ params }: EditSongPageProps) {
       <div className="w-full mt-16 pb-8">
         <div className="flex flex-col items-center w-full pb-32">
           <h1 className="text-3xl font-bold text-foreground neon-text mb-5">
-            Edit Song
+            ویرایش آهنگ
           </h1>
           <div className="bg-card text-3xl text-center p-6 rounded-lg border border-border md:w-xl xl:w-3xl">
-            Only admins can edit songs!
+            فقط ادمین ها میتوانند آهنگ ها را ویرایش کنند!
           </div>
         </div>
       </div>
@@ -33,7 +33,7 @@ export default async function EditSongPage({ params }: EditSongPageProps) {
     <div className="w-full mt-16 pb-8">
       <div className="flex flex-col items-center w-full pb-32">
         <h1 className="text-3xl font-bold text-foreground neon-text mb-5">
-          Edit Song
+          ویرایش آهنگ
         </h1>
         <div className="bg-card p-6 rounded-lg border border-border md:w-xl xl:w-3xl">
           <SongFormEdit songId={songId} mode="edit" />

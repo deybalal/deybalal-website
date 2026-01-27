@@ -9,8 +9,8 @@ import { auth } from "@/lib/auth";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Playlists",
-  description: "Manage and listen to your custom playlists on دی بلال.",
+  title: "پلی لیست ها",
+  description: "مدیریت و گوش دادن به آهنگ های پلی لیست ها در پلتفرم دی بلال.",
 };
 
 export const dynamic = "force-dynamic";
@@ -65,14 +65,14 @@ export default async function PlaylistsPage() {
     <div className="space-y-8 w-full pb-24">
       <div className="flex items-center">
         <h1 className="text-4xl font-bold text-white neon-text ml-5">
-          Playlists
+          پلی لیست ها
         </h1>
         <Button asChild variant="outline">
           <Link
             href="/panel/new/playlist"
             className=" text-foreground px-4 py-2 rounded-md transition-colors"
           >
-            Create New
+            ساخت پلی لیست جدید
           </Link>
         </Button>
       </div>

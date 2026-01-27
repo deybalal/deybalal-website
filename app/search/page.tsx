@@ -2,8 +2,9 @@ import SearchInterface from "@/components/SearchInterface";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Search",
-  description: "Search for songs, artists, and albums on دی بلال.",
+  title: "جست و جو",
+  description:
+    "جست و جو در میان آهنگ ها، خواننده ها و آلبوم ها در پلتفرم دی بلال.",
 };
 
 export default function SearchPage() {

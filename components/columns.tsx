@@ -325,14 +325,14 @@ const ArtistActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success("Artist deleted successfully");
+          toast.success("خواننده حذف شد!");
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to delete artist");
+          toast.error(result.message || "خطا در حذف خواننده");
         }
       } catch (error) {
         console.error("Error deleting artist:", error);
-        toast.error("An error occurred while deleting artist");
+        toast.error("خطا در حذف خواننده");
       }
     });
   };
@@ -352,7 +352,7 @@ const ArtistActionsCell = ({
             onClick={toggleVerified}
             disabled={isPending}
           >
-            {artist.isVerified ? "Unverify Artist" : "Verify Artist"}
+            {artist.isVerified ? "غیر رسمی کردن" : "رسمی کردن"}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -363,9 +363,9 @@ const ArtistActionsCell = ({
             asChild
           >
             <DialogAlert
-              title="Delete Artist"
-              description="Are you sure you want to delete this Artist?"
-              fnButton="Delete"
+              title="حذف خواننده"
+              description="آیا از حذف کردن این خواننده اطمینان دارید؟"
+              fnButton="حذف"
               fn={deleteArtist}
             />
           </DropdownMenuItem>
@@ -377,27 +377,6 @@ const ArtistActionsCell = ({
 
 export const getArtistColumns = (userRole?: string): ColumnDef<Artist>[] => [
   { accessorKey: "name", header: "نام" },
-  {
-    accessorKey: "nameEn",
-    header: "فتست",
-    cell: ({ row }) => {
-      const isVerified = row.getValue("isVerified") as boolean;
-      console.log(row.original);
-
-      return (
-        <div className="flex items-center gap-2">
-          {isVerified ? (
-            <CheckCircle2 className="h-4 w-4 text-blue-500" />
-          ) : (
-            <XCircle className="h-4 w-4 text-gray-500" />
-          )}
-          <span className="text-sm font-medium">
-            {isVerified ? "اکانت رسمی" : "اکانت غیر رسمی"}
-          </span>
-        </div>
-      );
-    },
-  },
   {
     accessorKey: "isVerified",
     header: "وضعیت",
@@ -599,14 +578,37 @@ const PlaylistActionsCell = ({ row }: { row: Row<Playlist> }) => {
         });
         const result = await response.json();
         if (result.success) {
-          toast.success("Playlist deleted successfully");
+          toast.success("پلی لیست حذف شد!");
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to delete playlist");
+          toast.error(result.message || "خطا در حذف پلی لیست");
         }
       } catch (error) {
         console.error("Error deleting playlist:", error);
-        toast.error("An error occurred while deleting playlist");
+        toast.error("خطا در حذف پلی لیست");
+      }
+    });
+  };
+
+  const toggleVisibility = async (isPrivate: boolean) => {
+    startTransition(async () => {
+      try {
+        const response = await fetch(`/api/playlists/${playlist.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isPrivate }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          toast.success("وضعیت نمایش پلی لیست تغییر کرد!");
+          router.refresh();
+        } else {
+          toast.error(result.message || "خطایی پیش آمد");
+        }
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "خطایی پیش آمد");
       }
     });
   };
@@ -626,11 +628,18 @@ const PlaylistActionsCell = ({ row }: { row: Row<Playlist> }) => {
           asChild
         >
           <DialogAlert
-            title="Delete Playlist"
-            description="Are you sure you want to delete this Playlist?"
-            fnButton="Delete"
+            title="حذف پلی لیست"
+            description="آیا از حذف این پلی لیست اطمینان دارید؟"
+            fnButton="حذف"
             fn={deletePlaylist}
           />
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => toggleVisibility(!row.original.isPrivate)}
+          disabled={isPending}
+        >
+          {row.original.isPrivate ? "تغییر به عمومی" : "تغییر به خصوصی"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -676,7 +685,7 @@ export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
               : "bg-green-500/10 text-green-500"
           )}
         >
-          {isPrivate ? "Private" : "Public"}
+          {isPrivate ? "خصوصی" : "عمومی"}
         </span>
       );
     },
@@ -711,7 +720,7 @@ const UserActionsCell = ({
 
   const isAdmin = userRole === "administrator";
 
-  const updateRole = async (newRole: string) => {
+  const updateRole = async (newRole: string, roleName?: string) => {
     startTransition(async () => {
       try {
         const response = await fetch(`/api/users/${user.id}`, {
@@ -721,14 +730,14 @@ const UserActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success(`User role updated to ${newRole}`);
+          toast.success(`نقش تغییر کرد به '${roleName}'`);
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to update user role");
+          toast.error(result.message || "خطا در تغییر نقش کاربر!");
         }
       } catch (error) {
         console.error("Error updating user role:", error);
-        toast.error("An error occurred while updating user role");
+        toast.error("خطا در تغییر نقش کاربر!");
       }
     });
   };
@@ -743,16 +752,14 @@ const UserActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success(
-            `User ${user.isBanned ? "unbanned" : "banned"} successfully`
-          );
+          toast.success(`کاربر ${user.isBanned ? "رفع مسدودی" : "مسدود"} شد!`);
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to update user status");
+          toast.error(result.message || "خطا در تغییر وضعیت کاربر");
         }
       } catch (error) {
         console.error("Error updating user status:", error);
-        toast.error("An error occurred while updating user status");
+        toast.error("خطا در تغییر وضعیت کاربر");
       }
     });
   };
@@ -767,16 +774,14 @@ const UserActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success(
-            `User ${user.isVerified ? "unverified" : "verified"} successfully`
-          );
+          toast.success(`کاربر ${user.isVerified ? "غیر رسمی" : "رسمی"} شد`);
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to update user status");
+          toast.error(result.message || "خطا در تغییر وضعیت کاربر");
         }
       } catch (error) {
         console.error("Error updating user status:", error);
-        toast.error("An error occurred while updating user status");
+        toast.error("خطا در تغییر وضعیت کاربر");
       }
     });
   };
@@ -793,17 +798,26 @@ const UserActionsCell = ({
         {isAdmin && (
           <>
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Change Role</DropdownMenuSubTrigger>
+              <DropdownMenuSubTrigger>تغییر نقش</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
-                  <DropdownMenuItem onClick={() => updateRole("user")}>
-                    User
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => updateRole("user", "کاربر عادی")}
+                  >
+                    کاربر عادی {user.role === "user" && "(فعلی)"}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => updateRole("moderator")}>
-                    Moderator
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => updateRole("moderator", "مدیریت کننده")}
+                  >
+                    مدیریت کننده {user.role === "moderator" && "(فعلی)"}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => updateRole("administrator")}>
-                    Administrator
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => updateRole("administrator", "ادمین اصلی")}
+                  >
+                    ادمین اصلی {user.role === "administrator" && "(فعلی)"}
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
@@ -813,14 +827,14 @@ const UserActionsCell = ({
               onClick={toggleVerified}
               disabled={isPending}
             >
-              {user.isVerified ? "Unverify User" : "Verify User"}
+              {user.isVerified ? "غیررسمی کردن کاربر" : "رسمی کردن کاربر"}
             </DropdownMenuItem>
             <ManageBadgesDialog user={user}>
               <DropdownMenuItem
                 className="cursor-pointer"
                 onSelect={(e) => e.preventDefault()}
               >
-                Manage Badges
+                مدیریت نشان ها
               </DropdownMenuItem>
             </ManageBadgesDialog>
             <AssignArtistDialog user={user}>
@@ -828,7 +842,7 @@ const UserActionsCell = ({
                 className="cursor-pointer"
                 onSelect={(e) => e.preventDefault()}
               >
-                Assign to Artist
+                الصاق به خواننده
               </DropdownMenuItem>
             </AssignArtistDialog>
             <DropdownMenuItem
@@ -836,7 +850,7 @@ const UserActionsCell = ({
               onClick={toggleBanned}
               disabled={isPending}
             >
-              {user.isBanned ? "Unban User" : "Ban User"}
+              {user.isBanned ? "رفع مسدودی" : "مسدود کردن"}
             </DropdownMenuItem>
           </>
         )}
@@ -919,18 +933,14 @@ const CommentsActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success(
-            `Comment ${
-              comment.isActive ? "unverified" : "verified"
-            } successfully`
-          );
+          toast.success(`نظر ${comment.isActive ? "حذف تایید" : "تایید"} شد`);
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to update comment status");
+          toast.error(result.message || "خطا در تغییر وضعیت نظر");
         }
       } catch (error) {
         console.error("Error updating comment status:", error);
-        toast.error("An error occurred while updating comment status");
+        toast.error("خطا در تغییر وضعیت نظر");
       }
     });
   };
@@ -943,14 +953,14 @@ const CommentsActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success("Comment deleted successfully");
+          toast.success("نظر حذف شد!");
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to delete comment");
+          toast.error(result.message || "خطا در حذف نظر");
         }
       } catch (error) {
         console.error("Error deleting comment:", error);
-        toast.error("An error occurred while deleting comment");
+        toast.error("خطا در حذف نظر");
       }
     });
   };
@@ -970,7 +980,7 @@ const CommentsActionsCell = ({
             onClick={toggleVerified}
             disabled={isPending}
           >
-            {comment.isActive ? "Unverify Comment" : "Verify Comment"}
+            {comment.isActive ? "حذف تایید" : "تایید نظر"}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
@@ -981,9 +991,9 @@ const CommentsActionsCell = ({
             asChild
           >
             <DialogAlert
-              title="Delete Comment"
-              description="Are you sure you want to delete this comment?"
-              fnButton="Delete"
+              title="حذف نظر"
+              description="آیا از حذف این نظر اطمینان دارید؟"
+              fnButton="حذف"
               fn={deleteComment}
             />
           </DropdownMenuItem>
@@ -1099,14 +1109,16 @@ const SuggestionActionsCell = ({
         );
         const result = await response.json();
         if (result.success) {
-          toast.success(`Suggestion ${status.toLowerCase()} successfully`);
+          toast.success(
+            `متن ارسالی کاربر ${status === "APPROVED" ? "تایید" : "رد"} شد!`
+          );
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to update suggestion");
+          toast.error(result.message || "خطا در تغییر وضعیت متن آهنگ");
         }
       } catch (error) {
         console.error("Error updating suggestion:", error);
-        toast.error("An error occurred while updating suggestion");
+        toast.error("خطا در تغییر وضعیت متن آهنگ");
       }
     });
   };
@@ -1116,29 +1128,29 @@ const SuggestionActionsCell = ({
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
-            <Eye className="h-4 w-4" /> View Diff
+            <Eye className="h-4 w-4" /> نمایش تغییرات
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              Lyrics Suggestion for {suggestion.song.title}
+              ویرایش متن ارسالی برای &apos;{suggestion.song.title}&apos;
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-semibold">Suggested by:</span>{" "}
+                <span className="font-semibold">ارسال شده توسط:</span>{" "}
                 {suggestion.user.name} ({suggestion.user.email})
               </div>
               <div>
-                <span className="font-semibold">Song:</span>{" "}
+                <span className="font-semibold">آهنگ:</span>{" "}
                 {suggestion.song.title} - {suggestion.song.artist}
               </div>
             </div>
             {suggestion.type === "LYRICS" && (
               <div className="space-y-2">
-                <h4 className="font-medium">Lyrics Diff</h4>
+                <h4 className="font-medium">تغییرات متن</h4>
                 <LyricsDiff
                   oldLyrics={suggestion.song.lyrics}
                   newLyrics={suggestion.lyrics}
@@ -1147,7 +1159,7 @@ const SuggestionActionsCell = ({
             )}
             {suggestion.type === "SYNCED" && (
               <div className="space-y-2">
-                <h4 className="font-medium">Synced Lyrics Diff</h4>
+                <h4 className="font-medium">تغییرات متن سینک شده</h4>
                 <LyricsDiff
                   oldLyrics={suggestion.song.syncedLyrics}
                   newLyrics={suggestion.syncedLyrics}
@@ -1163,14 +1175,14 @@ const SuggestionActionsCell = ({
                   onClick={() => handleModerate("REJECTED")}
                   disabled={isPending || suggestion.status !== "PENDING"}
                 >
-                  <X className="mr-2 h-4 w-4" /> Reject
+                  <X className="mr-2 h-4 w-4" /> رد کردن
                 </Button>
                 <Button
                   className="bg-green-600 hover:bg-green-700"
                   onClick={() => handleModerate("APPROVED")}
                   disabled={isPending || suggestion.status !== "PENDING"}
                 >
-                  <Check className="mr-2 h-4 w-4" /> Approve
+                  <Check className="mr-2 h-4 w-4" /> تایید کردن
                 </Button>
               </>
             )}
@@ -1308,14 +1320,14 @@ const GenreActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success("Genre deleted successfully");
+          toast.success("سبک حذف شد!");
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to delete genre");
+          toast.error(result.message || "خطا در حذف سبک!");
         }
       } catch (error) {
         console.error("Error deleting genre:", error);
-        toast.error("An error occurred while deleting genre");
+        toast.error("خطا در حذف سبک!");
       }
     });
   };
@@ -1402,14 +1414,14 @@ const BadgeActionsCell = ({
         });
         const result = await response.json();
         if (result.success) {
-          toast.success("Badge deleted successfully");
+          toast.success("نشان حذف شد!");
           router.refresh();
         } else {
-          toast.error(result.message || "Failed to delete badge");
+          toast.error(result.message || "خطا در حذف نشان");
         }
       } catch (error) {
         console.error("Error deleting badge:", error);
-        toast.error("An error occurred while deleting badge");
+        toast.error("خطا در حذف نشان");
       }
     });
   };

@@ -39,10 +39,10 @@ export default function Pagination({
         className="glass"
       >
         <ChevronLeft className="h-4 w-4 me-1 rtl:rotate-180" />
-        Previous
+        قبلی
       </Button>
       <div className="text-sm font-medium text-white px-4">
-        Page {currentPage} of {totalPages}
+        صفحه {currentPage} از {totalPages}
       </div>
       <Button
         variant="outline"
@@ -51,7 +51,7 @@ export default function Pagination({
         disabled={currentPage >= totalPages}
         className="glass"
       >
-        Next
+        بعدی
         <ChevronRight className="h-4 w-4 ms-1 rtl:rotate-180" />
       </Button>
     </div>

@@ -19,8 +19,8 @@ export default async function EditGenrePage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Edit Genre</h1>
-        <p className="text-muted-foreground">Edit genre details.</p>
+        <h1 className="text-3xl font-bold tracking-tight">ویرایش سبک</h1>
+        <p className="text-muted-foreground">ویرایش جزئیات سبک</p>
       </div>
       <GenreForm initialData={genre} />
     </div>

@@ -6,8 +6,8 @@ import { Song as PrismaSong, Artist as PrismaArtist } from "@prisma/client";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Most Played Songs",
-  description: "Discover the most popular and trending songs on دی بلال.",
+  title: "آهنگ های پرطرفدار",
+  description: "پرطرفدارترین و محبوب ترین آهنگ ها در پلتفرم آهنگ لری دی بلال.",
 };
 
 export const dynamic = "force-dynamic";
@@ -60,9 +60,9 @@ export default async function SongsPage({
   return (
     <div className="container mx-auto ps-4 pe-4 py-8 space-y-8 h-max">
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight">Most Played Songs</h1>
+        <h1 className="text-4xl font-bold tracking-tight">آهنگ های پرطرفدار</h1>
         <p className="text-muted-foreground text-lg">
-          The most popular tracks on the platform.
+          آهنگ های با بیشترین تعداد پخش توسط کاربران دی بلال
         </p>
       </div>
 
@@ -74,7 +74,7 @@ export default async function SongsPage({
 
       {songs.length === 0 && (
         <div className="text-center py-20 text-muted-foreground">
-          No songs found.
+          هنوز آهنگی وجود نداره :(
         </div>
       )}
 

@@ -19,8 +19,8 @@ export default async function EditBadgePage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Edit Badge</h1>
-        <p className="text-muted-foreground">Update badge details.</p>
+        <h1 className="text-3xl font-bold tracking-tight">ویرایش نشان</h1>
+        <p className="text-muted-foreground">ویرایش جزئیات نشان</p>
       </div>
       <BadgeForm initialData={badge} />
     </div>
