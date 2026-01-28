@@ -15,13 +15,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const user = await prisma.user.findFirst({
-    where: { userSlug: id },
+    where: { userSlug: id, isPrivate: false },
   });
 
-  if (!user) return { title: "User Not Found" };
+  if (!user) return { title: "کاربر یافت نشد" };
 
   const title = `${user.name} (@${user.userSlug})`;
-  const description = `View ${user.name}'s profile and public playlists on دی بلال.`;
+  const description = `مشاهده پروفایل و پلی لیست‌های عمومی ${user.name} در دی بلال.`;
 
   return {
     title,
@@ -82,7 +82,7 @@ export default async function PublicProfilePage({
   if (user.isPrivate && !isOwner) {
     return (
       <div className="container mx-auto px-4 py-8 text-center size-full flex justify-center items-center">
-        <h1 className="text-2xl font-bold">This profile is private.</h1>
+        <h1 className="text-2xl font-bold">این پروفایل خصوصی است.</h1>
       </div>
     );
   }
@@ -135,10 +135,10 @@ export default async function PublicProfilePage({
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Public Playlists</h2>
+        <h2 className="text-2xl font-semibold">پلی لیست‌های عمومی</h2>
         {user.playlists.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">
-            No public playlists found.
+            هیچ پلی لیست عمومی یافت نشد.
           </p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

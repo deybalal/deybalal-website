@@ -10,9 +10,9 @@ import { Metadata } from "next";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Home - Music Player",
+  title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری به همراه متن آهنگ",
   description:
-    "Welcome to دی بلال. Explore the latest songs, featured artists, and popular genres.",
+    "به دی بلال خوش آمدید. جدیدترین آهنگ‌ها، خوانندگان پیشنهادی و سبک‌های محبوب را کاوش کنید.",
 };
 
 export const dynamic = "force-dynamic";
@@ -162,23 +162,23 @@ export default async function Home() {
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                 <span className="text-white text-xs md:text-sm font-semibold tracking-wide">
-                  🎵 Premium Sound Experience
+                  🎵 تجربه صدای با کیفیت
                 </span>
               </div>
 
               {/* Massive Headline */}
               <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tight leading-[1.1]">
-                Where Music
+                جایی که موسیقی
                 <br />
                 <span className="bg-clip-text bg-linear-to-r from-violet-400 via-fuchsia-400 to-pink-400 neon-text animate-pulse">
-                  Comes Alive
+                  زنده می‌شود
                 </span>
               </h1>
 
               {/* Subheadline */}
               <p className="text-gray-200 dark:text-gray-300 text-lg md:text-xl lg:text-2xl leading-relaxed max-w-2xl mx-auto lg:mx-0 font-light">
-                Discover millions of songs, curated playlists, and exclusive
-                content from your favorite artists. Your soundtrack starts here.
+                میلیون‌ها آهنگ، لیست‌های پخش منتخب و متن آهنگ از هنرمندان مورد
+                علاقه خود را کشف کنید. موسیقی شما از اینجا شروع می‌شود.
               </p>
 
               {/* CTA Buttons */}
@@ -191,11 +191,11 @@ export default async function Home() {
                   >
                     <path d="M8 5v14l11-7z" />
                   </svg>
-                  Start Listening Now
+                  همین حالا گوش دادن را شروع کنید
                 </button>
 
                 <button className="px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl">
-                  Explore Playlists
+                  مشاهده پلی لیست ها
                 </button>
               </div>
 
@@ -210,7 +210,7 @@ export default async function Home() {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
                   <span className="text-sm md:text-base font-medium">
-                    100M+ Songs
+                    +100 میلیون آهنگ
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -222,7 +222,7 @@ export default async function Home() {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
                   <span className="text-sm md:text-base font-medium">
-                    Ad-Free
+                    بدون تبلیغات
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -234,7 +234,7 @@ export default async function Home() {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
                   <span className="text-sm md:text-base font-medium">
-                    HD Quality
+                    کیفیت HD
                   </span>
                 </div>
               </div>
@@ -258,10 +258,10 @@ export default async function Home() {
                       </svg>
                     </div>
                     <h3 className="text-white font-bold text-xl mb-2">
-                      Now Playing
+                      در حال پخش
                     </h3>
                     <p className="text-white/70 text-sm">
-                      Your favorite tracks
+                      آهنگ‌های مورد علاقه شما
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -288,7 +288,7 @@ export default async function Home() {
       {/* Featured Songs */}
       {featuredSongs.length > 0 && (
         <section>
-          <SectionHeader title="Featured Songs" color="bg-blue-500" />
+          <SectionHeader title="آهنگ‌های پیشنهادی" color="bg-blue-500" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {featuredSongs.map((song) => (
               <SongCard key={song.id} song={song} />
@@ -299,13 +299,13 @@ export default async function Home() {
 
       {/* New Releases (Previously Trending/New) */}
       <section>
-        <SectionHeader title="New Releases" color="bg-green-500" />
+        <SectionHeader title="جدیدترین‌ها" color="bg-green-500" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {newSongs.length > 0 ? (
             newSongs.map((song) => <SongCard key={song.id} song={song} />)
           ) : (
             <p className="text-gray-500 col-span-full">
-              No songs found. Add some in the Admin Panel!
+              آهنگی یافت نشد. در پنل مدیریت آهنگ اضافه کنید!
             </p>
           )}
         </div>
@@ -315,7 +315,7 @@ export default async function Home() {
       {mostPlayedArtists.length > 0 && (
         <section>
           <SectionHeader
-            title="Most Played Artists"
+            title="محبوب‌ترین خواننده‌ها"
             color="bg-pink-500"
             href="/artist"
           />
@@ -330,7 +330,7 @@ export default async function Home() {
       {/* Most Played Songs */}
       <section>
         <SectionHeader
-          title="Most Played Songs"
+          title="محبوب‌ترین آهنگ‌ها"
           color="bg-orange-500"
           href="/songs"
         />
@@ -341,7 +341,7 @@ export default async function Home() {
             ))
           ) : (
             <p className="text-gray-500 col-span-full">
-              No songs found. Start listening to see them here!
+              آهنگی یافت نشد. برای مشاهده آهنگ‌ها، گوش دادن را شروع کنید!
             </p>
           )}
         </div>
@@ -349,13 +349,17 @@ export default async function Home() {
 
       {/* New Albums */}
       <section>
-        <SectionHeader title="New Albums" color="bg-teal-500" href="/album" />
+        <SectionHeader
+          title="آلبوم‌های جدید"
+          color="bg-teal-500"
+          href="/album"
+        />
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {albums.length > 0 ? (
             albums.map((album) => <AlbumCard key={album.id} album={album} />)
           ) : (
             <p className="text-gray-500 col-span-full">
-              No albums found. Add some in the Admin Panel!
+              آلبومی یافت نشد. در پنل مدیریت آلبوم اضافه کنید!
             </p>
           )}
         </div>
@@ -365,7 +369,7 @@ export default async function Home() {
       {genresData.length > 0 && (
         <section>
           <SectionHeader
-            title="Popular Genres"
+            title="سبک‌های محبوب"
             color="bg-purple-500"
             href="/genres"
           />

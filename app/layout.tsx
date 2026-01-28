@@ -9,11 +9,11 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: {
-    default: "دی بلال | Your Ultimate Music Destination",
+    default: "دی بلال | پلتفرم پخش آنلاین آهنگ لری",
     template: "%s | دی بلال",
   },
   description:
-    "Discover, stream, and download your favorite music on دی بلال. The best platform for artists and fans.",
+    "آهنگ لری مورد علاقه ی خود را پیدا و آنلاین پخش کنید یا با کیفیت عالی دانلود کنید.",
   keywords: [
     "music",
     "streaming",
@@ -23,15 +23,15 @@ export const metadata: Metadata = {
     "lyrics",
     "download music",
   ],
-  authors: [{ name: "دی بلال Team" }],
+  authors: [{ name: "ادمین دی بلال" }],
   openGraph: {
     type: "website",
-    locale: "en_US",
-    url: "https://dey-music.com",
+    locale: "fa_IR",
+    url: "https://deybalal.com",
     siteName: "دی بلال",
-    title: "دی بلال | Your Ultimate Music Destination",
+    title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری",
     description:
-      "Discover, stream, and download your favorite music on دی بلال.",
+      "آهنگ لری مورد علاقه ی خود را پیدا و آنلاین پخش کنید یا با کیفیت عالی دانلود کنید.",
     images: [
       {
         url: "/images/og-image.png",
@@ -43,9 +43,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "دی بلال | Your Ultimate Music Destination",
+    title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری",
     description:
-      "Discover, stream, and download your favorite music on دی بلال.",
+      "آهنگ لری مورد علاقه ی خود را پیدا و آنلاین پخش کنید یا با کیفیت عالی دانلود کنید.",
     images: ["/images/og-image.png"],
   },
 };

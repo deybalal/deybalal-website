@@ -93,7 +93,7 @@ export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
     <div className="space-y-4 w-full max-w-3xl">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">
-          {isAdmin ? "Edit Lyrics" : "Suggest Lyrics Changes"}
+          {isAdmin ? "ویرایش متن آهنگ" : "پیشنهاد تغییر متن آهنگ"}
         </h2>
         <Button onClick={handleSave} disabled={saving}>
           {saving ? (
