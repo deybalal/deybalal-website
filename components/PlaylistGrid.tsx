@@ -39,32 +39,30 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
       const result = await res.json();
 
       if (result.success) {
-        toast.success("Playlist deleted successfully");
+        toast.success("پلی لیست با موفقیت حذف شد");
         setPlaylists((prev) => prev.filter((p) => p.id !== playlistId));
         router.refresh(); // Refresh server data
       } else {
-        toast.error(result.message || "Failed to delete playlist");
+        toast.error(result.message || "خطا در حذف پلی لیست");
       }
     } catch (error) {
-      console.error("Failed to delete playlist", error);
-      toast.error("Failed to delete playlist");
+      console.error("خطا در حذف پلی لیست", error);
+      toast.error("خطا در حذف پلی لیست");
     }
   };
 
   const handleCopyLink = (playlistId: string) => {
     const url = `${window.location.origin}/playlists/${playlistId}`;
     navigator.clipboard.writeText(url);
-    toast.success("Link copied to clipboard");
+    toast.success("لینک در حافظه کپی شد");
   };
 
   if (playlists.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground size-full min-h-[40dvh] flex justify-center items-center flex-col">
         <ListMusic className="h-16 w-16 mx-auto mb-4 opacity-50" />
-        <p className="text-xl">No playlists found</p>
-        <p className="text-sm mt-2">
-          Create your first playlist to get started!
-        </p>
+        <p className="text-xl">هیچ پلی لیستی یافت نشد</p>
+        <p className="text-sm mt-2">اولین پلی لیست خود را بسازید!</p>
       </div>
     );
   }
@@ -100,7 +98,7 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
                   </h3>
                   <div className="flex justify-between items-center mt-1">
                     <p className="text-muted-foreground text-sm truncate">
-                      {playlist.songs?.length || 0} songs
+                      {playlist.songs?.length || 0} آهنگ
                     </p>
                   </div>
                   {playlist.duration > 0 && (
@@ -134,13 +132,13 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
                   }}
                 >
                   <LinkIcon className="me-2 h-4 w-4" />
-                  Copy Link
+                  کپی لینک
                 </DropdownMenuItem>
                 {!playlist.isFavorite && (
                   <DialogAlert
-                    title="Remove Playlist"
-                    description="Are you sure you want to delete this Playlist?"
-                    fnButton="Delete"
+                    title="حذف پلی لیست"
+                    description="آیا از حذف این پلی لیست مطمئن هستید؟"
+                    fnButton="حذف"
                     fn={() => handleDeletePlaylist(playlist.id)}
                   />
                 )}

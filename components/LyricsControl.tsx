@@ -42,16 +42,18 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
 
   const modes: { mode: LyricsMode; label: string; icon: React.ElementType }[] =
     [
-      { mode: "hidden", label: "Hide Lyrics", icon: EyeOff },
-      { mode: "un-synced", label: "Show Un-Synced lyrics", icon: AlignLeft },
-      { mode: "synced", label: "Show Synced Lyrics", icon: Timer },
+      { mode: "hidden", label: "مخفی کردن متن", icon: EyeOff },
+      { mode: "un-synced", label: "نمایش متن ساده", icon: AlignLeft },
+      { mode: "synced", label: "نمایش متن زمان‌بندی شده", icon: Timer },
     ];
 
   return (
     <div className="bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold">Lyrics Settings</h3>
-        <p className="text-sm text-gray-400">Customize how you view lyrics</p>
+        <h3 className="text-lg font-semibold">تنظیمات متن آهنگ</h3>
+        <p className="text-sm text-gray-400">
+          نحوه نمایش متن آهنگ را شخصی سازی کنید
+        </p>
       </div>
 
       {isInstrumental ? (
@@ -61,7 +63,7 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
               <Music className="w-6 h-6 text-primary" />
             </div>
             <h4 className="text-lg font-medium">
-              Instrumental music. Enjoy the beat!
+              موسیقی بی کلام. از ریتم لذت ببرید!
             </h4>
           </div>
         </div>
@@ -96,12 +98,12 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
                 {hasLyrics ? (
                   <>
                     <FileEdit className="w-4 h-4" />
-                    Edit Lyrics
+                    ویرایش متن
                   </>
                 ) : (
                   <>
                     <PlusCircle className="w-4 h-4" />
-                    Add Lyrics
+                    افزودن متن
                   </>
                 )}
               </Link>
@@ -116,12 +118,12 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
                 {hasSyncedLyrics ? (
                   <>
                     <RefreshCw className="w-4 h-4" />
-                    Re-Synced Lyrics
+                    زمان‌بندی مجدد
                   </>
                 ) : (
                   <>
                     <Timer className="w-4 h-4" />
-                    Sync The Lyrics
+                    زمان‌بندی متن
                   </>
                 )}
               </Link>
@@ -135,7 +137,7 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
               >
                 <Link href={`/panel/edit/synced/${songId}`}>
                   <Type className="w-4 h-4" />
-                  Edit Synced Lyrics Text
+                  ویرایش متن زمان‌بندی شده
                 </Link>
               </Button>
             )}
@@ -149,8 +151,10 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
 
       <div className="mb-4">
         <div className="my-4">
-          <h3 className="text-lg font-semibold">Contributers</h3>
-          <p className="text-sm text-gray-400">Contributers of this song</p>
+          <h3 className="text-lg font-semibold">مشارکت کنندگان</h3>
+          <p className="text-sm text-gray-400">
+            مشارکت کنندگان این آهنگ در پلتفرم دی بلال
+          </p>
         </div>
         <Contributors contributors={contributors} />
 
@@ -163,11 +167,8 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
             <div className="my-8">
               <div className="flex flex-col items-center text-center mb-6">
                 <h3 className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/60">
-                  Lyrics Source
+                  منبع متن آهنگ
                 </h3>
-                <p className="text-sm text-gray-400 mt-1">
-                  The original source for these lyrics
-                </p>
               </div>
 
               <div className="flex justify-center">
@@ -183,15 +184,12 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
 
                     <div className="relative flex items-center justify-between gap-4 bg-[#0a0a0a]/80 backdrop-blur-xl p-6 rounded-[14px] border border-white/5">
                       <div className="flex flex-col items-start">
-                        <span className="text-xs font-medium uppercase tracking-wider text-primary mb-1">
-                          Verified Source
-                        </span>
-                        <span className="text-lg font-semibold text-white group-hover:text-primary transition-colors">
+                        <span className="text-lg font-semibold text-white group-hover:text-white/40 transition-colors">
                           {source}
                         </span>
                       </div>
 
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 border border-white/10 group-hover:bg-primary group-hover:border-primary transition-all">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 border border-white/10 group-hover:bg-white/40 group-hover:border-primary transition-all">
                         <ExternalLink className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
                       </div>
                     </div>

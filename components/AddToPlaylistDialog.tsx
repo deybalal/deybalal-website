@@ -44,8 +44,8 @@ export default function AddToPlaylistDialog({
         setPlaylists(data.data);
       }
     } catch (error) {
-      console.error("Failed to fetch playlists", error);
-      toast.error("Failed to load playlists");
+      console.error("خطا در دریافت پلی لیست", error);
+      toast.error("خطا در بارگذاری پلی لیست");
     } finally {
       setLoading(false);
     }
@@ -63,14 +63,14 @@ export default function AddToPlaylistDialog({
       const result = await res.json();
 
       if (result.success) {
-        toast.success("Added to playlist");
+        toast.success("به پلی لیست اضافه شد");
         setOpen(false);
       } else {
-        toast.error(result.message || "Failed to add to playlist");
+        toast.error(result.message || "خطا در اضافه کردن به پلی لیست");
       }
     } catch (error) {
-      console.error("Failed to add to playlist", error);
-      toast.error("Failed to add to playlist");
+      console.error("خطا در اضافه کردن به پلی لیست", error);
+      toast.error("خطا در اضافه کردن به پلی لیست");
     } finally {
       setAddingId(null);
     }
@@ -90,7 +90,7 @@ export default function AddToPlaylistDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-card/95 backdrop-blur-xl border-white/10">
         <DialogHeader>
-          <DialogTitle>Add to Playlist</DialogTitle>
+          <DialogTitle>افزودن به پلی لیست</DialogTitle>
         </DialogHeader>
         <div className="mt-4">
           {loading ? (
@@ -99,7 +99,7 @@ export default function AddToPlaylistDialog({
             </div>
           ) : playlists.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No playlists found. Create one first!
+              هیچ پلی لیستی یافت نشد. ابتدا یکی بسازید!
             </div>
           ) : (
             <ScrollArea className="h-[300px] pr-4">
@@ -128,7 +128,7 @@ export default function AddToPlaylistDialog({
                         {playlist.name}
                       </h4>
                       <p className="text-xs text-muted-foreground truncate">
-                        {playlist.songs?.length || 0} songs
+                        {playlist.songs?.length || 0} آهنگ
                       </p>
                     </div>
                     {addingId === playlist.id && (

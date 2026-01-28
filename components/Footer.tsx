@@ -8,22 +8,22 @@ const Footer = () => {
 
   const footerLinks = [
     {
-      title: "Navigation",
+      title: "دسترسی سریع",
       links: [
-        { name: "Home", href: "/" },
-        { name: "Search", href: "/search" },
-        { name: "Albums", href: "/album" },
-        { name: "Artists", href: "/artist" },
-        { name: "Playlists", href: "/playlists" },
+        { name: "صفحه اصلی", href: "/" },
+        { name: "جستوجو", href: "/search" },
+        { name: "آلبوم ها", href: "/album" },
+        { name: "خواننده ها", href: "/artist" },
+        { name: "پلی لیست ها", href: "/playlists" },
       ],
     },
     {
-      title: "Support",
+      title: "پشتیبانی",
       links: [
-        { name: "About Us", href: "/about" },
-        { name: "Contact", href: "/contact" },
-        { name: "Privacy Policy", href: "/privacy" },
-        { name: "Terms of Service", href: "/terms" },
+        { name: "درباره ما", href: "/about" },
+        { name: "تماس با ما", href: "/contact" },
+        { name: "حریم خصوصی", href: "/privacy" },
+        { name: "شرایط و قوانین", href: "/terms" },
       ],
     },
   ];
@@ -49,9 +49,8 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-muted-foreground max-w-xs leading-relaxed">
-              Your ultimate destination for discovering, streaming, and
-              downloading your favorite music. Join our community of artists and
-              fans.
+              مقصد نهایی شما برای کشف، پخش و دانلود موسیقی های مورد علاقه تان.
+              به جمع هنرمندان و طرفداران ما بپیوندید.
             </p>
             <div className="flex gap-4">
               {socialLinks.map((social) => (
@@ -94,26 +93,26 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} دی بلال. All rights reserved.
+            © {currentYear} دی بلال. تمامی حقوق محفوظ است.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <Link
               href="/privacy"
               className="hover:text-primary transition-colors"
             >
-              Privacy
+              حریم خصوصی
             </Link>
             <Link
               href="/terms"
               className="hover:text-primary transition-colors"
             >
-              Terms
+              قوانین
             </Link>
             <Link
               href="/cookies"
               className="hover:text-primary transition-colors"
             >
-              Cookies
+              کوکی ها
             </Link>
           </div>
         </div>

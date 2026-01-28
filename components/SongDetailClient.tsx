@@ -90,14 +90,14 @@ export default function SongDetailClient({
       if (result.success) {
         setIsFavorite(!isFavorite);
         toast.success(
-          isFavorite ? "Removed from favorites" : "Added to favorites"
+          isFavorite ? "از علاقه مندی ها حذف شد" : "به علاقه مندی ها اضافه شد"
         );
       } else {
-        toast.error(result.message || "Failed to update favorites");
+        toast.error(result.message || "خطا در بروزرسانی علاقه مندی ها");
       }
     } catch (error) {
       console.error("Failed to toggle favorite", error);
-      toast.error("Failed to update favorites");
+      toast.error("خطا در بروزرسانی علاقه مندی ها");
     } finally {
       setIsTogglingFavorite(false);
     }
@@ -185,7 +185,7 @@ export default function SongDetailClient({
               <Button
                 variant="outline"
                 className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
-                onClick={() => toast.error("You should Login first!")}
+                onClick={() => toast.error("ابتدا باید وارد حساب کاربری شوید!")}
               >
                 <ListPlus size={33} className="size-full" />
               </Button>
@@ -227,12 +227,12 @@ export default function SongDetailClient({
                 </div>
               ) : (
                 <p className="text-lg md:text-xl text-muted-foreground line-clamp-1">
-                  {song.artist || "Unknown Artist"}
+                  {song.artist || "خواننده ناشناس"}
                 </p>
               )
             ) : (
               <p className="text-lg md:text-xl text-muted-foreground line-clamp-1">
-                Unknown Artist
+                خواننده ناشناس
               </p>
             )}
             {song.album &&
@@ -270,7 +270,7 @@ export default function SongDetailClient({
                       size="sm"
                       className="text-xs cursor-pointer"
                     >
-                      Add Lyrics
+                      افزودن متن
                     </Button>
                   </Link>
                 )}
@@ -281,7 +281,7 @@ export default function SongDetailClient({
                       size="sm"
                       className="text-xs cursor-pointer"
                     >
-                      Sync Lyrics
+                      زمان‌بندی متن
                     </Button>
                   </Link>
                 )}
@@ -292,7 +292,7 @@ export default function SongDetailClient({
                       size="sm"
                       className="text-xs cursor-pointer"
                     >
-                      Paste Synced Lyrics
+                      افزودن متن زمان‌بندی شده
                     </Button>
                   </Link>
                 )}
@@ -306,7 +306,7 @@ export default function SongDetailClient({
               onClick={
                 isUserLoggedIn
                   ? toggleFavorite
-                  : () => toast.error("You should Login first!")
+                  : () => toast.error("ابتدا باید وارد حساب کاربری شوید!")
               }
               disabled={isTogglingFavorite}
               className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"

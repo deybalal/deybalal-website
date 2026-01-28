@@ -101,14 +101,14 @@ export default function SearchInterface({
       {/* Search Header */}
       <div className="flex flex-col items-center py-8 sm:py-12 animate-in fade-in slide-in-from-top-4 duration-500">
         <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-transparent bg-clip-text bg-linear-to-r from-white to-zinc-400 tracking-tight">
-          Search
+          جستوجو
         </h1>
         <div className="w-full max-w-3xl relative group">
           <div className="absolute -inset-0.5 bg-linear-to-r from-indigo-500 to-purple-600 rounded-full opacity-30 group-hover:opacity-75 blur transition duration-500"></div>
           <div className="relative flex items-center bg-zinc-900/90 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl">
             <Search className="w-6 h-6 text-zinc-400 ms-6" />
             <Input
-              placeholder="Songs, artists, albums..."
+              placeholder="جستوجوی آهنگ، خواننده یا آلبوم..."
               className="flex-1 py-6 px-4 border-none bg-transparent! focus-visible:ring-0 text-lg sm:text-xl placeholder:text-zinc-500 font-medium tracking-tight h-14 sm:h-16"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -176,11 +176,9 @@ export default function SearchInterface({
               results.playlists.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-60 text-zinc-400 animate-in fade-in zoom-in duration-300">
                 <p className="text-xl font-medium text-white mb-2">
-                  No results found for &quot;{query}&quot;
+                  نتیجه ای برای &quot;{query}&quot; یافت نشد
                 </p>
-                <p className="text-zinc-500">
-                  Try searching for something else.
-                </p>
+                <p className="text-zinc-500">عبارت دیگری را جستوجو کنید</p>
               </div>
             ) : !results || query.trim() === "" ? (
               <div className="flex flex-col items-center justify-center h-80 text-zinc-500 gap-6 animate-in fade-in duration-500">
@@ -189,11 +187,11 @@ export default function SearchInterface({
                 </div>
                 <div className="text-center">
                   <p className="text-xl font-medium text-white mb-2">
-                    Play what you love
+                    هر آنچه دوست دارید پخش کنید
                   </p>
                   <p className="text-base max-w-md mx-auto">
-                    Search for songs, artists, albums, and playlists to start
-                    listening.
+                    برای شروع گوش دادن، آهنگ، خواننده، آلبوم یا پلی لیست را
+                    جستوجو کنید.
                   </p>
                 </div>
               </div>
@@ -204,7 +202,7 @@ export default function SearchInterface({
                   <section>
                     <h3 className="text-2xl font-bold text-white mb-6 tracking-tight flex items-center">
                       <Music className="w-6 h-6 me-3 text-indigo-400" />
-                      Songs
+                      آهنگ ها
                     </h3>
                     <div className="space-y-2">
                       {results.songs.map((song) => (
@@ -250,7 +248,7 @@ export default function SearchInterface({
                   <section>
                     <h3 className="text-2xl font-bold text-white mb-6 tracking-tight flex items-center">
                       <Mic2 className="w-6 h-6 me-3 text-purple-400" />
-                      Artists
+                      خواننده ها
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                       {results.artists.map((artist) => (
@@ -278,7 +276,7 @@ export default function SearchInterface({
                             {artist.name}
                           </div>
                           <div className="text-sm text-zinc-400 mt-1">
-                            Artist
+                            خواننده
                           </div>
                         </Link>
                       ))}
@@ -291,7 +289,7 @@ export default function SearchInterface({
                   <section>
                     <h3 className="text-2xl font-bold text-white mb-6 tracking-tight flex items-center">
                       <Disc className="w-6 h-6 me-3 text-pink-400" />
-                      Albums
+                      آلبوم ها
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                       {results.albums.map((album) => (
@@ -332,7 +330,7 @@ export default function SearchInterface({
                   <section>
                     <h3 className="text-2xl font-bold text-white mb-6 tracking-tight flex items-center">
                       <ListMusic className="w-6 h-6 me-3 text-emerald-400" />
-                      Playlists
+                      پلی لیست
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                       {results.playlists.map((playlist) => (
@@ -360,7 +358,7 @@ export default function SearchInterface({
                             {playlist.name}
                           </div>
                           <div className="text-sm text-zinc-400 mt-1">
-                            By {playlist.name}{" "}
+                            توسط {playlist.name}{" "}
                           </div>
                         </Link>
                       ))}

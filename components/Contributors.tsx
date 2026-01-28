@@ -20,9 +20,9 @@ export const Contributors = ({ contributors }: ContributorsProps) => {
   }, {} as Record<string, Contributor[]>);
 
   const typeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
-    add: { label: "Added by", icon: <Music className="size-4" /> },
-    lyrics: { label: "Lyrics by", icon: <FileText className="size-4" /> },
-    sync: { label: "Synced by", icon: <Timer className="size-4" /> },
+    add: { label: "ارسال آهنگ", icon: <Music className="size-4" /> },
+    lyrics: { label: "ارسال متن از", icon: <FileText className="size-4" /> },
+    sync: { label: "زمان‌بندی توسط", icon: <Timer className="size-4" /> },
   };
 
   return (

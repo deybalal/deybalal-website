@@ -72,7 +72,7 @@ const SongList = ({ songs, onRemove }: SongListProps) => {
                   }}
                 >
                   <Play className="me-2 h-4 w-4" />
-                  Play
+                  پخش
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={(e) => {
@@ -82,7 +82,7 @@ const SongList = ({ songs, onRemove }: SongListProps) => {
                   className="text-red-500 focus:text-red-500"
                 >
                   <Trash2 className="me-2 h-4 w-4" />
-                  Remove from Playlist
+                  حذف از پلی لیست
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

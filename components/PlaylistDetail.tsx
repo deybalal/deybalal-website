@@ -40,7 +40,7 @@ export default function PlaylistDetail({
           <div className="flex justify-between items-start">
             <div className="flex flex-col gap-2">
               <span className="text-gray-500 uppercase tracking-widest text-sm font-bold">
-                Playlist
+                پلی لیست
               </span>
               <h1 className="text-5xl md:text-7xl font-bold text-white neon-text">
                 {playlist.name}
@@ -56,8 +56,8 @@ export default function PlaylistDetail({
                   )}
                   <span className="text-sm font-medium text-gray-300">
                     {playlist.isPrivate
-                      ? "Playlist is Private. Make it Public?"
-                      : "Playlist is Public. Make it Private?"}
+                      ? "پلی لیست خصوصی است. عمومی شود؟"
+                      : "پلی لیست عمومی است. خصوصی شود؟"}
                   </span>
                 </div>
                 <Switch
@@ -74,18 +74,18 @@ export default function PlaylistDetail({
                       const result = await res.json();
                       if (result.success) {
                         toast.success(
-                          `Playlist is now ${checked ? "private" : "public"}`
+                          `پلی لیست اکنون ${checked ? "خصوصی" : "عمومی"} است`
                         );
                       } else {
                         // Revert on failure
                         setPlaylist({ ...playlist, isPrivate: !checked });
                         toast.error(
-                          result.message || "Failed to update privacy"
+                          result.message || "خطا در بروزرسانی وضعیت نمایش"
                         );
                       }
-                    } catch (error) {
+                    } catch {
                       setPlaylist({ ...playlist, isPrivate: !checked });
-                      toast.error("Failed to update privacy");
+                      toast.error("خطا در بروزرسانی وضعیت نمایش");
                     }
                   }}
                 />
@@ -98,7 +98,7 @@ export default function PlaylistDetail({
             </p>
           )}
           <div className="flex items-center gap-2 text-gray-400 mt-2">
-            <span>{playlist.songs?.length || 0} songs</span>
+            <span>{playlist.songs?.length || 0} آهنگ</span>
             {playlist.duration > 0 && (
               <>
                 <span>•</span>
@@ -130,7 +130,7 @@ export default function PlaylistDetail({
                 const data = await res.json();
                 if (data.success) {
                   setPlaylist(data.data);
-                  toast.success("Song removed from playlist");
+                  toast.success("آهنگ از پلی لیست حذف شد");
                 }
               }
             } else {

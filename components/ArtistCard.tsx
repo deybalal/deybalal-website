@@ -31,7 +31,7 @@ const ArtistCard = ({ artist }: ArtistCardProps) => {
           <h3 className="text-foreground font-bold truncate text-lg group-hover:text-purple-400 transition-colors">
             {artist.name}
           </h3>
-          <p className="text-gray-400 text-sm">Artist</p>
+          <p className="text-gray-400 text-sm">خواننده</p>
         </div>
       </div>
     </Link>

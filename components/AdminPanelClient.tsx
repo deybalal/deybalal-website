@@ -108,43 +108,43 @@ export default function AdminPanelClient({
 }: AdminPanelClientProps) {
   const stats = [
     {
-      title: "Total Songs",
+      title: "کل آهنگ ها",
       value: songsCount,
       icon: Music2,
       color: "text-blue-500",
     },
     {
-      title: "Total Artists",
+      title: "کل خواننده ها",
       value: artistsCount,
       icon: Mic2,
       color: "text-green-500",
     },
     {
-      title: "Total Albums",
+      title: "کل آلبوم ها",
       value: albumsCount,
       icon: Disc,
       color: "text-purple-500",
     },
     {
-      title: "Total Playlists",
+      title: "کل پلی لیست ها",
       value: playlistsCount,
       icon: ListMusic,
       color: "text-orange-500",
     },
     {
-      title: "Total Users",
+      title: "کل کاربران",
       value: usersCount,
       icon: Users,
       color: "text-red-500",
     },
     {
-      title: "Total Comments",
+      title: "کل نظرات",
       value: commentsCount,
       icon: MessageCircle,
       color: "text-yellow-500",
     },
     {
-      title: "Lyrics Suggestions",
+      title: "متن های ارسالی",
       value: suggestionsCount,
       icon: FileText,
       color: "text-cyan-500",
@@ -165,15 +165,15 @@ export default function AdminPanelClient({
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold text-foreground neon-text tracking-tight">
-            Admin Dashboard
+            پنل مدیریت
           </h1>
           <p className="text-muted-foreground mt-2 text-lg">
-            Manage your music library content with ease.
+            محتوای کتابخانه موسیقی خود را به راحتی مدیریت کنید.
           </p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" className="glass hover:bg-white/10">
-            <Link href="/">Back to App</Link>
+            <Link href="/">بازگشت به برنامه</Link>
           </Button>
         </div>
       </div>
@@ -204,28 +204,28 @@ export default function AdminPanelClient({
             className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
           >
             <Music2 className="h-4 w-4" />
-            <span>Songs</span>
+            <span>آهنگ ها</span>
           </TabsTrigger>
           <TabsTrigger
             value="artists"
             className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
           >
             <Mic2 className="h-4 w-4" />
-            <span>Artists</span>
+            <span>خواننده ها</span>
           </TabsTrigger>
           <TabsTrigger
             value="albums"
             className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
           >
             <Disc className="h-4 w-4" />
-            <span>Albums</span>
+            <span>آلبوم ها</span>
           </TabsTrigger>
           <TabsTrigger
             value="playlists"
             className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
           >
             <ListMusic className="h-4 w-4" />
-            <span>Playlists</span>
+            <span>پلی لیست ها</span>
           </TabsTrigger>
           {userRole !== "user" && (
             <TabsTrigger
@@ -233,7 +233,7 @@ export default function AdminPanelClient({
               className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
             >
               <Users className="h-4 w-4" />
-              <span>Users</span>
+              <span>کاربران</span>
             </TabsTrigger>
           )}
           <TabsTrigger
@@ -241,40 +241,40 @@ export default function AdminPanelClient({
             className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
           >
             <MessageCircle className="h-4 w-4" />
-            <span>Comments</span>
+            <span>نظرات</span>
           </TabsTrigger>
           <TabsTrigger
             value="suggestions"
             className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
           >
             <FileText className="h-4 w-4" />
-            <span>Lyrics Suggestions</span>
+            <span>متن های پیشنهادی</span>
           </TabsTrigger>
           <TabsTrigger
             value="genres"
             className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
           >
             <Tags className="h-4 w-4" />
-            <span>Genres</span>
+            <span>سبک ها</span>
           </TabsTrigger>
           <TabsTrigger
             value="badges"
             className="flex items-center cursor-pointer hover:border-primary gap-2 px-4 py-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
           >
             <Award className="h-4 w-4" />
-            <span>Badges</span>
+            <span>نشان ها</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="songs" className="space-y-4">
           <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold">Songs Library</h2>
+            <h2 className="text-xl font-semibold">کتابخانه آهنگ ها</h2>
             <Button
               asChild
               className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
             >
               <Link href="/panel/new/song">
-                <Plus className="mr-2 h-4 w-4" /> Add New Song
+                <Plus className="mr-2 h-4 w-4" /> افزودن آهنگ جدید
               </Link>
             </Button>
           </div>
@@ -292,13 +292,13 @@ export default function AdminPanelClient({
 
         <TabsContent value="artists" className="space-y-4">
           <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold">Artists Library</h2>
+            <h2 className="text-xl font-semibold">کتابخانه خواننده ها</h2>
             <Button
               asChild
               className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
             >
               <Link href="/panel/new/artist">
-                <Plus className="mr-2 h-4 w-4" /> Add New Artist
+                <Plus className="mr-2 h-4 w-4" /> افزودن خواننده جدید
               </Link>
             </Button>
           </div>
@@ -316,13 +316,13 @@ export default function AdminPanelClient({
 
         <TabsContent value="albums" className="space-y-4">
           <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold">Albums Library</h2>
+            <h2 className="text-xl font-semibold">کتابخانه آلبوم ها</h2>
             <Button
               asChild
               className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
             >
               <Link href="/panel/new/album">
-                <Plus className="mr-2 h-4 w-4" /> Add New Album
+                <Plus className="mr-2 h-4 w-4" /> افزودن آلبوم جدید
               </Link>
             </Button>
           </div>
@@ -340,13 +340,13 @@ export default function AdminPanelClient({
 
         <TabsContent value="playlists" className="space-y-4">
           <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold">Playlists Library</h2>
+            <h2 className="text-xl font-semibold">کتابخانه پلی لیست ها</h2>
             <Button
               asChild
               className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
             >
               <Link href="/panel/new/playlist">
-                <Plus className="mr-2 h-4 w-4" /> Add New Playlist
+                <Plus className="mr-2 h-4 w-4" /> افزودن پلی لیست جدید
               </Link>
             </Button>
           </div>
@@ -365,7 +365,7 @@ export default function AdminPanelClient({
         {userRole !== "user" && (
           <TabsContent value="users" className="space-y-4">
             <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-              <h2 className="text-xl font-semibold">User Management</h2>
+              <h2 className="text-xl font-semibold">مدیریت کاربران</h2>
             </div>
             <div className="glass rounded-lg border border-white/10 overflow-hidden">
               <DataTable
@@ -382,7 +382,7 @@ export default function AdminPanelClient({
 
         <TabsContent value="comments" className="space-y-4">
           <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold">Comments Management</h2>
+            <h2 className="text-xl font-semibold">مدیریت نظرات</h2>
           </div>
           <div className="glass rounded-lg border border-white/10 overflow-hidden">
             <DataTable
@@ -398,9 +398,7 @@ export default function AdminPanelClient({
 
         <TabsContent value="suggestions" className="space-y-4">
           <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold">
-              Lyrics Suggestions Management
-            </h2>
+            <h2 className="text-xl font-semibold">مدیریت متن های پیشنهادی</h2>
           </div>
           <div className="glass rounded-lg border border-white/10 overflow-hidden">
             <DataTable
@@ -416,13 +414,13 @@ export default function AdminPanelClient({
 
         <TabsContent value="genres" className="space-y-4">
           <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold">Genres Library</h2>
+            <h2 className="text-xl font-semibold">کتابخانه سبک ها</h2>
             <Button
               asChild
               className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
             >
               <Link href="/panel/new/genre">
-                <Plus className="mr-2 h-4 w-4" /> Add New Genre
+                <Plus className="mr-2 h-4 w-4" /> افزودن سبک جدید
               </Link>
             </Button>
           </div>
@@ -440,13 +438,13 @@ export default function AdminPanelClient({
 
         <TabsContent value="badges" className="space-y-4">
           <div className="flex justify-between items-center bg-card/30 p-4 rounded-lg border border-white/5 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold">Badges Library</h2>
+            <h2 className="text-xl font-semibold">کتابخانه نشان ها</h2>
             <Button
               asChild
               className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
             >
               <Link href="/panel/new/badge">
-                <Plus className="mr-2 h-4 w-4" /> Add New Badge
+                <Plus className="mr-2 h-4 w-4" /> افزودن نشان جدید
               </Link>
             </Button>
           </div>

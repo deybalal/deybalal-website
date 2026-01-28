@@ -109,10 +109,10 @@ const SongCard = ({ song }: SongCardProps) => {
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                 <h3 className="text-gray-900 dark:text-white font-bold truncate text-lg mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-purple-600 group-hover:to-pink-600 dark:group-hover:from-purple-400 dark:group-hover:to-pink-400 transition-all duration-300">
-                  {song.title || "Unknown Title"}
+                  {song.title || "بدون عنوان"}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm truncate group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300 font-medium">
-                  {song.artist || "Unknown Artist"}
+                  {song.artist || "خواننده ناشناس"}
                 </p>
 
                 {/* Bottom Info Bar */}
@@ -170,29 +170,29 @@ const SongCard = ({ song }: SongCardProps) => {
         <ContextMenuItem
           onClick={() => {
             setSong(song);
-            toast.success("Playing now!");
+            toast.success("در حال پخش...");
           }}
         >
           <PlayCircle className="w-4 h-4 me-2" />
-          Play Now
+          پخش
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() => {
             playNext(song);
-            toast.success("Playing next");
+            toast.success("بعدی پخش می شود");
           }}
         >
           <PlayCircle className="w-4 h-4 me-2" />
-          Play Next
+          پخش بعدی
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() => {
             addToQueue(song);
-            toast.success("Added to queue");
+            toast.success("به صف اضافه شد");
           }}
         >
           <ListPlus className="w-4 h-4 me-2" />
-          Add to Queue
+          افزودن به صف
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

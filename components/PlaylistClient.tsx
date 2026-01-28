@@ -47,7 +47,7 @@ export default function PlaylistClient({
           <div className="flex justify-between items-start">
             <div className="flex flex-col gap-2">
               <span className="text-gray-500 uppercase tracking-widest text-sm font-bold">
-                Playlist
+                پلی لیست
               </span>
               <h1 className="text-5xl md:text-7xl font-bold neon-text">
                 {playlist.name}
@@ -64,8 +64,8 @@ export default function PlaylistClient({
                 <span className="text-sm font-medium text-gray-300">
                   {" "}
                   {playlist.isPrivate
-                    ? "Playlist is Private. Make it Public?"
-                    : "Playlist is Public. Make it Private?"}{" "}
+                    ? "پلی لیست خصوصی است. عمومی شود؟"
+                    : "پلی لیست عمومی است. خصوصی شود؟"}{" "}
                 </span>
                 <Switch
                   checked={playlist.isPrivate}
@@ -83,11 +83,11 @@ export default function PlaylistClient({
                       const result = await res.json();
                       if (!result.success) throw new Error();
                       toast.success(
-                        `Playlist is now ${checked ? "private" : "public"}`
+                        `پلی لیست اکنون ${checked ? "خصوصی" : "عمومی"} است`
                       );
                     } catch {
                       setPlaylist({ ...playlist, isPrivate: prev });
-                      toast.error("Failed to update privacy");
+                      toast.error("خطا در بروزرسانی وضعیت نمایش");
                     }
                   }}
                 />
@@ -103,7 +103,7 @@ export default function PlaylistClient({
 
           <div className="flex items-center justify-between text-gray-400 mt-2">
             <div className="flex items-center gap-2">
-              <span>{playlist.songsLength} songs</span>
+              <span>{playlist.songsLength} آهنگ</span>
               {playlist.duration > 0 && (
                 <>
                   <span>•</span>
@@ -141,10 +141,10 @@ export default function PlaylistClient({
                   ...playlist,
                   songs: playlist.songs.filter((s) => s.id !== songId),
                 });
-                toast.success("Song removed");
+                toast.success("آهنگ حذف شد");
               }
             } catch {
-              toast.error("Failed to remove song");
+              toast.error("خطا در حذف آهنگ");
             }
           }}
         />

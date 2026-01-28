@@ -35,7 +35,7 @@ export default function QueueDrawer() {
         className="w-8/12 sm:w-[400px] overflow-y-auto "
       >
         <SheetHeader className="mb-6">
-          <SheetTitle className="text-left">Play Queue</SheetTitle>
+          <SheetTitle className="text-left">صف پخش</SheetTitle>
         </SheetHeader>
 
         <div className="space-y-6">
@@ -43,7 +43,7 @@ export default function QueueDrawer() {
           {currentSong && (
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                Now Playing
+                در حال پخش
               </h3>
               <div className="flex items-center gap-3 p-2 rounded-lg bg-accent/10 border border-accent/20">
                 <div className="relative w-12 h-12 rounded overflow-hidden shrink-0">
@@ -72,7 +72,7 @@ export default function QueueDrawer() {
           {priorityQueue.length > 0 && (
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                Next in Queue
+                بعدی در صف
               </h3>
               <div className="space-y-2">
                 {priorityQueue.map((song, index) => (
@@ -114,7 +114,7 @@ export default function QueueDrawer() {
           {nextFromPlaylist.length > 0 && (
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                Next from: Playlist
+                بعدی از: پلی لیست
               </h3>
               <div className="space-y-2">
                 {nextFromPlaylist.map((song, index) => (

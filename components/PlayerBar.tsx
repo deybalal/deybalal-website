@@ -160,11 +160,11 @@ const PlayerBar = () => {
         </div>
         <div className="overflow-hidden flex-1">
           <MarqueeText
-            text={currentSong.title || "No Title"}
+            text={currentSong.title || "بدون عنوان"}
             className="text-foreground font-medium text-sm md:text-base"
           />
           <MarqueeText
-            text={currentSong.artist || "Unknown Artist"}
+            text={currentSong.artist || "خواننده ناشناس"}
             className="text-muted-foreground text-xs md:text-sm"
           />
         </div>

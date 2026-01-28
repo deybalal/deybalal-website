@@ -2,9 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Album } from "@/types/types";
-import { Play } from "lucide-react";
 import Image from "next/image";
-import { usePlayerStore } from "@/hooks/usePlayerStore";
 import Link from "next/link";
 
 interface AlbumCardProps {
@@ -12,15 +10,6 @@ interface AlbumCardProps {
 }
 
 const AlbumCard = ({ album }: AlbumCardProps) => {
-  const { setQueue } = usePlayerStore();
-
-  const handlePlay = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent navigation if we wrap card in Link later
-    if (album.songs && album.songs.length > 0) {
-      setQueue(album.songs);
-    }
-  };
-
   return (
     <Card className="group relative overflow-hidden bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full">
       <CardContent className="p-4">
@@ -35,7 +24,7 @@ const AlbumCard = ({ album }: AlbumCardProps) => {
               />
             ) : (
               <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                <span className="text-gray-500">No Art</span>
+                <span className="text-gray-500">بدون کاور</span>
               </div>
             )}
           </div>
