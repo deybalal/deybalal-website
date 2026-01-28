@@ -5,7 +5,7 @@ import AdminTable from "@/components/AdminTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Users",
+  title: "کاربران",
 };
 
 export default async function UsersPage({

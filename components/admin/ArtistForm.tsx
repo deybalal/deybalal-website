@@ -56,17 +56,17 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        toast.error(result.message || "Failed to create artist");
-        throw new Error(result.message || "Failed to create artist");
+        toast.error(result.message || "خطا در افزودن خواننده");
+        throw new Error(result.message || "خطا در افزودن خواننده");
       }
 
-      toast.success("Artist created successfully");
+      toast.success("خواننده ی جدید اضافه شد!");
       form.reset();
       if (onSuccess) {
         onSuccess(result.data);
       }
     } catch {
-      toast.error("Failed to create artist");
+      toast.error("خطا در افزودن خواننده");
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+      toast.error("لطفا یک عکس انتخاب کنید");
       return;
     }
 
@@ -93,7 +93,7 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        throw new Error(result.message || "Failed to upload image");
+        throw new Error(result.message || "خطا در ارسال عکس");
       }
 
       const { filePath, filename } = result.data;
@@ -101,10 +101,10 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
       form.setValue("image", filePath);
       form.setValue("tempImage", filename);
 
-      toast.success("Image uploaded");
+      toast.success("عکس آپلود شد");
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload image");
+      toast.error("خطا در ارسال عکس");
     } finally {
       setUploading(false);
     }
@@ -124,7 +124,7 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
           name="image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Artist Image</FormLabel>
+              <FormLabel>تصویر خواننده</FormLabel>
               <FormControl>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-4">
@@ -157,9 +157,9 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>نام</FormLabel>
               <FormControl>
-                <Input placeholder="Artist Name" {...field} />
+                <Input placeholder="نام خواننده" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -170,9 +170,9 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
           name="nameEn"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name (English)</FormLabel>
+              <FormLabel>نام خواننده به انگلیسی</FormLabel>
               <FormControl>
-                <Input placeholder="Artist Name (English)" {...field} />
+                <Input placeholder="نام خواننده به زبان انگلیسی" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -180,7 +180,7 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
         />
 
         <Button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Artist"}
+          {loading ? "در حال ساخت..." : "افزودن"}
         </Button>
       </form>
     </Form>

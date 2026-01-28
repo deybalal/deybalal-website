@@ -44,7 +44,7 @@ export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
         }
       } catch (error) {
         console.error("Failed to fetch song", error);
-        toast.error("Failed to load lyrics");
+        toast.error("خطا در دریافت متن آهنگ");
       } finally {
         setLoading(false);
       }
@@ -66,16 +66,16 @@ export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
       if (res.ok && result.success) {
         toast.success(
           isAdmin
-            ? "Lyrics updated successfully"
-            : "Lyrics suggestion submitted for review"
+            ? "متن آهنگ با موفقیت بروزرسانی شد!"
+            : "ویرایش متن آهنگ ارسال شد. پس از تایید نمایش داده می شود."
         );
         router.push("/panel");
       } else {
-        throw new Error(result.message || "Failed to save lyrics");
+        throw new Error(result.message || "خطا در ذخیره متن آهنگ");
       }
     } catch (error) {
       console.error("Error saving lyrics:", error);
-      toast.error("Failed to save lyrics");
+      toast.error("خطا در ذخیره متن آهنگ");
     } finally {
       setSaving(false);
     }
@@ -101,30 +101,30 @@ export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
           ) : isAdmin ? null : (
             <Send className="mr-2 h-4 w-4" />
           )}
-          {isAdmin ? "Save Lyrics" : "Submit Suggestion"}
+          {isAdmin ? "ذخیره متن" : "ارسال ویرایش"}
         </Button>
       </div>
       <Textarea
         value={lyrics}
         onChange={(e) => setLyrics(e.target.value)}
-        placeholder="Enter song lyrics here..."
+        placeholder="متن آهنگ را وارد کنید..."
         className="min-h-[500px] font-mono text-sm"
       />
 
-      <Label>Source</Label>
+      <Label>منبع (در صورت وجود)</Label>
       <Input
         onChange={(e) => setSource(e.target.value)}
         value={source}
         disabled={!isAdmin && isSourceExist}
-        placeholder="e.g. Spotify"
+        placeholder="سایتی که متن از آن کپی شده"
       />
 
-      <Label>Source URL</Label>
+      <Label>آدرس منبع</Label>
       <Input
         onChange={(e) => setSourceUrl(e.target.value)}
         value={sourceUrl}
         disabled={!isAdmin && isSourceExist}
-        placeholder="e.g. https://open.spotify.com/track/6R4JZJZJZJZJZJZJZJZJZJ"
+        placeholder="https://bakhtiarylyrics.blogfa.com/post/50"
       />
     </div>
   );

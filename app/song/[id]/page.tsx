@@ -25,11 +25,11 @@ export async function generateMetadata({
     include: { artists: true },
   });
 
-  if (!song) return { title: "Song Not Found" };
+  if (!song) return { title: "آهنگ پیدا نشد" };
 
   const artistNames = song.artists.map((a) => a.name).join(", ");
-  const title = `${song.title} by ${artistNames}`;
-  const description = `Listen to ${song.title} by ${artistNames} on دی بلال. Stream and download in high quality.`;
+  const title = `${song.title} از ${artistNames}`;
+  const description = `${song.title} از ${artistNames}. پخش آنلاین یا دانلود با کیفیت بالا در پلتفرم آهنگ لری دی بلال.`;
   const ogImageUrl = `/api/og/song/${id}`;
 
   return {
@@ -86,7 +86,7 @@ export default async function SongDetailPage({
   if (!songData) {
     return (
       <div className="size-full flex items-center justify-center">
-        <p className="text-muted-foreground text-3xl">Song not found!</p>
+        <p className="text-muted-foreground text-3xl">آهنگ پیدا نشد!</p>
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default async function SongDetailPage({
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] w-full text-gray-400">
         <Music className="w-16 h-16 mb-4 opacity-50" />
-        <h2 className="text-2xl font-bold">This Song is not active yet!</h2>
+        <h2 className="text-2xl font-bold">این آهنگ غیرفعال است!</h2>
       </div>
     );
   }

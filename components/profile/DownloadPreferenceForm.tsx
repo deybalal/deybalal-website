@@ -47,15 +47,15 @@ export default function DownloadPreferenceForm({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to update preference");
+        throw new Error(result.message || "خطا در بروزرسانی تنظیمات");
       }
 
       setDownloadPreference(parseInt(preference));
-      toast.success("Download preference updated");
+      toast.success("تنظیمات بروزرسانی شد");
       router.refresh();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Something went wrong"
+        error instanceof Error ? error.message : "مشکلی پیش آمده است"
       );
     } finally {
       setIsLoading(false);
@@ -83,27 +83,30 @@ export default function DownloadPreferenceForm({
               <line x1="12" x2="12" y1="15" y2="3" />
             </svg>
           </span>
-          Playback Quality
+          کیفیت پخش آنلاین
         </CardTitle>
         <CardDescription>
-          Choose your preferred audio quality for streaming and downloads.
+          کیفیت صوتی مورد نظر خود را برای پخش آنلاین انتخاب کنید.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col md:flex-row items-end gap-4">
         <div className="flex-1 space-y-2">
           <label className="text-sm font-medium text-muted-foreground">
-            Select Quality
+            انتخاب کیفیت
           </label>
           <Select value={preference} onValueChange={setPreference}>
             <SelectTrigger className="w-full h-12 bg-background/50 backdrop-blur-sm border-primary/10 focus:ring-primary/20">
-              <SelectValue placeholder="Select quality" />
+              <SelectValue placeholder="انتخاب کیفیت" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="64" className="cursor-pointer">
+                64 کیلوبیت (حجم پایین)
+              </SelectItem>
               <SelectItem value="128" className="cursor-pointer">
-                128 kbps (Standard)
+                ۱۲۸ کیلوبیت (استاندارد)
               </SelectItem>
               <SelectItem value="320" className="cursor-pointer">
-                320 kbps (High Quality)
+                ۳۲۰ کیلوبیت (کیفیت بالا)
               </SelectItem>
             </SelectContent>
           </Select>
@@ -118,7 +121,7 @@ export default function DownloadPreferenceForm({
           ) : (
             <Save className="w-4 h-4 me-2 group-hover:scale-110 transition-transform" />
           )}
-          Save Preference
+          ذخیره تنظیمات
         </Button>
       </CardContent>
     </Card>

@@ -20,7 +20,7 @@ import { Badge } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "نام اجباری است"),
   description: z.string().optional(),
 });
 
@@ -58,21 +58,19 @@ export default function BadgeForm({ initialData }: BadgeFormProps) {
       const result = await res.json();
       if (!res.ok || result.success === false) {
         const errorMessage =
-          result.error || result.message || "Failed to save badge";
+          result.error || result.message || "خطا در ذخیره نشان";
         toast.error(errorMessage);
         throw new Error(errorMessage);
       }
 
       toast.success(
-        initialData
-          ? "Badge updated successfully"
-          : "Badge created successfully"
+        initialData ? "نشان با موفقیت بروزرسانی شد" : "نشان با موفقیت ساخته شد"
       );
-      router.push("/panel?tab=badges");
+      router.push("/panel/badges");
       router.refresh();
     } catch (error) {
       console.error("Error saving badge:", error);
-      toast.error("Failed to save badge");
+      toast.error("خطا در ذخیره نشان");
     } finally {
       setLoading(false);
     }
@@ -94,10 +92,10 @@ export default function BadgeForm({ initialData }: BadgeFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>نام</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Badge Name"
+                  placeholder="نام این نشان جدید را وارد کنید"
                   {...field}
                   onChange={handleNameChange}
                 />
@@ -111,9 +109,9 @@ export default function BadgeForm({ initialData }: BadgeFormProps) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>توضیحات</FormLabel>
               <FormControl>
-                <Textarea placeholder="Badge description..." {...field} />
+                <Textarea placeholder="توضیح کوتاه در مورد نشان" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -123,11 +121,11 @@ export default function BadgeForm({ initialData }: BadgeFormProps) {
         <Button type="submit" disabled={loading}>
           {loading
             ? initialData
-              ? "Updating..."
-              : "Creating..."
+              ? "در حال بروزرسانی..."
+              : "در حال ساخت..."
             : initialData
-            ? "Update Badge"
-            : "Create Badge"}
+            ? "بروزرسانی نشان"
+            : "ساخت نشان"}
         </Button>
       </form>
     </Form>

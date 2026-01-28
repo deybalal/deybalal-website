@@ -61,9 +61,9 @@ interface SongFormProps {
 }
 
 const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(1, "نام آهنگ اجباری است."),
   titleEn: z.string().optional(),
-  artist: z.string().min(2, "You must enter artist name!"),
+  artist: z.string().min(2, "وارد کردن نام خواننده اجباری است."),
   artistEn: z.string().optional(),
   artistIds: z.array(z.string()).optional(), // Multiple artist IDs
   albumId: z.string().optional(),
@@ -77,8 +77,8 @@ const formSchema = z.object({
   crew: z
     .array(
       z.object({
-        role: z.string().min(1, "Role is required"),
-        name: z.string().min(1, "Name is required"),
+        role: z.string().min(1, "نقش اجباری است"),
+        name: z.string().min(1, "نام اجباری است"),
       })
     )
     .optional(),
@@ -143,7 +143,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           }
         }
       } catch (error) {
-        console.error("Failed to fetch albums", error);
+        console.error("خطا در دریافت لیست آلبوم ها", error);
       }
     };
 
@@ -157,7 +157,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           }
         }
       } catch (error) {
-        console.error("Failed to fetch artists", error);
+        console.error("خطا در دریافت لیست خواننده ها", error);
       }
     };
 
@@ -170,7 +170,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           setGenres(Array.isArray(result) ? result : result.data || []);
         }
       } catch (error) {
-        console.error("Failed to fetch genres", error);
+        console.error("خطا در دریافت لیست سبک ها", error);
       }
     };
 
@@ -222,12 +222,12 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                 );
               }
             } else {
-              toast.error("Failed to fetch song data");
+              toast.error("خطا در دریافت مشخصات آهنگ");
             }
           }
         } catch (error) {
           console.error("Error fetching song:", error);
-          toast.error("Failed to fetch song data");
+          toast.error("خطا در دریافت مشخصات آهنگ");
         } finally {
           setFetchingData(false);
         }
@@ -265,13 +265,17 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        toast.error(result.message || `Failed to ${mode} song`);
-        throw new Error(result.message || `Failed to ${mode} song`);
+        toast.error(
+          result.message ||
+            `خطا در ${mode === "create" ? "افزودن" : "ویرایش"} آهنگ`
+        );
+        throw new Error(
+          result.message ||
+            `خطا در ${mode === "create" ? "افزودن" : "ویرایش"} آهنگ`
+        );
       }
 
-      toast.success(
-        `Song ${mode === "edit" ? "updated" : "created"} successfully`
-      );
+      toast.success(`آهنگ ${mode === "edit" ? "ویرایش" : "افزوده"} شد`);
       if (mode === "create") {
         form.reset();
         setSelectedArtists([]);
@@ -279,7 +283,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
       }
       router.push("/panel");
     } catch {
-      toast.error(`Failed to ${mode} song`);
+      toast.error(`خطا در ${mode === "create" ? "افزودن" : "ویرایش"} آهنگ`);
     } finally {
       setLoading(false);
     }
@@ -329,7 +333,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith(".mp3")) {
-      toast.error("Please select an MP3 file");
+      toast.error("لطفا یک فایل با فرمت MP3 انتخاب کنید.");
       return;
     }
 
@@ -345,7 +349,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        throw new Error(result.message || "Failed to upload file");
+        throw new Error(result.message || "خطا در ارسال آهنگ");
       }
 
       const { filename, metadata, coverArt, tempCoverArt } = result.data;
@@ -464,10 +468,10 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
         form.setValue("tempCoverArt", tempCoverArt);
       }
 
-      toast.success("File uploaded and metadata extracted");
+      toast.success("آهنگ آپلود شد! لطفا به مرحله بعد بروید!");
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload file");
+      toast.error("خطا در آپلود فایل");
     } finally {
       setUploading(false);
     }
@@ -478,7 +482,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+      toast.error("لطفا یک عکس انتخاب کنید!");
       return;
     }
 
@@ -494,7 +498,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        throw new Error(result.message || "Failed to upload image");
+        throw new Error(result.message || "خطا در آپلود عکس");
       }
 
       const { filePath, filename } = result.data;
@@ -502,10 +506,10 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
       form.setValue("coverArt", filePath);
       form.setValue("tempCoverArt", filename);
 
-      toast.success("Cover art uploaded");
+      toast.success("عکس این آهنگ آپلود شد!");
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload cover art");
+      toast.error("خطا در آپلود عکس");
     } finally {
       setUploading(false);
     }
@@ -517,7 +521,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
         <FormItem>
-          <FormLabel>Upload MP3</FormLabel>
+          <FormLabel>آپلود فایل MP3</FormLabel>
           <FormControl>
             <Input
               key={`mp3-${fileInputKey}`}
@@ -529,7 +533,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           </FormControl>
           {uploading && (
             <p className="text-sm text-muted-foreground">
-              Uploading and parsing...
+              در حال آپلود و پردازش...
             </p>
           )}
         </FormItem>
@@ -538,7 +542,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           name="coverArt"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cover Art</FormLabel>
+              <FormLabel>کاور آهنگ</FormLabel>
               <FormControl>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-4">
@@ -555,7 +559,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                     <div className="relative w-32 h-32 rounded-md overflow-hidden border">
                       <Image
                         src={field.value}
-                        alt="Cover Art Preview"
+                        alt="پیش نمایش کاور"
                         fill
                         className="object-cover"
                       />
@@ -572,9 +576,9 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>نام آهنگ</FormLabel>
               <FormControl>
-                <Input placeholder="Song Title" {...field} />
+                <Input placeholder="نام آهنگ" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -585,9 +589,9 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           name="titleEn"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title (English)</FormLabel>
+              <FormLabel>نام آهنگ (انگلیسی)</FormLabel>
               <FormControl>
-                <Input placeholder="Song Title (English)" {...field} />
+                <Input placeholder="نام آهنگ (انگلیسی)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -600,13 +604,13 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           render={() => (
             <FormItem className="flex flex-col">
               <FormLabel>
-                Artists{" "}
+                خواننده ها{" "}
                 <Link
                   className="border p-1.5 rounded-md hover:scale-110 transition-all"
                   href="/panel/new/artist"
                   target="_blank"
                 >
-                  Add new
+                  افزودن جدید
                 </Link>
               </FormLabel>
 
@@ -662,17 +666,17 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                       )}
                     >
                       {selectedArtists.length > 0
-                        ? `${selectedArtists.length} artist(s) selected`
-                        : "Select artists"}
+                        ? `${selectedArtists.length} خواننده انتخاب شده`
+                        : "انتخاب خواننده ها"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                   <Command>
-                    <CommandInput placeholder="Search artist..." />
+                    <CommandInput placeholder="جستجوی خواننده..." />
                     <CommandList>
-                      <CommandEmpty>No artist found.</CommandEmpty>
+                      <CommandEmpty>خواننده ای پیدا نشد.</CommandEmpty>
                       <CommandGroup>
                         {artists.map((artist) => (
                           <CommandItem
@@ -754,9 +758,9 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           name="artistEn"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Artist (English)</FormLabel>
+              <FormLabel>خواننده (انگلیسی)</FormLabel>
               <FormControl>
-                <Input placeholder="Artist Name (English)" {...field} />
+                <Input placeholder="نام خواننده (انگلیسی)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -767,11 +771,11 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           name="albumId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Album</FormLabel>
+              <FormLabel>آلبوم</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select an album" />
+                    <SelectValue placeholder="انتخاب آلبوم" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -791,9 +795,9 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           name="albumName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Album Name (Optional override)</FormLabel>
+              <FormLabel>نام آلبوم (اختیاری)</FormLabel>
               <FormControl>
-                <Input placeholder="Album Name" {...field} />
+                <Input placeholder="نام آلبوم" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -804,7 +808,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           name="year"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Release Year</FormLabel>
+              <FormLabel>سال انتشار</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -826,7 +830,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           name="duration"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Duration (seconds)</FormLabel>
+              <FormLabel>مدت زمان (ثانیه)</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -848,7 +852,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           name="genreIds"
           render={() => (
             <FormItem className="flex flex-col">
-              <FormLabel>Genres</FormLabel>
+              <FormLabel>سبک ها</FormLabel>
 
               {/* Display selected genres as badges */}
               {selectedGenres.length > 0 && (
@@ -893,17 +897,17 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                       )}
                     >
                       {selectedGenres.length > 0
-                        ? `${selectedGenres.length} genre(s) selected`
-                        : "Select genres"}
+                        ? `${selectedGenres.length} سبک انتخاب شده`
+                        : "انتخاب سبک ها"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                   <Command>
-                    <CommandInput placeholder="Search genre..." />
+                    <CommandInput placeholder="جستجوی سبک..." />
                     <CommandList>
-                      <CommandEmpty>No genre found.</CommandEmpty>
+                      <CommandEmpty>سبکی پیدا نشد.</CommandEmpty>
                       <CommandGroup>
                         {genres.map((genre) => (
                           <CommandItem
@@ -959,7 +963,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <FormLabel className="text-lg font-semibold">
-              Crew Members
+              دست اندرکاران
             </FormLabel>
             <Button
               type="button"
@@ -967,7 +971,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
               size="sm"
               onClick={() => append({ role: "", name: "" })}
             >
-              Add Member
+              افزودن عضو
             </Button>
           </div>
 
@@ -979,9 +983,9 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                   name={`crew.${index}.role`}
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Role</FormLabel>
+                      <FormLabel>نقش</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Mix & Master" {...field} />
+                        <Input placeholder="مثلا میکس و مستر" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -992,9 +996,9 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                   name={`crew.${index}.name`}
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>نام</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. John Doe" {...field} />
+                        <Input placeholder="مثلا علی رضایی" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1014,7 +1018,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
           </div>
           {fields.length === 0 && (
             <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
-              No crew members added yet.
+              هنوز دست اندرکاری اضافه نشده است.
             </div>
           )}
         </div>
@@ -1022,11 +1026,11 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
         <Button type="submit" disabled={loading || fetchingData}>
           {loading
             ? mode === "edit"
-              ? "Updating..."
-              : "Creating..."
+              ? "در حال بروزرسانی..."
+              : "در حال ساخت..."
             : mode === "edit"
-            ? "Update Song"
-            : "Create Song"}
+            ? "ویرایش آهنگ"
+            : "ساخت آهنگ"}
         </Button>
       </form>
     </Form>

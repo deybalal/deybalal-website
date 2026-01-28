@@ -35,7 +35,7 @@ interface ProfileFormProps {
 }
 
 const profileSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "نام اجباری است"),
   image: z.string().optional(),
   isPrivate: z.boolean().optional(),
 });
@@ -73,14 +73,14 @@ export default function ProfileForm({ user }: ProfileFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to update profile");
+        throw new Error(result.message || "خطا در بروزرسانی پروفایل");
       }
 
-      toast.success("Profile updated successfully");
+      toast.success("پروفایل با موفقیت بروزرسانی شد");
       router.refresh();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Something went wrong"
+        error instanceof Error ? error.message : "مشکلی پیش آمده است"
       );
     } finally {
       setIsLoading(false);
@@ -94,18 +94,18 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         className="space-y-6 max-w-md"
       >
         <div className="mb-8 text-xl">
-          For changing your avatar, You should Logout and Login againg with
-          Instagram! <Instagram className="inline-block mr-1 text-purple-500" />
+          برای تغییر آواتار، باید خارج شده و دوباره با اینستاگرام وارد شوید!{" "}
+          <Instagram className="inline-block mr-1 text-purple-500" />
         </div>
 
         {mounted && user?.userSlug && (
           <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm">
             <div className="flex flex-col space-y-1.5">
               <h3 className="font-semibold leading-none tracking-tight">
-                Public Profile
+                پروفایل عمومی
               </h3>
               <p className="text-sm text-muted-foreground">
-                Your public profile is accessible at:
+                پروفایل عمومی شما در این آدرس در دسترس است:
               </p>
             </div>
             <div className="mt-4 flex items-center gap-2">
@@ -128,9 +128,9 @@ export default function ProfileForm({ user }: ProfileFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>نام</FormLabel>
               <FormControl>
-                <Input placeholder="Your name" {...field} />
+                <Input placeholder="نام شما" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -143,9 +143,10 @@ export default function ProfileForm({ user }: ProfileFormProps) {
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <FormLabel className="text-base">Private Profile</FormLabel>
+                <FormLabel className="text-base">پروفایل خصوصی</FormLabel>
                 <div className="text-sm text-muted-foreground">
-                  Only you can see your profile and playlists when enabled.
+                  در صورت فعال بودن، فقط خودتان می‌توانید پروفایل و لیست‌های پخش
+                  خود را ببینید.
                 </div>
               </div>
               <FormControl>
@@ -159,7 +160,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         />
 
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save Changes"}
+          {isLoading ? "در حال ذخیره..." : "ذخیره تغییرات"}
         </Button>
       </form>
     </Form>

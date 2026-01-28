@@ -51,7 +51,7 @@ export default function ManageBadgesDialog({
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("Failed to load badges");
+      toast.error("خطا در دریافت نشان ها");
     } finally {
       setLoading(false);
     }
@@ -81,15 +81,15 @@ export default function ManageBadgesDialog({
       });
 
       if (!res.ok) {
-        throw new Error("Failed to update badges");
+        throw new Error("خطا در ویرایش نشان ها");
       }
 
-      toast.success("Badges updated successfully");
+      toast.success("نشان با موفقیت ویرایش شد.");
       setOpen(false);
       router.refresh();
     } catch (error) {
       console.error("Error updating badges:", error);
-      toast.error("Failed to update badges");
+      toast.error("خطا در ویرایش نشان ها");
     } finally {
       setSaving(false);
     }
@@ -100,7 +100,7 @@ export default function ManageBadgesDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Manage Badges for {user.name}</DialogTitle>
+          <DialogTitle>ویرایش نشان ها برای &apos;{user.name}&apos;</DialogTitle>
         </DialogHeader>
         <div className="py-4">
           {loading ? (
@@ -155,13 +155,13 @@ export default function ManageBadgesDialog({
                     />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">No badges found</p>
+                    <p className="text-sm font-medium">هیچ نشانی وجود ندارد.</p>
                     <p className="text-xs text-muted-foreground">
-                      Create badges first to assign them to users.
+                      ابتدا باید از پنل مدیریت نشان بسازید.
                     </p>
                   </div>
                   <Button asChild variant="outline" size="sm">
-                    <Link href="/panel/badges">Create Badge</Link>
+                    <Link href="/panel/badges">ساخت نشان</Link>
                   </Button>
                 </div>
               )}
@@ -174,10 +174,10 @@ export default function ManageBadgesDialog({
             onClick={() => setOpen(false)}
             disabled={saving}
           >
-            Cancel
+            لفو
           </Button>
           <Button onClick={handleSave} disabled={saving || loading}>
-            {saving ? "Saving..." : "Save Changes"}
+            {saving ? "در حال ذخیره کردن..." : "ذخیره تغییرات"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -51,7 +51,6 @@ import {
 import ArtistForm from "./ArtistForm";
 import GenreForm from "./GenreForm";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 
 interface Artist {
   id: string;
@@ -65,9 +64,9 @@ interface SongFormProps {
 }
 
 const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(1, "نام آهنگ اجباری است."),
   titleEn: z.string().optional(),
-  artist: z.string().min(2, "You must enter artist name!"),
+  artist: z.string().min(2, "وارد کردن نام خواننده اجباری است."),
   artistEn: z.string().optional(),
   artistIds: z.array(z.string()).optional(), // Multiple artist IDs
   albumId: z.string().optional(),
@@ -82,8 +81,8 @@ const formSchema = z.object({
   crew: z
     .array(
       z.object({
-        role: z.string().min(1, "Role is required"),
-        name: z.string().min(1, "Name is required"),
+        role: z.string().min(2, "نقش اجباری است"),
+        name: z.string().min(2, "نام اجباری است"),
       })
     )
     .optional(),
@@ -146,7 +145,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
           }
         }
       } catch (error) {
-        console.error("Failed to fetch albums", error);
+        console.error("خطا در دریافت لیست آلبوم ها", error);
       }
     };
 
@@ -160,7 +159,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
           }
         }
       } catch (error) {
-        console.error("Failed to fetch artists", error);
+        console.error("خطا در دریافت لیست خواننده ها", error);
       }
     };
 
@@ -172,7 +171,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
           setGenres(result);
         }
       } catch (error) {
-        console.error("Failed to fetch genres", error);
+        console.error("خطا در دریافت لیست سبک ها", error);
       }
     };
 
@@ -223,12 +222,12 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                 );
               }
             } else {
-              toast.error("Failed to fetch song data");
+              toast.error("خطا در دریافت مشخصات آهنگ");
             }
           }
         } catch (error) {
           console.error("Error fetching song:", error);
-          toast.error("Failed to fetch song data");
+          toast.error("خطا در دریافت مشخصات آهنگ");
         } finally {
           // setFetchingData(false);
         }
@@ -287,13 +286,17 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        toast.error(result.message || `Failed to ${mode} song`);
-        throw new Error(result.message || `Failed to ${mode} song`);
+        toast.error(
+          result.message ||
+            `خطا در ${mode === "create" ? "افزودن" : "ویرایش"} آهنگ`
+        );
+        throw new Error(
+          result.message ||
+            `خطا در ${mode === "create" ? "افزودن" : "ویرایش"} آهنگ`
+        );
       }
 
-      toast.success(
-        `Song ${mode === "edit" ? "updated" : "created"} successfully`
-      );
+      toast.success(`آهنگ ${mode === "edit" ? "ویرایش" : "افزوده"} شد`);
       if (mode === "create") {
         form.reset();
         setSelectedArtists([]);
@@ -303,7 +306,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       setStep(1);
       router.push("/panel");
     } catch {
-      toast.error(`Failed to ${mode} song`);
+      toast.error(`خطا در ${mode === "create" ? "افزودن" : "ویرایش"} آهنگ`);
     } finally {
       setLoading(false);
     }
@@ -353,7 +356,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith(".mp3")) {
-      toast.error("Please select an MP3 file");
+      toast.error("لطفا یک فایل با فرمت MP3 انتخاب کنید.");
       return;
     }
 
@@ -369,7 +372,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        throw new Error(result.message || "Failed to upload file");
+        throw new Error(result.message || "خطا در ارسال آهنگ");
       }
 
       const { filename, metadata, coverArt, tempCoverArt } = result.data;
@@ -485,10 +488,10 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
         form.setValue("tempCoverArt", tempCoverArt);
       }
 
-      toast.success("File uploaded and metadata extracted");
+      toast.success("آهنگ آپلود شد! لطفا به مرحله بعد بروید!");
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload file");
+      toast.error("خطا در آپلود فایل");
     } finally {
       setUploading(false);
     }
@@ -499,7 +502,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+      toast.error("لطفا یک عکس انتخاب کنید!");
       return;
     }
 
@@ -515,7 +518,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        throw new Error(result.message || "Failed to upload image");
+        throw new Error(result.message || "خطا در آپلود عکس");
       }
 
       const { filePath, filename } = result.data;
@@ -523,10 +526,10 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       form.setValue("coverArt", filePath);
       form.setValue("tempCoverArt", filename);
 
-      toast.success("Cover art uploaded");
+      toast.success("عکس این آهنگ آپلود شد!");
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload cover art");
+      toast.error("خطا در آپلود عکس");
     } finally {
       setUploading(false);
     }
@@ -534,11 +537,11 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
 
   const nextStep = () => {
     if (step === 1 && !form.getValues("filename")) {
-      toast.error("Please upload an MP3 file");
+      toast.error("لطفا یک فایل MP3 آپلود کنید.");
       return;
     }
     if (step === 2 && selectedArtists.length === 0) {
-      toast.error("Please select at least one artist");
+      toast.error("لطفا حداقل یک خواننده را انتخاب کنید.");
       return;
     }
     setStep((prev) => prev + 1);
@@ -573,12 +576,12 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               )}
             >
               {s === 1
-                ? "Upload"
+                ? "آپلود"
                 : s === 2
-                ? "Artist"
+                ? "خواننده"
                 : s === 3
-                ? "Details"
-                : "Crew"}
+                ? "جزئیات"
+                : "دست اندرکاران"}
             </span>
           </div>
         ))}
@@ -588,24 +591,24 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       <div className="bg-muted/50 p-4 rounded-lg border border-primary/20">
         <h3 className="font-semibold text-primary mb-1 flex items-center gap-2">
           <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
-            TIP
+            ✅
           </span>
           {step === 1
-            ? "Upload Song"
+            ? "ارسال فایل mp3 آهنگ"
             : step === 2
-            ? "Select Artist"
+            ? "انتخاب خواننده"
             : step === 3
-            ? "Song Details"
-            : "Crew Members"}
+            ? "جزئیات آهنگ"
+            : "دست اندرکاران"}
         </h3>
         <p className="text-sm text-muted-foreground">
           {step === 1
-            ? "Upload the MP3 file for the song. We'll automatically extract metadata like title, album, and duration to save you time."
+            ? "ابتدا فایل MP3 را انتخاب کنید. پلتفرم بطور خودکار فایل را آپلود می کند و نام آهنگ و خواننده و آلبوم را استخراج میکند!"
             : step === 2
-            ? "Start by selecting the main artist for this song. If the artist doesn't exist yet, you can create a new one right here."
+            ? "از لیست موجود، خواننده یا خواننده های آهنگ را انتخاب کنید. اگر خواننده در لیست وجود نداشت، میتوانید روی دکمه ی ساخت خواننده ی جدید کلیک کنید."
             : step === 3
-            ? "Review the extracted details and fill in any missing information. Add cover art and ensure everything looks correct before saving."
-            : "Add crew members who worked on this song (e.g., Mix & Master, Producer, Graphic Designer)."}
+            ? "مشخصات آهنگ که به صورت خودکار درج شده اند را بررسی کنید و اطلاعات دیگر را اضافه کنید."
+            : "این مورد اختیاری است. در صورتی که از افرادی که در تهیه این آهنگ اطلاع دارید، میتوانید نام و نقش آن ها را وارد کنید."}
         </p>
       </div>
 
@@ -627,7 +630,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               <FormItem>
                 <FormLabel className="text-lg font-semibold">
-                  Upload MP3 File
+                  فایل MP3 را انتخاب و آپلود کنید.
                 </FormLabel>
                 <div
                   className={cn(
@@ -675,20 +678,19 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     </div>
                     <span className="text-lg font-medium">
                       {uploading
-                        ? "Uploading & Extracting..."
+                        ? "درحال آپلود..."
                         : form.getValues("filename")
-                        ? "File Uploaded!"
-                        : "Click to Upload MP3"}
+                        ? "فایل با موفقیت آپلود شد. لطفا به مرحله بعدی بروید!"
+                        : "انتخاب فایل"}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {form.getValues("filename") ||
-                        "Supported format: .mp3 (Max 20MB)"}
+                      {form.getValues("filename") || "فرمت پشتیبانی شده: mp3"}
                     </span>
                   </label>
                 </div>
                 {uploading && (
                   <p className="text-center text-sm text-muted-foreground animate-pulse">
-                    Please wait while we process the audio file...
+                    لطفا کمی صبر کنید...
                   </p>
                 )}
               </FormItem>
@@ -704,7 +706,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                 render={() => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="text-lg font-semibold">
-                      Select Artist
+                      خواننده را انتخاب کنید
                       <Dialog
                         open={openCreateArtist}
                         onOpenChange={setOpenCreateArtist}
@@ -715,12 +717,12 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                             className="h-12 px-6 ml-3 cursor-pointer"
                             type="button"
                           >
-                            Create New Artist
+                            ساخت خواننده جدید
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Create New Artist</DialogTitle>
+                            <DialogTitle>ساخت خواننده جدید</DialogTitle>
                           </DialogHeader>
                           <ArtistForm
                             onSuccess={(newArtist) => {
@@ -801,17 +803,17 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                               )}
                             >
                               {selectedArtists.length > 0
-                                ? "Add more artists..."
-                                : "Search and select artists..."}
+                                ? "انتخاب خواننده های بیشتر؟"
+                                : "جستوجو و انتخاب خواننده"}
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-[300px] p-0">
                           <Command>
-                            <CommandInput placeholder="Search artist..." />
+                            <CommandInput placeholder="جستوجوی خواننده..." />
                             <CommandList>
-                              <CommandEmpty>No artist found.</CommandEmpty>
+                              <CommandEmpty>خواننده ای پیدا نشد.</CommandEmpty>
                               <CommandGroup>
                                 {artists.map((artist) => (
                                   <CommandItem
@@ -913,7 +915,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     name="coverArt"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cover Art</FormLabel>
+                        <FormLabel>تصویر آهنگ (Cover Art)</FormLabel>
                         <FormControl>
                           <div className="flex flex-col gap-4">
                             <div className="flex items-center gap-4">
@@ -937,7 +939,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                               </div>
                             ) : (
                               <div className="w-full aspect-square rounded-md border-2 border-dashed flex items-center justify-center text-muted-foreground bg-muted/20">
-                                No Cover Art
+                                بدون تصویر
                               </div>
                             )}
                           </div>
@@ -954,9 +956,12 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Title</FormLabel>
+                        <FormLabel>نام آهنگ</FormLabel>
                         <FormControl>
-                          <Input placeholder="Song Title" {...field} />
+                          <Input
+                            placeholder="نام آهنگ را وارد کنید"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -967,10 +972,10 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     name="titleEn"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Title (English)</FormLabel>
+                        <FormLabel>نام (انگلیسی)</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Song Title (English)"
+                            placeholder="نام آهنگ را به زبان انگلیسی وارد کنید"
                             {...field}
                           />
                         </FormControl>
@@ -983,10 +988,10 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     name="artistEn"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Artist (English)</FormLabel>
+                        <FormLabel>خواننده (انگلیسی)</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Artist Name (English)"
+                            placeholder="نام خواننده را به زبان انگلیسی وارد کنید"
                             {...field}
                           />
                         </FormControl>
@@ -999,7 +1004,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     name="albumId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Album</FormLabel>
+                        <FormLabel>آلبوم</FormLabel>
                         <Select
                           onValueChange={(value) => {
                             field.onChange(value);
@@ -1016,7 +1021,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                         >
                           <FormControl>
                             <SelectTrigger className="cursor-pointer">
-                              <SelectValue placeholder="Select an album" />
+                              <SelectValue placeholder="انتخاب یک آلبوم" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -1041,7 +1046,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                       name="year"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Release Year</FormLabel>
+                          <FormLabel>سال انتشار (میلادی)</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -1066,7 +1071,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                       disabled
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Duration (s)</FormLabel>
+                          <FormLabel>زمان آهنگ (ثانیه)</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -1090,7 +1095,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     name="genreIds"
                     render={() => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>Genres</FormLabel>
+                        <FormLabel>سبک ها</FormLabel>
                         <div className="flex flex-wrap gap-2 mb-2">
                           {selectedGenres.map((genre) => (
                             <div
@@ -1127,7 +1132,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                                 aria-expanded={openGenre}
                                 className="w-full justify-between cursor-pointer"
                               >
-                                Select genres...
+                                سبک ها را انتخاب کنید...
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
@@ -1138,7 +1143,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                           >
                             <DialogContent>
                               <DialogHeader>
-                                <DialogTitle>Create New Genre</DialogTitle>
+                                <DialogTitle>ساخت سبک جدید</DialogTitle>
                               </DialogHeader>
                               <GenreForm
                                 onSuccess={(newGenre) => {
@@ -1160,7 +1165,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                           <PopoverContent className="w-[400px] p-0">
                             <div className="flex items-center justify-between p-2 border-b">
                               <span className="text-xs font-medium text-muted-foreground px-2">
-                                Genres
+                                سبک ها
                               </span>
                               <Button
                                 type="button"
@@ -1169,13 +1174,13 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                                 className="h-8 px-2 text-xs hover:bg-primary/10 hover:text-primary cursor-pointer"
                                 onClick={() => setOpenCreateGenre(true)}
                               >
-                                <Plus className="w-3 h-3 mr-1" /> New Genre
+                                <Plus className="w-3 h-3 mr-1" /> سبک جدید
                               </Button>
                             </div>
                             <Command>
-                              <CommandInput placeholder="Search genre..." />
+                              <CommandInput placeholder="جست و جوی سبک..." />
                               <CommandList>
-                                <CommandEmpty>No genre found.</CommandEmpty>
+                                <CommandEmpty>سبک پیدا نشد!</CommandEmpty>
                                 <CommandGroup>
                                   {genres.map((genre) => (
                                     <CommandItem
@@ -1232,7 +1237,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-center justify-between">
                 <FormLabel className="text-lg font-semibold">
-                  Crew Members
+                  دست اندرکاران
                 </FormLabel>
                 <Button
                   type="button"
@@ -1241,7 +1246,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                   onClick={() => append({ role: "", name: "" })}
                   className="cursor-pointer"
                 >
-                  Add Member
+                  اضافه کردن
                 </Button>
               </div>
 
@@ -1250,12 +1255,15 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                   <div key={field.id} className="flex gap-4 items-end">
                     <FormField
                       control={form.control}
-                      name={`crew.${index}.role`}
+                      name={`crew.${index}.name`}
                       render={({ field }) => (
                         <FormItem className="flex-1">
-                          <FormLabel>Role</FormLabel>
+                          <FormLabel>نام</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. Mix & Master" {...field} />
+                            <Input
+                              placeholder="مانند: علی عالی زاده"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1263,12 +1271,15 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     />
                     <FormField
                       control={form.control}
-                      name={`crew.${index}.name`}
+                      name={`crew.${index}.role`}
                       render={({ field }) => (
                         <FormItem className="flex-1">
-                          <FormLabel>Name</FormLabel>
+                          <FormLabel>نقش</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. John Doe" {...field} />
+                            <Input
+                              placeholder="مانند: ترانه سرا، میکس و مستر، تنظیم"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1288,7 +1299,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               </div>
               {fields.length === 0 && (
                 <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
-                  No crew members added yet.
+                  هیچ شخصی به عنوان دست اندرکار اضافه نشده.
                 </div>
               )}
             </div>
@@ -1302,7 +1313,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               disabled={step === 1}
               className="cursor-pointer"
             >
-              Previous
+              قبلی
             </Button>
 
             {step < 4 ? (
@@ -1318,7 +1329,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     "bg-green-600 hover:bg-green-700 text-white border-green-700"
                 )}
               >
-                Next
+                بعدی
               </Button>
             ) : (
               <Button
@@ -1334,7 +1345,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                 )}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {mode === "create" ? "Create Song" : "Update Song"}
+                {mode === "create" ? "ارسال آهنگ" : "ویرایش آهنگ"}
               </Button>
             )}
           </div>

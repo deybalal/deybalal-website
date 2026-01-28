@@ -30,8 +30,8 @@ export default function SyncedLyricsEditor({
           }
         }
       } catch (error) {
-        console.error("Failed to fetch song", error);
-        toast.error("Failed to load synced lyrics");
+        console.error("خطا در دریافت آهنگ", error);
+        toast.error("خطا در بارگذاری متن همگام سازی شده");
       } finally {
         setLoading(false);
       }
@@ -51,14 +51,18 @@ export default function SyncedLyricsEditor({
 
       const result = await res.json();
       if (res.ok && result.success) {
-        toast.success(result.message || "Synced lyrics updated successfully");
+        toast.success(
+          result.message || "متن همگام سازی شده با موفقیت بروزرسانی شد"
+        );
         router.push("/panel");
       } else {
-        throw new Error(result.message || "Failed to update synced lyrics");
+        throw new Error(
+          result.message || "خطا در بروزرسانی متن همگام سازی شده"
+        );
       }
     } catch (error) {
       console.error("Error saving synced lyrics:", error);
-      toast.error("Failed to save synced lyrics");
+      toast.error("خطا در ذخیره متن همگام سازی شده");
     } finally {
       setSaving(false);
     }
@@ -75,19 +79,19 @@ export default function SyncedLyricsEditor({
   return (
     <div className="space-y-4 w-full max-w-3xl">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Edit Synced Lyrics (LRC)</h2>
+        <h2 className="text-xl font-semibold">
+          ویرایش متن همگام سازی شده (LRC)
+        </h2>
         <Button onClick={handleSave} disabled={saving}>
-          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Synced Lyrics
+          {saving && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+          ذخیره متن همگام سازی شده
         </Button>
       </div>
-      <p className="text-sm text-muted-foreground">
-        Format: [mm:ss.xx] Lyric line
-      </p>
+      <p className="text-sm text-muted-foreground">فرمت: [mm:ss.xx] متن آهنگ</p>
       <Textarea
         value={syncedLyrics}
         onChange={(e) => setSyncedLyrics(e.target.value)}
-        placeholder="[00:00.00] Line 1&#10;[00:05.00] Line 2"
+        placeholder="[00:00.00] خط ۱&#10;[00:05.00] خط ۲"
         className="min-h-[500px] font-mono text-sm"
       />
     </div>

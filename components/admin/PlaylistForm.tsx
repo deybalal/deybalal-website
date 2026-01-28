@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "نام اجباری است"),
   description: z.string().optional(),
 });
 
@@ -43,12 +43,12 @@ export default function PlaylistForm() {
 
       const result = await res.json();
       if (!res.ok || !result.success)
-        throw new Error(result.message || "Failed to create playlist");
+        throw new Error(result.message || "خطا در ساخت پلی لیست");
 
-      toast.success("Playlist created successfully");
+      toast.success("پلی لیست ساخته شد!");
       form.reset();
     } catch {
-      toast.error("Failed to create playlist");
+      toast.error("خطا در ساخت پلی لیست");
     } finally {
       setLoading(false);
     }
@@ -65,9 +65,9 @@ export default function PlaylistForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Playlist Name</FormLabel>
+              <FormLabel>نام پلی لیست</FormLabel>
               <FormControl>
-                <Input placeholder="Playlist Name" {...field} />
+                <Input placeholder="نام پلی لیست را وارد کنید" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -78,9 +78,9 @@ export default function PlaylistForm() {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>توضیحات</FormLabel>
               <FormControl>
-                <Input placeholder="Description" {...field} />
+                <Input placeholder="توضیحات کوتاه..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -88,7 +88,7 @@ export default function PlaylistForm() {
         />
 
         <Button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Playlist"}
+          {loading ? "در حال ساخت..." : "ساخت پلی لیست"}
         </Button>
       </form>
     </Form>

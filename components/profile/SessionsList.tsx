@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import { Laptop, Smartphone, Globe } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { faIR } from "date-fns/locale";
 
 interface Session {
   id: string;
@@ -31,7 +32,7 @@ export default function SessionsList() {
         setSessions(result.data);
       }
     } catch (error) {
-      console.error("Failed to fetch sessions", error);
+      console.error("خطا در دریافت لیست نشست‌ها", error);
     } finally {
       setIsLoading(false);
     }
@@ -45,13 +46,13 @@ export default function SessionsList() {
       const result = await response.json();
 
       if (result.success) {
-        toast.success("Session revoked");
+        toast.success("نشست با موفقیت لغو شد");
         fetchSessions();
       } else {
         toast.error(result.message);
       }
     } catch {
-      toast.error("Failed to revoke session");
+      toast.error("خطا در لغو نشست");
     }
   }
 
@@ -62,7 +63,7 @@ export default function SessionsList() {
     return <Laptop className="w-5 h-5" />;
   }
 
-  if (isLoading) return <div>Loading sessions...</div>;
+  if (isLoading) return <div>در حال بارگذاری نشست‌ها...</div>;
 
   return (
     <div className="space-y-4">
@@ -77,20 +78,24 @@ export default function SessionsList() {
             </div>
             <div>
               <div className="font-medium flex items-center gap-2">
-                {session.ipAddress || "Unknown IP"}
+                {session.ipAddress || "آی‌پی ناشناخته"}
                 {session.isCurrent && (
                   <span className="text-xs bg-green-500/20 text-green-500 px-2 py-0.5 rounded-full">
-                    Current
+                    فعلی
                   </span>
                 )}
               </div>
               <div className="text-sm text-muted-foreground">
                 {session.userAgent
                   ? session.userAgent.substring(0, 50) + "..."
-                  : "Unknown Device"}
+                  : "دستگاه ناشناخته"}
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                Started {formatDistanceToNow(new Date(session.createdAt))} ago
+                شروع شده از{" "}
+                {formatDistanceToNow(new Date(session.createdAt), {
+                  locale: faIR,
+                })}{" "}
+                قبل
               </div>
             </div>
           </div>
@@ -100,7 +105,7 @@ export default function SessionsList() {
               size="sm"
               onClick={() => revokeSession(session.id)}
             >
-              Revoke
+              لغو دسترسی
             </Button>
           )}
         </div>

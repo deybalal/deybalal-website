@@ -9,6 +9,7 @@ import { Loader2, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import DialogAlert from "./DialogAlert";
+import { faIR } from "date-fns/locale";
 
 interface Comment {
   id: string;
@@ -183,6 +184,7 @@ export function CommentSection({
                     <span className="text-xs text-gray-500">
                       {formatDistanceToNow(new Date(comment.createdAt), {
                         addSuffix: true,
+                        locale: faIR,
                       })}
                     </span>
                     {!comment.isActive && (

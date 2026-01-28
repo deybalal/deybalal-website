@@ -40,9 +40,9 @@ interface Artist {
 }
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  artistName: z.string().min(1, "Artist Name is required"),
-  nameEn: z.string().min(1, "Artist Name in English is required"),
+  name: z.string().min(1, "نام اجباری است"),
+  artistName: z.string().min(1, "نام خواننده اجباری است"),
+  nameEn: z.string().min(1, "نام خواننده به انگلیسی اجباری است"),
   artistId: z.string().optional(), // Will be set automatically when artist is selected
   coverArt: z.string().optional(),
   releaseDate: z.string().optional(),
@@ -82,7 +82,8 @@ export default function AlbumForm() {
           }
         }
       } catch (error) {
-        console.error("Failed to fetch artists", error);
+        console.error("خطا در دریافت لیست خواننده ها", error);
+        toast.error("خطا در دریافت لیست خواننده ها");
       }
     };
     const fetchGenres = async () => {
@@ -93,7 +94,8 @@ export default function AlbumForm() {
           setGenres(result);
         }
       } catch (error) {
-        console.error("Failed to fetch genres", error);
+        console.error("خطا در دریافت سبک ها", error);
+        toast.error("خطا در دریافت سبک ها");
       }
     };
     fetchArtists();
@@ -105,7 +107,7 @@ export default function AlbumForm() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+      toast.error("لطفا یک تصویر انتخاب کنید!");
       return;
     }
 
@@ -121,15 +123,15 @@ export default function AlbumForm() {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        throw new Error(result.message || "Failed to upload image");
+        throw new Error(result.message || "خطا در ارسال عکس!");
       }
 
       const { filePath } = result.data;
       form.setValue("coverArt", filePath);
-      toast.success("Cover art uploaded");
+      toast.success("تصویر آهنگ آپلود شد.");
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload cover art");
+      toast.error("خطا در ارسال عکس!");
     } finally {
       setUploading(false);
     }
@@ -146,12 +148,12 @@ export default function AlbumForm() {
 
       const result = await res.json();
       if (!res.ok || !result.success)
-        throw new Error(result.message || "Failed to create album");
+        throw new Error(result.message || "خطا در ساخت آلبوم");
 
-      toast.success("Album created successfully");
+      toast.success("آلبوم ساخته شد.");
       form.reset();
     } catch {
-      toast.error("Failed to create album");
+      toast.error("خطا در ساخت آلبوم");
     } finally {
       setLoading(false);
     }
@@ -168,9 +170,9 @@ export default function AlbumForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Album Name</FormLabel>
+              <FormLabel>نام آلبوم</FormLabel>
               <FormControl>
-                <Input placeholder="Album Name" {...field} />
+                <Input placeholder="نام آلبوم را وارد کنید" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -181,7 +183,7 @@ export default function AlbumForm() {
           name="artistName"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Artist Name</FormLabel>
+              <FormLabel>خواننده</FormLabel>
               <Popover open={openArtist} onOpenChange={setOpenArtist}>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -197,16 +199,16 @@ export default function AlbumForm() {
                       {field.value
                         ? artists.find((artist) => artist.name === field.value)
                             ?.name || field.value
-                        : "Select artist"}
+                        : "یک خواننده را انتخاب کنید"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                   <Command>
-                    <CommandInput placeholder="Search artist..." />
+                    <CommandInput placeholder="جستوجوی خواننده" />
                     <CommandList>
-                      <CommandEmpty>No artist found.</CommandEmpty>
+                      <CommandEmpty>نتیجه ای پیدا نشد!</CommandEmpty>
                       <CommandGroup>
                         {artists.map((artist) => (
                           <CommandItem
@@ -246,9 +248,12 @@ export default function AlbumForm() {
           name="nameEn"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Artist Name (English)</FormLabel>
+              <FormLabel> نام خواننده به انگلیسی </FormLabel>
               <FormControl>
-                <Input placeholder="Artist Name (English)" {...field} />
+                <Input
+                  placeholder="نام خواننده را به زبان انگلیسی وارد کنید"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -259,7 +264,7 @@ export default function AlbumForm() {
           name="coverArt"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cover Art</FormLabel>
+              <FormLabel>تصویر آلبوم (Cover Art)</FormLabel>
               <FormControl>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-4">
@@ -292,7 +297,7 @@ export default function AlbumForm() {
           name="releaseDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Release Date</FormLabel>
+              <FormLabel>سال انتشار به میلادی</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -310,7 +315,7 @@ export default function AlbumForm() {
           name="genreIds"
           render={() => (
             <FormItem className="flex flex-col">
-              <FormLabel>Genres</FormLabel>
+              <FormLabel>سبک ها</FormLabel>
               <div className="flex flex-wrap gap-2 mb-2">
                 {selectedGenres.map((genre) => (
                   <div
@@ -346,16 +351,16 @@ export default function AlbumForm() {
                       aria-expanded={openGenre}
                       className="w-full justify-between"
                     >
-                      Select genres...
+                      انتخاب سبک ها...
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-[400px] p-0">
                   <Command>
-                    <CommandInput placeholder="Search genre..." />
+                    <CommandInput placeholder="جست و جوی سبک..." />
                     <CommandList>
-                      <CommandEmpty>No genre found.</CommandEmpty>
+                      <CommandEmpty>نتیجه ای پیدا نشد!</CommandEmpty>
                       <CommandGroup>
                         {genres.map((genre) => (
                           <CommandItem
@@ -400,7 +405,7 @@ export default function AlbumForm() {
           )}
         />
         <Button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Album"}
+          {loading ? "درحال ساخت..." : "ساخت آلبوم"}
         </Button>
       </form>
     </Form>

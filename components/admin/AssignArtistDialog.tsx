@@ -55,7 +55,7 @@ export default function AssignArtistDialog({
       }
     } catch (error) {
       console.error("Error fetching artists:", error);
-      toast.error("Failed to load artists");
+      toast.error("خطا در دریافت لیست خواننده ها");
     } finally {
       setLoading(false);
     }
@@ -80,21 +80,19 @@ export default function AssignArtistDialog({
       });
 
       if (!res.ok) {
-        throw new Error("Failed to update user");
+        throw new Error("خطایی پیش آمد!");
       }
 
-      toast.success("User updated successfully");
+      toast.success("الصاق کاربر به خواننده با موفقیت انجام شد!");
       setOpen(false);
       router.refresh();
     } catch (error) {
       console.error("Error updating user:", error);
-      toast.error("Failed to update user");
+      toast.error("خطایی پیش آمد!");
     } finally {
       setSaving(false);
     }
   };
-
-  console.log("Artists, ", artists);
 
   const filteredArtists = artists?.filter((artist) =>
     artist.name.toLowerCase().includes(search.toLowerCase())
@@ -105,29 +103,31 @@ export default function AssignArtistDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Assign Artist to {user.name}</DialogTitle>
+          <DialogTitle>
+            الصاق خواننده به کاربر &apos;{user.name}&apos;
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
           <div className="flex items-center space-x-2">
+            <Label
+              htmlFor="isUserAnArtist"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              این حساب کاربری متعلق به یک خواننده است.
+            </Label>
             <Switch
               id="isUserAnArtist"
               checked={isUserAnArtist}
               onCheckedChange={(checked: boolean) => setIsUserAnArtist(checked)}
             />
-            <Label
-              htmlFor="isUserAnArtist"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              This user is an Artist
-            </Label>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Select Artist</Label>
+            <Label className="text-sm font-medium">انتخاب خواننده</Label>
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search artists..."
+                placeholder="جستوجوی خواننده..."
                 className="pl-8"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -159,7 +159,7 @@ export default function AssignArtistDialog({
                 ))
               ) : (
                 <div className="p-4 text-center text-sm text-muted-foreground">
-                  No artists found
+                  نتیجه ای پیدا نشد.
                 </div>
               )}
             </div>
@@ -171,10 +171,10 @@ export default function AssignArtistDialog({
             onClick={() => setOpen(false)}
             disabled={saving}
           >
-            Cancel
+            لغو
           </Button>
           <Button onClick={handleSave} disabled={saving || loading}>
-            {saving ? "Saving..." : "Save Changes"}
+            {saving ? "در حال ذخیره کردن..." : "ذخیره"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -35,7 +35,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     return (
       <div className="w-full max-w-4xl h-[400px] flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">
-          Loading settings...
+          در حال بارگذاری تنظیمات...
         </div>
       </div>
     );
@@ -44,8 +44,8 @@ export default function ProfileClient({ user }: ProfileClientProps) {
   return (
     <Tabs id="profile-tabs" defaultValue="general" className="w-full max-w-4xl">
       <TabsList className="grid w-full grid-cols-2 mb-8">
-        <TabsTrigger value="general">General</TabsTrigger>
-        <TabsTrigger value="security">Security</TabsTrigger>
+        <TabsTrigger value="general">عمومی</TabsTrigger>
+        <TabsTrigger value="security">امنیت</TabsTrigger>
       </TabsList>
 
       <TabsContent value="general">
@@ -54,9 +54,9 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         />
         <Card>
           <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
+            <CardTitle>اطلاعات حساب کاربری</CardTitle>
             <CardDescription>
-              Update your profile details and public information.
+              اطلاعات حساب کاربری و اطلاعات عمومی خود را بروزرسانی کنید.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -68,9 +68,9 @@ export default function ProfileClient({ user }: ProfileClientProps) {
       <TabsContent value="security">
         <Card>
           <CardHeader>
-            <CardTitle>Active Sessions</CardTitle>
+            <CardTitle>نشست‌های فعال</CardTitle>
             <CardDescription>
-              Manage your active sessions across different devices.
+              نشست‌های فعال خود را در دستگاه‌های مختلف مدیریت کنید.
             </CardDescription>
           </CardHeader>
           <CardContent>

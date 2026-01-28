@@ -57,25 +57,21 @@ export default function GenreForm({ initialData, onSuccess }: GenreFormProps) {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        toast.error(result.message || "Failed to save genre");
-        throw new Error(result.message || "Failed to save genre");
+        toast.error(result.message || "خطا در ذخیره سبک");
+        throw new Error(result.message || "خطا در ذخیره سبک");
       }
 
-      toast.success(
-        initialData
-          ? "Genre updated successfully"
-          : "Genre created successfully"
-      );
+      toast.success(initialData ? "سبک بروزرسانی شد." : "سبک ساخته شد.");
 
       if (onSuccess) {
         onSuccess(result.data);
       } else {
-        router.push("/panel?tab=genres");
+        router.push("/panel/genres");
         router.refresh();
       }
     } catch (error) {
       console.error("Error saving genre:", error);
-      toast.error("Failed to save genre");
+      toast.error("خطا در ذخیره سبک");
     } finally {
       setLoading(false);
     }
@@ -107,10 +103,10 @@ export default function GenreForm({ initialData, onSuccess }: GenreFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>نام</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Genre Name"
+                  placeholder="نام سبک. مانند: فولکور، یار یار، دی بلال و..."
                   {...field}
                   onChange={handleNameChange}
                 />
@@ -124,12 +120,16 @@ export default function GenreForm({ initialData, onSuccess }: GenreFormProps) {
           name="slug"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Slug</FormLabel>
+              <FormLabel>آدرس (Slug)</FormLabel>
               <FormControl>
                 <Input placeholder="genre-slug" {...field} />
               </FormControl>
               <FormDescription>
-                Unique identifier for the genre URL.
+                آدرس یکتا برای این سبک. مانند:
+                <span className="block text-lg text-foreground cursor-pointer hover:text-foreground/60 hover:scale-105">
+                  {process.env.NEXT_PUBLIC_DEPLOYED_URL}
+                  /genres/slug
+                </span>
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -139,11 +139,11 @@ export default function GenreForm({ initialData, onSuccess }: GenreFormProps) {
         <Button type="submit" disabled={loading}>
           {loading
             ? initialData
-              ? "Updating..."
-              : "Creating..."
+              ? "در حال بروزرسانی..."
+              : "در حال ساخت..."
             : initialData
-            ? "Update Genre"
-            : "Create Genre"}
+            ? "بروزرسانی سبک"
+            : "ساخت سبک"}
         </Button>
       </form>
     </Form>

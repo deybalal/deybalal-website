@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { faIR } from "date-fns/locale";
 
 interface Notification {
   id: string;
@@ -147,9 +148,10 @@ export function NotificationCenter() {
                       <p className="text-xs text-gray-400 leading-relaxed">
                         {notification.message}
                       </p>
-                      <p className="text-[10px] text-gray-500">
+                      <p className="text-[10px] text-gray-500 rtl">
                         {formatDistanceToNow(new Date(notification.createdAt), {
                           addSuffix: true,
+                          locale: faIR,
                         })}
                       </p>
                     </div>
