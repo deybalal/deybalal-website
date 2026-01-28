@@ -15,12 +15,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-hot-toast";
 import { Artist } from "@/types/types";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   nameEn: z.string().optional(),
+  description: z.string().optional(),
   image: z.string().optional(),
   tempImage: z.string().optional(),
 });
@@ -28,19 +30,24 @@ const formSchema = z.object({
 type ArtistFormValues = z.infer<typeof formSchema>;
 
 interface ArtistFormProps {
+  initialData?: Artist;
   onSuccess?: (artist: Artist) => void;
 }
 
-export default function ArtistForm({ onSuccess }: ArtistFormProps) {
+export default function ArtistForm({
+  initialData,
+  onSuccess,
+}: ArtistFormProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const form = useForm<ArtistFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      nameEn: "",
-      image: "",
+      name: initialData?.name || "",
+      nameEn: initialData?.nameEn || "",
+      description: initialData?.description || "",
+      image: initialData?.image || "",
       tempImage: "",
     },
   });
@@ -48,25 +55,40 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
   async function onSubmit(values: ArtistFormValues) {
     setLoading(true);
     try {
-      const res = await fetch("/api/artists/create", {
-        method: "POST",
+      const url = initialData
+        ? `/api/artists/${initialData.id}`
+        : "/api/artists/create";
+      const method = initialData ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        toast.error(result.message || "خطا در افزودن خواننده");
-        throw new Error(result.message || "خطا در افزودن خواننده");
+        toast.error(
+          result.message ||
+            `خطا در ${initialData ? "ویرایش" : "افزودن"} خواننده`
+        );
+        throw new Error(
+          result.message ||
+            `خطا در ${initialData ? "ویرایش" : "افزودن"} خواننده`
+        );
       }
 
-      toast.success("خواننده ی جدید اضافه شد!");
-      form.reset();
+      toast.success(
+        initialData ? "تغییرات ذخیره شد!" : "خواننده ی جدید اضافه شد!"
+      );
+      if (!initialData) {
+        form.reset();
+      }
       if (onSuccess) {
         onSuccess(result.data);
       }
     } catch {
-      toast.error("خطا در افزودن خواننده");
+      toast.error(`خطا در ${initialData ? "ویرایش" : "افزودن"} خواننده`);
     } finally {
       setLoading(false);
     }
@@ -178,9 +200,28 @@ export default function ArtistForm({ onSuccess }: ArtistFormProps) {
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>توضیحات خواننده</FormLabel>
+              <FormControl>
+                <Textarea placeholder="توضیحات خواننده" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button type="submit" disabled={loading}>
-          {loading ? "در حال ساخت..." : "افزودن"}
+          {loading
+            ? initialData
+              ? "در حال ویرایش..."
+              : "در حال ساخت..."
+            : initialData
+            ? "ذخیره تغییرات"
+            : "افزودن"}
         </Button>
       </form>
     </Form>

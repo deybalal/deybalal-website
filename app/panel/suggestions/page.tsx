@@ -5,7 +5,7 @@ import AdminTable from "@/components/AdminTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Suggestions",
+  title: "مدیریت متن آهنگ ها",
 };
 
 export default async function SuggestionsPage({

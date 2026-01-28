@@ -347,6 +347,13 @@ const ArtistActionsCell = ({
       <DropdownMenuContent align="end">
         <DropdownMenuLabel className="text-center">مدیریت</DropdownMenuLabel>
         {canApprove && (
+          <DropdownMenuItem>
+            <Link href={`/panel/artists/${artist.id}`} className="w-full">
+              ویرایش خواننده
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {canApprove && (
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={toggleVerified}

@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, nameEn, image } = body;
+    const { name, nameEn, image, description } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -68,6 +68,7 @@ export async function POST(req: Request) {
         name,
         nameEn,
         image,
+        description,
         userId: session.user.id,
       },
     });

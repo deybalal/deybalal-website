@@ -8,7 +8,7 @@ import AdminTable from "@/components/AdminTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Playlists",
+  title: "مدیریت پلی لیست ها",
 };
 
 export default async function PlaylistsPage({

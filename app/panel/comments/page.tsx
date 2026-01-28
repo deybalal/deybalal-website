@@ -5,7 +5,7 @@ import AdminTable from "@/components/AdminTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Comments",
+  title: "مدیریت نظرات",
 };
 
 export default async function CommentsPage({

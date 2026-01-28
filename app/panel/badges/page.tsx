@@ -8,7 +8,7 @@ import AdminTable from "@/components/AdminTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Badges",
+  title: "مدیریت نشان ها",
 };
 
 export default async function BadgesPage({

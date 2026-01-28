@@ -52,9 +52,9 @@ const SongList = ({
             <div className="w-10 flex items-center justify-center shrink-0">
               {isCurrent && isPlaying ? (
                 <div className="flex items-center gap-0.5 h-3">
-                  <div className="w-0.5 h-full bg-primary animate-bounce animation-duration-[0.6s]" />
-                  <div className="w-0.5 h-full bg-primary animate-bounce animation-duration-[0.8s]" />
-                  <div className="w-0.5 h-full bg-primary animate-bounce animation-duration-[0.7s]" />
+                  <div className="w-0.5 h-full bg-primary animate-bounce [animation-duration:0.6s]" />
+                  <div className="w-0.5 h-full bg-primary animate-bounce [animation-duration:0.8s]" />
+                  <div className="w-0.5 h-full bg-primary animate-bounce [animation-duration:0.7s]" />
                 </div>
               ) : (
                 <span className="text-sm text-muted-foreground group-hover:hidden">
@@ -112,7 +112,7 @@ const SongList = ({
                 {formatTime(song.duration)}
               </span>
 
-              <div className="flex items-center md:opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <DropdownMenu dir="rtl">
                   <DropdownMenuTrigger asChild>
                     <Button

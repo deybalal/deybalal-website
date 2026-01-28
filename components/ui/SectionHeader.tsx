@@ -23,7 +23,7 @@ const SectionHeader = ({
         href={href}
         className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center transition-colors"
       >
-        Show more <ChevronRight className="w-4 h-4 ms-1 rtl:rotate-180" />
+        نمایش همه <ChevronRight className="w-4 h-4 ms-1 rtl:rotate-180" />
       </Link>
     )}
   </div>

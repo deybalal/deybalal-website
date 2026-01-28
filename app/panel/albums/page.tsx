@@ -8,7 +8,7 @@ import AdminTable from "@/components/AdminTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Albums",
+  title: "مدیریت آلبوم ها",
 };
 
 export default async function AlbumsPage({

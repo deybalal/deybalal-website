@@ -46,6 +46,8 @@ export interface Contributor {
 export type Artist = {
   id: string;
   name: string;
+  nameEn?: string | null;
+  description?: string | null;
   image: string | null;
   songs: Song[];
   isVerified: boolean;

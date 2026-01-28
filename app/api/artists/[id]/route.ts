@@ -66,6 +66,16 @@ export async function PUT(
 
     const userRole = (session.user as { role?: string }).role;
 
+    if (userRole !== "administrator" && userRole !== "moderator") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "فقط مدیران و ناظران میتوانند خواننده ها را ویرایش کنند!",
+        },
+        { status: 403 }
+      );
+    }
+
     // Check if artist exists
     const existingArtist = await prisma.artist.findUnique({
       where: { id },
@@ -85,6 +95,7 @@ export async function PUT(
         name: body.name,
         nameEn: body.nameEn,
         image: body.image,
+        description: body.description,
         isVerified:
           body.isVerified !== undefined
             ? userRole === "moderator" || userRole === "administrator"
