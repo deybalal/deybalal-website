@@ -108,7 +108,7 @@ export function CommentSection({
     <div className="space-y-8 mb-8">
       <div className="flex items-center gap-2 text-xl font-bold">
         <MessageSquare className="w-6 h-6 text-blue-500" />
-        Comments ({comments.length})
+        نظرات ({comments.length} نظر)
       </div>
 
       {!isUserLoggedIn ? (

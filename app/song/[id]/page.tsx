@@ -11,6 +11,7 @@ import { LyricsControl } from "@/components/LyricsControl";
 import { Contributor } from "@/types/types";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ReportIssueModal } from "@/components/ReportIssueModal";
 
 export const dynamic = "force-dynamic";
 
@@ -267,17 +268,25 @@ export default async function SongDetailPage({
         {/* <Contributors
           contributors={songData.contributors as unknown as Contributor[]}
         /> */}
-        <div className="flex items-center justify-between bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
-          <div className="space-y-1">
+        <div className="flex flex-col md:flex-row items-center justify-between bg-white/5 p-6 rounded-2xl border border-white/10 mb-6 gap-6">
+          <div className="space-y-1 text-center md:text-right">
             <h3 className="text-lg font-semibold">به اشتراک گذاری</h3>
             <p className="text-sm text-gray-400">
               به اشتراک گذاری با دوستان و آشنایان در شبکه های اجتماعی
             </p>
           </div>
-          <ShareButtons
-            title={song.title}
-            url={`/song/${song.id}`}
-            type="song"
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <ShareButtons
+              title={song.title}
+              url={`${process.env.NEXT_PUBLIC_DEPLOYED_URL}/song/${song.id}`}
+              type="song"
+            />
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
+          <ReportIssueModal
+            songTitle={`${song.title} - ${song.artist}`}
+            songUrl={`${process.env.NEXT_PUBLIC_DEPLOYED_URL}/song/${song.id}`}
           />
         </div>
         <CommentSection

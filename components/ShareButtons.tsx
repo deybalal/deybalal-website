@@ -11,9 +11,7 @@ interface ShareButtonsProps {
 }
 
 export function ShareButtons({ title, url, type }: ShareButtonsProps) {
-  const fullUrl =
-    typeof window !== "undefined" ? `${window.location.origin}${url}` : "";
-  const encodedUrl = encodeURIComponent(fullUrl);
+  const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(`Check out this ${type}: ${title}`);
 
   const shareLinks = {
@@ -23,7 +21,7 @@ export function ShareButtons({ title, url, type }: ShareButtonsProps) {
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(fullUrl);
+    navigator.clipboard.writeText(url);
     toast.success("لینک کپی شد!");
   };
 
