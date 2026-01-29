@@ -7,6 +7,7 @@ import { existsSync } from "fs";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
+import { parseFile } from "music-metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,7 @@ const songSchema = z.object({
     )
     .optional(),
   genreIds: z.array(z.string()).optional(),
+  useArtistImage: z.boolean().optional(),
 });
 
 export async function POST(request: Request) {
@@ -66,9 +68,6 @@ export async function POST(request: Request) {
 
     if (user?.isUserAnArtist && user.artistId) {
       // If user is an artist, they can only create songs where they are the singer
-      // We check if artistIds contains their artistId and ONLY their artistId (or at least includes it)
-      // The requirement says "only send new songs... where themself are the singer"
-      // This usually means artistIds should be [user.artistId]
       if (
         !validatedData.artistIds ||
         !validatedData.artistIds.includes(user.artistId)
@@ -84,12 +83,45 @@ export async function POST(request: Request) {
       }
     }
 
+    // Fetch artistEn from database if not provided
+    let artistEn = validatedData.artistEn || "";
+    if (
+      !artistEn &&
+      validatedData.artistIds &&
+      validatedData.artistIds.length > 0
+    ) {
+      const artists = await prisma.artist.findMany({
+        where: { id: { in: validatedData.artistIds } },
+        select: { nameEn: true },
+      });
+      artistEn = artists
+        .map((a) => a.nameEn)
+        .filter(Boolean)
+        .join(", ");
+    }
+
+    // Fetch duration from file if not provided
+    let duration = validatedData.duration || 0;
+    if (!duration && validatedData.filename) {
+      const filePath = path.join(
+        process.cwd(),
+        "public/assets/mp3",
+        validatedData.filename
+      );
+      if (existsSync(filePath)) {
+        try {
+          const metadata = await parseFile(filePath);
+          duration = Math.round(metadata.format.duration || 0);
+        } catch (err) {
+          console.error("Failed to parse duration on creation:", err);
+        }
+      }
+    }
+
     const slug =
       validatedData.slug ||
       slugify(
-        `${
-          validatedData.artistEn ? validatedData.artistEn : validatedData.artist
-        }-${
+        `${artistEn ? artistEn : validatedData.artist}-${
           validatedData.titleEn ? validatedData.titleEn : validatedData.title
         }`
       );
@@ -107,8 +139,6 @@ export async function POST(request: Request) {
           validatedData.coverArt.includes(validatedData.tempCoverArt)
         ) {
           // User kept the extracted cover art -> Rename it
-          // validatedData.filename should be the MP3 filename (e.g. "song.mp3")
-          // We want "song.jpg"
           const mp3Filename =
             validatedData.filename || `song-${Date.now()}.mp3`;
           const baseName =
@@ -136,6 +166,24 @@ export async function POST(request: Request) {
     }
 
     if (!finalCoverArt) {
+      if (
+        validatedData.useArtistImage &&
+        validatedData.artistIds &&
+        validatedData.artistIds.length > 0
+      ) {
+        const artist = await prisma.artist.findUnique({
+          where: { id: validatedData.artistIds[0] },
+          select: { image: true },
+        });
+        if (artist?.image) {
+          finalCoverArt = artist.image;
+        } else {
+          finalCoverArt = "/images/cover.png";
+        }
+      }
+    }
+
+    if (!finalCoverArt) {
       finalCoverArt = "/images/cover.png";
     }
 
@@ -144,7 +192,7 @@ export async function POST(request: Request) {
         title: validatedData.title,
         titleEn: validatedData.titleEn || "",
         artist: validatedData.artist || "",
-        artistEn: validatedData.artistEn || "",
+        artistEn: artistEn || "",
         artists: {
           connect: validatedData.artistIds?.map((id) => ({ id })) || [],
         },
@@ -158,7 +206,7 @@ export async function POST(request: Request) {
         links: validatedData.links || undefined,
         coverArt: finalCoverArt,
         year: validatedData.year || 0,
-        duration: validatedData.duration || 0,
+        duration: duration,
         filename: validatedData.filename,
         lyrics: validatedData.lyrics,
         syncedLyrics: validatedData.syncedLyrics,

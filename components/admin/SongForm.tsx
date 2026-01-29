@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 import {
   Select,
@@ -56,6 +57,7 @@ interface Artist {
   id: string;
   name: string;
   nameEn?: string | null;
+  image?: string | null;
 }
 
 interface SongFormProps {
@@ -67,15 +69,14 @@ const formSchema = z.object({
   title: z.string().min(1, "نام آهنگ اجباری است."),
   titleEn: z.string().optional(),
   artist: z.string().min(2, "وارد کردن نام خواننده اجباری است."),
-  artistEn: z.string().optional(),
   artistIds: z.array(z.string()).optional(), // Multiple artist IDs
   albumId: z.string().optional(),
   albumName: z.string().optional(),
   coverArt: z.string().optional(),
   year: z.number().min(0).optional(),
-  duration: z.number().min(0).optional(),
   filename: z.string().optional(),
   genreIds: z.array(z.string()).optional(),
+  useArtistImage: z.boolean().optional(),
 
   tempCoverArt: z.string().optional(),
   crew: z
@@ -105,6 +106,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   const [step, setStep] = useState(1);
   const [openCreateArtist, setOpenCreateArtist] = useState(false);
   const [openCreateGenre, setOpenCreateGenre] = useState(false);
+  const [manualCoverArt, setManualCoverArt] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -114,18 +116,17 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       title: "",
       titleEn: "",
       artist: "",
-      artistEn: "",
       artistIds: [],
       albumId: "",
       albumName: "",
       coverArt: "",
       year: 0,
-      duration: 0,
       filename: "",
 
       tempCoverArt: "",
       crew: [],
       genreIds: [],
+      useArtistImage: false,
     },
   });
 
@@ -194,7 +195,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               form.setValue("title", song.title || "");
               form.setValue("titleEn", song.titleEn || "");
               form.setValue("artist", song.artist || "");
-              form.setValue("artistEn", song.artistEn || "");
 
               // Set multiple artists
               if (song.artists && song.artists.length > 0) {
@@ -209,7 +209,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
               form.setValue("albumName", song.albumName || "");
               form.setValue("coverArt", song.coverArt || "");
               form.setValue("year", song.year || 0);
-              form.setValue("duration", song.duration || 0);
               form.setValue("filename", song.filename || "");
               if (song.crew) {
                 form.setValue("crew", song.crew);
@@ -237,18 +236,17 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
     }
   }, [mode, songId, form]);
 
-  // Update artistEn whenever selectedArtists changes
+  const useEffectChangeWatcher = form.watch("useArtistImage");
+  // Sync coverArt with artist image if useArtistImage is checked
   useEffect(() => {
-    const artistEnNames = selectedArtists
-      .map((a) => a.nameEn)
-      .filter((name): name is string => !!name);
-
-    if (artistEnNames.length > 0) {
-      form.setValue("artistEn", artistEnNames.join(", "));
-    } else {
-      form.setValue("artistEn", "");
+    const useArtistImage = form.watch("useArtistImage");
+    if (useArtistImage && selectedArtists.length > 0) {
+      const artistImage = selectedArtists[0].image;
+      form.setValue("coverArt", artistImage || "/images/cover.png");
+    } else if (manualCoverArt) {
+      form.setValue("coverArt", manualCoverArt);
     }
-  }, [selectedArtists, form]);
+  }, [selectedArtists, useEffectChangeWatcher, manualCoverArt, form]);
 
   // Filter albums based on selected artists
   const filteredAlbums = useMemo(() => {
@@ -480,12 +478,10 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
 
       if (metadata.year) form.setValue("year", Math.round(metadata.year));
 
-      if (metadata.duration)
-        form.setValue("duration", Math.round(metadata.duration));
-
       if (coverArt) {
         form.setValue("coverArt", coverArt);
         form.setValue("tempCoverArt", tempCoverArt);
+        setManualCoverArt(coverArt);
       }
 
       toast.success("آهنگ آپلود شد! لطفا به مرحله بعد بروید!");
@@ -525,6 +521,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
 
       form.setValue("coverArt", filePath);
       form.setValue("tempCoverArt", filename);
+      setManualCoverArt(filePath);
 
       toast.success("عکس این آهنگ آپلود شد!");
     } catch (error) {
@@ -861,21 +858,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                                           .join(", ")
                                       );
 
-                                      // Update artistEn with all selected artists' nameEn
-                                      const artistEnNames = newSelected
-                                        .map((a) => a.nameEn)
-                                        .filter(
-                                          (name): name is string => !!name
-                                        );
-
-                                      if (artistEnNames.length > 0) {
-                                        form.setValue(
-                                          "artistEn",
-                                          artistEnNames.join(", ")
-                                        );
-                                      } else {
-                                        form.setValue("artistEn", "");
-                                      }
                                       setOpenArtist(false);
                                     }}
                                   >
@@ -948,6 +930,29 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="useArtistImage"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>استفاده از تصویر خواننده</FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            تصویر خواننده به عنوان کاور آهنگ استفاده شود. تنها
+                            در صورتی از این گزینه استفاده کنید که آهنگ عکس
+                            نداشته باشد یا تصویر موجود ارتباطی با آهنگ نداشته
+                            باشد.
+                          </div>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <div className="space-y-4">
@@ -972,7 +977,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     name="titleEn"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>نام (انگلیسی)</FormLabel>
+                        <FormLabel>نام آهنگ به انگلیسی</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="نام آهنگ را به زبان انگلیسی وارد کنید"
@@ -983,22 +988,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="artistEn"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>خواننده (انگلیسی)</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="نام خواننده را به زبان انگلیسی وارد کنید"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
                   <FormField
                     control={form.control}
                     name="albumId"
@@ -1052,30 +1042,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                               type="number"
                               {...field}
                               placeholder="2025"
-                              value={field.value ?? ""}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                field.onChange(
-                                  value === "" ? undefined : Number(value)
-                                );
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="duration"
-                      disabled
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>زمان آهنگ (ثانیه)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
                               value={field.value ?? ""}
                               onChange={(e) => {
                                 const value = e.target.value;

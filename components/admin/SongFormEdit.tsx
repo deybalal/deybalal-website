@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 import {
   Select,
@@ -47,6 +48,7 @@ interface Artist {
   id: string;
   name: string;
   nameEn?: string | null;
+  image?: string | null;
 }
 
 interface Genre {
@@ -64,14 +66,13 @@ const formSchema = z.object({
   title: z.string().min(1, "نام آهنگ اجباری است."),
   titleEn: z.string().optional(),
   artist: z.string().min(2, "وارد کردن نام خواننده اجباری است."),
-  artistEn: z.string().optional(),
   artistIds: z.array(z.string()).optional(), // Multiple artist IDs
   albumId: z.string().optional(),
   albumName: z.string().optional(),
   coverArt: z.string().optional(),
   year: z.number().min(0).optional(),
-  duration: z.number().min(0).optional(),
   filename: z.string().optional(),
+  useArtistImage: z.boolean().optional(),
 
   tempCoverArt: z.string().optional(),
   crew: z
@@ -99,6 +100,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
   const [openGenre, setOpenGenre] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0); // Key to force file input reset
   const [fetchingData, setFetchingData] = useState(false);
+  const [manualCoverArt, setManualCoverArt] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -108,15 +110,13 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
       title: "",
       titleEn: "",
       artist: "",
-      artistEn: "",
       artistIds: [],
       albumId: "",
       albumName: "",
       coverArt: "",
       year: 0,
-      duration: 0,
       filename: "",
-
+      useArtistImage: false,
       tempCoverArt: "",
       crew: [],
       genreIds: [],
@@ -194,7 +194,6 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
               form.setValue("title", song.title || "");
               form.setValue("titleEn", song.titleEn || "");
               form.setValue("artist", song.artist || "");
-              form.setValue("artistEn", song.artistEn || "");
 
               // Set multiple artists
               if (song.artists && song.artists.length > 0) {
@@ -208,8 +207,8 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
               form.setValue("albumId", song.albumId || "");
               form.setValue("albumName", song.albumName || "");
               form.setValue("coverArt", song.coverArt || "");
+              setManualCoverArt(song.coverArt || "");
               form.setValue("year", song.year || 0);
-              form.setValue("duration", song.duration || 0);
               form.setValue("filename", song.filename || "");
               if (song.crew) {
                 form.setValue("crew", song.crew);
@@ -237,18 +236,17 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
     }
   }, [mode, songId, form]);
 
-  // Update artistEn whenever selectedArtists changes
+  const useEffectChangeWatcher = form.watch("useArtistImage");
+  // Sync coverArt with artist image if useArtistImage is checked
   useEffect(() => {
-    const artistEnNames = selectedArtists
-      .map((a) => a.nameEn)
-      .filter((name): name is string => !!name);
-
-    if (artistEnNames.length > 0) {
-      form.setValue("artistEn", artistEnNames.join(", "));
-    } else {
-      form.setValue("artistEn", "");
+    const useArtistImage = form.watch("useArtistImage");
+    if (useArtistImage && selectedArtists.length > 0) {
+      const artistImage = selectedArtists[0].image;
+      form.setValue("coverArt", artistImage || "/images/cover.png");
+    } else if (manualCoverArt) {
+      form.setValue("coverArt", manualCoverArt);
     }
-  }, [selectedArtists, form]);
+  }, [selectedArtists, useEffectChangeWatcher, manualCoverArt, form]);
 
   async function onSubmit(values: SongFormValues) {
     setLoading(true);
@@ -460,12 +458,10 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
 
       if (metadata.year) form.setValue("year", Math.round(metadata.year));
 
-      if (metadata.duration)
-        form.setValue("duration", Math.round(metadata.duration));
-
       if (coverArt) {
         form.setValue("coverArt", coverArt);
         form.setValue("tempCoverArt", tempCoverArt);
+        setManualCoverArt(coverArt);
       }
 
       toast.success("آهنگ آپلود شد! لطفا به مرحله بعد بروید!");
@@ -505,6 +501,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
 
       form.setValue("coverArt", filePath);
       form.setValue("tempCoverArt", filename);
+      setManualCoverArt(filePath);
 
       toast.success("عکس این آهنگ آپلود شد!");
     } catch (error) {
@@ -568,6 +565,26 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                 </div>
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="useArtistImage"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+              <div className="space-y-0.5">
+                <FormLabel>استفاده از تصویر خواننده</FormLabel>
+                <div className="text-sm text-muted-foreground">
+                  تصویر خواننده به عنوان کاور آهنگ استفاده شود
+                </div>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
             </FormItem>
           )}
         />
@@ -717,20 +734,6 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                                 "artist",
                                 newSelected.map((a) => a.name).join(", ")
                               );
-
-                              // Update artistEn with all selected artists' nameEn
-                              const artistEnNames = newSelected
-                                .map((a) => a.nameEn)
-                                .filter((name): name is string => !!name);
-
-                              if (artistEnNames.length > 0) {
-                                form.setValue(
-                                  "artistEn",
-                                  artistEnNames.join(", ")
-                                );
-                              } else {
-                                form.setValue("artistEn", "");
-                              }
                             }}
                           >
                             <Check
@@ -753,19 +756,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="artistEn"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>خواننده (انگلیسی)</FormLabel>
-              <FormControl>
-                <Input placeholder="نام خواننده (انگلیسی)" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <FormField
           control={form.control}
           name="albumId"
@@ -814,27 +805,6 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                   type="number"
                   {...field}
                   placeholder="2025"
-                  value={field.value ?? ""}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    field.onChange(value === "" ? undefined : Number(value));
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="duration"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>مدت زمان (ثانیه)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
                   value={field.value ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;

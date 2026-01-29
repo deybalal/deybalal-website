@@ -205,9 +205,9 @@ export default function ArtistForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>توضیحات خواننده</FormLabel>
+              <FormLabel>درباره خواننده</FormLabel>
               <FormControl>
-                <Textarea placeholder="توضیحات خواننده" {...field} />
+                <Textarea placeholder="درباره خواننده" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

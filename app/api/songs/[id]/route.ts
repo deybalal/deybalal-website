@@ -94,6 +94,19 @@ export async function PUT(
       );
     }
 
+    // Fetch artistEn from database if artistIds are provided but artistEn is not
+    let artistEn = body.artistEn;
+    if (artistEn === undefined && body.artistIds && body.artistIds.length > 0) {
+      const artists = await prisma.artist.findMany({
+        where: { id: { in: body.artistIds } },
+        select: { nameEn: true },
+      });
+      artistEn = artists
+        .map((a) => a.nameEn)
+        .filter(Boolean)
+        .join(", ");
+    }
+
     // Update the song
     const updatedSong = await prisma.song.update({
       where: { id },
@@ -101,7 +114,7 @@ export async function PUT(
         title: body.title,
         titleEn: body.titleEn ?? existingSong.titleEn ?? null,
         artist: body.artist,
-        artistEn: body.artistEn ?? existingSong.artistEn ?? null,
+        artistEn: artistEn ?? existingSong.artistEn ?? null,
         ...(body.artistIds && {
           artists: {
             set: [], // Disconnect all existing
@@ -120,6 +133,18 @@ export async function PUT(
         ...(body.coverArt && {
           coverArt: body.coverArt ?? existingSong.coverArt ?? null,
         }),
+        ...(body.useArtistImage &&
+          (body.artistIds || existingSong.artists.length > 0) && {
+            coverArt: await (async () => {
+              const artistId =
+                body.artistIds?.[0] || existingSong.artists[0].id;
+              const artist = await prisma.artist.findUnique({
+                where: { id: artistId },
+                select: { image: true },
+              });
+              return artist?.image || "/images/cover.png";
+            })(),
+          }),
         ...(body.year && {
           year: body.year ?? existingSong.year ?? null,
         }),
@@ -328,12 +353,11 @@ export async function PUT(
       await createNotification({
         userId: existingSong.userId,
         type: "SONG_REJECTED",
-        title: "Song Submission Update",
-        message: `Your song submission "${
-          updatedSong.title
-        }" was not approved. ${
-          body.disabledDescription ? `Reason: ${body.disabledDescription}` : ""
+        title: "آهنگ رد شد",
+        message: `آهنگ ارسالی شما "${updatedSong.title}" به دلیل زیر رد شد: ${
+          body.disabledDescription || "دلیلی ذکر نشده است."
         }`,
+        link: `/panel/songs`,
       });
     }
 
@@ -341,7 +365,7 @@ export async function PUT(
   } catch (error) {
     console.error("Error updating song:", error);
     return NextResponse.json(
-      { success: false, message: "خطا در آپدیت کردن آهنگ" },
+      { success: false, message: "خطا در بروزرسانی آهنگ!" },
       { status: 500 }
     );
   }
@@ -367,28 +391,49 @@ export async function DELETE(
 
     const userRole = (session.user as { role?: string }).role;
 
-    if (userRole !== "administrator") {
+    if (userRole !== "administrator" && userRole !== "moderator") {
       return NextResponse.json(
-        {
-          success: false,
-          message: "فقط مدیریت پلتفرم میتواند آهنگ ها را حذف کند!",
-        },
-        { status: 403 }
+        { success: false, message: "خطای دسترسی! فقط مدیران میتوانند!." },
+        { status: 401 }
       );
     }
 
+    const song = await prisma.song.findUnique({
+      where: { id },
+    });
+
+    if (!song) {
+      return NextResponse.json(
+        { success: false, message: "آهنگ پیدا نشد!" },
+        { status: 404 }
+      );
+    }
+
+    // Delete the song from database
     await prisma.song.delete({
       where: { id },
     });
 
+    // Delete the MP3 file if it exists
+    if (song.filename) {
+      const filePath = path.join(
+        process.cwd(),
+        "public/assets/mp3",
+        song.filename
+      );
+      if (existsSync(filePath)) {
+        await unlink(filePath);
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      message: "آهنگ حذف شد!",
+      message: "آهنگ با موفقیت حذف شد.",
     });
   } catch (error) {
     console.error("Error deleting song:", error);
     return NextResponse.json(
-      { success: false, message: "خطا در حذف آهنک!" },
+      { success: false, message: "خطا در حذف آهنگ!" },
       { status: 500 }
     );
   }
