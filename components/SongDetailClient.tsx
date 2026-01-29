@@ -12,6 +12,7 @@ import Link from "next/link";
 import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
 import { toast } from "react-hot-toast";
 import { useLyricsStore } from "@/hooks/useLyricsStore";
+import { formatPlayCount } from "@/lib/utils";
 
 interface SongDetailClientProps {
   song: Song;
@@ -103,9 +104,21 @@ export default function SongDetailClient({
     }
   };
 
-  const showLyrics =
-    lyricsMode !== "hidden" && (!!song.syncedLyrics || !!song.lyrics);
-  const showSynced = lyricsMode === "synced" && !!song.syncedLyrics;
+  const hasSynced = !!song.syncedLyrics;
+  const hasPlain = !!song.lyrics;
+  const anyLyrics = hasSynced || hasPlain;
+
+  const showLyrics = lyricsMode !== "hidden" && anyLyrics;
+
+  // Determine if we should show synced version
+  // Fallback: if synced is preferred but missing, show plain.
+  // Fallback: if plain is preferred but missing, show synced.
+  const showSynced =
+    lyricsMode === "synced"
+      ? hasSynced
+      : lyricsMode === "un-synced"
+      ? !hasPlain && hasSynced
+      : false;
 
   return (
     <div
@@ -235,19 +248,31 @@ export default function SongDetailClient({
                 خواننده ناشناس
               </p>
             )}
-            {song.album &&
-              (song.albumId ? (
-                <Link
-                  href={`/album/${song.albumId}`}
-                  className="text-sm text-foreground/80 hover:text-foreground mt-1 line-clamp-1"
-                >
-                  {song.album}
-                </Link>
-              ) : (
-                <p className="text-sm text-muted-foreground/70 mt-1 line-clamp-1">
-                  {song.album}
-                </p>
-              ))}
+            <div className="flex items-center justify-center gap-2 mt-1">
+              {song.album &&
+                (song.albumId ? (
+                  <>
+                    <Link
+                      href={`/album/${song.albumId}`}
+                      className="text-sm text-foreground/80 hover:text-foreground line-clamp-1"
+                    >
+                      {song.album}
+                    </Link>
+                    <span className="text-xs text-muted-foreground/50">•</span>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground/90 line-clamp-1">
+                      {song.album}
+                    </p>
+                    <span className="text-xs text-muted-foreground/50">•</span>
+                  </>
+                ))}
+              <span className="text-xs text-muted-foreground/90 flex items-center gap-1">
+                <Play size={12} className="fill-current" />
+                {formatPlayCount(song.playCount)}
+              </span>
+            </div>
             {song.genres && song.genres.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-center mt-2">
                 {song.genres.map((genre) => (
@@ -282,17 +307,6 @@ export default function SongDetailClient({
                       className="text-xs cursor-pointer"
                     >
                       زمان‌بندی متن
-                    </Button>
-                  </Link>
-                )}
-                {song.lyrics && !song.syncedLyrics && (
-                  <Link href={`/panel/edit/synced/${song.id}`}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs cursor-pointer"
-                    >
-                      افزودن متن زمان‌بندی شده
                     </Button>
                   </Link>
                 )}

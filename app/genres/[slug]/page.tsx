@@ -102,6 +102,7 @@ export default async function GenrePage({
     coverArt: song.coverArt || null,
     duration: song.duration || 0,
     uri: song.uri,
+    playCount: song.playCount,
     titleEn: song.titleEn,
     filename: song.filename || "",
     index: song.index,

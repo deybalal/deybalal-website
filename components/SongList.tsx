@@ -2,7 +2,7 @@
 
 import { Song } from "@/types/types";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
-import { formatTime } from "@/lib/utils";
+import { formatTime, formatPlayCount } from "@/lib/utils";
 import Image from "next/image";
 import {
   Trash2,
@@ -108,9 +108,15 @@ const SongList = ({
             </div>
 
             <div className="flex items-center gap-4 ms-4">
-              <span className="text-xs text-muted-foreground tabular-nums">
-                {formatTime(song.duration)}
-              </span>
+              <div className="flex flex-col items-end gap-0.5">
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {formatTime(song.duration)}
+                </span>
+                <span className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
+                  <Play size={10} className="fill-current" />
+                  {formatPlayCount(song.playCount)}
+                </span>
+              </div>
 
               <div className="flex items-center md:opacity-0 group-hover:opacity-100 transition-opacity">
                 <DropdownMenu dir="rtl">

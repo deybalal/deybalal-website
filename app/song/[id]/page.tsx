@@ -231,15 +231,6 @@ export default async function SongDetailPage({
             </div>
           </div>
         )}
-        <LyricsControl
-          songId={song.id}
-          hasLyrics={!!song.lyrics}
-          hasSyncedLyrics={!!song.syncedLyrics}
-          contributors={songData.contributors as unknown as Contributor[]}
-          source={songData.lyricsSource}
-          sourceUrl={songData.lyricsSourceUrl}
-          isInstrumental={isInstrumental}
-        />
 
         {songData.crew && songData.crew.length > 0 && (
           <div className="flex flex-col gap-4 bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
@@ -262,6 +253,16 @@ export default async function SongDetailPage({
             </div>
           </div>
         )}
+
+        <LyricsControl
+          songId={song.id}
+          hasLyrics={!!song.lyrics}
+          hasSyncedLyrics={!!song.syncedLyrics}
+          contributors={songData.contributors as unknown as Contributor[]}
+          source={songData.lyricsSource}
+          sourceUrl={songData.lyricsSourceUrl}
+          isInstrumental={isInstrumental}
+        />
 
         {/* <Contributors
           contributors={songData.contributors as unknown as Contributor[]}

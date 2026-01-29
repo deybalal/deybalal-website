@@ -70,22 +70,30 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-            {modes.map(({ mode, label, icon: Icon }) => (
-              <Button
-                key={mode}
-                variant={lyricsMode === mode ? "default" : "secondary"}
-                className={cn(
-                  "flex items-center gap-2 h-11 transition-all",
-                  lyricsMode === mode
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-white/5 hover:bg-white/10"
-                )}
-                onClick={() => setLyricsMode(mode)}
-              >
-                <Icon className="w-4 h-4" />
-                {label}
-              </Button>
-            ))}
+            {modes.map(({ mode, label, icon: Icon }) => {
+              const isDisabled =
+                (mode === "un-synced" && !hasLyrics) ||
+                (mode === "synced" && !hasSyncedLyrics);
+
+              return (
+                <Button
+                  key={mode}
+                  variant={lyricsMode === mode ? "default" : "secondary"}
+                  disabled={isDisabled}
+                  className={cn(
+                    "flex items-center gap-2 h-11 transition-all",
+                    lyricsMode === mode
+                      ? "bg-primary text-primary-foreground opacity-100"
+                      : "bg-white/5 hover:bg-white/10",
+                    isDisabled && lyricsMode !== mode && "opacity-50"
+                  )}
+                  onClick={() => setLyricsMode(mode)}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </Button>
+              );
+            })}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

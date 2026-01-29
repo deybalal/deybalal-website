@@ -125,6 +125,7 @@ export default async function ArtistDetailPage({
     coverArt: song.coverArt,
     artist: artist!.name,
     album: song.albumName,
+    playCount: song.playCount,
     albumId: song.albumId,
     year: song.year.toString(),
     links: song.links as Song["links"],

@@ -6,7 +6,7 @@ import { Play, Music2, Pause } from "lucide-react";
 import Image from "next/image";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, formatPlayCount } from "@/lib/utils";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -117,13 +117,19 @@ const SongCard = ({ song }: SongCardProps) => {
 
                 {/* Bottom Info Bar */}
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-white/5">
-                  {/* Duration */}
-                  {song.duration && (
-                    <span className="text-xs text-gray-600 dark:text-gray-500 bg-gray-200 dark:bg-white/5 px-3 py-1.5 rounded-full group-hover:bg-purple-200 dark:group-hover:bg-purple-500/20 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-all duration-300 font-medium">
-                      {Math.floor(song.duration / 60)}:
-                      {String(song.duration % 60).padStart(2, "0")}
+                  {/* Duration & Play Count */}
+                  <div className="flex items-center gap-2">
+                    {song.duration && (
+                      <span className="text-xs text-gray-600 dark:text-gray-500 bg-gray-200 dark:bg-white/5 px-3 py-1.5 rounded-full group-hover:bg-purple-200 dark:group-hover:bg-purple-500/20 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-all duration-300 font-medium">
+                        {Math.floor(song.duration / 60)}:
+                        {String(song.duration % 60).padStart(2, "0")}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-2 py-1 rounded-full flex items-center gap-1">
+                      <Play size={10} className="fill-current" />
+                      {formatPlayCount(song.playCount)}
                     </span>
-                  )}
+                  </div>
 
                   {/* Animated Music Visualizer Bars */}
                   <div

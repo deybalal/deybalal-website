@@ -106,6 +106,7 @@ export default async function AlbumDetailPage({
     index: song.index,
     year: song.year.toString(),
     duration: song.duration,
+    playCount: song.playCount,
     id: song.id,
     links: song.links as Record<
       number,
@@ -114,7 +115,7 @@ export default async function AlbumDetailPage({
   }));
 
   return (
-    <div className="space-y-8 relative h-max">
+    <div className="space-y-12 pb-24 h-max w-full md:w-auto">
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-linear-to-b from-accent/10 via-background to-background pointer-events-none -z-10 h-[500px]" />
 
