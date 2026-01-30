@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Song } from "@/types/types";
+import { toast } from "react-hot-toast";
 
 export const TAB_ID =
   typeof window !== "undefined"
@@ -18,6 +19,7 @@ interface PlayerState {
   duration: number;
   activeId: string | null;
   downloadPreference: number;
+  currentQuality: number | null;
 
   play: () => void;
   pause: () => void;
@@ -42,10 +44,14 @@ interface PlayerState {
   setRepeatMode: (mode: "off" | "all" | "one") => void;
 }
 
-const getBestUri = (song: Song, preference: number): string => {
-  if (!song.links) return song.uri;
+const getBestUri = (
+  song: Song,
+  preference: number
+): { uri: string; quality: number } => {
+  if (!song.links) return { uri: song.uri, quality: preference }; // Assume default quality if no links
   // Try to find exact match
-  if (song.links[preference]) return song.links[preference].url;
+  if (song.links[preference])
+    return { uri: song.links[preference].url, quality: preference };
   // Fallback to any available link
   const availableQualities = Object.keys(song.links)
     .map(Number)
@@ -55,9 +61,9 @@ const getBestUri = (song: Song, preference: number): string => {
     // or just the highest available if preference is high.
     const bestMatch =
       availableQualities.find((q) => q <= preference) || availableQualities[0];
-    return song.links[bestMatch].url;
+    return { uri: song.links[bestMatch].url, quality: bestMatch };
   }
-  return song.uri;
+  return { uri: song.uri, quality: preference };
 };
 
 export const usePlayerStore = create<PlayerState>()(
@@ -76,12 +82,24 @@ export const usePlayerStore = create<PlayerState>()(
       repeatMode: "off",
       activeId: null,
       downloadPreference: 128,
+      currentQuality: null,
 
       play: () => set({ isPlaying: true, activeId: TAB_ID }),
       pause: () => set({ isPlaying: false }),
 
       setSong: (song, play) => {
-        const uri = getBestUri(song, get().downloadPreference);
+        const pref = get().downloadPreference;
+        const { uri, quality } = getBestUri(song, pref);
+
+        if (quality !== pref && play !== false) {
+          toast.error(
+            `کیفیت ${pref}k یافت نشد، در حال پخش با کیفیت ${quality}k`
+          );
+        }
+        console.log("Song ", song);
+
+        console.log(uri);
+
         set({
           currentSong: { ...song, uri },
           isPlaying: play === false ? false : true,
@@ -93,32 +111,45 @@ export const usePlayerStore = create<PlayerState>()(
 
       setQueue: (songs, startIndex = 0) => {
         const pref = get().downloadPreference;
-        const songsWithUri = songs.map((s) => ({
-          ...s,
-          uri: getBestUri(s, pref),
-        }));
-        const currentSong = songsWithUri[startIndex] || null;
+        const songsWithUri = songs.map((s) => {
+          const { uri } = getBestUri(s, pref);
+          return { ...s, uri };
+        });
+        const currentSongData = songsWithUri[startIndex] || null;
+        let currentQuality = null;
+
+        if (currentSongData) {
+          const { quality } = getBestUri(songs[startIndex], pref);
+          currentQuality = quality;
+          if (quality !== pref) {
+            toast.error(
+              `کیفیت ${pref}k یافت نشد، در حال پخش با کیفیت ${quality}k`
+            );
+          }
+        }
+
         set({
           queue: songsWithUri,
           priorityQueue: [],
           currentIndex: startIndex,
-          currentSong,
+          currentSong: currentSongData,
+          currentQuality,
           isPlaying: true,
           progress: 0,
-          duration: currentSong?.duration || 0,
+          duration: currentSongData?.duration || 0,
           activeId: TAB_ID,
         });
       },
 
       addToQueue: (song) => {
-        const uri = getBestUri(song, get().downloadPreference);
+        const { uri } = getBestUri(song, get().downloadPreference);
         set((state) => ({
           priorityQueue: [...state.priorityQueue, { ...song, uri }],
         }));
       },
 
       playNext: (song) => {
-        const uri = getBestUri(song, get().downloadPreference);
+        const { uri } = getBestUri(song, get().downloadPreference);
         set((state) => ({
           priorityQueue: [{ ...song, uri }, ...state.priorityQueue],
         }));
@@ -143,11 +174,20 @@ export const usePlayerStore = create<PlayerState>()(
         if (priorityQueue.length > 0) {
           const nextSong = priorityQueue[0];
           const newPriorityQueue = priorityQueue.slice(1);
+          const { uri, quality } = getBestUri(nextSong, downloadPreference);
+
+          if (quality !== downloadPreference) {
+            toast.error(
+              `کیفیت ${downloadPreference}k یافت نشد، در حال پخش با کیفیت ${quality}k`
+            );
+          }
+
           set({
             currentSong: {
               ...nextSong,
-              uri: getBestUri(nextSong, downloadPreference),
+              uri,
             },
+            currentQuality: quality,
             priorityQueue: newPriorityQueue,
             isPlaying: true,
             progress: 0,
@@ -176,12 +216,21 @@ export const usePlayerStore = create<PlayerState>()(
 
         if (nextIndex !== -1) {
           const nextSong = queue[nextIndex];
+          const { uri, quality } = getBestUri(nextSong, downloadPreference);
+
+          if (quality !== downloadPreference) {
+            toast.error(
+              `کیفیت ${downloadPreference}k یافت نشد، در حال پخش با کیفیت ${quality}k`
+            );
+          }
+
           set({
             currentIndex: nextIndex,
             currentSong: {
               ...nextSong,
-              uri: getBestUri(nextSong, downloadPreference),
+              uri,
             },
+            currentQuality: quality,
             isPlaying: true,
             progress: 0,
             duration: nextSong.duration || 0,
@@ -204,13 +253,21 @@ export const usePlayerStore = create<PlayerState>()(
 
         if (currentIndex > 0) {
           const prevSong = queue[currentIndex - 1];
+          const { uri, quality } = getBestUri(prevSong, downloadPreference);
+
+          if (quality !== downloadPreference) {
+            toast.error(
+              `کیفیت ${downloadPreference}k یافت نشد، در حال پخش با کیفیت ${quality}k`
+            );
+          }
 
           set({
             currentIndex: currentIndex - 1,
             currentSong: {
               ...prevSong,
-              uri: getBestUri(prevSong, downloadPreference),
+              uri,
             },
+            currentQuality: quality,
             isPlaying: true,
             progress: 0,
             duration: prevSong.duration || 0,
@@ -227,10 +284,18 @@ export const usePlayerStore = create<PlayerState>()(
       setDownloadPreference: (downloadPreference) => {
         const { currentSong } = get();
         if (currentSong) {
-          const newUri = getBestUri(currentSong, downloadPreference);
+          const { uri, quality } = getBestUri(currentSong, downloadPreference);
+
+          if (quality !== downloadPreference) {
+            toast.error(
+              `کیفیت ${downloadPreference}k یافت نشد، در حال پخش با کیفیت ${quality}k`
+            );
+          }
+
           set({
             downloadPreference,
-            currentSong: { ...currentSong, uri: newUri },
+            currentSong: { ...currentSong, uri },
+            currentQuality: quality,
           });
         } else {
           set({ downloadPreference });
@@ -256,6 +321,7 @@ export const usePlayerStore = create<PlayerState>()(
           repeatMode: state.repeatMode,
           activeId: state.activeId,
           downloadPreference: state.downloadPreference,
+          currentQuality: state.currentQuality,
         } as PlayerState),
     }
   )

@@ -22,6 +22,7 @@ interface Comment {
     image: string | null;
     userSlug: string;
   };
+  replies: Comment[];
 }
 
 interface CommentSectionProps {
@@ -39,6 +40,8 @@ export function CommentSection({
 }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [content, setContent] = useState("");
+  const [replyToId, setReplyToId] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,21 +64,39 @@ export function CommentSection({
     fetchComments();
   }, [songId, albumId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, parentId?: string) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    const submitContent = parentId ? replyContent : content;
+    if (!submitContent.trim()) return;
 
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, songId, albumId }),
+        body: JSON.stringify({
+          content: submitContent,
+          songId,
+          albumId,
+          parentId,
+        }),
       });
       const data = await res.json();
       if (data.success) {
-        setComments([data.data, ...comments]);
-        setContent("");
+        if (parentId) {
+          setComments(
+            comments.map((c) =>
+              c.id === parentId
+                ? { ...c, replies: [...(c.replies || []), data.data] }
+                : c
+            )
+          );
+          setReplyContent("");
+          setReplyToId(null);
+        } else {
+          setComments([data.data, ...comments]);
+          setContent("");
+        }
         toast.success("نظر شما ارسال شد! پس از تایید نمایش داده می شود.");
       } else {
         toast.error(data.message || "خطا در ارسال نظر!");
@@ -87,14 +108,24 @@ export function CommentSection({
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, parentId?: string) => {
     try {
       const res = await fetch(`/api/comments?id=${id}`, {
         method: "DELETE",
       });
       const data = await res.json();
       if (data.success) {
-        setComments(comments.filter((c) => c.id !== id));
+        if (parentId) {
+          setComments(
+            comments.map((c) =>
+              c.id === parentId
+                ? { ...c, replies: c.replies.filter((r) => r.id !== id) }
+                : c
+            )
+          );
+        } else {
+          setComments(comments.filter((c) => c.id !== id));
+        }
         toast.success("نظر حذف شد!");
       } else {
         toast.error(data.message || "خطا در حذف نظر!");
@@ -153,62 +184,170 @@ export function CommentSection({
           </div>
         ) : comments.length > 0 ? (
           comments.map((comment) => (
-            <div
-              key={comment.id}
-              className="flex gap-4 group animate-in fade-in slide-in-from-bottom-2 duration-300"
-            >
-              <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden shrink-0 border border-white/10">
-                {comment.user.image ? (
-                  <Image
-                    src={comment.user.image}
-                    alt={comment.user.name}
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold bg-linear-to-br from-gray-800 to-gray-900">
-                    {comment.user.name[0].toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/u/${comment.user.userSlug}`}
-                      className="font-semibold text-foreground hover:text-blue-400 transition-colors cursor-pointer"
-                    >
-                      {comment.user.name}
-                    </Link>
-                    <span className="text-xs text-gray-500">
-                      {formatDistanceToNow(new Date(comment.createdAt), {
-                        addSuffix: true,
-                        locale: faIR,
-                      })}
-                    </span>
-                    {!comment.isActive && (
-                      <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[10px] font-medium border border-amber-500/20 flex items-center gap-1">
-                        <span className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
-                        منتظر تایید
-                      </span>
-                    )}
-                  </div>
-                  {userSlug === comment.user.userSlug && (
-                    <div className="cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8">
-                      <DialogAlert
-                        title=""
-                        description="آیا مطمئنید میخواهید این نظر را حذف کنید؟"
-                        fnButton="Delete"
-                        fn={() => handleDelete(comment.id)}
-                      />
+            <div key={comment.id} className="space-y-4">
+              <div className="flex gap-4 group animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden shrink-0 border border-white/10">
+                  {comment.user.image ? (
+                    <Image
+                      src={comment.user.image}
+                      alt={comment.user.name}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold bg-linear-to-br from-gray-800 to-gray-900">
+                      {comment.user.name[0].toUpperCase()}
                     </div>
                   )}
                 </div>
-                <p className="text-foreground/70 whitespace-pre-wrap leading-relaxed">
-                  {comment.content}
-                </p>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/u/${comment.user.userSlug}`}
+                        className="font-semibold text-foreground hover:text-blue-400 transition-colors cursor-pointer"
+                      >
+                        {comment.user.name}
+                      </Link>
+                      <span className="text-xs text-gray-500">
+                        {formatDistanceToNow(new Date(comment.createdAt), {
+                          addSuffix: true,
+                          locale: faIR,
+                        })}
+                      </span>
+                      {!comment.isActive && (
+                        <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[10px] font-medium border border-amber-500/20 flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
+                          منتظر تایید
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isUserLoggedIn && (
+                        <button
+                          onClick={() =>
+                            setReplyToId(
+                              replyToId === comment.id ? null : comment.id
+                            )
+                          }
+                          className="text-xs text-blue-500 hover:text-blue-400 font-medium transition-colors"
+                        >
+                          {replyToId === comment.id ? "لغو پاسخ" : "پاسخ"}
+                        </button>
+                      )}
+                      {userSlug === comment.user.userSlug && (
+                        <div className="cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8">
+                          <DialogAlert
+                            title=""
+                            description="آیا مطمئنید میخواهید این نظر را حذف کنید؟"
+                            fnButton="Delete"
+                            fn={() => handleDelete(comment.id)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-foreground/70 whitespace-pre-wrap leading-relaxed">
+                    {comment.content}
+                  </p>
+                </div>
               </div>
+
+              {/* Reply Form */}
+              {replyToId === comment.id && (
+                <div className="ms-14 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <Textarea
+                    placeholder={`در پاسخ به ${comment.user.name}...`}
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    className="min-h-[80px] bg-foreground/5 border-white/10 focus:border-blue-500/50 transition-all resize-none text-sm"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setReplyToId(null)}
+                      className="rounded-full text-xs"
+                    >
+                      انصراف
+                    </Button>
+                    <Button
+                      size="sm"
+                      disabled={isSubmitting || !replyContent.trim()}
+                      onClick={(e) => handleSubmit(e, comment.id)}
+                      className="rounded-full px-6 font-semibold text-xs"
+                    >
+                      {isSubmitting && (
+                        <Loader2 className="me-2 h-3 w-3 animate-spin" />
+                      )}
+                      ارسال پاسخ
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Replies */}
+              {comment.replies && comment.replies.length > 0 && (
+                <div className="ms-10 ps-4 border-s-2 border-white/5 space-y-4 mt-4">
+                  {comment.replies.map((reply) => (
+                    <div key={reply.id} className="flex gap-3 group">
+                      <div className="w-8 h-8 rounded-full bg-gray-800 overflow-hidden shrink-0 border border-white/10">
+                        {reply.user.image ? (
+                          <Image
+                            src={reply.user.image}
+                            alt={reply.user.name}
+                            width={32}
+                            height={32}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-bold bg-linear-to-br from-gray-800 to-gray-900">
+                            {reply.user.name[0].toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Link
+                              href={`/u/${reply.user.userSlug}`}
+                              className="text-sm font-semibold text-foreground hover:text-blue-400 transition-colors cursor-pointer"
+                            >
+                              {reply.user.name}
+                            </Link>
+                            <span className="text-[10px] text-gray-500">
+                              {formatDistanceToNow(new Date(reply.createdAt), {
+                                addSuffix: true,
+                                locale: faIR,
+                              })}
+                            </span>
+                            {!reply.isActive && (
+                              <span className="px-1 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[8px] font-medium border border-amber-500/20 flex items-center gap-1">
+                                <span className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
+                                منتظر تایید
+                              </span>
+                            )}
+                          </div>
+                          {userSlug === reply.user.userSlug && (
+                            <div className="cursor-pointer transition-opacity text-red-500 hover:text-red-400 hover:bg-red-500/10 h-7 w-7 flex items-center justify-center rounded-lg">
+                              <DialogAlert
+                                title=""
+                                description="آیا مطمئنید میخواهید این پاسخ را حذف کنید؟"
+                                fnButton="Delete"
+                                fn={() => handleDelete(reply.id, comment.id)}
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-foreground/70 whitespace-pre-wrap leading-relaxed">
+                          {reply.content}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))
         ) : (

@@ -24,6 +24,7 @@ export async function GET(request: Request) {
       where: {
         songId: songId || undefined,
         albumId: albumId || undefined,
+        parentId: null, // Only fetch top-level comments
         isDeleted: false,
       },
       select: {
@@ -31,12 +32,32 @@ export async function GET(request: Request) {
         content: true,
         createdAt: true,
         isActive: true,
-        userId: false,
         user: {
           select: {
             name: true,
             image: true,
             userSlug: true,
+          },
+        },
+        replies: {
+          where: {
+            isDeleted: false,
+          },
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            isActive: true,
+            user: {
+              select: {
+                name: true,
+                image: true,
+                userSlug: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "asc", // Replies usually ordered oldest to newest
           },
         },
       },
@@ -45,17 +66,20 @@ export async function GET(request: Request) {
       },
     });
 
-    const filteredComments = comments.filter((cm) => {
+    const filterActive = (cm: {
+      isActive: boolean;
+      user: { userSlug: string };
+    }) => {
       if (!cm.isActive) {
-        if (cm.user.userSlug === session?.user.userSlug) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return true;
+        return cm.user.userSlug === session?.user.userSlug;
       }
-    });
+      return true;
+    };
+
+    const filteredComments = comments.filter(filterActive).map((cm) => ({
+      ...cm,
+      replies: cm.replies.filter(filterActive),
+    }));
 
     return NextResponse.json({ success: true, data: filteredComments });
   } catch (error) {
@@ -80,7 +104,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { content, songId, albumId } = await request.json();
+    const { content, songId, albumId, parentId } = await request.json();
 
     if (!content) {
       return NextResponse.json(
@@ -89,22 +113,51 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!songId && !albumId) {
+    if (!songId && !albumId && !parentId) {
       return NextResponse.json(
-        { success: false, message: "آیدی آهنگ یا آلبوم اجباری است!" },
+        {
+          success: false,
+          message: "آیدی آهنگ یا آلبوم یا آیدی نظر والد اجباری است!",
+        },
         { status: 400 }
       );
     }
 
+    let finalSongId = songId;
+    let finalAlbumId = albumId;
+
+    if (parentId) {
+      const parentComment = await prisma.comment.findUnique({
+        where: { id: parentId },
+      });
+
+      if (!parentComment) {
+        return NextResponse.json(
+          { success: false, message: "نظر والد پیدا نشد!" },
+          { status: 404 }
+        );
+      }
+
+      if (parentComment.parentId) {
+        return NextResponse.json(
+          { success: false, message: "پاسخ به پاسخ امکان پذیر نیست!" },
+          { status: 400 }
+        );
+      }
+
+      finalSongId = parentComment.songId;
+      finalAlbumId = parentComment.albumId;
+    }
+
     const songTitle = await prisma.song.findUnique({
-      where: { id: songId ? songId : "noId" },
+      where: { id: finalSongId ? finalSongId : "noId" },
     });
 
     const albumTitle = await prisma.album.findUnique({
-      where: { id: albumId ? albumId : "noId" },
+      where: { id: finalAlbumId ? finalAlbumId : "noId" },
     });
 
-    const postTitle = songId
+    const postTitle = finalSongId
       ? (songTitle?.title as string)
       : (albumTitle?.name as string);
 
@@ -113,8 +166,9 @@ export async function POST(request: Request) {
         content,
         userId: session.user.id,
         userSlug: session.user.userSlug,
-        songId: songId || null,
-        albumId: albumId || null,
+        songId: finalSongId || null,
+        albumId: finalAlbumId || null,
+        parentId: parentId || null,
         postTitle,
       },
       include: {

@@ -64,6 +64,7 @@ const PlayerBar = () => {
     setRepeatMode,
     downloadPreference,
     setDownloadPreference,
+    currentQuality,
   } = usePlayerStore();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -270,7 +271,9 @@ const PlayerBar = () => {
               className="text-xs font-bold text-gray-400 hover:text-white gap-1 px-2 h-8 cursor-pointer"
             >
               <Settings size={14} />
-              {downloadPreference}k
+              {currentQuality && currentQuality !== downloadPreference
+                ? `${currentQuality}k (${downloadPreference}k)`
+                : `${downloadPreference}k`}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
