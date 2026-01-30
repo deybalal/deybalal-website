@@ -23,27 +23,29 @@ export default async function SuggestionsPage({
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
+  const where = {
+    OR: [
+      userRole === "administrator" || userRole === "moderator"
+        ? {
+            OR: [
+              {
+                status: "PENDING" as const,
+              },
+              {
+                status: "APPROVED" as const,
+              },
+              {
+                status: "REJECTED" as const,
+              },
+            ],
+          }
+        : { userId: session?.user?.id },
+    ],
+  };
+
   const [suggestions, suggestionsCount] = await Promise.all([
     prisma.lyricsSuggestion.findMany({
-      where: {
-        OR: [
-          userRole === "administrator" || userRole === "moderator"
-            ? {
-                OR: [
-                  {
-                    status: "PENDING",
-                  },
-                  {
-                    status: "APPROVED",
-                  },
-                  {
-                    status: "REJECTED",
-                  },
-                ],
-              }
-            : { userId: session?.user?.id },
-        ],
-      },
+      where,
       include: {
         song: {
           select: {
@@ -64,7 +66,7 @@ export default async function SuggestionsPage({
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.lyricsSuggestion.count(),
+    prisma.lyricsSuggestion.count({ where }),
   ]);
 
   return (

@@ -75,10 +75,18 @@ const SongActionsCell = ({
   const toggleActive = async () => {
     startTransition(async () => {
       try {
-        const response = await fetch(`/api/songs/${song.id}`, {
-          method: "PUT",
+        const isApproving = !song.isActive;
+        const endpoint = isApproving
+          ? `/api/songs/${song.id}/approve`
+          : `/api/songs/${song.id}`;
+        const method = isApproving ? "POST" : "PUT";
+
+        const response = await fetch(endpoint, {
+          method,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ isActive: !song.isActive }),
+          body: isApproving
+            ? JSON.stringify({})
+            : JSON.stringify({ isActive: false }),
         });
         const result = await response.json();
         if (result.success) {

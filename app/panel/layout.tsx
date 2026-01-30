@@ -29,6 +29,9 @@ export default async function ProtectedLayout({
 
   const userRole = (session?.user as { role?: string })?.role;
 
+  const isAdminOrMod = userRole === "administrator" || userRole === "moderator";
+  const userId = session.user.id;
+
   const [
     songsCount,
     artistsCount,
@@ -38,13 +41,25 @@ export default async function ProtectedLayout({
     commentsCount,
     suggestionsCount,
   ] = await Promise.all([
-    prisma.song.count(),
-    prisma.artist.count(),
-    prisma.album.count(),
-    prisma.playlist.count(),
-    prisma.user.count(),
-    prisma.comment.count(),
-    prisma.lyricsSuggestion.count(),
+    prisma.song.count({
+      where: isAdminOrMod ? {} : { userId },
+    }),
+    prisma.artist.count({
+      where: isAdminOrMod ? {} : { userId },
+    }),
+    prisma.album.count({
+      where: isAdminOrMod ? {} : { userId },
+    }),
+    prisma.playlist.count({
+      where: isAdminOrMod ? {} : { userId },
+    }),
+    isAdminOrMod ? prisma.user.count() : Promise.resolve(0),
+    isAdminOrMod
+      ? prisma.comment.count()
+      : prisma.comment.count({ where: { userId } }),
+    isAdminOrMod
+      ? prisma.lyricsSuggestion.count()
+      : prisma.lyricsSuggestion.count({ where: { userId } }),
   ]);
 
   return (

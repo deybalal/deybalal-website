@@ -26,17 +26,19 @@ export default async function PanelPage({
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
+  const where =
+    userRole === "administrator" || userRole === "moderator"
+      ? {}
+      : { userId: session?.user?.id };
+
   const [songs, songsCount] = await Promise.all([
     prisma.song.findMany({
-      where:
-        userRole === "administrator" || userRole === "moderator"
-          ? {}
-          : { userId: session?.user?.id },
+      where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.song.count(),
+    prisma.song.count({ where }),
   ]);
 
   return (

@@ -26,13 +26,19 @@ export default async function ArtistsPage({
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
+  const where =
+    userRole === "administrator" || userRole === "moderator"
+      ? {}
+      : { userId: session?.user?.id };
+
   const [artists, artistsCount] = await Promise.all([
     prisma.artist.findMany({
+      where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.artist.count(),
+    prisma.artist.count({ where }),
   ]);
 
   return (

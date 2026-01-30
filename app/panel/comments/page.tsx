@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import AdminTable from "@/components/AdminTable";
 import { Metadata } from "next";
 
@@ -18,25 +19,26 @@ export default async function CommentsPage({
   });
 
   const userRole = (session?.user as { role?: string })?.role;
+  if (userRole === "user") {
+    return redirect("/panel");
+  }
   const params = await searchParams;
 
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
+  const where = {
+    isDeleted: false,
+  };
+
   const [comments, commentsCount] = await Promise.all([
     prisma.comment.findMany({
-      where: {
-        OR: [
-          userRole === "administrator" || userRole === "moderator"
-            ? { isDeleted: false }
-            : { userId: session?.user?.id, isDeleted: false },
-        ],
-      },
+      where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.comment.count(),
+    prisma.comment.count({ where }),
   ]);
 
   return (

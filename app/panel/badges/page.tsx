@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -21,6 +22,9 @@ export default async function BadgesPage({
   });
 
   const userRole = (session?.user as { role?: string })?.role;
+  if (userRole !== "administrator") {
+    return redirect("/panel");
+  }
   const params = await searchParams;
 
   const page = Number(params.page) || 1;

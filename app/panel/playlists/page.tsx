@@ -20,19 +20,23 @@ export default async function PlaylistsPage({
     headers: await headers(),
   });
 
+  const userRole = (session?.user as { role?: string })?.role;
   const params = await searchParams;
-
   const page = Number(params.page) || 1;
   const pageSize = 20;
+  const where =
+    userRole === "administrator" || userRole === "moderator"
+      ? {}
+      : { userId: session?.user?.id };
 
   const [playlists, playlistsCount] = await Promise.all([
     prisma.playlist.findMany({
-      where: { userId: session?.user?.id },
+      where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.playlist.count(),
+    prisma.playlist.count({ where }),
   ]);
 
   return (
@@ -51,6 +55,7 @@ export default async function PlaylistsPage({
       <div className="glass rounded-lg border border-white/10 overflow-hidden">
         <AdminTable
           type="playlists"
+          userRole={userRole}
           data={playlists}
           pageCount={Math.ceil(playlistsCount / pageSize)}
           pageIndex={page - 1}

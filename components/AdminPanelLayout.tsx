@@ -43,45 +43,52 @@ export default function AdminPanelLayout({
       title: "تعداد آهنگ ها",
       value: stats.songsCount,
       icon: Music2,
+      role: ["administrator", "moderator", "user"],
       color: "text-blue-500",
     },
     {
       title: "تعداد خواننده ها",
       value: stats.artistsCount,
       icon: Mic2,
+      role: ["administrator", "moderator", "user"],
       color: "text-green-500",
     },
     {
       title: "تعداد آلبوم ها",
       value: stats.albumsCount,
       icon: Disc,
+      role: ["administrator", "moderator", "user"],
       color: "text-purple-500",
     },
     {
       title: "تعداد پلی لیست ها",
       value: stats.playlistsCount,
       icon: ListMusic,
+      role: ["administrator", "moderator", "user"],
       color: "text-orange-500",
     },
     {
       title: "تعداد کاربران",
       value: stats.usersCount,
       icon: Users,
+      role: ["administrator", "moderator"],
       color: "text-red-500",
     },
     {
       title: "تعداد نظرات",
       value: stats.commentsCount,
       icon: MessageCircle,
+      role: ["administrator", "moderator"],
       color: "text-yellow-500",
     },
     {
       title: "تعداد متن آهنگ ارسالی",
       value: stats.suggestionsCount,
       icon: FileText,
+      role: ["administrator", "moderator", "user"],
       color: "text-cyan-500",
     },
-  ];
+  ].filter((item) => item.role.includes(userRole || "user"));
 
   const tabs = [
     {

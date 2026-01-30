@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import AdminTable from "@/components/AdminTable";
 import { Metadata } from "next";
 
@@ -18,8 +19,11 @@ export default async function UsersPage({
   });
 
   const userRole = (session?.user as { role?: string })?.role;
-  const params = await searchParams;
+  if (userRole !== "administrator") {
+    return redirect("/panel");
+  }
 
+  const params = await searchParams;
   const page = Number(params.page) || 1;
   const pageSize = 20;
 

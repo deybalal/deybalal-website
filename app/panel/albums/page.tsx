@@ -26,17 +26,19 @@ export default async function AlbumsPage({
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
+  const where =
+    userRole === "administrator" || userRole === "moderator"
+      ? {}
+      : { userId: session?.user?.id };
+
   const [albums, albumsCount] = await Promise.all([
     prisma.album.findMany({
-      where:
-        userRole === "administrator" || userRole === "moderator"
-          ? {}
-          : { userId: session?.user?.id },
+      where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.album.count(),
+    prisma.album.count({ where }),
   ]);
 
   return (

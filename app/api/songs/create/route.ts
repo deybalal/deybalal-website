@@ -6,7 +6,7 @@ import path from "path";
 import { existsSync } from "fs";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { slugify } from "@/lib/utils";
+import { getUniqueSongSlug } from "@/lib/slug";
 import { parseFile } from "music-metadata";
 
 export const dynamic = "force-dynamic";
@@ -118,13 +118,13 @@ export async function POST(request: Request) {
       }
     }
 
-    const slug =
+    const slugBase =
       validatedData.slug ||
-      slugify(
-        `${artistEn ? artistEn : validatedData.artist}-${
-          validatedData.titleEn ? validatedData.titleEn : validatedData.title
-        }`
-      );
+      `${artistEn ? artistEn : validatedData.artist}-${
+        validatedData.titleEn ? validatedData.titleEn : validatedData.title
+      }`;
+
+    const slug = await getUniqueSongSlug(slugBase);
 
     let finalCoverArt = validatedData.coverArt;
 
