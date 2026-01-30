@@ -11,7 +11,7 @@ import { LyricsControl } from "@/components/LyricsControl";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ReportIssueModal } from "@/components/ReportIssueModal";
-import SongList from "@/components/SongList";
+import SimilarSongsCarousel from "@/components/SimilarSongsCarousel";
 import { Song, Contributor } from "@/types/types";
 
 export const dynamic = "force-dynamic";
@@ -281,13 +281,13 @@ export default async function SongDetailPage({
         )}
 
         {song.similarSongs && song.similarSongs.length > 0 && (
-          <div className="flex flex-col gap-4 bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
-            <h3 className="text-lg font-semibold">آهنگ‌های مشابه</h3>
-            <SongList
-              songs={song.similarSongs as Song[]}
-              showArtist={true}
-              showAlbum={false}
-            />
+          <div className="flex flex-col gap-6 bg-white/5 p-6 rounded-2xl border border-white/10 mb-6 overflow-hidden">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                آهنگ‌های مشابه
+              </h3>
+            </div>
+            <SimilarSongsCarousel songs={song.similarSongs as Song[]} />
           </div>
         )}
 

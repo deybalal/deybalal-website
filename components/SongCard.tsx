@@ -35,6 +35,7 @@ const SongCard = ({ song }: SongCardProps) => {
             {/* Main Card Container */}
             <Link
               href={`/song/${song.id}`}
+              onDragStart={(e) => e.preventDefault()}
               className="relative bg-linear-to-br from-white/95 to-gray-100/95 dark:from-gray-900/90 dark:to-black/90 backdrop-blur-2xl rounded-2xl border border-gray-200 dark:border-white/10 group-hover:border-gray-300 dark:group-hover:border-white/30 transition-all duration-500 overflow-hidden shadow-lg dark:shadow-none block"
             >
               {/* Animated Background Pattern */}
