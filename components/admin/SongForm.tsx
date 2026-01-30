@@ -60,6 +60,15 @@ interface Artist {
   image?: string | null;
 }
 
+interface SimilarSong {
+  id: string;
+  title: string;
+  titleEn: string | null;
+  slug: string;
+  duration: number;
+  artists: { name: string }[];
+}
+
 interface SongFormProps {
   songId?: string;
   mode?: "create" | "edit";
@@ -79,6 +88,7 @@ const formSchema = z.object({
   useArtistImage: z.boolean().optional(),
 
   tempCoverArt: z.string().optional(),
+  duration: z.number().optional(),
   crew: z
     .array(
       z.object({
@@ -107,6 +117,9 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   const [openCreateArtist, setOpenCreateArtist] = useState(false);
   const [openCreateGenre, setOpenCreateGenre] = useState(false);
   const [manualCoverArt, setManualCoverArt] = useState<string | null>(null);
+  const [similarSongs, setSimilarSongs] = useState<SimilarSong[]>([]);
+  const [showSimilarityDialog, setShowSimilarityDialog] = useState(false);
+  const [checkingDuplicates, setCheckingDuplicates] = useState(false);
 
   const router = useRouter();
 
@@ -127,6 +140,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       crew: [],
       genreIds: [],
       useArtistImage: false,
+      duration: 0,
     },
   });
 
@@ -310,6 +324,38 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
     }
   }
 
+  const checkDuplicates = async () => {
+    const title = form.getValues("title");
+    const titleEn = form.getValues("titleEn");
+    const duration = form.getValues("duration");
+    const artistIds = form.getValues("artistIds");
+
+    if (!title && !titleEn) return false;
+
+    setCheckingDuplicates(true);
+    try {
+      const res = await fetch("/api/songs/check-duplicate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, titleEn, duration, artistIds }),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        if (result.success && result.data.length > 0) {
+          setSimilarSongs(result.data);
+          setShowSimilarityDialog(true);
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error("Error checking duplicates:", error);
+    } finally {
+      setCheckingDuplicates(false);
+    }
+    return false;
+  };
+
   // Helper function to calculate string similarity (Levenshtein distance)
   const getStringSimilarity = (str1: string, str2: string): number => {
     const s1 = str1.toLowerCase().trim();
@@ -378,6 +424,8 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       form.setValue("filename", filename);
 
       if (metadata.title) form.setValue("titleEn", metadata.title);
+      if (metadata.duration)
+        form.setValue("duration", Math.round(metadata.duration));
 
       // Search for matching artist by name or nameEn with fuzzy matching
       if (metadata.artist) {
@@ -532,7 +580,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
     }
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (step === 1 && !form.getValues("filename")) {
       toast.error("لطفا یک فایل MP3 آپلود کنید.");
       return;
@@ -541,6 +589,12 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       toast.error("لطفا حداقل یک خواننده را انتخاب کنید.");
       return;
     }
+
+    if (step === 3) {
+      const hasDuplicates = await checkDuplicates();
+      if (hasDuplicates) return;
+    }
+
     setStep((prev) => prev + 1);
   };
 
@@ -608,6 +662,65 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
             : "این مورد اختیاری است. در صورتی که از افرادی که در تهیه این آهنگ اطلاع دارید، میتوانید نام و نقش آن ها را وارد کنید."}
         </p>
       </div>
+
+      <Dialog
+        open={showSimilarityDialog}
+        onOpenChange={setShowSimilarityDialog}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-center">
+              آیا قصد ارسال این آهنگ ها را داشتید؟
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-center text-muted-foreground">
+              آهنگ های مشابهی در سیستم پیدا شد. اگر آهنگ مورد نظر شما در لیست
+              زیر است، نیازی به ارسال مجدد آن نیست.
+            </p>
+            <div className="grid gap-3">
+              {similarSongs.map((song) => (
+                <div
+                  key={song.id}
+                  className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-lg">{song.title}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {song.artists?.map((a) => a.name).join(", ")}
+                      {song.duration > 0 &&
+                        ` • ${Math.floor(song.duration / 60)}:${(
+                          song.duration % 60
+                        )
+                          .toString()
+                          .padStart(2, "0")}`}
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => router.push(`/song/${song.id}`)}
+                    className="cursor-pointer"
+                  >
+                    بله، همین است (مشاهده آهنگ)
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowSimilarityDialog(false);
+                  setStep(4);
+                }}
+                className="cursor-pointer"
+              >
+                خیر، این یک آهنگ متفاوت است
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Form {...form}>
         <form
@@ -1294,7 +1407,11 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     (step === 3 && form.getValues("title"))) &&
                     "bg-green-600 hover:bg-green-700 text-white border-green-700"
                 )}
+                disabled={checkingDuplicates}
               >
+                {checkingDuplicates && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 بعدی
               </Button>
             ) : (
