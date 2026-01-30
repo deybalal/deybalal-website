@@ -293,7 +293,7 @@ export default function SongDetailClient({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs cursor-pointer"
+                      className="text-xs cursor-pointer mb-3"
                     >
                       افزودن متن
                     </Button>

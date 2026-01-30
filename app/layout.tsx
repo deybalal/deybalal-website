@@ -66,7 +66,7 @@ export default function RootLayout({
         >
           <div className="flex min-h-screen">
             <Navbar />
-            <main className="flex flex-1 justify-center mr-0 md:mr-20 pb-32 md:pb-24 p-4 md:p-8 overflow-y-auto h-screen scroll-smooth">
+            <main className="flex flex-1 justify-center mr-0 md:mr-20 pb-32 md:pb-24 p-2 md:p-8 overflow-y-auto h-screen scroll-smooth">
               {children}
             </main>
           </div>

@@ -91,7 +91,7 @@ export function NotificationCenter() {
           variant="ghost"
           size="icon"
           className={cn(
-            "cursor-pointer relative transition-colors h-10 w-10 rounded-full ring-1 ring-gray-400/30 ",
+            "cursor-pointer relative transition-colors size-7 md:size-10 rounded-full ring-1 ring-gray-400/30 ",
             unreadCount > 0
               ? "text-orange-400 hover:text-orange-300 animate-pulse duration-18000"
               : "text-gray-400 hover:text-white"
@@ -182,7 +182,7 @@ export function NotificationCenter() {
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <Bell className="w-12 h-12 mb-4 opacity-20" />
-              <p>هنوز هیچ اعلانی نداری!</p>
+              <p className="rtl">هنوز هیچ اعلانی نداری!</p>
             </div>
           )}
         </ScrollArea>

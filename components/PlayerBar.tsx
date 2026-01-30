@@ -144,232 +144,261 @@ const PlayerBar = () => {
   if (!currentSong) return null; // Or return a disabled state
 
   return (
-    <div className="fixed bottom-0 start-0 w-full h-20 md:h-24 glass z-50 px-4 md:px-8 flex items-center justify-between bg-black/40 backdrop-blur-md border-t border-white/10 transition-all duration-300">
-      {/* Song Info */}
-      <Link
-        href={`/song/${currentSong.id}`}
-        className="flex items-center flex-1 min-w-0 md:w-1/4 md:max-w-none pr-2 md:pr-0"
-      >
-        <div className="w-12 h-12 md:w-14 md:h-14 bg-gray-800 rounded-md neon-box ml-3 md:ml-4 shrink-0 relative overflow-hidden">
-          <Image
-            src={currentSong.coverArt || "/images/cover.png"}
-            alt="Cover"
-            width={60}
-            height={60}
-            className="object-cover w-full h-full"
-          />
-        </div>
-        <div className="overflow-hidden flex-1">
-          <MarqueeText
-            text={currentSong.title || "بدون عنوان"}
-            className="text-foreground font-medium text-sm md:text-base"
-          />
-          <MarqueeText
-            text={currentSong.artist || "خواننده ناشناس"}
-            className="text-muted-foreground text-xs md:text-sm"
-          />
-        </div>
-      </Link>
-
-      {/* Controls */}
-      <NotificationCenter />
-      <div className="flex items-center justify-end flex-none ml-2 md:ml-0 md:flex-col md:items-center md:w-1/2 md:max-w-2xl xl:max-w-3xl md:px-4 md:static md:translate-x-0">
-        <div className="flex items-center gap-4 md:gap-6 mb-1 md:mb-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`hidden md:inline-flex hover:bg-transparent cursor-pointer ${
-              repeatMode !== "off"
-                ? "text-foreground"
-                : "text-gray-400 hover:text-foreground"
-            }`}
-            onClick={toggleRepeat}
+    <div className="fixed flex justify-between items-center bottom-0 start-0 w-full h-20 md:h-24 glass z-50 px-4 md:px-8 bg-black/40 backdrop-blur-md border-t border-white/10 transition-all duration-300">
+      <div className="flex flex-col items-center w-full">
+        <div className="flex w-full justify-around items-center">
+          {/* Song Info */}
+          <Link
+            href={`/song/${currentSong.id}`}
+            className="flex items-center md:flex-1 min-w-0 md:w-1/4 md:max-w-none pr-2 md:pr-0"
           >
-            {repeatMode === "one" ? (
-              <Repeat1 size={20} />
-            ) : (
-              <Repeat size={20} />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
-            onClick={next}
-          >
-            <SkipForward size={20} className="md:w-6 md:h-6" />
-          </Button>
-          <div className="relative group">
-            {isPlaying && (
-              <div className="absolute inset-0 rounded-full bg-indigo-500/50 animate-ping" />
-            )}
-            <Button
-              size="icon"
-              className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/40 hover:scale-110 hover:shadow-indigo-500/60 ring-2 ring-white/10 transition-all duration-300 flex items-center justify-center cursor-pointer"
-              onClick={togglePlay}
-            >
-              {isPlaying ? (
-                <Pause className="size-4 md:size-6 fill-white" />
-              ) : (
-                <Play className="size-4 md:size-6 fill-white" />
-              )}
-            </Button>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
-            onClick={prev}
-          >
-            <SkipBack size={20} className="md:w-6 md:h-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`hidden md:inline-flex  hover:bg-transparent cursor-pointer ${
-              isShuffling
-                ? "text-foreground"
-                : "text-gray-400 hover:text-foreground"
-            }`}
-            onClick={toggleShuffle}
-          >
-            <Shuffle size={20} />
-          </Button>
-        </div>
-        {/* Progress Bar */}
-        <div className="w-64 md:w-full items-center gap-2 md:gap-3 text-[10px] md:text-xs text-gray-400 hidden md:flex">
-          <span>{formatTime(duration || currentSong.duration)}</span>
-          <Slider
-            value={[progress]}
-            onValueChange={handleSeek}
-            max={duration || currentSong.duration || 100}
-            step={1}
-            className="w-full cursor-pointer h-1.5"
-          />
-          <span>{formatTime(progress)}</span>
-        </div>
-      </div>
-
-      {/* Mobile Progress Bar */}
-      <div className="absolute top-0 start-0 w-full md:hidden">
-        <Slider
-          value={[progress]}
-          onValueChange={handleSeek}
-          max={duration || 100}
-          step={1}
-          className="w-full cursor-pointer h-1 rounded-none"
-        />
-      </div>
-
-      {/* Volume & Quality */}
-      <div className="hidden md:flex items-center justify-end w-1/4 gap-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs font-bold text-gray-400 hover:text-white gap-1 px-2 h-8 cursor-pointer"
-            >
-              <Settings size={14} />
-              {currentQuality && currentQuality !== downloadPreference
-                ? `${currentQuality}k (${downloadPreference}k)`
-                : `${downloadPreference}k`}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="bg-background/95 backdrop-blur-xl border-white/10"
-          >
-            {qualities.map((q) => (
-              <DropdownMenuItem
-                key={q.value}
-                onClick={() => handleQualityChange(q.value)}
-                className={`cursor-pointer ${
-                  downloadPreference === q.value
-                    ? "text-primary font-bold"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {q.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <div className="flex items-center gap-2">
-          <Volume2 size={20} className="text-gray-400" />
-          <Slider
-            value={[volume]}
-            onValueChange={(v) => setVolume(v[0])}
-            max={100}
-            step={1}
-            className="w-24 cursor-pointer"
-          />
-        </div>
-      </div>
-      <QueueDrawer />
-      {/* Mobile Menu Trigger */}
-      <div className="md:hidden flex items-center justify-end flex-none">
-        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-gray-400 hover:text-white cursor-pointer"
-            >
-              <Menu size={24} />
-            </Button>
-          </SheetTrigger>
-          <SheetContent
-            side="left"
-            className="w-64 bg-background/95 backdrop-blur-xl border-s border-white/10 p-0"
-          >
-            <SheetHeader className="p-6 border-b border-white/5">
-              <SheetTitle className="text-center text-xl font-bold text-foreground">
-                دی بلال
-              </SheetTitle>
-              <SheetDescription className="text-center text-xs text-muted-foreground">
-                آهنگ لری
-              </SheetDescription>
-            </SheetHeader>
-            <div className="flex flex-col py-4">
-              <div className="px-6 pb-4 border-b border-white/5">
-                <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-3 text-center">
-                  کیفیت پخش آنلاین
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  {qualities.map((q) => (
-                    <Button
-                      key={q.value}
-                      variant={
-                        downloadPreference === q.value ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => handleQualityChange(q.value)}
-                      className="text-[12px] h-7 px-2 cursor-pointer"
-                    >
-                      {q.label.split(" ")[0]}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-start px-6 py-4 text-gray-400 hover:text-foreground hover:bg-white/5 transition-colors"
-                >
-                  <item.icon className="w-5 h-5 me-4" />
-                  <span className="font-medium">{item.name}</span>
-                </Link>
-              ))}
-              <div className="flex py-3 transition-colors duration-200 relative justify-end items-end rtl flex-row-reverse gap-4">
-                <DynamicDarkModeToggle />
-              </div>
+            <div className="w-12 h-12 md:w-14 md:h-14 bg-gray-800 rounded-md neon-box ml-3 md:ml-4 shrink-0 relative overflow-hidden">
+              <Image
+                src={currentSong.coverArt || "/images/cover.png"}
+                alt="Cover"
+                width={60}
+                height={60}
+                className="object-cover w-full h-full"
+              />
             </div>
-          </SheetContent>
-        </Sheet>
+            <div className="overflow-hidden flex-1 hidden md:flex flex-col">
+              <MarqueeText
+                text={currentSong.title || "بدون عنوان"}
+                className="text-foreground font-medium text-sm md:text-base"
+              />
+              <MarqueeText
+                text={currentSong.artist || "خواننده ناشناس"}
+                className="text-muted-foreground text-xs md:text-sm"
+              />
+            </div>
+          </Link>
+
+          {/* Controls */}
+          <NotificationCenter />
+          <div className="flex items-center justify-end flex-none ml-2 md:ml-0 md:flex-col md:items-center md:w-1/2 md:max-w-2xl xl:max-w-3xl md:px-4 md:static md:translate-x-0">
+            <div className="flex items-center gap-4 md:gap-6 mb-1 md:mb-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`hidden md:inline-flex hover:bg-transparent cursor-pointer ${
+                  repeatMode !== "off"
+                    ? "text-foreground"
+                    : "text-gray-400 hover:text-foreground"
+                }`}
+                onClick={toggleRepeat}
+              >
+                {repeatMode === "one" ? (
+                  <Repeat1 size={20} />
+                ) : (
+                  <Repeat size={20} />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
+                onClick={next}
+              >
+                <SkipForward size={20} className="md:w-6 md:h-6" />
+              </Button>
+              <div className="relative group">
+                {isPlaying && (
+                  <div className="absolute inset-0 rounded-full bg-indigo-500/50 animate-ping" />
+                )}
+                <Button
+                  size="icon"
+                  className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/40 hover:scale-110 hover:shadow-indigo-500/60 ring-2 ring-white/10 transition-all duration-300 flex items-center justify-center cursor-pointer"
+                  onClick={togglePlay}
+                >
+                  {isPlaying ? (
+                    <Pause className="size-4 md:size-6 fill-white" />
+                  ) : (
+                    <Play className="size-4 md:size-6 fill-white" />
+                  )}
+                </Button>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
+                onClick={prev}
+              >
+                <SkipBack size={20} className="md:w-6 md:h-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`hidden md:inline-flex  hover:bg-transparent cursor-pointer ${
+                  isShuffling
+                    ? "text-foreground"
+                    : "text-gray-400 hover:text-foreground"
+                }`}
+                onClick={toggleShuffle}
+              >
+                <Shuffle size={20} />
+              </Button>
+            </div>
+            {/* Progress Bar */}
+            <div className="w-64 md:w-full items-center gap-2 md:gap-3 text-[10px] md:text-xs text-gray-400 hidden md:flex">
+              <span>{formatTime(duration || currentSong.duration)}</span>
+              <Slider
+                value={[progress]}
+                onValueChange={handleSeek}
+                max={duration || currentSong.duration || 100}
+                step={1}
+                className="w-full cursor-pointer h-1.5"
+              />
+              <span>{formatTime(progress)}</span>
+            </div>
+          </div>
+
+          {/* Mobile Progress Bar */}
+          <div className="absolute -top-1 start-0 w-full md:hidden">
+            <Slider
+              value={[progress]}
+              onValueChange={handleSeek}
+              max={duration || 100}
+              step={1}
+              className="w-full cursor-pointer h-1 rounded-none"
+            />
+          </div>
+
+          {/* Volume & Quality */}
+          <div className="hidden md:flex items-center justify-end w-1/4 gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs font-bold text-gray-400 hover:text-white gap-1 px-2 h-8 cursor-pointer"
+                >
+                  <Settings size={14} />
+                  {currentQuality && currentQuality !== downloadPreference
+                    ? `${currentQuality}k (${downloadPreference}k)`
+                    : `${downloadPreference}k`}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="bg-background/95 backdrop-blur-xl border-white/10"
+              >
+                {qualities.map((q) => (
+                  <DropdownMenuItem
+                    key={q.value}
+                    onClick={() => handleQualityChange(q.value)}
+                    className={`cursor-pointer ${
+                      downloadPreference === q.value
+                        ? "text-primary font-bold"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {q.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <div className="flex items-center gap-2">
+              <Volume2 size={20} className="text-gray-400" />
+              <Slider
+                value={[volume]}
+                onValueChange={(v) => setVolume(v[0])}
+                max={100}
+                step={1}
+                className="w-24 cursor-pointer"
+              />
+            </div>
+          </div>
+          <QueueDrawer />
+          {/* Mobile Menu Trigger */}
+          <div className="md:hidden flex items-center justify-end flex-none">
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-400 hover:text-white cursor-pointer"
+                >
+                  <Menu size={24} />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="w-64 bg-background/95 backdrop-blur-xl border-s border-white/10 p-0"
+              >
+                <SheetHeader className="p-6 border-b border-white/5">
+                  <SheetTitle className="text-center text-xl font-bold text-foreground">
+                    دی بلال
+                  </SheetTitle>
+                  <SheetDescription className="text-center text-xs text-muted-foreground">
+                    آهنگ لری
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="flex flex-col py-4">
+                  <div className="px-6 pb-4 border-b border-white/5">
+                    <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-3 text-center">
+                      کیفیت پخش آنلاین
+                    </p>
+                    <div className="flex items-center justify-center gap-2">
+                      {qualities.map((q) => (
+                        <Button
+                          key={q.value}
+                          variant={
+                            downloadPreference === q.value
+                              ? "default"
+                              : "outline"
+                          }
+                          size="sm"
+                          onClick={() => handleQualityChange(q.value)}
+                          className="text-[12px] h-7 px-2 cursor-pointer"
+                        >
+                          {q.label.split(" ")[0]}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center justify-start px-6 py-4 text-gray-400 hover:text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <item.icon className="w-5 h-5 me-4" />
+                      <span className="font-medium">{item.name}</span>
+                    </Link>
+                  ))}
+                  <div className="flex py-3 transition-colors duration-200 relative justify-end items-end rtl flex-row-reverse gap-4">
+                    <DynamicDarkModeToggle />
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+        <div className="flex md:hidden justify-center items-center w-full gap-2 px-2 md:px-0 max-w-11/12">
+          <span className="text-[10px] md:text-xs font-medium text-muted-foreground w-10 text-right tabular-nums shrink-0">
+            {formatTime(duration || currentSong.duration)}
+          </span>
+
+          <div className="flex w-full items-center gap-x-1.5 justify-center min-w-0 flex-1 md:flex-none">
+            <MarqueeText
+              text={
+                `${currentSong.title} ${currentSong.title} ${currentSong.title} ${currentSong.title} ${currentSong.title}` ||
+                "بدون عنوان"
+              }
+              className="text-foreground font-medium text-sm w-1/2 md:text-base"
+            />
+            <span className="text-foreground/50 text-[12px]">از</span>
+            <MarqueeText
+              text={currentSong.artist || "خواننده ناشناس"}
+              className="text-foreground/80 text-xs md:text-sm w-1/2"
+            />
+          </div>
+          <span className="text-[10px] md:text-xs font-medium text-muted-foreground w-10 text-right tabular-nums shrink-0">
+            {formatTime(progress)}
+          </span>
+        </div>
       </div>
     </div>
   );
