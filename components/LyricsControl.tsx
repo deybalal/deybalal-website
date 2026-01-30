@@ -117,25 +117,27 @@ export const LyricsControl: React.FC<LyricsControlProps> = ({
               </Link>
             </Button>
 
-            <Button
-              asChild
-              variant="secondary"
-              className="bg-white/5 hover:bg-white/10 flex items-center gap-2 h-11"
-            >
-              <Link href={`/panel/edit/sync/${songId}`}>
-                {hasSyncedLyrics ? (
-                  <>
-                    <RefreshCw className="w-4 h-4" />
-                    زمان‌بندی مجدد
-                  </>
-                ) : (
-                  <>
-                    <Timer className="w-4 h-4" />
-                    زمان‌بندی متن
-                  </>
-                )}
-              </Link>
-            </Button>
+            {hasLyrics && (
+              <Button
+                asChild
+                variant="secondary"
+                className="bg-white/5 hover:bg-white/10 flex items-center gap-2 h-11"
+              >
+                <Link href={`/panel/edit/sync/${songId}`}>
+                  {hasSyncedLyrics ? (
+                    <>
+                      <RefreshCw className="w-4 h-4" />
+                      زمان‌بندی مجدد
+                    </>
+                  ) : (
+                    <>
+                      <Timer className="w-4 h-4" />
+                      زمان‌بندی متن
+                    </>
+                  )}
+                </Link>
+              </Button>
+            )}
 
             {hasSyncedLyrics && (
               <Button

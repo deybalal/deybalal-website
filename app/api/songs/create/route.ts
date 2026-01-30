@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getUniqueSongSlug } from "@/lib/slug";
 import { parseFile } from "music-metadata";
+import { findSimilarSongs } from "@/lib/similarity";
 
 export const dynamic = "force-dynamic";
 
@@ -244,6 +245,13 @@ export async function POST(request: Request) {
         },
         genres: {
           connect: validatedData.genreIds?.map((id) => ({ id })) || [],
+        },
+        similarSongs: {
+          connect: await findSimilarSongs({
+            title: validatedData.title,
+            artistIds: validatedData.artistIds || [],
+            genreIds: validatedData.genreIds || [],
+          }),
         },
       },
     });

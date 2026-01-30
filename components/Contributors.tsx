@@ -67,7 +67,7 @@ export const Contributors = ({ contributors }: ContributorsProps) => {
                     <span className="text-sm font-semibold text-foreground group-hover/user:text-indigo-400 transition-colors line-clamp-1">
                       {c.user.name}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 ltr">
                       @{c.user.userSlug}
                     </span>
                   </div>

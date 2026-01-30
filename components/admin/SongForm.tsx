@@ -27,7 +27,7 @@ import {
 import { toast } from "react-hot-toast";
 import { Album, Genre } from "@prisma/client";
 import { Check, ChevronsUpDown, Trash2, Loader2, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getStringSimilarity } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -354,45 +354,6 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       setCheckingDuplicates(false);
     }
     return false;
-  };
-
-  // Helper function to calculate string similarity (Levenshtein distance)
-  const getStringSimilarity = (str1: string, str2: string): number => {
-    const s1 = str1.toLowerCase().trim();
-    const s2 = str2.toLowerCase().trim();
-
-    if (s1 === s2) return 1;
-
-    const len1 = s1.length;
-    const len2 = s2.length;
-
-    if (len1 === 0 || len2 === 0) return 0;
-
-    // Create a matrix for dynamic programming
-    const matrix: number[][] = [];
-
-    for (let i = 0; i <= len1; i++) {
-      matrix[i] = [i];
-    }
-
-    for (let j = 0; j <= len2; j++) {
-      matrix[0][j] = j;
-    }
-
-    for (let i = 1; i <= len1; i++) {
-      for (let j = 1; j <= len2; j++) {
-        const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j - 1] + cost
-        );
-      }
-    }
-
-    const distance = matrix[len1][len2];
-    const maxLen = Math.max(len1, len2);
-    return 1 - distance / maxLen;
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1334,13 +1295,13 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                   <div key={field.id} className="flex gap-4 items-end">
                     <FormField
                       control={form.control}
-                      name={`crew.${index}.name`}
+                      name={`crew.${index}.role`}
                       render={({ field }) => (
                         <FormItem className="flex-1">
-                          <FormLabel>نام</FormLabel>
+                          <FormLabel>نقش</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="مانند: علی عالی زاده"
+                              placeholder="مانند: ترانه سرا، میکس و مستر، تنظیم"
                               {...field}
                             />
                           </FormControl>
@@ -1350,13 +1311,13 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                     />
                     <FormField
                       control={form.control}
-                      name={`crew.${index}.role`}
+                      name={`crew.${index}.name`}
                       render={({ field }) => (
                         <FormItem className="flex-1">
-                          <FormLabel>نقش</FormLabel>
+                          <FormLabel>نام</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="مانند: ترانه سرا، میکس و مستر، تنظیم"
+                              placeholder="مانند: علی عالی زاده"
                               {...field}
                             />
                           </FormControl>

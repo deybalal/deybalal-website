@@ -8,10 +8,11 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { Metadata } from "next";
 import { Music, Download } from "lucide-react";
 import { LyricsControl } from "@/components/LyricsControl";
-import { Contributor } from "@/types/types";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ReportIssueModal } from "@/components/ReportIssueModal";
+import SongList from "@/components/SongList";
+import { Song, Contributor } from "@/types/types";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +82,17 @@ export default async function SongDetailPage({
         },
       },
       crew: true,
+      similarSongs: {
+        where: { isActive: true },
+        include: {
+          artists: true,
+          genres: true,
+          album: {
+            select: { name: true },
+          },
+        },
+        take: 10,
+      },
     },
   });
 
@@ -134,6 +146,19 @@ export default async function SongDetailPage({
       number,
       { url: string; size: string; bytes: number }
     >,
+    similarSongs: songData.similarSongs.map((s) => ({
+      ...s,
+      album: s.album?.name ?? null,
+      artists: s.artists.map((a) => ({ ...a, songs: [] })),
+      links: s.links as unknown as Record<
+        number,
+        { url: string; size: string; bytes: number }
+      >,
+      year: s.year.toString(),
+      userId: null,
+      createdAt: s.createdAt.getTime(),
+      updatedAt: s.updatedAt.getTime(),
+    })),
   };
 
   const isInstrumental = songData.genres.some(
@@ -252,6 +277,17 @@ export default async function SongDetailPage({
                 </Link>
               ))}
             </div>
+          </div>
+        )}
+
+        {song.similarSongs && song.similarSongs.length > 0 && (
+          <div className="flex flex-col gap-4 bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
+            <h3 className="text-lg font-semibold">آهنگ‌های مشابه</h3>
+            <SongList
+              songs={song.similarSongs as Song[]}
+              showArtist={true}
+              showAlbum={false}
+            />
           </div>
         )}
 

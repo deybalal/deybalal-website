@@ -137,7 +137,7 @@ export function NotificationCenter() {
                   }`}
                 >
                   <div className="flex justify-between items-start gap-2">
-                    <div className="space-y-1 flex-1">
+                    <div className="space-y-1 flex-1 rtl">
                       <p
                         className={`text-sm font-semibold ${
                           !notification.isRead ? "text-white" : "text-gray-300"
@@ -148,7 +148,8 @@ export function NotificationCenter() {
                       <p className="text-xs text-gray-400 leading-relaxed">
                         {notification.message}
                       </p>
-                      <p className="text-[10px] text-gray-500 rtl">
+
+                      <p className="text-[10px] text-gray-500 text-left">
                         {formatDistanceToNow(new Date(notification.createdAt), {
                           addSuffix: true,
                           locale: faIR,

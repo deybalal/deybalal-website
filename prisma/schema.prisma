@@ -46,6 +46,9 @@ model Song {
   genres              Genre[]            @relation("GenreToSong")
   playlists           Playlist[]         @relation("PlaylistToSong")
 
+  similarSongs Song[] @relation("SongSimilarity")
+  similarTo    Song[] @relation("SongSimilarity")
+
   @@index([title])
   @@index([artist])
   @@index([albumId])
