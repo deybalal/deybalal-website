@@ -248,7 +248,7 @@ export default async function Home() {
       {featuredSongs.length > 0 && (
         <section>
           <SectionHeader title="آهنگ‌های پیشنهادی" color="bg-blue-500" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">
             {featuredSongs.map((song) => (
               <SongCard key={song.id} song={song} />
             ))}
@@ -259,7 +259,7 @@ export default async function Home() {
       {/* New Releases (Previously Trending/New) */}
       <section>
         <SectionHeader title="جدیدترین‌ها" color="bg-green-500" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">
           {newSongs.length > 0 ? (
             newSongs.map((song) => <SongCard key={song.id} song={song} />)
           ) : (
@@ -278,7 +278,7 @@ export default async function Home() {
             color="bg-pink-500"
             href="/artist"
           />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
             {mostPlayedArtists.map((artist) => (
               <ArtistCard key={artist.id} artist={artist} />
             ))}
@@ -293,7 +293,7 @@ export default async function Home() {
           color="bg-orange-500"
           href="/songs"
         />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">
           {mostPlayedSongs.length > 0 ? (
             mostPlayedSongs.map((song) => (
               <SongCard key={song.id} song={song} />
@@ -313,7 +313,7 @@ export default async function Home() {
           color="bg-teal-500"
           href="/album"
         />
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
           {albums.length > 0 ? (
             albums.map((album) => <AlbumCard key={album.id} album={album} />)
           ) : (
@@ -332,7 +332,7 @@ export default async function Home() {
             color="bg-purple-500"
             href="/genres"
           />
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             {genresData.map((genre, index) => (
               <GenreCard
                 key={genre.id}

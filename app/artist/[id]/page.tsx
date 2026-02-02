@@ -275,7 +275,7 @@ export default async function ArtistDetailPage({
         {albums.length > 0 && (
           <section>
             <SectionHeader title="آلبوم ها" color="bg-pink-500" />
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6 lg:gap-8">
               {albums.map((album) => (
                 <AlbumCard key={album.id} album={album} />
               ))}
