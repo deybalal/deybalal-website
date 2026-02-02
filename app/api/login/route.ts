@@ -1,26 +1,22 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { logAuthAttempt } from "@/lib/logger";
+import { isValidEmail } from "@/lib/input-sanitizer";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-
     const { email, password } = body;
 
-    const findUser = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    if (findUser?.isBanned) {
+    // Validate email format
+    if (!isValidEmail(email)) {
       return NextResponse.json(
         {
           success: false,
-          message: "شما بلاک شده اید!",
+          message: "فرمت ایمیل نامعتبر است",
         },
-        { status: 401 }
+        { status: 400 }
       );
     }
 
@@ -28,34 +24,57 @@ export async function POST(request: NextRequest) {
       body: {
         email,
         password,
-        callbackURL: `${process.env.BETTER_AUTH_URL}/panel`,
       },
     });
 
-    if (login.user) {
-      return NextResponse.json({
-        success: true,
-        downloadPreference: login.user.downloadPreference,
-        message: "ورود موفق به حساب کاربری!",
-      });
-    } else {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+
+    if (!login.user) {
+      // Log failed attempt
+      logAuthAttempt(false, email, ip, "Invalid credentials");
+
       return NextResponse.json(
         {
           success: false,
-          message: "خطا! ایمیل یا رمز اشتباه است!",
+          message: "ایمیل یا رمز عبور اشتباه است",
         },
         { status: 401 }
       );
     }
-  } catch (error) {
-    console.error((error as Error).message);
 
+    // Log successful login
+    logAuthAttempt(true, email, ip);
+
+    // Check if user is banned
+    const user = await prisma.user.findUnique({
+      where: { id: login.user.id },
+      select: { isBanned: true },
+    });
+
+    if (user?.isBanned) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "حساب کاربری شما مسدود شده است",
+        },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "ورود موفقیت آمیز بود!",
+      user: login.user,
+    });
+  } catch (error) {
+    console.error("Login error:", error);
     return NextResponse.json(
       {
         success: false,
         message: "خطایی پیش آمد!",
       },
-      { status: 401 }
+      { status: 500 }
     );
   }
 }

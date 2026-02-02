@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 
+import { sanitizeTextContent } from "@/lib/input-sanitizer";
+import { validateContentLength, CONTENT_LENGTH_LIMITS } from "@/lib/validators";
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -113,6 +116,25 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate content length
+    const lengthValidation = validateContentLength(
+      content,
+      CONTENT_LENGTH_LIMITS.COMMENT_MAX,
+      "نظر"
+    );
+    if (!lengthValidation.valid) {
+      return NextResponse.json(
+        { success: false, message: lengthValidation.message },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize content to prevent XSS
+    const sanitizedContent = sanitizeTextContent(
+      content,
+      CONTENT_LENGTH_LIMITS.COMMENT_MAX
+    );
+
     if (!songId && !albumId && !parentId) {
       return NextResponse.json(
         {
@@ -163,7 +185,7 @@ export async function POST(request: Request) {
 
     const comment = await prisma.comment.create({
       data: {
-        content,
+        content: sanitizedContent,
         userId: session.user.id,
         userSlug: session.user.userSlug,
         songId: finalSongId || null,

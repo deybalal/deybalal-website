@@ -4,6 +4,13 @@ import path from "path";
 import * as mm from "music-metadata";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { logSuspiciousUpload } from "@/lib/logger";
+import { sanitizeFilename } from "@/lib/input-sanitizer";
+import {
+  validateFileType,
+  validateFileSize,
+  FILE_SIZE_LIMITS,
+} from "@/lib/validators";
 
 export async function POST(request: Request) {
   try {
@@ -20,7 +27,6 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
-
     const formData = await request.formData();
     const file = formData.get("file") as File;
 
@@ -31,13 +37,48 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!file.name.toLowerCase().endsWith(".mp3")) {
+    // Validate file size (23MB max)
+    const sizeValidation = validateFileSize(
+      file.size,
+      FILE_SIZE_LIMITS.AUDIO_MAX
+    );
+    if (!sizeValidation.valid) {
+      return NextResponse.json(
+        { success: false, message: sizeValidation.message },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize filename
+    const sanitizedFilename = sanitizeFilename(file.name);
+
+    if (!sanitizedFilename.toLowerCase().endsWith(".mp3")) {
       return NextResponse.json(
         { success: false, message: "فقط فایل های mp3 اجازه ی آپلود دارند!" },
         { status: 400 }
       );
     }
+
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Validate file type using magic numbers
+    const typeValidation = await validateFileType(buffer, ["audio/mpeg"]);
+    if (!typeValidation.valid) {
+      const ip =
+        request.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+      logSuspiciousUpload(
+        session.user.id,
+        file.name,
+        `Invalid file type: ${typeValidation.detectedType || "unknown"}`,
+        ip
+      );
+
+      return NextResponse.json(
+        { success: false, message: "فایل آپلود شده یک فایل MP3 معتبر نیست!" },
+        { status: 400 }
+      );
+    }
+
     const uploadDir = path.join(process.cwd(), "public/assets/mp3");
 
     // Ensure directory exists
