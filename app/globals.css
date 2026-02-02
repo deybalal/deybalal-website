@@ -6,7 +6,7 @@
 @theme {
   --color-background: #0a0a0a;
   --color-foreground: #ededed;
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-iranyekan);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -49,9 +49,21 @@
 }
 
 body {
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+body,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+div {
+  font-family: var(--font-iranyekan), Arial, Helvetica, sans-serif;
 }
 
 .rtl {
@@ -60,6 +72,7 @@ body {
 
 .ltr {
   direction: ltr;
+  font-family: sans-serif;
 }
 
 /* Glassmorphism Utilities */

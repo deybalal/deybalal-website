@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import PlayerBar from "@/components/PlayerBar";
@@ -6,6 +7,12 @@ import PlayerProvider from "@/components/PlayerProvider";
 import { Toaster } from "react-hot-toast";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+
+const iranyekan = localFont({
+  src: "../public/assets/iranyekan_regular.woff2",
+  variable: "--font-iranyekan",
+  weight: "400",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -55,7 +62,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
-      <body className={`antialiased bg-background text-foreground rtl`}>
+      <body
+        className={`${iranyekan.variable} antialiased bg-background text-foreground rtl`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

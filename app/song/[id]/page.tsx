@@ -196,11 +196,11 @@ export default async function SongDetailPage({
                         <Download className="w-5 h-5" />
                       </div>
                       <div className="flex flex-col items-start">
-                        <span className="font-bold text-lg">64 kbps</span>
+                        <span className="font-bold text-lg ltr">64 kbps</span>
                         <span className="text-xs opacity-80">کیفیت پایین</span>
                       </div>
                     </div>
-                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
+                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full ltr">
                       {song.links[64].size}
                     </span>
                   </a>
@@ -220,11 +220,11 @@ export default async function SongDetailPage({
                         <Download className="w-5 h-5" />
                       </div>
                       <div className="flex flex-col items-start">
-                        <span className="font-bold text-lg">128 kbps</span>
+                        <span className="font-bold text-lg ltr">128 kbps</span>
                         <span className="text-xs opacity-80">کیفیت متوسط</span>
                       </div>
                     </div>
-                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
+                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full ltr">
                       {song.links[128].size}
                     </span>
                   </a>
@@ -244,11 +244,11 @@ export default async function SongDetailPage({
                         <Download className="w-5 h-5" />
                       </div>
                       <div className="flex flex-col items-start">
-                        <span className="font-bold text-lg">320 kbps</span>
+                        <span className="font-bold text-lg ltr">320 kbps</span>
                         <span className="text-xs opacity-80">کیفیت عالی</span>
                       </div>
                     </div>
-                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
+                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full ltr">
                       {song.links[320].size}
                     </span>
                   </a>

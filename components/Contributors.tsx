@@ -32,7 +32,7 @@ export const Contributors = ({ contributors }: ContributorsProps) => {
           key={type}
           className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-foreground/10 hover:border-foreground/20 transition-all group"
         >
-          <div className="flex items-center gap-2 mb-4 text-gray-400 group-hover:text-foreground transition-colors">
+          <div className="flex items-center gap-2 mb-2 text-gray-400 group-hover:text-foreground transition-colors justify-center text-center">
             {typeLabels[type]?.icon}
             <span className="text-sm font-medium uppercase tracking-wider">
               {typeLabels[type]?.label || type}
@@ -41,13 +41,10 @@ export const Contributors = ({ contributors }: ContributorsProps) => {
 
           <div className="space-y-4">
             {users.map((c) => (
-              <div
-                key={c.id}
-                className="flex items-center justify-between gap-3"
-              >
+              <div key={c.id} className="flex items-center gap-3 justify-end">
                 <Link
                   href={`/u/${c.user.userSlug}`}
-                  className="flex items-center gap-3 group/user"
+                  className="flex items-center ltr gap-3 group/user"
                 >
                   <div className="relative size-10 rounded-full overflow-hidden border-2 border-foreground/10 group-hover/user:border-indigo-500 transition-colors">
                     {c.user.image ? (
