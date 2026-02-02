@@ -16,6 +16,7 @@ const SimilarSongsCarousel = ({ songs }: SimilarSongsCarouselProps) => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [isRTL, setIsRTL] = useState(true);
+  const [itemWidth, setItemWidth] = useState(216); // Default for desktop
 
   // Triple the items for infinite loop effect
   const repeatedSongs = [...songs, ...songs, ...songs];
@@ -27,12 +28,22 @@ const SimilarSongsCarousel = ({ songs }: SimilarSongsCarouselProps) => {
       const direction = window.getComputedStyle(container).direction;
       setIsRTL(direction === "rtl");
     }
+
+    const updateWidth = () => {
+      const isMobile = window.innerWidth < 768;
+      // Mobile: 150 (width) + 8 (gap-2) = 158
+      // Desktop: 200 (width) + 16 (gap-4) = 216
+      setItemWidth(isMobile ? 158 : 216);
+    };
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
   useEffect(() => {
     const container = scrollRef.current;
     if (container && originalLength > 0) {
-      const itemWidth = 216; // w-[200px] + gap-4
       // Center on the middle set
       if (isRTL) {
         // In most RTL browsers, scrollLeft is 0 at the far right and negative as you move left
@@ -41,13 +52,12 @@ const SimilarSongsCarousel = ({ songs }: SimilarSongsCarouselProps) => {
         container.scrollLeft = itemWidth * originalLength;
       }
     }
-  }, [originalLength, isRTL]);
+  }, [originalLength, isRTL, itemWidth]);
 
   const handleScroll = () => {
     const container = scrollRef.current;
     if (!container || originalLength === 0 || isDragging) return;
 
-    const itemWidth = 216;
     const currentScroll = container.scrollLeft;
     const totalContentWidth = itemWidth * originalLength;
 
@@ -114,7 +124,7 @@ const SimilarSongsCarousel = ({ songs }: SimilarSongsCarouselProps) => {
   const scroll = (direction: "left" | "right") => {
     const container = scrollRef.current;
     if (!container) return;
-    const scrollAmount = 216 * 2;
+    const scrollAmount = itemWidth * 2;
 
     // In RTL, "right" button should increase scrollLeft (towards 0), "left" should decrease it
     // But scrollTo with {left: ...} often handles direction automatically if behavior: "smooth" is used?
@@ -161,7 +171,7 @@ const SimilarSongsCarousel = ({ songs }: SimilarSongsCarouselProps) => {
         onScroll={handleScroll}
         onMouseDown={onMouseDown}
         className={cn(
-          "flex gap-4 overflow-x-auto py-4 px-2 scrollbar-hide snap-x selection:bg-transparent touch-pan-y",
+          "flex gap-2 md:gap-4 overflow-x-auto py-4 px-2 scrollbar-hide snap-x selection:bg-transparent touch-pan-y",
           isDragging ? "cursor-grabbing snap-none" : "cursor-grab"
         )}
         style={{
@@ -175,7 +185,7 @@ const SimilarSongsCarousel = ({ songs }: SimilarSongsCarouselProps) => {
           <div
             key={`${s.id}-${index}`}
             className={cn(
-              "w-[200px] shrink-0 snap-start transition-transform duration-300",
+              "w-[150px] md:w-[200px] shrink-0 snap-start transition-transform duration-300",
               isDragging
                 ? "pointer-events-none scale-[0.98]"
                 : "hover:scale-[1.05]"

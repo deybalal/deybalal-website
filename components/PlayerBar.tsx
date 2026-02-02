@@ -376,26 +376,23 @@ const PlayerBar = () => {
             </Sheet>
           </div>
         </div>
-        <div className="flex md:hidden justify-center items-center w-full gap-2 px-2 md:px-0 max-w-11/12">
-          <span className="text-[10px] md:text-xs font-medium text-muted-foreground w-10 text-right tabular-nums shrink-0">
+        <div className="flex md:hidden justify-center items-center w-full gap-2 px-2 md:px-0 max-w-full">
+          <span className="text-[12px] md:text-xs font-medium text-muted-foreground w-10 tabular-nums shrink-0 text-left">
             {formatTime(duration || currentSong.duration)}
           </span>
 
           <div className="flex w-full items-center gap-x-1.5 justify-center min-w-0 flex-1 md:flex-none">
             <MarqueeText
-              text={
-                `${currentSong.title} ${currentSong.title} ${currentSong.title} ${currentSong.title} ${currentSong.title}` ||
-                "بدون عنوان"
-              }
-              className="text-foreground font-medium text-sm w-1/2 md:text-base"
+              text={currentSong.title || "بدون عنوان"}
+              className="text-foreground font-medium text-sm w-1/2 max-w-min"
             />
             <span className="text-foreground/50 text-[12px]">از</span>
             <MarqueeText
               text={currentSong.artist || "خواننده ناشناس"}
-              className="text-foreground/80 text-xs md:text-sm w-1/2"
+              className="text-foreground/80 text-xs w-1/2 max-w-min"
             />
           </div>
-          <span className="text-[10px] md:text-xs font-medium text-muted-foreground w-10 text-right tabular-nums shrink-0">
+          <span className="text-[12px] md:text-xs font-medium text-muted-foreground w-10 tabular-nums shrink-0 text-right">
             {formatTime(progress)}
           </span>
         </div>

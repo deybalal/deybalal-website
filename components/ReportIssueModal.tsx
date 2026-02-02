@@ -103,13 +103,13 @@ export function ReportIssueModal({
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="flex items-center gap-2 border-orange-500/50 text-orange-500 hover:bg-orange-500/10 hover:text-orange-400 transition-all rounded-xl px-6 h-12"
+          className="flex items-center gap-2 border-orange-500/50 text-orange-500 hover:bg-orange-500/10 hover:text-orange-400 transition-all rounded-xl px-4 md:px-6 h-10 md:h-12 text-sm md:text-base"
         >
           <AlertTriangle className="w-4 h-4" />
           گزارش اشتباه / درخواست حذف
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-[#121212] border-white/10 text-white">
+      <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-[#121212] border-white/10 text-white rounded-2xl scrollbar-hide">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-right">
             گزارش اشتباه در اطلاعات

@@ -13,6 +13,7 @@ import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
 import { toast } from "react-hot-toast";
 import { useLyricsStore } from "@/hooks/useLyricsStore";
 import { formatPlayCount } from "@/lib/utils";
+import MarqueeText from "./MarqueeText";
 
 interface SongDetailClientProps {
   song: Song;
@@ -124,8 +125,8 @@ export default function SongDetailClient({
     <div
       className={`h-[calc(100dvh-120px)] w-full flex-1 flex justify-center m-0 ms-auto me-auto p-0 transition-all duration-500 ${
         showLyrics
-          ? "max-w-7xl flex flex-col lg:grid lg:grid-cols-2 lg:gap-12 ps-2 pe-2"
-          : "max-w-4xl flex flex-col items-center justify-center"
+          ? "max-w-7xl flex flex-col lg:grid lg:grid-cols-2 lg:gap-12 lg:ps-6 lg:pe-6"
+          : "max-w-4xl flex flex-col items-center justify-center p-0 md:p-0"
       }`}
     >
       {/* Lyrics Column (Left on Desktop) */}
@@ -150,8 +151,8 @@ export default function SongDetailClient({
         {/* Art */}
         <div
           className={`w-full aspect-square bg-card rounded-2xl shadow-2xl neon-box relative overflow-hidden group transition-all duration-500 ${
-            showLyrics ? "max-w-[90vw] lg:max-w-sm" : "max-w-md"
-          }`}
+            showLyrics ? "max-w-[90vw] lg:max-w-sm" : "max-w-[90vw] md:max-w-md"
+          } mx-auto`}
         >
           {song.coverArt ? (
             <Image
@@ -169,7 +170,7 @@ export default function SongDetailClient({
 
           {/* Mobile Lyrics Overlay */}
           {showLyrics && (
-            <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[2px] ps-4 pe-4 pt-4 pb-4 lg:hidden overflow-hidden rounded-2xl">
+            <div className="absolute inset-0 z-10 bg-black/70 backdrop-blur-xs px-6 py-6 lg:hidden overflow-hidden rounded-2xl">
               <Lyrics
                 lrc={showSynced ? song.syncedLyrics : null}
                 plainLyrics={song.lyrics}
@@ -180,34 +181,37 @@ export default function SongDetailClient({
         </div>
 
         {/* Info */}
-        <div className="flex justify-between w-full ps-4 pe-4">
-          <div className="mt-2">
+        <div className="flex justify-between w-full md:my-0">
+          <div className="mt-2 shrink-0">
             {isUserLoggedIn ? (
               <AddToPlaylistDialog
                 songId={song.id}
                 trigger={
                   <Button
                     variant="outline"
-                    className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
+                    className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer size-10 md:size-12 p-0"
                   >
-                    <ListPlus size={33} className="size-full" />
+                    <ListPlus size={24} />
                   </Button>
                 }
               />
             ) : (
               <Button
                 variant="outline"
-                className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
+                className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer size-10 md:size-12 p-0"
                 onClick={() => toast.error("ابتدا باید وارد حساب کاربری شوید!")}
               >
-                <ListPlus size={33} className="size-full" />
+                <ListPlus size={24} />
               </Button>
             )}
           </div>
           <div className="text-center flex-1 min-w-0 ps-2 pe-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-              {song.title}
-            </h1>
+            <div className="flex items-center justify-center truncate">
+              <MarqueeText
+                text={song.title || "بدون عنوان"}
+                className="max-w-3xs w-3xs overflow-hidden text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-1 md:mb-2 line-clamp-none text-center"
+              />
+            </div>
             {song.artist ? (
               song.artists && song.artists.length > 0 ? (
                 <div className="flex flex-wrap gap-2 justify-center">
@@ -215,20 +219,25 @@ export default function SongDetailClient({
                     <React.Fragment key={artist.id}>
                       <Link
                         href={`/artist/${artist.id}`}
-                        className="flex items-center text-lg md:text-xl text-muted-foreground hover:scale-110 hover:text-foreground transition-transform"
+                        className="flex items-center justify-center text-lg md:text-xl text-foreground/80 hover:scale-110 hover:text-foreground transition-transform"
                       >
-                        {artist.name}{" "}
-                        {artist.isVerified ? (
-                          <Image
-                            className="mt-1"
-                            src="/images/verified.svg"
-                            width={20}
-                            height={20}
-                            alt="خواننده ی تایید شده"
+                        <div className="flex justify-center w-full">
+                          <MarqueeText
+                            text={`${artist.name || "خواننده ناشناس"}${" "}`}
+                            className=""
                           />
-                        ) : (
-                          ""
-                        )}
+                          {artist.isVerified ? (
+                            <Image
+                              className="mt-1"
+                              src="/images/verified.svg"
+                              width={20}
+                              height={20}
+                              alt="خواننده ی تایید شده"
+                            />
+                          ) : (
+                            ""
+                          )}
+                        </div>
                       </Link>
                       {index < song.artists.length - 1 && (
                         <span className="text-lg md:text-xl text-muted-foreground">
@@ -304,7 +313,7 @@ export default function SongDetailClient({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs cursor-pointer"
+                      className="text-xs cursor-pointer mb-3"
                     >
                       زمان‌بندی متن
                     </Button>
@@ -314,7 +323,7 @@ export default function SongDetailClient({
             )}
           </div>
 
-          <div className="mt-2">
+          <div className="mt-2 shrink-0">
             <Button
               variant="outline"
               onClick={
@@ -323,10 +332,10 @@ export default function SongDetailClient({
                   : () => toast.error("ابتدا باید وارد حساب کاربری شوید!")
               }
               disabled={isTogglingFavorite}
-              className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer"
+              className="border-accent text-accent-foreground hover:bg-accent hover:text-white/30 cursor-pointer size-10 md:size-12 p-0"
             >
               <Heart
-                size={33}
+                size={24}
                 className={isFavorite ? "fill-red-500 text-red-500" : ""}
               />
             </Button>

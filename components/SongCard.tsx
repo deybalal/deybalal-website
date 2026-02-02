@@ -109,25 +109,25 @@ const SongCard = ({ song }: SongCardProps) => {
                 {/* Animated Top Border */}
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                <h3 className="text-gray-900 dark:text-white font-bold truncate text-lg mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-purple-600 group-hover:to-pink-600 dark:group-hover:from-purple-400 dark:group-hover:to-pink-400 transition-all duration-300">
+                <h3 className="text-gray-900 dark:text-white font-bold truncate text-base md:text-lg mb-0.5 md:mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-purple-600 group-hover:to-pink-600 dark:group-hover:from-purple-400 dark:group-hover:to-pink-400 transition-all duration-300 line-clamp-1">
                   {song.title || "بدون عنوان"}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm truncate group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300 font-medium">
+                <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm truncate group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300 font-medium line-clamp-1">
                   {song.artist || "خواننده ناشناس"}
                 </p>
 
                 {/* Bottom Info Bar */}
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-white/5">
+                <div className="flex items-center justify-between mt-2 md:mt-3 pt-2 md:pt-3 border-t border-gray-200 dark:border-white/5">
                   {/* Duration & Play Count */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 md:gap-2">
                     {song.duration && (
-                      <span className="text-xs text-gray-600 dark:text-gray-500 bg-gray-200 dark:bg-white/5 px-3 py-1.5 rounded-full group-hover:bg-purple-200 dark:group-hover:bg-purple-500/20 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-all duration-300 font-medium">
+                      <span className="text-[10px] md:text-xs text-gray-600 dark:text-gray-500 bg-gray-200 dark:bg-white/5 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full group-hover:bg-purple-200 dark:group-hover:bg-purple-500/20 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-all duration-300 font-medium">
                         {Math.floor(song.duration / 60)}:
                         {String(song.duration % 60).padStart(2, "0")}
                       </span>
                     )}
-                    <span className="text-[10px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-2 py-1 rounded-full flex items-center gap-1">
-                      <Play size={10} className="fill-current" />
+                    <span className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 md:py-1 rounded-full flex items-center gap-1">
+                      <Play size={9} className="fill-current" />
                       {formatPlayCount(song.playCount)}
                     </span>
                   </div>
@@ -135,10 +135,10 @@ const SongCard = ({ song }: SongCardProps) => {
                   {/* Animated Music Visualizer Bars */}
                   <div
                     className={cn(
-                      "flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                      "flex items-center gap-0.5 transition-opacity duration-300 shrink-0",
                       isPlaying && song.id === currentSong?.id
                         ? "opacity-100"
-                        : "opacity-0"
+                        : "opacity-0 group-hover:opacity-40"
                     )}
                   >
                     <div
