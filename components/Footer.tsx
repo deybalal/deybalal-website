@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Twitter, Instagram, Github, Music2 } from "lucide-react";
+import { ContactUsModal } from "@/components/ContactUsModal";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -18,12 +19,10 @@ const Footer = () => {
       ],
     },
     {
-      title: "پشتیبانی",
+      title: "لینک ها",
       links: [
-        { name: "درباره ما", href: "/about" },
         { name: "تماس با ما", href: "/contact" },
-        { name: "حریم خصوصی", href: "/privacy" },
-        { name: "شرایط و قوانین", href: "/terms" },
+        { name: "شرایط و قوانین", href: "/tos" },
       ],
     },
   ];
@@ -31,7 +30,11 @@ const Footer = () => {
   const socialLinks = [
     { name: "Twitter", icon: Twitter, href: "https://twitter.com" },
     { name: "Instagram", icon: Instagram, href: "https://instagram.com" },
-    { name: "GitHub", icon: Github, href: "https://github.com" },
+    {
+      name: "GitHub",
+      icon: Github,
+      href: "https://github.com/deybalal/deybalal-website",
+    },
   ];
 
   return (
@@ -49,8 +52,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-muted-foreground max-w-xs leading-relaxed">
-              مقصد نهایی شما برای کشف، پخش و دانلود موسیقی های مورد علاقه تان.
-              به جمع هنرمندان و طرفداران ما بپیوندید.
+              پلتفرم پخش آنلاین و دانلود آهنگ لری
             </p>
             <div className="flex gap-4">
               {socialLinks.map((social) => (
@@ -77,12 +79,20 @@ const Footer = () => {
               <ul className="space-y-4">
                 {section.links.map((link) => (
                   <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-muted-foreground hover:text-primary transition-colors duration-200"
-                    >
-                      {link.name}
-                    </Link>
+                    {link.href === "/contact" ? (
+                      <ContactUsModal>
+                        <button className="cursor-pointer text-muted-foreground hover:text-primary transition-colors duration-200 text-sm">
+                          {link.name}
+                        </button>
+                      </ContactUsModal>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-muted-foreground hover:text-primary transition-colors duration-200"
+                      >
+                        {link.name}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -93,26 +103,19 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} دی بلال. تمامی حقوق محفوظ است.
+            {currentYear} دی بلال. پروژه ی متن باز.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link
-              href="/privacy"
-              className="hover:text-primary transition-colors"
-            >
-              حریم خصوصی
-            </Link>
-            <Link
-              href="/terms"
-              className="hover:text-primary transition-colors"
-            >
+            <Link href="/tos" className="hover:text-primary transition-colors">
               قوانین
             </Link>
             <Link
-              href="/cookies"
+              href="https://github.com/deybalal/deybalal-website"
               className="hover:text-primary transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              کوکی ها
+              مشارکت در پروژه
             </Link>
           </div>
         </div>

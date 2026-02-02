@@ -24,7 +24,7 @@ const GenreCard = ({ genre, color = "bg-purple-500" }: GenreCardProps) => {
           </h3>
           {genre._count && (
             <p className="text-white/80 text-sm font-medium">
-              {genre._count.songs} Songs
+              {genre._count.songs} آهنگ
             </p>
           )}
         </CardContent>

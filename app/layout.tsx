@@ -15,13 +15,11 @@ export const metadata: Metadata = {
   description:
     "آهنگ لری مورد علاقه ی خود را پیدا و آنلاین پخش کنید یا با کیفیت عالی دانلود کنید.",
   keywords: [
-    "music",
-    "streaming",
-    "songs",
-    "artists",
-    "albums",
-    "lyrics",
-    "download music",
+    "استریم آهنگ لری",
+    "آهنگ لری",
+    "آلبوم های لری",
+    "خواننده های لری",
+    "دانلود آهنگ لری",
   ],
   authors: [{ name: "ادمین دی بلال" }],
   openGraph: {
