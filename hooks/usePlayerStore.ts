@@ -24,7 +24,7 @@ interface PlayerState {
   play: () => void;
   pause: () => void;
   setSong: (song: Song, play?: boolean) => void;
-  setQueue: (songs: Song[], startIndex?: number) => void;
+  setQueue: (songs: Song[], startIndex?: number, play?: boolean) => void;
   addToQueue: (song: Song) => void;
   playNext: (song: Song) => void;
   removeFromQueue: (index: number) => void;
@@ -109,7 +109,7 @@ export const usePlayerStore = create<PlayerState>()(
         });
       },
 
-      setQueue: (songs, startIndex = 0) => {
+      setQueue: (songs, startIndex = 0, play = true) => {
         const pref = get().downloadPreference;
         const songsWithUri = songs.map((s) => {
           const { uri } = getBestUri(s, pref);
@@ -134,10 +134,10 @@ export const usePlayerStore = create<PlayerState>()(
           currentIndex: startIndex,
           currentSong: currentSongData,
           currentQuality,
-          isPlaying: true,
+          isPlaying: play,
           progress: 0,
           duration: currentSongData?.duration || 0,
-          activeId: TAB_ID,
+          activeId: play ? TAB_ID : get().activeId,
         });
       },
 

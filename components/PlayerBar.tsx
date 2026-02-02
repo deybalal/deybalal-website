@@ -65,6 +65,8 @@ const PlayerBar = () => {
     downloadPreference,
     setDownloadPreference,
     currentQuality,
+    setSong,
+    setQueue,
   } = usePlayerStore();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -140,6 +142,25 @@ const PlayerBar = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [volume, isPlaying, pause, play, setVolume]);
+
+  useEffect(() => {
+    const prefetchRandomSong = async () => {
+      if (!currentSong) {
+        try {
+          const res = await fetch("/api/songs/random-play");
+          if (res.ok) {
+            const song = await res.json();
+            setSong(song, false);
+            setQueue([song], 0, false);
+          }
+        } catch (error) {
+          console.error("Failed to prefetch random song:", error);
+        }
+      }
+    };
+
+    prefetchRandomSong();
+  }, [currentSong, setSong, setQueue]);
 
   if (!currentSong) return null; // Or return a disabled state
 

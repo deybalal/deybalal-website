@@ -9,6 +9,8 @@ import HeroLyricsDemo from "@/components/HeroLyricsDemo";
 
 import { Metadata } from "next";
 import Footer from "@/components/Footer";
+import Link from "next/link";
+import PlayRandomButton from "@/components/PlayRandomButton";
 
 export const metadata: Metadata = {
   title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری به همراه متن آهنگ",
@@ -184,20 +186,14 @@ export default async function Home() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
-                <button className="group/btn px-8 py-4 bg-white text-black rounded-full font-bold text-base md:text-lg shadow-2xl hover:shadow-white/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2">
-                  <svg
-                    className="w-6 h-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                  همین حالا گوش دادن را شروع کنید
-                </button>
+                <PlayRandomButton />
 
-                <button className="px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl">
-                  مشاهده پلی لیست ها
-                </button>
+                <Link
+                  href="/artist"
+                  className="px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
+                >
+                  مشاهده خواننده ها
+                </Link>
               </div>
 
               {/* Stats/Features */}
