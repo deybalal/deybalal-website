@@ -1,6 +1,6 @@
 "use client";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Play,
   Pause,
@@ -67,9 +67,11 @@ const PlayerBar = () => {
     currentQuality,
     setSong,
     setQueue,
+    hasHydrated,
   } = usePlayerStore();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [previousVolume, setPreviousVolume] = useState(100);
 
   const navItems = [
     { name: "صفحه اصلی", href: "/", icon: Home },
@@ -88,16 +90,16 @@ const PlayerBar = () => {
     { label: "320 kbps", value: 320 },
   ];
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     if (isPlaying) pause();
     else play();
-  };
+  }, [isPlaying, pause, play]);
 
-  const toggleRepeat = () => {
+  const toggleRepeat = useCallback(() => {
     if (repeatMode === "off") setRepeatMode("all");
     else if (repeatMode === "all") setRepeatMode("one");
     else setRepeatMode("off");
-  };
+  }, [repeatMode, setRepeatMode]);
 
   const handleSeek = (value: number[]) => {
     setSeekTo(value[0]);
@@ -126,25 +128,75 @@ const PlayerBar = () => {
         return;
       }
 
-      if (e.code === "Space") {
+      const code = e.code;
+      const shiftKey = e.shiftKey;
+
+      if (code === "Space") {
         e.preventDefault();
-        if (isPlaying) pause();
-        else play();
-      } else if (e.code === "ArrowUp") {
+        togglePlay();
+      } else if (code === "ArrowUp") {
         e.preventDefault();
-        setVolume(Math.min(volume + 2, 100));
-      } else if (e.code === "ArrowDown") {
+        setVolume(Math.min(volume + 5, 100));
+      } else if (code === "ArrowDown") {
         e.preventDefault();
-        setVolume(Math.max(volume - 2, 0));
+        setVolume(Math.max(volume - 5, 0));
+      } else if (code === "ArrowRight") {
+        e.preventDefault();
+        if (shiftKey) {
+          next();
+        } else {
+          setSeekTo(progress + 5);
+          setProgress(progress + 5);
+        }
+      } else if (code === "ArrowLeft") {
+        e.preventDefault();
+        if (shiftKey) {
+          prev();
+        } else {
+          setSeekTo(progress - 5);
+          setProgress(progress - 5);
+        }
+      } else if (code === "KeyM") {
+        e.preventDefault();
+        if (volume > 0) {
+          setPreviousVolume(volume);
+          setVolume(0);
+        } else {
+          setVolume(previousVolume > 0 ? previousVolume : 100);
+        }
+      } else if (code === "KeyS") {
+        e.preventDefault();
+        toggleShuffle();
+      } else if (code === "KeyR") {
+        e.preventDefault();
+        toggleRepeat();
+      } else if (code === "KeyL") {
+        e.preventDefault();
+        toggleRepeat();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [volume, isPlaying, pause, play, setVolume]);
+  }, [
+    volume,
+    previousVolume,
+    isPlaying,
+    progress,
+    togglePlay,
+    setVolume,
+    setSeekTo,
+    setProgress,
+    next,
+    prev,
+    toggleShuffle,
+    toggleRepeat,
+  ]);
 
   useEffect(() => {
     const prefetchRandomSong = async () => {
+      if (!hasHydrated) return;
+
       if (!currentSong) {
         try {
           const res = await fetch("/api/songs/random-play");
@@ -160,7 +212,7 @@ const PlayerBar = () => {
     };
 
     prefetchRandomSong();
-  }, [currentSong, setSong, setQueue]);
+  }, [currentSong, setSong, setQueue, hasHydrated]);
 
   if (!currentSong) return null; // Or return a disabled state
 

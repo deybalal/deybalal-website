@@ -84,23 +84,8 @@ export default function HeroLyricsDemo() {
     return index === -1 ? 0 : index;
   }, [currentTime, lyrics]);
 
-  // Auto-scroll
-  useEffect(() => {
-    if (!scrollContainerRef.current) return;
-
-    const activeElement = scrollContainerRef.current.children[
-      activeIndex
-    ] as HTMLElement;
-    if (activeElement) {
-      activeElement.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, [activeIndex]);
-
   return (
-    <div className="relative w-[400px] h-[400px] group/card shrink-0 hidden lg:block">
+    <div className="relative w-[400px] h-[440px] group/card shrink-0 hidden lg:block">
       {/* Glassmorphism Background Layers */}
       <div className="absolute inset-0 bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl transform rotate-6 group-hover/card:rotate-12 transition-transform duration-500" />
       <div className="absolute inset-0 bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl transform -rotate-3 group-hover/card:-rotate-6 transition-transform duration-500" />

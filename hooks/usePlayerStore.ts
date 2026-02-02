@@ -20,6 +20,7 @@ interface PlayerState {
   activeId: string | null;
   downloadPreference: number;
   currentQuality: number | null;
+  hasHydrated: boolean;
 
   play: () => void;
   pause: () => void;
@@ -37,6 +38,7 @@ interface PlayerState {
   setSeekTo: (time: number | null) => void;
   setActiveId: (id: string) => void;
   setDownloadPreference: (pref: number) => void;
+  setHasHydrated: (state: boolean) => void;
 
   isShuffling: boolean;
   repeatMode: "off" | "all" | "one";
@@ -83,6 +85,7 @@ export const usePlayerStore = create<PlayerState>()(
       activeId: null,
       downloadPreference: 128,
       currentQuality: null,
+      hasHydrated: false,
 
       play: () => set({ isPlaying: true, activeId: TAB_ID }),
       pause: () => set({ isPlaying: false }),
@@ -305,9 +308,13 @@ export const usePlayerStore = create<PlayerState>()(
       toggleShuffle: () =>
         set((state) => ({ isShuffling: !state.isShuffling })),
       setRepeatMode: (mode) => set({ repeatMode: mode }),
+      setHasHydrated: (state) => set({ hasHydrated: state }),
     }),
     {
       name: "player-storage",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
       partialize: (state) =>
         ({
           volume: state.volume,

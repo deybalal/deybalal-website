@@ -115,7 +115,7 @@ export default async function AlbumDetailPage({
   }));
 
   return (
-    <div className="space-y-12 pb-24 h-max w-full md:w-auto">
+    <div className="space-y-12 pb-24 h-max w-full max-w-5xl">
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-linear-to-b from-accent/10 via-background to-background pointer-events-none -z-10 h-[500px]" />
 

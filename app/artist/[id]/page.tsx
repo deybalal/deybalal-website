@@ -155,7 +155,7 @@ export default async function ArtistDetailPage({
   }));
 
   return (
-    <div className="space-y-12 pb-24 h-max w-full md:w-auto">
+    <div className="space-y-12 pb-24 h-max w-full md:w-auto max-w-6xl">
       {/* Header Section */}
       <div className="relative min-h-[400px] md:h-[50vh] -mt-8 overflow-hidden rounded-b-[3rem] shadow-2xl flex flex-col justify-center">
         {/* Blurred Background */}

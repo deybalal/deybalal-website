@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Album } from "@/types/types";
 import Image from "next/image";
