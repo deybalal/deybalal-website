@@ -5,6 +5,7 @@ import SongCard from "@/components/SongCard";
 import { prisma } from "@/lib/prisma";
 import { Song as PrismaSong, Artist as PrismaArtist } from "@prisma/client";
 import SectionHeader from "@/components/ui/SectionHeader";
+import HeroLyricsDemo from "@/components/HeroLyricsDemo";
 
 import { Metadata } from "next";
 import Footer from "@/components/Footer";
@@ -241,46 +242,8 @@ export default async function Home() {
             </div>
 
             {/* Right Content - Floating Card (Hidden on Mobile) */}
-            <div className="hidden lg:block shrink-0">
-              <div className="relative w-80 h-80 group/card">
-                {/* Glassmorphism Card */}
-                <div className="absolute inset-0 bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl transform rotate-6 group-hover/card:rotate-12 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl transform -rotate-3 group-hover/card:-rotate-6 transition-transform duration-500" />
-                <div className="relative bg-linear-to-br from-white/20 to-white/5 backdrop-blur-2xl rounded-3xl border border-white/30 shadow-2xl p-6 h-full flex flex-col justify-between hover:scale-105 transition-transform duration-500">
-                  <div>
-                    <div className="w-full h-48 bg-linear-to-br from-purple-500 to-pink-500 rounded-2xl mb-4 flex items-center justify-center">
-                      <svg
-                        className="w-20 h-20 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-white font-bold text-xl mb-2">
-                      در حال پخش
-                    </h3>
-                    <p className="text-white/70 text-sm">
-                      آهنگ‌های مورد علاقه شما
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                      <svg
-                        className="w-6 h-6 text-black"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
-                      <div className="h-full w-2/3 bg-white rounded-full" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Right Content - Floating Card (Hidden on Mobile) */}
+            <HeroLyricsDemo />
           </div>
         </div>
       </section>
