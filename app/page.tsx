@@ -165,23 +165,19 @@ export default async function Home() {
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                 <span className="text-white text-xs md:text-sm font-semibold tracking-wide">
-                  🎵 تجربه صدای با کیفیت
+                  🎵 تجربه ای متفاوت
                 </span>
               </div>
 
               {/* Massive Headline */}
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tight leading-[1.1]">
-                جایی که موسیقی
-                <br />
-                <span className="bg-clip-text bg-linear-to-r from-violet-400 via-fuchsia-400 to-pink-400 neon-text animate-pulse">
-                  زنده می‌شود
-                </span>
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tight leading-[1.1] bg-clip-text bg-linear-to-r from-violet-400 via-fuchsia-400 to-pink-400 neon-text animate-pulse">
+                دی بلال
               </h1>
 
               {/* Subheadline */}
               <p className="text-gray-200 dark:text-gray-300 text-lg md:text-xl lg:text-2xl leading-relaxed max-w-2xl mx-auto lg:mx-0 font-light">
-                میلیون‌ها آهنگ، لیست‌های پخش منتخب و متن آهنگ از هنرمندان مورد
-                علاقه خود را کشف کنید. موسیقی شما از اینجا شروع می‌شود.
+                پخش آنلاین و دانلود آهنگ های لری با کیفیت بالا به همراه متن آهنگ
+                در پلتفرم دی بلال
               </p>
 
               {/* CTA Buttons */}
@@ -207,7 +203,7 @@ export default async function Home() {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
                   <span className="text-sm md:text-base font-medium">
-                    +100 میلیون آهنگ
+                    +100 آهنگ
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -231,7 +227,7 @@ export default async function Home() {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
                   <span className="text-sm md:text-base font-medium">
-                    کیفیت HD
+                    کیفیت بالا
                   </span>
                 </div>
               </div>

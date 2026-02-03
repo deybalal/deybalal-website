@@ -67,6 +67,15 @@ export async function POST(request: NextRequest) {
           userId: signUp.user.id,
         },
       });
+      await prisma.playlist.create({
+        data: {
+          name: "لیست دانلود",
+          description: "آهنگ هایی که میخواهید دانلود کنید. (روی موبایل)",
+          isDownload: true,
+          duration: 0,
+          userId: signUp.user.id,
+        },
+      });
     }
 
     return NextResponse.json({

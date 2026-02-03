@@ -3,9 +3,13 @@
 import Link from "next/link";
 import { Twitter, Instagram, Github, Music2 } from "lucide-react";
 import { ContactUsModal } from "@/components/ContactUsModal";
+import { useTheme } from "next-themes";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const theme = useTheme();
+
+  const isDark = theme.theme === "dark";
 
   const footerLinks = [
     {
@@ -119,6 +123,41 @@ const Footer = () => {
             </Link>
           </div>
         </div>
+      </div>
+      <div className="w-full flex justify-center mt-6">
+        <h3 className="flex items-center gap-1 text-xl">
+          همه جای{" "}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 310 120"
+            className="inline-block h-[1em] w-auto align-text-bottom"
+          >
+            <defs>
+              <linearGradient id="iranGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#239F40" />
+                <stop offset="34%" stopColor="#239F40" />
+                <stop offset="34%" stopColor={isDark ? "#FFFFFF" : "#b3b3b3"} />
+                <stop offset="68%" stopColor={isDark ? "#FFFFFF" : "#b3b3b3"} />
+                <stop offset="68%" stopColor="#CE1126" />
+                <stop offset="100%" stopColor="#CE1126" />
+              </linearGradient>
+            </defs>
+
+            <text
+              x="50%"
+              y="70%"
+              textAnchor="middle"
+              direction="rtl"
+              unicodeBidi="bidi-override"
+              fontSize="120"
+              fontWeight={600}
+              fill="url(#iranGradient)"
+            >
+              ایران
+            </text>
+          </svg>{" "}
+          سرای من است.
+        </h3>
       </div>
     </footer>
   );
