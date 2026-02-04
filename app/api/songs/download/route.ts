@@ -42,6 +42,7 @@ export async function POST(request: Request) {
           isDownload: true,
           duration: 0,
           userId: session.user.id,
+          coverArt: "/images/download.png",
         },
         include: { songs: true },
       });

@@ -71,7 +71,7 @@ export default function SongCardPlayButton({
   };
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-100">
       <div className="relative">
         {/* Pulsing Glow Ring */}
         <div className="absolute inset-0 w-16 h-16 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 bg-purple-400/40 dark:bg-white/30 rounded-full blur-xl animate-pulse" />
@@ -79,7 +79,7 @@ export default function SongCardPlayButton({
         {/* Play Button */}
         <div
           onClick={handleClick}
-          className="z-50 relative w-16 h-16 rounded-full bg-white dark:bg-white/95 backdrop-blur-md flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-2xl shadow-purple-500/30 dark:shadow-black/50 hover:shadow-purple-500/50"
+          className="z-200 relative w-16 h-16 rounded-full bg-white dark:bg-white/95 backdrop-blur-md flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-2xl shadow-purple-500/30 dark:shadow-black/50 hover:shadow-purple-500/50"
         >
           {isPlaying && songId === currentSong?.id ? (
             <Pause

@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  experimental: {
+    proxyClientMaxBodySize: 26214400, // 25MB in bytes
+  },
 
   // Security headers
   async headers() {
@@ -20,13 +23,6 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
-  },
-
-  // Limit request body size
-  experimental: {
-    serverActions: {
-      bodySizeLimit: "10mb",
-    },
   },
 };
 

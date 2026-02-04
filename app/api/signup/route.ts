@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
           isDownload: true,
           duration: 0,
           userId: signUp.user.id,
+          coverArt: "/images/download.png",
         },
       });
     }

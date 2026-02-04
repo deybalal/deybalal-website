@@ -4,10 +4,17 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-hot-toast";
-import { Loader2, Send } from "lucide-react";
+import { HelpCircle, Loader2, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface LyricsEditorProps {
   songId: string;
@@ -95,14 +102,41 @@ export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
         <h2 className="text-xl font-semibold">
           {isAdmin ? "ویرایش متن آهنگ" : "پیشنهاد تغییر متن آهنگ"}
         </h2>
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : isAdmin ? null : (
-            <Send className="mr-2 h-4 w-4" />
-          )}
-          {isAdmin ? "ذخیره متن" : "ارسال ویرایش"}
-        </Button>
+
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="secondary">
+              <HelpCircle />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] bg-card/95 backdrop-blur-xl border-white/10">
+            <DialogHeader>
+              <DialogTitle>راهنمای افزودن متن</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4 flex flex-col gap-y-3">
+              <span> 1. لطفا بیت های تکراری را حذف نکنید! </span>
+              <span>
+                2. متن آهنگ باید دقیقا شبیه به متن شعری باشد که خواننده از روی
+                آن می خواند. بدون حذفیات .
+              </span>
+              <span>
+                3. در صورتی که متن آهنگ را از سایتی کپی کرده اید، نام سایت و
+                آدرس آن را در کادر های پایین میتوانید وارد کنید.
+              </span>
+              <span>
+                4. متن آهنگ پس از تایید توسط مدیر وبسایت نمایش داده می شود!
+              </span>
+              <span>
+                5. نتیجه ی تایید یا رد شدن متن را می توانید با مراجعه به حساب
+                کاربری ببینید.
+              </span>
+              <span>
+                6. پس از تایید شدن آهنگ، نام شما به عنوان &apos;ارسال کننده ی
+                متن&apos; در صفحه ی اختصاصی آهنگ نمایش داده می شود.
+              </span>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
       <Textarea
         value={lyrics}
@@ -126,6 +160,20 @@ export default function LyricsEditor({ songId, userRole }: LyricsEditorProps) {
         disabled={!isAdmin && isSourceExist}
         placeholder="https://bakhtiarylyrics.blogfa.com/post/50"
       />
+      <div className="flex justify-center w-full mt-6">
+        <Button
+          onClick={handleSave}
+          disabled={saving}
+          className="text-xl bg-green-600 hover:bg-green-400 text-white"
+        >
+          {saving ? (
+            <Loader2 className="mr-2 size-8 animate-spin" />
+          ) : isAdmin ? null : (
+            <Send className="mr-2 size-8" />
+          )}
+          {isAdmin ? "ذخیره متن" : "ارسال ویرایش"}
+        </Button>
+      </div>
     </div>
   );
 }

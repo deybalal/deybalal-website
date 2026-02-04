@@ -114,7 +114,10 @@ const SimilarSongsCarousel = ({ songs }: SimilarSongsCarouselProps) => {
   }, [isDragging, startX, scrollLeft, isRTL]);
 
   const onMouseDown = (e: React.MouseEvent) => {
+    console.log("Above");
+
     if (!scrollRef.current) return;
+    console.log("Nelowe");
     setIsDragging(true);
     // Use screenX for more consistent dragging across RTL containers
     setStartX(e.pageX - (scrollRef.current.offsetLeft || 0));

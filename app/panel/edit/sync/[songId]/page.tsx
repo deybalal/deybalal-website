@@ -221,23 +221,23 @@ export default function SyncLyricsPage({
 
   if (!song) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black text-white">
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         آهنگ پیدا نشد!
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 md:ml-20 z-60 flex flex-col bg-black text-white overflow-hidden">
+    <div className="fixed inset-0 z-60 flex flex-col bg-background text-foreground overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 bg-black/50 backdrop-blur-md z-10 border-b border-white/10">
+      <header className="flex items-center justify-between px-6 py-4 bg-background/50 backdrop-blur-md z-10 border-b border-white/10">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
-          className="text-white hover:bg-white/10 cursor-pointer"
+          className="text-foreground hover:bg-white/10 cursor-pointer"
         >
-          <ArrowLeft size={24} />
+          <ArrowRight size={24} />
         </Button>
         <h1 className="text-lg font-bold">همگام سازی متن آهنگ</h1>
         <Button
@@ -253,7 +253,7 @@ export default function SyncLyricsPage({
       <div className="flex-1 overflow-hidden flex flex-col md:flex-row pb-32">
         {/* Left Side: Cover & Info (Desktop) */}
         <div className="hidden md:flex flex-col items-center justify-center w-1/3 p-8 border-r border-white/10 bg-zinc-900/50">
-          <div className="relative w-64 h-64 rounded-2xl overflow-hidden shadow-2xl shadow-black border border-white/10 mb-6">
+          <div className="relative w-64 h-64 rounded-2xl overflow-hidden shadow-2xl shadow-background border border-white/10 mb-6">
             <Image
               src={song.coverArt || "/images/cover.png"}
               alt={song.title}
@@ -280,7 +280,7 @@ export default function SyncLyricsPage({
                 className="object-cover"
               />
             </div>
-            <div>
+            <div className="mr-2">
               <h3 className="font-bold text-sm">{song.title}</h3>
               <p className="text-xs text-gray-400">{song.artist}</p>
             </div>
@@ -311,12 +311,14 @@ export default function SyncLyricsPage({
                     <p
                       className={`text-lg font-medium leading-relaxed transition-all duration-200 ${
                         isSynced ? "text-green-400" : "text-gray-300"
-                      } ${isActive ? "text-white scale-105 origin-left" : ""}`}
+                      } ${
+                        isActive ? "text-foreground scale-105 origin-left" : ""
+                      }`}
                     >
                       {line}
                     </p>
                     {isSynced && (
-                      <span className="text-xs font-mono text-green-500/70 whitespace-nowrap bg-black/30 px-2 py-1 rounded">
+                      <span className="text-xs font-mono text-green-500/70 whitespace-nowrap bg-background/30 px-2 py-1 rounded">
                         {formatTime(syncedEntry.time)}
                       </span>
                     )}
@@ -328,7 +330,7 @@ export default function SyncLyricsPage({
         </div>
       </div>
       {/* Floating Controls */}
-      <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 p-4 pb-8 md:pb-4 z-50">
+      <div className="absolute bottom-0 left-0 right-0 bg-[#424242] dark:bg-foreground/20 backdrop-blur-xl border-t border-white/10 p-4 pb-8 md:pb-4 z-50">
         <div className="max-w-4xl mx-auto flex flex-col gap-4">
           {/* Progress Bar */}
           <div className="flex items-center gap-3 text-xs text-gray-400">
@@ -345,50 +347,6 @@ export default function SyncLyricsPage({
 
           {/* Buttons */}
           <div className="flex items-center justify-center gap-6 md:gap-10 relative">
-            {/* Save Button (Mobile/Desktop Quick Access) */}
-            <Button
-              size="icon"
-              className="rounded-full w-12 h-12 bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-900/20"
-              onClick={handleSave}
-            >
-              <Save size={20} />
-            </Button>
-
-            {/* Playback Controls */}
-            <div className="flex items-center gap-4 bg-zinc-900/80 rounded-full px-6 py-2 border border-white/5">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSeekTo(progress + 5)}
-                className="text-gray-300 hover:text-white flex flex-col items-center justify-center size-10 p-1 cursor-pointer"
-              >
-                <ArrowRight size={20} />
-                <span className="text-xs m-0 p-0">5s</span>
-              </Button>
-
-              <Button
-                size="icon"
-                className="rounded-full w-14 h-14 bg-white text-black hover:bg-gray-200 hover:scale-105 transition-all"
-                onClick={isPlaying ? pause : play}
-              >
-                {isPlaying ? (
-                  <Pause size={24} fill="currentColor" />
-                ) : (
-                  <Play size={24} fill="currentColor" className="ml-1" />
-                )}
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSeekTo(progress - 5)}
-                className="text-gray-300 hover:text-white flex flex-col items-center justify-center size-10 p-1 cursor-pointer"
-              >
-                <ArrowLeft size={20} />
-                <span className="text-xs m-0 p-0">5s</span>
-              </Button>
-            </div>
-
             {/* Sync Button */}
             <Button
               size="icon"
@@ -405,6 +363,49 @@ export default function SyncLyricsPage({
               }}
             >
               <Timer size={20} />
+            </Button>
+
+            {/* Playback Controls */}
+            <div className="flex items-center gap-4 bg-foreground/60 dark:bg-foreground/20 rounded-full px-6 py-2 border border-white/5">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSeekTo(progress + 5)}
+                className="text-white hover:text-foreground flex flex-col items-center justify-center size-10 p-1 cursor-pointer"
+              >
+                <ArrowRight size={20} />
+                <span className="text-xs m-0 p-0">5s</span>
+              </Button>
+
+              <Button
+                size="icon"
+                className="rounded-full w-14 h-14 bg-foreground text-background hover:bg-foreground/30 hover:scale-105 transition-all"
+                onClick={isPlaying ? pause : play}
+              >
+                {isPlaying ? (
+                  <Pause size={24} fill="currentColor" />
+                ) : (
+                  <Play size={24} fill="currentColor" className="ml-1" />
+                )}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSeekTo(progress - 5)}
+                className="text-white hover:text-foreground flex flex-col items-center justify-center size-10 p-1 cursor-pointer"
+              >
+                <ArrowLeft size={20} />
+                <span className="text-xs m-0 p-0">5s</span>
+              </Button>
+            </div>
+            {/* Save Button (Mobile/Desktop Quick Access) */}
+            <Button
+              size="icon"
+              className="rounded-full w-12 h-12 bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-900/20"
+              onClick={handleSave}
+            >
+              <Save size={20} />
             </Button>
           </div>
 
