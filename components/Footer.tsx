@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Twitter, Instagram, Github, Music2 } from "lucide-react";
 import { ContactUsModal } from "@/components/ContactUsModal";
-import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
 
 const Footer = () => {
@@ -11,9 +10,6 @@ const Footer = () => {
     ssr: false,
   });
   const currentYear = new Date().getFullYear();
-  const theme = useTheme();
-
-  const isDark = theme.theme === "dark";
 
   const footerLinks = [
     {
@@ -145,8 +141,8 @@ const Footer = () => {
               <linearGradient id="iranGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#239F40" />
                 <stop offset="34%" stopColor="#239F40" />
-                <stop offset="34%" stopColor={isDark ? "#FFFFFF" : "#b3b3b3"} />
-                <stop offset="68%" stopColor={isDark ? "#FFFFFF" : "#b3b3b3"} />
+                <stop offset="34%" stopColor="var(--gradient-stop)" />
+                <stop offset="68%" stopColor="var(--gradient-stop)" />
                 <stop offset="68%" stopColor="#CE1126" />
                 <stop offset="100%" stopColor="#CE1126" />
               </linearGradient>

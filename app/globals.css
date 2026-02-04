@@ -11,6 +11,7 @@
 }
 
 :root {
+  --gradient-stop: #b3b3b3; /* light‑mode default */
   --primary: oklch(0.205 0 0);
   --secondary: oklch(0.97 0 0);
   --accent: oklch(0.55 0.25 240);
@@ -156,6 +157,7 @@ div {
 }
 
 .dark {
+  --gradient-stop: #ffffff;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

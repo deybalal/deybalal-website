@@ -136,10 +136,10 @@ const PlayerBar = () => {
         togglePlay();
       } else if (code === "ArrowUp") {
         e.preventDefault();
-        setVolume(Math.min(volume + 5, 100));
+        setVolume(Math.min(volume + 2, 100));
       } else if (code === "ArrowDown") {
         e.preventDefault();
-        setVolume(Math.max(volume - 5, 0));
+        setVolume(Math.max(volume - 2, 0));
       } else if (code === "ArrowRight") {
         e.preventDefault();
         if (shiftKey) {
