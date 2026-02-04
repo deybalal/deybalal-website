@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     "دانلود آهنگ لری",
   ],
   authors: [{ name: "ادمین دی بلال" }],
+  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     locale: "fa_IR",
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
       "آهنگ لری مورد علاقه ی خود را پیدا و آنلاین پخش کنید یا با کیفیت عالی دانلود کنید.",
     images: [
       {
-        url: "/images/og-image.png",
+        url: "/images/download.png",
         width: 1200,
         height: 630,
         alt: "دی بلال",
@@ -51,8 +52,12 @@ export const metadata: Metadata = {
     title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری",
     description:
       "آهنگ لری مورد علاقه ی خود را پیدا و آنلاین پخش کنید یا با کیفیت عالی دانلود کنید.",
-    images: ["/images/og-image.png"],
+    images: ["/images/download.png"],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0c0d0e",
 };
 
 export default function RootLayout({

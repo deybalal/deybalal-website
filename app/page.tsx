@@ -146,7 +146,7 @@ export default async function Home() {
         <div className="absolute inset-0 bg-linear-to-br from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-900 dark:via-purple-900 dark:to-fuchsia-900 animate-gradient-slow" />
 
         {/* Overlay Pattern with Animation */}
-        <div className="absolute inset-0 bg-[url('/images/temp_landing.jpg')] bg-cover bg-center opacity-20 mix-blend-overlay transition-transform duration-1000 group-hover:scale-110" />
+        <div className="absolute inset-0 bg-[url('/images/landing.jpg')] bg-cover bg-center opacity-20 mix-blend-normal transition-transform duration-1000 group-hover:scale-110" />
 
         {/* Multiple Gradient Overlays for Depth */}
         <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/30 to-transparent" />

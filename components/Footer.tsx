@@ -4,8 +4,12 @@ import Link from "next/link";
 import { Twitter, Instagram, Github, Music2 } from "lucide-react";
 import { ContactUsModal } from "@/components/ContactUsModal";
 import { useTheme } from "next-themes";
+import dynamic from "next/dynamic";
 
 const Footer = () => {
+  const InstallPWANoSSR = dynamic(() => import("./InstallPWA"), {
+    ssr: false,
+  });
   const currentYear = new Date().getFullYear();
   const theme = useTheme();
 
@@ -99,6 +103,11 @@ const Footer = () => {
                     )}
                   </li>
                 ))}
+                {section.title === "لینک ها" && (
+                  <li>
+                    <InstallPWANoSSR />
+                  </li>
+                )}
               </ul>
             </div>
           ))}

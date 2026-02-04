@@ -123,7 +123,7 @@ export default function SongDetailClient({
 
   return (
     <div
-      className={`h-[calc(100dvh-120px)] w-full flex-1 flex justify-center m-0 ms-auto me-auto p-0 transition-all duration-500 ${
+      className={`h-[calc(100vh-120px)] w-full flex-1 flex justify-center m-0 ms-auto me-auto p-0 transition-all duration-500 ${
         showLyrics
           ? "max-w-7xl flex flex-col lg:grid lg:grid-cols-2 lg:gap-12 lg:ps-6 lg:pe-6"
           : "max-w-4xl flex flex-col items-center justify-center p-0 md:p-0"
