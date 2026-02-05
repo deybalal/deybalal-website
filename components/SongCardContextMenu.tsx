@@ -10,7 +10,6 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Artist } from "@/types/types";
 import AddToPlaylistDialog from "./AddToPlaylistDialog";
@@ -53,8 +52,6 @@ export default function SongCardContextMenu({
   children,
 }: SongCardContextMenuProps) {
   const { setSong, addToQueue, playNext } = usePlayerStore();
-
-  const router = useRouter();
 
   const song = {
     id: songId,
