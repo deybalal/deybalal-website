@@ -377,7 +377,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
 
       const result = await res.json();
       if (!res.ok || !result.success) {
-        throw new Error(result.message || "خطا در ارسال آهنگ");
+        toast.error(result?.message || "خطا در ارسال آهنگ");
       }
 
       const { filename, metadata, coverArt, tempCoverArt } = result.data;

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { unlink, stat } from "fs/promises";
+import { unlink, stat, rename } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { createNotification, notifyFollowers } from "@/lib/notifications";
@@ -103,6 +103,7 @@ export async function POST(
       counter++;
     }
 
+    const filenameCoverArt = `${finalBaseName}.jpg`;
     const filenameOgg = `${song.id}.ogg`;
     const filename64 = `${finalBaseName}-64.mp3`;
     const filename128 = `${finalBaseName}-128.mp3`;
@@ -192,6 +193,7 @@ export async function POST(
         duration: duration || song.duration,
         uri: `/assets/mp3/${filename128}`,
         ogg: `/assets/ogg/${filenameOgg}`,
+        coverArt: hasCover ? `/assets/cover/${filenameCoverArt}` : "",
         links: {
           "64": {
             url: `/assets/mp3/${filename64}`,
@@ -245,6 +247,15 @@ export async function POST(
     await unlink(sourcePath).catch((e) =>
       console.error("Failed to delete source file:", e)
     );
+
+    if (hasCover) {
+      if (existsSync(coverPath)) {
+        rename(
+          coverPath,
+          path.join(process.cwd(), "public/assets/cover", filenameCoverArt)
+        );
+      }
+    }
 
     return NextResponse.json({ success: true, data: updatedSong });
   } catch (error) {
