@@ -84,7 +84,8 @@ export default async function PlaylistDetailPage({
   // Transform to match Playlist type
   const playlist = {
     ...playlistData,
-    userId: playlistData.userId ?? undefined,
+    userId: undefined,
+    doesUserOwnsPlaylist: playlistData.userId === session?.user.id,
     description: playlistData.description ?? undefined,
     coverArt: playlistData.coverArt ?? undefined,
     songsLength: playlistData._count.songs,
@@ -114,7 +115,6 @@ export default async function PlaylistDetailPage({
     <Suspense fallback={<PlaylistSkeleton />}>
       <PlaylistClient
         playlist={playlist}
-        sessionUserId={session?.user.id ?? null}
         currentPage={currentPage}
         totalPages={Math.ceil(playlistData._count.songs / pageSize)}
       />

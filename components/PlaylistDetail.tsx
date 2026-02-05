@@ -131,7 +131,11 @@ export default function PlaylistDetail({
                 if (data.success) {
                   setPlaylist(data.data);
                   toast.success("آهنگ از پلی لیست حذف شد");
+                } else {
+                  toast.error(result.message);
                 }
+              } else {
+                toast.error("خطا در حذف آهنگ");
               }
             } else {
               console.error(result.message);

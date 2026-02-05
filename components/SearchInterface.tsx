@@ -131,7 +131,7 @@ export default function SearchInterface({
 
       {/* Results Area */}
       <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full">
+        <ScrollArea className="h-full rtl">
           <div className="pb-24">
             {query.trim() !== "" &&
             (isPending || isLoading || query !== debouncedQuery) ? (

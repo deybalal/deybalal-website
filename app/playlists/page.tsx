@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import PlaylistGrid from "@/components/PlaylistGrid";
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 
@@ -20,20 +19,53 @@ export default async function PlaylistsPage() {
     headers: await headers(),
   });
 
-  if (!session) {
-    return redirect("/login");
-  }
-
   const playlistsData = await prisma.playlist.findMany({
     where: {
-      userId: session.user.id,
+      userId: session ? session.user.id : "",
     },
     include: { songs: true },
     orderBy: { createdAt: "desc" },
   });
 
+  const publicPlaylistsData = await prisma.playlist.findMany({
+    where: {
+      isPrivate: false,
+    },
+    include: { songs: true, user: true },
+    orderBy: { createdAt: "desc" },
+  });
+
   // Map Prisma result to match Playlist type
   const playlists = playlistsData.map((playlist) => ({
+    ...playlist,
+    doesUserOwnsPlaylist: playlist.userId === session?.user.id,
+    createdAt: playlist.createdAt.getTime(),
+    updatedAt: playlist.updatedAt.getTime(),
+    songs: playlist.songs.map((song) => ({
+      ...song,
+      album: song.albumName,
+      coverArt: song.coverArt || null,
+      lyrics: song.lyrics || null,
+      syncedLyrics: song.syncedLyrics || null,
+      filename: song.filename || "",
+      year: song.year.toString(),
+      links: song.links as Record<
+        number,
+        { url: string; size: string; bytes: number }
+      > | null,
+      createdAt: song.createdAt.getTime(),
+      updatedAt: song.updatedAt.getTime(),
+      artists: [], // Minimal artist info for playlist view
+    })),
+    songsLength: playlist.songs.length,
+    coverArt: playlist.coverArt || undefined,
+    description: playlist.description || undefined,
+    userId: undefined,
+    userName: undefined, // Own playlist
+    profileUrl: undefined, // Own playlist
+  }));
+
+  const publicPlaylists = publicPlaylistsData.map((playlist) => ({
     ...playlist,
     createdAt: playlist.createdAt.getTime(),
     updatedAt: playlist.updatedAt.getTime(),
@@ -56,13 +88,13 @@ export default async function PlaylistsPage() {
     songsLength: playlist.songs.length,
     coverArt: playlist.coverArt || undefined,
     description: playlist.description || undefined,
-    userId: undefined, // Add if needed
-    userName: undefined, // Add if needed
-    profileUrl: undefined, // Add if needed
+    userId: undefined,
+    userName: playlist.user.name,
+    profileUrl: playlist.user.image || undefined,
   }));
 
   return (
-    <div className="space-y-8 w-full pb-24">
+    <div className="space-y-8 w-full pb-24 h-max">
       <div className="flex items-center">
         <h1 className="text-4xl font-bold text-white neon-text ml-5">
           پلی لیست ها
@@ -78,6 +110,13 @@ export default async function PlaylistsPage() {
       </div>
 
       <PlaylistGrid initialPlaylists={playlists} />
+
+      <div className="flex flex-col">
+        <h2 className="text-4xl font-bold text-foreground neon-text ml-5 mb-4">
+          پلی لیست های عمومی
+        </h2>
+        <PlaylistGrid initialPlaylists={publicPlaylists} />
+      </div>
     </div>
   );
 }

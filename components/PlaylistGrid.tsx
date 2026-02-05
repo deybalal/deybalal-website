@@ -24,11 +24,14 @@ import { useRouter } from "next/navigation";
 import DialogAlert from "./DialogAlert";
 
 interface PlaylistGridProps {
-  initialPlaylists: Playlist[];
+  initialPlaylists: (Playlist & { doesUserOwnsPlaylist?: boolean })[];
 }
 
 export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
-  const [playlists, setPlaylists] = useState<Playlist[]>(initialPlaylists);
+  const [playlists, setPlaylists] =
+    useState<(Playlist & { doesUserOwnsPlaylist?: boolean })[]>(
+      initialPlaylists
+    );
   const router = useRouter();
 
   const handleDeletePlaylist = async (playlistId: string) => {
@@ -62,13 +65,13 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
       <div className="text-center py-12 text-muted-foreground size-full min-h-[40dvh] flex justify-center items-center flex-col">
         <ListMusic className="h-16 w-16 mx-auto mb-4 opacity-50" />
         <p className="text-xl">هیچ پلی لیستی یافت نشد</p>
-        <p className="text-sm mt-2">اولین پلی لیست خود را بسازید!</p>
+        <p className="text-sm mt-2">وارد حساب کاربری خود شوید!</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pb-24">
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pb-10 mx-5">
       {playlists.map((playlist) => (
         <div key={playlist.id} className="relative group">
           <Link href={`/playlists/${playlist.id}`}>
@@ -96,6 +99,11 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
                   <h3 className="text-foreground font-bold truncate text-lg">
                     {playlist.name}
                   </h3>
+                  {playlist.userName && (
+                    <p className="text-muted-foreground text-sm truncate">
+                      توسط {playlist.userName}
+                    </p>
+                  )}
                   <div className="flex justify-between items-center mt-1">
                     <p className="text-muted-foreground text-sm truncate">
                       {playlist.songs?.length || 0} آهنگ
@@ -134,14 +142,16 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
                   <LinkIcon className="me-2 h-4 w-4" />
                   کپی لینک
                 </DropdownMenuItem>
-                {!playlist.isFavorite && (
-                  <DialogAlert
-                    title="حذف پلی لیست"
-                    description="آیا از حذف این پلی لیست مطمئن هستید؟"
-                    fnButton="حذف"
-                    fn={() => handleDeletePlaylist(playlist.id)}
-                  />
-                )}
+                {!playlist.isFavorite &&
+                  !playlist.isDownload &&
+                  playlist.doesUserOwnsPlaylist && (
+                    <DialogAlert
+                      title="حذف پلی لیست"
+                      description="آیا از حذف این پلی لیست مطمئن هستید؟"
+                      fnButton="حذف"
+                      fn={() => handleDeletePlaylist(playlist.id)}
+                    />
+                  )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

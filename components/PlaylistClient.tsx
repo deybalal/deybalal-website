@@ -12,15 +12,13 @@ import Pagination from "@/components/Pagination";
 import { ShareButtons } from "@/components/ShareButtons";
 
 type Props = {
-  playlist: Playlist;
-  sessionUserId: string | null;
+  playlist: Playlist & { doesUserOwnsPlaylist: boolean };
   currentPage: number;
   totalPages: number;
 };
 
 export default function PlaylistClient({
   playlist: initialPlaylist,
-  sessionUserId,
   currentPage,
   totalPages,
 }: Props) {
@@ -54,7 +52,7 @@ export default function PlaylistClient({
               </h1>
             </div>
 
-            {sessionUserId === playlist.userId && (
+            {playlist.doesUserOwnsPlaylist && (
               <div className="flex items-center gap-2 bg-black/20 p-2 rounded-lg backdrop-blur-sm border border-white/10">
                 {playlist.isPrivate ? (
                   <Lock size={16} className="text-red-400" />
@@ -142,6 +140,8 @@ export default function PlaylistClient({
                   songs: playlist.songs.filter((s) => s.id !== songId),
                 });
                 toast.success("آهنگ حذف شد");
+              } else {
+                toast.error(result.message);
               }
             } catch {
               toast.error("خطا در حذف آهنگ");
