@@ -235,21 +235,40 @@ export async function DELETE(
       );
     }
 
-    // Delete the song from database
-    await prisma.song.delete({
-      where: { id },
-    });
+    if (userRole === "administrator") {
+      await prisma.song.delete({
+        where: { id },
+      });
 
-    // Delete the MP3 file if it exists
-    if (song.filename) {
-      const filePath = path.join(
-        process.cwd(),
-        "public/assets/mp3",
-        song.filename
-      );
-      if (existsSync(filePath)) {
-        await unlink(filePath);
+      const songLinks = Object.values(song.links || {}).map((item) => item.url);
+
+      if (song.coverArt) {
+        if (!song.coverArt.includes("cover.png")) {
+          songLinks.push(song.coverArt);
+        }
       }
+
+      if (song.ogg) {
+        songLinks.push(song.ogg);
+      }
+
+      for (const link of songLinks) {
+        const filePath = path.join(process.cwd(), "public", link);
+        if (existsSync(filePath)) {
+          console.log("Deleting file: ", filePath);
+
+          await unlink(filePath);
+        }
+      }
+    } else {
+      // Delete the song from database
+      await prisma.song.update({
+        where: { id },
+        data: {
+          isDisabled: true,
+          disabledDescription: "آهنگ حذف شد",
+        },
+      });
     }
 
     return NextResponse.json({

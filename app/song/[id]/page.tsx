@@ -104,8 +104,6 @@ export default async function SongDetailPage({
     );
   }
 
-  console.log(songData);
-
   const session = await auth.api.getSession({
     headers: await headers(),
   });

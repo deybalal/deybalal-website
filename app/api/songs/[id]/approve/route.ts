@@ -123,7 +123,9 @@ export async function POST(
 
     const metadataArgs = [
       `-metadata title="${song.title.replace(/"/g, '\\"')}"`,
+      `-metadata comment="${process.env.BETTER_AUTH_URL}"`,
       `-metadata artist="${song.artist.replace(/"/g, '\\"')}"`,
+      `-metadata album_artist="${song.artist.replace(/"/g, '\\"')}"`,
       song.albumName
         ? `-metadata album="${song.albumName.replace(/"/g, '\\"')}"`
         : "",
@@ -148,17 +150,17 @@ export async function POST(
 
       // Generate 64kbps
       await execAsync(
-        `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -metadata comment="${process.env.BETTER_AUTH_URL}" -b:a 64k -y "${path64}"`
+        `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -b:a 64k -y "${path64}"`
       );
 
       // Generate 128kbps
       await execAsync(
-        `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -metadata comment="${process.env.BETTER_AUTH_URL}" -b:a 128k -y "${path128}"`
+        `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -b:a 128k -y "${path128}"`
       );
 
       // Generate 320kbps
       await execAsync(
-        `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -metadata comment="${process.env.BETTER_AUTH_URL}"  -b:a 320k -y "${path320}"`
+        `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs}  -b:a 320k -y "${path320}"`
       );
     } catch (ffmpegError) {
       console.error("FFMPEG Processing Error:", ffmpegError);
