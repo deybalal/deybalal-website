@@ -243,7 +243,11 @@ export default async function Home() {
       {/* Featured Songs */}
       {featuredSongs.length > 0 && (
         <section>
-          <SectionHeader title="آهنگ‌های پیشنهادی" color="bg-blue-500" />
+          <SectionHeader
+            title="آهنگ‌های پیشنهادی"
+            color="bg-blue-500"
+            href="/featured"
+          />
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">
             {featuredSongs.map((song) => (
               <SongCard key={song.id} song={song} />

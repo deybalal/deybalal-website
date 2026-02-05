@@ -11,6 +11,8 @@ import {
   ListPlus,
   PlayCircle,
   Music,
+  ArrowBigUpIcon,
+  Mic2,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -22,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AddToPlaylistDialog from "./AddToPlaylistDialog";
 import { toast } from "react-hot-toast";
+import Link from "next/link";
 
 interface SongListProps {
   songs: Song[];
@@ -131,11 +134,45 @@ const SongList = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => setQueue(songs, i)}>
+                    <DropdownMenuItem>
+                      <Link
+                        href={`/song/${song.id}`}
+                        className="flex items-center flex-row hover:scale-105"
+                      >
+                        <ArrowBigUpIcon className="w-4 h-4 me-2" />
+                        نمایش آهنگ
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer hover:scale-105">
+                      <Link
+                        href={`/artist/${song?.artists[0]?.id}`}
+                        className="flex items-center flex-row hover:scale-105"
+                      >
+                        <Mic2 className="w-4 h-4 me-2" />
+                        نمایش خواننده
+                      </Link>
+                    </DropdownMenuItem>
+                    {song.albumId && (
+                      <DropdownMenuItem className="cursor-pointer hover:scale-105">
+                        <Link
+                          href={`/album/${song.albumId}`}
+                          className="flex items-center flex-row hover:scale-105"
+                        >
+                          <Mic2 className="w-4 h-4 me-2" />
+                          نمایش آلبوم
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer hover:scale-105"
+                      onClick={() => setQueue(songs, i)}
+                    >
                       <PlayCircle className="ml-2 h-4 w-4" />
                       پخش
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className="cursor-pointer hover:scale-105"
                       onClick={(e) => {
                         e.stopPropagation();
                         playNext(song);
@@ -146,6 +183,7 @@ const SongList = ({
                       پخش بعدی
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className="cursor-pointer hover:scale-105"
                       onClick={(e) => {
                         e.stopPropagation();
                         addToQueue(song);
@@ -155,11 +193,13 @@ const SongList = ({
                       <ListPlus className="ml-2 h-4 w-4" />
                       افزودن به صف
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
                     <AddToPlaylistDialog
                       songId={song.id}
                       trigger={
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <DropdownMenuItem
+                          className="cursor-pointer hover:scale-105"
+                          onSelect={(e) => e.preventDefault()}
+                        >
                           <ListPlus className="ml-2 h-4 w-4" />
                           افزودن به پلی لیست
                         </DropdownMenuItem>
@@ -173,7 +213,7 @@ const SongList = ({
                             e.stopPropagation();
                             onRemove(song.id);
                           }}
-                          className="text-destructive focus:text-destructive"
+                          className="text-destructive focus:text-destructive cursor-pointer hover:scale-105"
                         >
                           <Trash2 className="ml-2 h-4 w-4" />
                           حذف از پلی لیست

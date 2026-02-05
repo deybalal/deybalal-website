@@ -49,7 +49,8 @@ export type Artist = {
   nameEn?: string | null;
   description?: string | null;
   image: string | null;
-  songs: Song[];
+  userId: string | null;
+  // songs: Song[];
   isVerified: boolean;
 };
 

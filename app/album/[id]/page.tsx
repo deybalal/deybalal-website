@@ -57,6 +57,9 @@ export default async function AlbumDetailPage({
     where: { id },
     include: {
       songs: {
+        include: {
+          artists: true,
+        },
         where: { isActive: true },
         orderBy: { index: "asc" },
       },
@@ -96,7 +99,7 @@ export default async function AlbumDetailPage({
   // We need to map it to ensure compatibility with SongList and Player
   const songs: Song[] = album.songs.map((song) => ({
     ...song,
-    artists: [],
+    artists: song.artists,
     album: song.albumName || null,
     coverArt: song.coverArt || null,
     title: song.title,

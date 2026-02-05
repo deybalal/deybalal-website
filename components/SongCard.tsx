@@ -15,6 +15,7 @@ const SongCard = ({ song }: SongCardProps) => {
   return (
     <SongCardContextMenu
       songId={song.id}
+      artists={song.artists}
       title={song.title ?? ""}
       titleEn={song.titleEn ?? null}
       uri={song.uri}
