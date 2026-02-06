@@ -11,11 +11,15 @@ import { Metadata } from "next";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import PlayRandomButton from "@/components/PlayRandomButton";
+import { StructuredData } from "@/components/StructuredData";
 
 export const metadata: Metadata = {
   title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری به همراه متن آهنگ",
   description:
     "به دی بلال خوش آمدید. جدیدترین آهنگ‌ها، خوانندگان پیشنهادی و سبک‌های محبوب را کاوش کنید.",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export const dynamic = "force-dynamic";
@@ -138,8 +142,24 @@ export default async function Home() {
     "bg-indigo-500",
   ];
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com";
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "دی بلال",
+    url: baseUrl,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${baseUrl}/search?page=1&q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <div className="space-y-12 pb-20 h-max container">
+      <StructuredData data={structuredData as Record<string, unknown>} />
       {/* Hero Section - Premium Music Platform Design */}
       <section className="relative min-h-[500px] lg:min-h-[600px] rounded-2xl md:rounded-3xl overflow-hidden flex items-center px-6 py-12 md:px-12 lg:px-16 group">
         {/* Animated Gradient Background */}

@@ -10,6 +10,7 @@ import { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { StructuredData } from "@/components/StructuredData";
 
 export async function generateMetadata({
   params,
@@ -30,6 +31,9 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: {
+      canonical: `/album/${id}`,
+    },
     openGraph: {
       title,
       description,
@@ -117,8 +121,32 @@ export default async function AlbumDetailPage({
     > | null,
   }));
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com";
+  const albumUrl = `${baseUrl}/album/${album.id}`;
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "MusicAlbum",
+    name: album.name,
+    url: albumUrl,
+    image: album.coverArt,
+    byArtist: {
+      "@type": "MusicGroup",
+      name: album.artistName,
+      url: `${baseUrl}/artist/${album.artistId}`,
+    },
+    numTracks: songs.length,
+    track: songs.map((s) => ({
+      "@type": "MusicRecording",
+      name: s.title,
+      url: `${baseUrl}/song/${s.id}`,
+    })),
+  };
+
   return (
     <div className="space-y-12 pb-24 h-max w-full max-w-5xl">
+      <StructuredData data={structuredData as Record<string, unknown>} />
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-linear-to-b from-accent/10 via-background to-background pointer-events-none -z-10 h-[500px]" />
 

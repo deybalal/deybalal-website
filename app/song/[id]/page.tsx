@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ReportIssueModal } from "@/components/ReportIssueModal";
 import SimilarSongsCarousel from "@/components/SimilarSongsCarousel";
 import { Song, Contributor } from "@/types/types";
+import { StructuredData } from "@/components/StructuredData";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,9 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: {
+      canonical: `/song/${id}`,
+    },
     openGraph: {
       title,
       description,
@@ -163,8 +167,35 @@ export default async function SongDetailPage({
     (genre) => genre.slug === "instrumental"
   );
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com";
+  const songUrl = `${baseUrl}/song/${song.id}`;
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "MusicRecording",
+    name: song.title,
+    url: songUrl,
+    image: song.coverArt,
+    datePublished: new Date(song.createdAt).toISOString(),
+    genre: song.genres.map((g) => g.name),
+    byArtist: song.artists.map((a) => ({
+      "@type": "MusicGroup",
+      name: a.name,
+      url: `${baseUrl}/artist/${a.id}`,
+    })),
+    duration: `PT${Math.floor(song.duration / 60)}M${song.duration % 60}S`,
+    inAlbum: songData.album
+      ? {
+          "@type": "MusicAlbum",
+          name: songData.album.name,
+        }
+      : undefined,
+  };
+
   return (
     <div className="space-y-12 pb-24 w-full flex-1">
+      <StructuredData data={structuredData} />
       <SongDetailClient
         song={song}
         isUserLoggedIn={isUserLoggedIn}

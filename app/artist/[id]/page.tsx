@@ -10,6 +10,7 @@ import Pagination from "@/components/Pagination";
 import { FollowButton } from "@/components/FollowButton";
 import ArtistDescription from "@/components/ArtistDescription";
 import SectionHeader from "@/components/ui/SectionHeader";
+import { StructuredData } from "@/components/StructuredData";
 
 export async function generateMetadata({
   params,
@@ -37,6 +38,9 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: {
+      canonical: `/artist/${id}`,
+    },
     openGraph: {
       title,
       description,
@@ -136,6 +140,7 @@ export default async function ArtistDetailPage({
         image: artist!.image,
         isVerified: artist!.isVerified,
         songs: [],
+        userId: "",
       },
     ],
   }));
@@ -154,8 +159,27 @@ export default async function ArtistDetailPage({
     updatedAt: new Date(album.updatedAt).getTime(),
   }));
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com";
+  const artistUrl = `${baseUrl}/artist/${artist.id}`;
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "MusicGroup",
+    name: artist.name,
+    url: artistUrl,
+    image: artist.image,
+    description: artist.description,
+    track: songs.map((s) => ({
+      "@type": "MusicRecording",
+      name: s.title,
+      url: `${baseUrl}/song/${s.id}`,
+    })),
+  };
+
   return (
     <div className="space-y-12 pb-24 h-max w-full md:w-auto max-w-6xl">
+      <StructuredData data={structuredData as Record<string, unknown>} />
       {/* Header Section */}
       <div className="relative min-h-[400px] md:h-[50vh] -mt-8 overflow-hidden rounded-b-[3rem] shadow-2xl flex flex-col justify-center">
         {/* Blurred Background */}

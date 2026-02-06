@@ -29,6 +29,9 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: {
+      canonical: `/genres/${slug}`,
+    },
     openGraph: {
       title,
       description,
@@ -112,6 +115,7 @@ export default async function GenrePage({
       image: a.image,
       isVerified: a.isVerified,
       songs: [],
+      userId: "",
     })),
     links: song.links as unknown as Song["links"],
     year: song.year.toString(),

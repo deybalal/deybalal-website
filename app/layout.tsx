@@ -15,6 +15,9 @@ const iranyekan = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com"
+  ),
   title: {
     default: "دی بلال | پلتفرم پخش آنلاین آهنگ لری",
     template: "%s | دی بلال",
@@ -27,9 +30,14 @@ export const metadata: Metadata = {
     "آلبوم های لری",
     "خواننده های لری",
     "دانلود آهنگ لری",
+    "موسیقی لری",
+    "متن آهنگ لری",
   ],
   authors: [{ name: "ادمین دی بلال" }],
   manifest: "/manifest.json",
+  alternates: {
+    canonical: "./",
+  },
   openGraph: {
     type: "website",
     locale: "fa_IR",
@@ -53,6 +61,17 @@ export const metadata: Metadata = {
     description:
       "آهنگ لری مورد علاقه ی خود را پیدا و آنلاین پخش کنید یا با کیفیت عالی دانلود کنید.",
     images: ["/images/download.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
