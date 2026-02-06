@@ -85,13 +85,13 @@ export default function HeroLyricsDemo() {
   }, [currentTime, lyrics]);
 
   return (
-    <div className="relative w-[400px] h-[440px] group/card shrink-0 hidden lg:block">
+    <div className="relative w-full md:w-4/12 h-[440px] group/card shrink-0 lg:block flex">
       {/* Glassmorphism Background Layers */}
       <div className="absolute inset-0 bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl transform rotate-6 group-hover/card:rotate-12 transition-transform duration-500" />
       <div className="absolute inset-0 bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl transform -rotate-3 group-hover/card:-rotate-6 transition-transform duration-500" />
 
       {/* Main Content Container */}
-      <div className="relative bg-linear-to-br from-black/40 to-black/20 backdrop-blur-3xl rounded-3xl border border-white/10 shadow-2xl p-6 h-full flex flex-col overflow-hidden">
+      <div className="relative w-full bg-linear-to-br from-black/40 to-black/20 backdrop-blur-3xl rounded-3xl border border-white/10 shadow-2xl p-3 md:p-6 h-full flex flex-col overflow-hidden">
         {/* Header / Now Playing Indicator */}
         <div className="flex items-center gap-2 mb-4 shrink-0">
           <span className="relative flex h-3 w-3">
@@ -129,7 +129,7 @@ export default function HeroLyricsDemo() {
 
         {/* Lyrics Scroll Area */}
         <div
-          className="flex-1 overflow-hidden mask-gradient relative"
+          className="flex-1 overflow-hidden mask-gradient relative w-full"
           ref={scrollContainerRef}
           style={{
             maskImage:
@@ -146,7 +146,7 @@ export default function HeroLyricsDemo() {
               <div className="h-4 bg-white/5 rounded-md w-2/3 mx-auto animate-pulse" />
             </div>
           ) : (
-            <div className="py-10">
+            <div className="py-10 px-2.5">
               {" "}
               {/* Padding to allow scrolling top/bottom items to center */}
               {lyrics.map((line, index) => (

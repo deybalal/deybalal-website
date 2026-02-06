@@ -84,15 +84,17 @@ export default function SongCardContextMenu({
             نمایش آهنگ
           </Link>
         </ContextMenuItem>
-        <ContextMenuItem className="cursor-pointer hover:scale-105">
-          <Link
-            href={`/artist/${artists[0].id}`}
-            className="flex items-center flex-row hover:scale-105"
-          >
-            <Mic2 className="w-4 h-4 me-2" />
-            نمایش خواننده
-          </Link>
-        </ContextMenuItem>
+        {artists.length > 0 && (
+          <ContextMenuItem className="cursor-pointer hover:scale-105">
+            <Link
+              href={`/artist/${artists[0]?.id}`}
+              className="flex items-center flex-row hover:scale-105"
+            >
+              <Mic2 className="w-4 h-4 me-2" />
+              نمایش خواننده
+            </Link>
+          </ContextMenuItem>
+        )}
         {albumId && (
           <ContextMenuItem className="cursor-pointer hover:scale-105">
             <Link
