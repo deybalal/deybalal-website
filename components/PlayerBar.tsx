@@ -217,7 +217,7 @@ const PlayerBar = () => {
   if (!currentSong) return null; // Or return a disabled state
 
   return (
-    <div className="fixed flex justify-between items-center bottom-0 start-0 w-full h-20 md:h-24 glass z-50 px-4 md:px-8 bg-black/40 backdrop-blur-md border-t border-white/10 transition-all duration-300">
+    <div className="fixed flex justify-between items-center bottom-0 start-0 w-full h-20 md:h-24 glass z-50 px-4 md:px-8 bg-black/40 backdrop-blur-lg border-t border-white/10 transition-all duration-300">
       <div className="flex flex-col items-center w-full">
         <div className="flex w-full justify-around items-center">
           {/* Song Info */}

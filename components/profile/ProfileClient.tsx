@@ -42,7 +42,12 @@ export default function ProfileClient({ user }: ProfileClientProps) {
   }
 
   return (
-    <Tabs id="profile-tabs" defaultValue="general" className="w-full max-w-4xl">
+    <Tabs
+      id="profile-tabs"
+      defaultValue="general"
+      className="w-full max-w-4xl"
+      dir="rtl"
+    >
       <TabsList className="grid w-full grid-cols-2 mb-8">
         <TabsTrigger value="general">عمومی</TabsTrigger>
         <TabsTrigger value="security">امنیت</TabsTrigger>

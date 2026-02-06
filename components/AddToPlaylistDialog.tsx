@@ -14,6 +14,7 @@ import { toast } from "react-hot-toast";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Playlist } from "@/types/types";
+import { formatTime } from "@/lib/utils";
 
 interface AddToPlaylistDialogProps {
   songId: string;
@@ -88,7 +89,10 @@ export default function AddToPlaylistDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-card/95 backdrop-blur-xl border-white/10">
+      <DialogContent
+        dir="rtl"
+        className="sm:max-w-[425px] bg-card/95 backdrop-blur-xl border-white/10"
+      >
         <DialogHeader>
           <DialogTitle>افزودن به پلی لیست</DialogTitle>
         </DialogHeader>
@@ -102,14 +106,14 @@ export default function AddToPlaylistDialog({
               هیچ پلی لیستی یافت نشد. ابتدا یکی بسازید!
             </div>
           ) : (
-            <ScrollArea className="h-[300px] pr-4">
+            <ScrollArea className="h-[300px] pr-4" dir="rtl">
               <div className="space-y-2">
                 {playlists.map((playlist) => (
                   <button
                     key={playlist.id}
                     onClick={() => addToPlaylist(playlist.id)}
                     disabled={addingId === playlist.id}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-foreground/10 transition-colors group text-left cursor-pointer"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-foreground/10 transition-colors group text-right cursor-pointer"
                   >
                     <div className="relative h-12 w-12 rounded-md overflow-hidden bg-muted flex items-center justify-center shrink-0">
                       {playlist.coverArt ? (
@@ -128,7 +132,8 @@ export default function AddToPlaylistDialog({
                         {playlist.name}
                       </h4>
                       <p className="text-xs text-muted-foreground truncate">
-                        {playlist.songs?.length || 0} آهنگ
+                        {playlist.songs?.length || 0} آهنگ |{" "}
+                        {formatTime(playlist.duration)}
                       </p>
                     </div>
                     {addingId === playlist.id && (

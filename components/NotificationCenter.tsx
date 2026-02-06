@@ -91,9 +91,9 @@ export function NotificationCenter() {
           variant="ghost"
           size="icon"
           className={cn(
-            "cursor-pointer relative transition-colors size-7 md:size-10 rounded-full ring-1 ring-gray-400/30 ",
+            "cursor-pointer relative transition-colors size-7 md:size-10 rounded-full ring-1 ring-gray-800/30 dark:ring-gray-300/30",
             unreadCount > 0
-              ? "text-orange-400 hover:text-orange-300 animate-pulse duration-18000"
+              ? "text-orange-500 hover:text-orange-400 animate-pulse duration-18000"
               : "text-gray-400 hover:text-white"
           )}
         >
@@ -140,7 +140,9 @@ export function NotificationCenter() {
                     <div className="space-y-1 flex-1 rtl">
                       <p
                         className={`text-sm font-semibold ${
-                          !notification.isRead ? "text-white" : "text-gray-300"
+                          !notification.isRead
+                            ? "text-foreground"
+                            : "text-gray-300"
                         }`}
                       >
                         {notification.title}

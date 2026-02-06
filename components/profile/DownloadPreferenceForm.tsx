@@ -94,7 +94,7 @@ export default function DownloadPreferenceForm({
           <label className="text-sm font-medium text-muted-foreground">
             انتخاب کیفیت
           </label>
-          <Select value={preference} onValueChange={setPreference}>
+          <Select value={preference} onValueChange={setPreference} dir="rtl">
             <SelectTrigger className="w-full h-12 bg-background/50 backdrop-blur-sm border-primary/10 focus:ring-primary/20">
               <SelectValue placeholder="انتخاب کیفیت" />
             </SelectTrigger>
