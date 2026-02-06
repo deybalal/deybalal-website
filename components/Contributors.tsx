@@ -43,7 +43,11 @@ export const Contributors = ({ contributors }: ContributorsProps) => {
             {users.map((c) => (
               <div key={c.id} className="flex items-center gap-3 justify-end">
                 <Link
-                  href={`/u/${c.user.userSlug}`}
+                  href={
+                    c.user.instagramHandle
+                      ? `/u/@${c.user.instagramHandle}`
+                      : `/u/${c.user.userSlug}`
+                  }
                   className="flex items-center ltr gap-3 group/user"
                 >
                   <div className="relative size-10 rounded-full overflow-hidden border-2 border-foreground/10 group-hover/user:border-indigo-500 transition-colors">

@@ -38,6 +38,7 @@ export interface Contributor {
   percentage: number;
   user: {
     userSlug: string;
+    instagramHandle?: string | null;
     image: string | null;
     name: string;
   };

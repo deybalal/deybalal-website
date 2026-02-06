@@ -15,7 +15,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const user = await prisma.user.findFirst({
-    where: { userSlug: id, isPrivate: false },
+    where: {
+      AND: [
+        id.startsWith("@")
+          ? { instagramHandle: id.slice(1) }
+          : { userSlug: id },
+        { isPrivate: false },
+      ],
+    },
   });
 
   if (!user) return { title: "کاربر یافت نشد" };
@@ -54,7 +61,9 @@ export default async function PublicProfilePage({
   }
 
   const user = await prisma.user.findFirst({
-    where: { userSlug },
+    where: id.startsWith("@")
+      ? { instagramHandle: id.slice(1) }
+      : { userSlug: id },
     include: {
       playlists: {
         where: {

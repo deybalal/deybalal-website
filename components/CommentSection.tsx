@@ -21,6 +21,7 @@ interface Comment {
     name: string;
     image: string | null;
     userSlug: string;
+    instagramHandle?: string | null;
   };
   replies: Comment[];
 }
@@ -205,7 +206,11 @@ export function CommentSection({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/u/${comment.user.userSlug}`}
+                        href={
+                          comment.user.instagramHandle
+                            ? `/u/@${comment.user.instagramHandle}`
+                            : `/u/${comment.user.userSlug}`
+                        }
                         className="font-semibold text-foreground hover:text-blue-400 transition-colors cursor-pointer"
                       >
                         {comment.user.name}
@@ -311,7 +316,11 @@ export function CommentSection({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Link
-                              href={`/u/${reply.user.userSlug}`}
+                              href={
+                                reply.user.instagramHandle
+                                  ? `/u/@${reply.user.instagramHandle}`
+                                  : `/u/${reply.user.userSlug}`
+                              }
                               className="text-sm font-semibold text-foreground hover:text-blue-400 transition-colors cursor-pointer"
                             >
                               {reply.user.name}

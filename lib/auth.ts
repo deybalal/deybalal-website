@@ -2,12 +2,44 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { nextCookies } from "better-auth/next-js";
+import { downloadAvatar } from "./avatar";
 
 export const auth = betterAuth({
   plugins: [nextCookies()],
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          if (user.image && user.image.startsWith("http")) {
+            const localPath = await downloadAvatar(user.image, user.id);
+            if (localPath) {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { image: localPath },
+              });
+            }
+          }
+        },
+      },
+      update: {
+        after: async (user) => {
+          // Check if image is an external URL (e.g. from social provider update)
+          if (user.image && user.image.startsWith("http")) {
+            const localPath = await downloadAvatar(user.image, user.id);
+            if (localPath) {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { image: localPath },
+              });
+            }
+          }
+        },
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
@@ -44,6 +76,9 @@ export const auth = betterAuth({
       },
       downloadPreference: {
         type: "number",
+      },
+      instagramHandle: {
+        type: "string",
       },
     },
   },
@@ -108,6 +143,19 @@ export const auth = betterAuth({
           spotify: {
             clientId: process.env.SPOTIFY_CLIENT_ID,
             clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+          },
+        }
+      : {}),
+    ...(process.env.INSTAGRAM_CLIENT_ID && process.env.INSTAGRAM_CLIENT_SECRET
+      ? {
+          instagram: {
+            clientId: process.env.INSTAGRAM_CLIENT_ID,
+            clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
+            mapProfile: (profile: Record<string, unknown>) => {
+              return {
+                instagramHandle: profile.username as string,
+              };
+            },
           },
         }
       : {}),

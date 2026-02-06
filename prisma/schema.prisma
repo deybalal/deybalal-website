@@ -218,6 +218,7 @@ model User {
   artistId           String?
   userIndex          Int                @unique @default(autoincrement())
   userSlug           String             @unique @default(nanoid(10)) @db.VarChar(10)
+  instagramHandle    String?            @unique
   role               Role               @default(user)
   isVerified         Boolean            @default(false)
   isUserAnArtist     Boolean            @default(false)

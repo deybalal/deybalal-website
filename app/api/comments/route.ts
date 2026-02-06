@@ -40,6 +40,7 @@ export async function GET(request: Request) {
             name: true,
             image: true,
             userSlug: true,
+            instagramHandle: true,
           },
         },
         replies: {
@@ -56,6 +57,7 @@ export async function GET(request: Request) {
                 name: true,
                 image: true,
                 userSlug: true,
+                instagramHandle: true,
               },
             },
           },
@@ -200,6 +202,7 @@ export async function POST(request: Request) {
             name: true,
             image: true,
             userSlug: true,
+            instagramHandle: true,
           },
         },
       },
