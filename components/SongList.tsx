@@ -134,7 +134,11 @@ const SongList = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
                       <Link
                         href={`/song/${song.id}`}
                         className="flex items-center flex-row hover:scale-105"
@@ -143,7 +147,12 @@ const SongList = ({
                         نمایش آهنگ
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer hover:scale-105">
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="cursor-pointer hover:scale-105"
+                    >
                       <Link
                         href={`/artist/${song?.artists[0]?.id}`}
                         className="flex items-center flex-row hover:scale-105"
@@ -153,7 +162,12 @@ const SongList = ({
                       </Link>
                     </DropdownMenuItem>
                     {song.albumId && (
-                      <DropdownMenuItem className="cursor-pointer hover:scale-105">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        className="cursor-pointer hover:scale-105"
+                      >
                         <Link
                           href={`/album/${song.albumId}`}
                           className="flex items-center flex-row hover:scale-105"
@@ -193,18 +207,26 @@ const SongList = ({
                       <ListPlus className="ml-2 h-4 w-4" />
                       افزودن به صف
                     </DropdownMenuItem>
-                    <AddToPlaylistDialog
-                      songId={song.id}
-                      trigger={
-                        <DropdownMenuItem
-                          className="cursor-pointer hover:scale-105"
-                          onSelect={(e) => e.preventDefault()}
-                        >
-                          <ListPlus className="ml-2 h-4 w-4" />
-                          افزودن به پلی لیست
-                        </DropdownMenuItem>
-                      }
-                    />
+                    <DropdownMenuItem
+                      className="cursor-pointer hover:scale-105"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      <AddToPlaylistDialog
+                        songId={song.id}
+                        trigger={
+                          <span className="flex">
+                            <ListPlus className="ml-2 h-4 w-4" />
+                            افزودن به پلی لیست
+                          </span>
+                        }
+                      />
+                    </DropdownMenuItem>
                     {onRemove && (
                       <>
                         <DropdownMenuSeparator />
