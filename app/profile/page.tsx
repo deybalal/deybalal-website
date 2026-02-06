@@ -24,6 +24,7 @@ export default async function ProfilePage() {
     select: {
       id: true,
       name: true,
+      bio: true,
       image: true,
       userSlug: true,
       isPrivate: true,

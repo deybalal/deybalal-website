@@ -9,6 +9,10 @@ export const dynamic = "force-dynamic";
 const profileSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
   isPrivate: z.boolean().optional(),
+  bio: z
+    .string()
+    .max(160, { message: "حداکثر متن مجاز، 160 کاراکتر است!" })
+    .optional(),
   downloadPreference: z.number().optional(),
 });
 
@@ -34,6 +38,9 @@ export async function PATCH(request: Request) {
         ...(validatedData.name && { name: validatedData.name }),
         ...(validatedData.isPrivate !== undefined && {
           isPrivate: validatedData.isPrivate,
+        }),
+        ...(validatedData.bio !== undefined && {
+          bio: validatedData.bio,
         }),
         ...(validatedData.downloadPreference !== undefined && {
           downloadPreference: validatedData.downloadPreference,

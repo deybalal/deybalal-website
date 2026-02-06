@@ -110,7 +110,13 @@ export default async function PublicProfilePage({
             <CheckCircle2 className="w-6 h-6 text-blue-500 fill-blue-500/10" />
           )}
         </div>
-
+        {user.isPrivate ? (
+          <span className="my-4">
+            پروفایل شما خصوصی است. فقط شما قادر به مشاهده ی پروفایلتان هستید!❌
+          </span>
+        ) : (
+          ""
+        )}
         {user.badges.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2">
             {user.badges.map(({ badge }) => {
@@ -133,6 +139,12 @@ export default async function PublicProfilePage({
           </div>
         )}
       </div>
+
+      {user.bio && (
+        <div className="mt-4 text-center max-w-2xl mx-auto">
+          <p className="text-muted-foreground">{user.bio}</p>
+        </div>
+      )}
 
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold">پلی لیست‌های عمومی</h2>

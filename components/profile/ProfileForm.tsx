@@ -21,13 +21,14 @@ import { Instagram } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
+import { Textarea } from "../ui/textarea";
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 interface ProfileFormProps {
   user: {
     name: string;
-    image: string | null;
+    bio?: string;
     userSlug: string;
     isPrivate: boolean;
     downloadPreference?: number | null;
@@ -36,7 +37,10 @@ interface ProfileFormProps {
 
 const profileSchema = z.object({
   name: z.string().min(1, "نام اجباری است"),
-  image: z.string().optional(),
+  bio: z
+    .string()
+    .max(160, { message: "حداکثر متن مجاز، 160 کاراکتر است!" })
+    .optional(),
   isPrivate: z.boolean().optional(),
 });
 
@@ -53,10 +57,12 @@ export default function ProfileForm({ user }: ProfileFormProps) {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: user.name || "",
+      bio: user.bio || "",
       isPrivate: user.isPrivate || false,
     },
     values: {
       name: user.name || "",
+      bio: user.bio || "",
       isPrivate: user.isPrivate || false,
     },
   });
@@ -139,6 +145,20 @@ export default function ProfileForm({ user }: ProfileFormProps) {
 
         <FormField
           control={form.control}
+          name="bio"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>بیو (در صفحه پروفایل نمایش داده می شود)</FormLabel>
+              <FormControl>
+                <Textarea placeholder="توضیح کوتاه در مورد شما" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="isPrivate"
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -147,6 +167,9 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                 <div className="text-sm text-muted-foreground">
                   در صورت فعال بودن، فقط خودتان می‌توانید پروفایل و لیست‌های پخش
                   خود را ببینید.
+                </div>
+                <div>
+                  وضعیت فعلی: {field.value === true ? "خصوصی" : "عمومی"}
                 </div>
               </div>
               <FormControl>
