@@ -10,6 +10,9 @@ import { toast } from "react-hot-toast";
 import { Switch } from "@/components/ui/switch";
 import Pagination from "@/components/Pagination";
 import { ShareButtons } from "@/components/ShareButtons";
+import SearchModal from "@/components/SearchModal";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 
 type Props = {
   playlist: Playlist & { doesUserOwnsPlaylist: boolean };
@@ -109,11 +112,29 @@ export default function PlaylistClient({
                 </>
               )}
             </div>
-            <ShareButtons
-              title={playlist.name}
-              url={`/playlists/${playlist.id}`}
-              type="playlist"
-            />
+            <div className="flex items-center gap-4">
+              <SearchModal
+                scope={{
+                  type: "playlist",
+                  id: playlist.id,
+                  name: playlist.name,
+                }}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+                  >
+                    <Search className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                  </Button>
+                }
+              />
+              <ShareButtons
+                title={playlist.name}
+                url={`/playlists/${playlist.id}`}
+                type="playlist"
+              />
+            </div>
           </div>
         </div>
       </div>

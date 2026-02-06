@@ -6,10 +6,17 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface SearchInterfaceProps {
   onClose?: () => void;
   isPage?: boolean;
+  scope?: {
+    type: "artist" | "album" | "playlist";
+    id: string;
+    name: string;
+  };
 }
 
 type SearchResults = {
@@ -40,12 +47,22 @@ type SearchResults = {
 export default function SearchInterface({
   onClose,
   isPage = false,
+  scope,
 }: SearchInterfaceProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults | null>(null);
   const [isPending, startTransition] = useTransition();
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q");
+
+  useEffect(() => {
+    if (isPage) {
+      setQuery(searchQuery || "");
+    }
+  }, [isPage, searchQuery]);
 
   // Debounce query
   useEffect(() => {
@@ -72,7 +89,7 @@ export default function SearchInterface({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ query: debouncedQuery }),
+          body: JSON.stringify({ query: debouncedQuery, scope }),
         });
         if (res.ok) {
           const data = await res.json();
@@ -88,7 +105,7 @@ export default function SearchInterface({
         setIsLoading(false);
       }
     });
-  }, [debouncedQuery]);
+  }, [debouncedQuery, scope]);
 
   const handleLinkClick = () => {
     if (onClose) {
@@ -101,14 +118,20 @@ export default function SearchInterface({
       {/* Search Header */}
       <div className="flex flex-col items-center py-8 sm:py-12 animate-in fade-in slide-in-from-top-4 duration-500">
         <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-transparent bg-clip-text bg-linear-to-r from-white to-zinc-400 tracking-tight">
-          جستوجو
+          {scope ? `جستوجو در ${scope.name}` : "جستوجو"}
         </h1>
         <div className="w-full max-w-3xl relative group">
           <div className="absolute -inset-0.5 bg-linear-to-r from-indigo-500 to-purple-600 rounded-full opacity-30 group-hover:opacity-75 blur transition duration-500"></div>
           <div className="relative flex items-center bg-zinc-900/90 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl">
             <Search className="w-6 h-6 text-zinc-400 ms-6" />
             <Input
-              placeholder="جستوجوی آهنگ، خواننده یا آلبوم..."
+              placeholder={
+                scope
+                  ? `جستوجو در ${scope.type === "artist" ? "آثار" : ""} ${
+                      scope.name
+                    }...`
+                  : "جستوجوی آهنگ، خواننده یا آلبوم..."
+              }
               className="flex-1 py-6 px-4 border-none bg-transparent! focus-visible:ring-0 text-lg sm:text-xl placeholder:text-zinc-500 font-medium tracking-tight h-14 sm:h-16"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -161,7 +184,12 @@ export default function SearchInterface({
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                     {[...Array(5)].map((_, i) => (
                       <div key={i} className="flex flex-col items-center">
-                        <div className="w-32 h-32 rounded-full bg-white/10 mb-4" />
+                        <div
+                          className={cn(
+                            "rounded-full bg-white/10 mb-4",
+                            scope ? "size-16" : "size-32"
+                          )}
+                        />
                         <div className="h-4 w-24 bg-white/10 rounded" />
                       </div>
                     ))}

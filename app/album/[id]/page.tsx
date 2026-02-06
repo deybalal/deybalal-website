@@ -11,6 +11,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { StructuredData } from "@/components/StructuredData";
+import SearchModal from "@/components/SearchModal";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export async function generateMetadata({
   params,
@@ -214,6 +217,18 @@ export default async function AlbumDetailPage({
 
           <div className="mt-2 flex items-center gap-4">
             <PlayAlbumButton songs={songs} />
+            <SearchModal
+              scope={{ type: "album", id: album.id, name: album.name }}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+                >
+                  <Search className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                </Button>
+              }
+            />
             <ShareButtons
               title={album.name}
               url={`/album/${album.id}`}
