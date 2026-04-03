@@ -3,6 +3,17 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import fs from "fs";
 import path from "path";
 import "dotenv/config";
+import { stat } from "fs/promises";
+import { writeFileSync } from "fs";
+import { findSimilarSongs } from "../lib/jssimilarity.js";
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
+}
 
 // --- Main Script ---
 async function main() {
@@ -27,6 +38,7 @@ async function main() {
 
   let artistsCreatedCount = 0;
 
+  const errored = [];
   // let indx = 0;
   for (const item of songsData) {
     // indx++;
@@ -66,10 +78,39 @@ async function main() {
 
       // 5. Construct Asset URLs
       // Paths provided by user: @/public/assets/mp3/ and @/public/public/assets/cover/
-      // Following route.ts's logic of prepending FTP_BASE_URL
       const uri = item.filename ? `/assets/mp3/${item.filename}` : "";
 
+      const uriForStat = path.join(
+        process.cwd(),
+        "public",
+        "assets",
+        "mp3",
+        item.filename
+      );
+
       const currentSongCount = await prisma.song.count();
+
+      const stats = await stat(uriForStat);
+
+      const fileSize = formatFileSize(stats.size);
+
+      const links = {
+        64: {
+          url: `${process.env.NEXT_PUBLIC_DEPLOYED_URL}/assets/mp3/${item.filename}`,
+          size: fileSize,
+          bytes: stats.size,
+        },
+        128: {
+          url: `${process.env.NEXT_PUBLIC_DEPLOYED_URL}/assets/mp3/${item.filename}`,
+          size: fileSize,
+          bytes: stats.size,
+        },
+        320: {
+          url: `${process.env.NEXT_PUBLIC_DEPLOYED_URL}/assets/mp3/${item.filename}`,
+          size: fileSize,
+          bytes: stats.size,
+        },
+      };
 
       // 6. Create Song
       await prisma.song.create({
@@ -88,26 +129,33 @@ async function main() {
           duration: item.duration || 0,
           lyrics: item.lyrics,
           slug: slug,
-          userId: "j5cxlciLifqo1FJseH5R8utxmmMpUA8v",
+          userId: "fBTuRnw3G0TqDGp6AD5lhVeUSav97bxR",
           isActive: true,
-          links: item.links || {},
+          links: links || {},
           contributors: {
             create: [
               {
-                userId: "j5cxlciLifqo1FJseH5R8utxmmMpUA8v",
+                userId: "fBTuRnw3G0TqDGp6AD5lhVeUSav97bxR",
                 type: "add",
                 percentage: 100,
               },
               ...(item.lyrics
                 ? [
                     {
-                      userId: "j5cxlciLifqo1FJseH5R8utxmmMpUA8v",
+                      userId: "fBTuRnw3G0TqDGp6AD5lhVeUSav97bxR",
                       type: "lyrics",
                       percentage: 100,
                     },
                   ]
                 : []),
             ],
+          },
+          similarSongs: {
+            connect: await findSimilarSongs({
+              title: item.title || "بدون عنوان",
+              artistIds: [artistRecord.id],
+              genreIds: [],
+            }),
           },
         },
       });
@@ -120,6 +168,7 @@ async function main() {
       }
     } catch (error) {
       console.error(`❌ Error importing song "${item.title}":`, error);
+      errored.push(item);
       skippedCount++;
     }
   }
@@ -129,6 +178,8 @@ async function main() {
   console.log(`✔ Artists Created Count: ${artistsCreatedCount}`);
   console.log(`⏭️ Skipped: ${skippedCount}`);
   console.log(`🏁 Total processed: ${songsData.length}`);
+
+  writeFileSync("./errored.json", JSON.stringify(errored, null, 2));
 
   await prisma.$disconnect();
 }

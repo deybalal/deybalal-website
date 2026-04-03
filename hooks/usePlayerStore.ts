@@ -123,9 +123,6 @@ export const usePlayerStore = create<PlayerState>()(
             `کیفیت ${pref}k یافت نشد، در حال پخش با کیفیت ${quality}k`
           );
         }
-        console.log("Song ", song);
-
-        console.log(uri);
 
         set({
           currentSong: { ...song, uri },

@@ -19,6 +19,9 @@ const PlayerProvider = () => {
     activeId,
   } = usePlayerStore();
 
+  const prevActiveIdRef = useRef<string | null>(null);
+  const isInitializedRef = useRef(false);
+
   const incrementPlayCount = async (songId: string) => {
     try {
       const url = `/api/songs/${songId}/play`;
@@ -79,9 +82,6 @@ const PlayerProvider = () => {
       const isSameSource = currentSrc === newSrc || currentSrc.endsWith(newSrc);
 
       if (!isSameSource || isNewSong) {
-        console.log(
-          `[Player] Swapping source to ${newSrc} (IsNewSong: ${isNewSong})`
-        );
         lastSongIdRef.current = currentSong.id;
 
         // When changing source, we must pause first if playing to prevent race conditions
@@ -101,17 +101,20 @@ const PlayerProvider = () => {
     return () => {};
   }, [currentSong, isPlaying, activeId]);
 
-  // Sync audio time when becoming active
+  // Sync audio time when TAKING OVER as active tab
   useEffect(() => {
     if (audioRef.current && activeId === TAB_ID) {
-      // If we just became active, sync our audio time to the stored progress
-      // to ensure we pick up where the other tab left off.
-      const { progress } = usePlayerStore.getState();
-      // Only sync if difference is significant (> 2 seconds) to avoid glitches
-      if (Math.abs(audioRef.current.currentTime - progress) > 2) {
-        audioRef.current.currentTime = progress;
+      // If we just became active (transitioned from null or another tab), sync our audio time to the stored progress
+      if (prevActiveIdRef.current !== TAB_ID || !isInitializedRef.current) {
+        const { progress } = usePlayerStore.getState();
+        // Only sync if difference is significant (> 2 seconds) to avoid glitches
+        if (Math.abs(audioRef.current.currentTime - progress) > 2) {
+          audioRef.current.currentTime = progress;
+        }
+        isInitializedRef.current = true;
       }
     }
+    prevActiveIdRef.current = activeId;
   }, [activeId]);
 
   const handleTimeUpdate = () => {
@@ -158,7 +161,12 @@ const PlayerProvider = () => {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        usePlayerStore.persist.rehydrate();
+        // Only rehydrate if we are not the one currently playing to avoid race conditions with our own state
+        const { activeId: currentActiveId, isPlaying: currentIsPlaying } =
+          usePlayerStore.getState();
+        if (currentActiveId !== TAB_ID || !currentIsPlaying) {
+          usePlayerStore.persist.rehydrate();
+        }
       }
     };
 

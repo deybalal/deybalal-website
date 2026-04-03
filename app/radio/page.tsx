@@ -157,6 +157,17 @@ export default function RadioPage() {
     checkFavoriteStatus();
   }, [state?.currentTrack.id]);
 
+  // Update page title
+  useEffect(() => {
+    if (typeof window !== undefined) {
+      document.title = `${state?.currentTrack.title} از ${state?.currentTrack.artist} - رادیو لری دی بلال`;
+    }
+  }, [
+    state?.currentTrack.artist,
+    state?.currentTrack.id,
+    state?.currentTrack.title,
+  ]);
+
   const toggleFavorite = async () => {
     if (isTogglingFavorite) return;
 

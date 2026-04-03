@@ -9,11 +9,6 @@ export async function GET() {
   noStore();
   try {
     const now = Temporal.Now.zonedDateTimeISO();
-    console.log("Now (Temporal):", now.toString());
-
-    // Get today's date in local machine timezone
-    const today = now.toPlainDate();
-    console.log("Today (Local):", today.toString());
 
     const playlist = await prisma.radioPlaylist.findFirst({
       // Consider filtering by date if needed:

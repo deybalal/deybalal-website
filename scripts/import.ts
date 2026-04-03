@@ -3,7 +3,16 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import fs from "fs";
 import path from "path";
 import "dotenv/config";
+import { stat } from "fs/promises";
+import { findSimilarSongs } from "@/lib/similarity";
 
+function formatFileSize(bytes: number) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
+}
 // --- Main Script ---
 async function main() {
   const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
@@ -70,6 +79,28 @@ async function main() {
       const uri = item.filename ? `/assets/mp3/${item.filename}` : "";
       const currentSongCount = await prisma.song.count();
 
+      const stats = await stat(uri);
+
+      const fileSize = formatFileSize(stats.size);
+
+      const links = {
+        64: {
+          url: item.links["music64"],
+          size: fileSize,
+          bytes: stats.size,
+        },
+        128: {
+          url: item.links["music128"],
+          size: fileSize,
+          bytes: stats.size,
+        },
+        320: {
+          url: item.links["music320"],
+          size: fileSize,
+          bytes: stats.size,
+        },
+      };
+
       // 6. Create Song
       await prisma.song.create({
         data: {
@@ -87,26 +118,33 @@ async function main() {
           duration: item.duration || 0,
           lyrics: item.lyrics,
           slug: slug,
-          userId: "CPtLgjHeOoVy1hznqfJRYjiIjB1jOOaO",
+          userId: "fBTuRnw3G0TqDGp6AD5lhVeUSav97bxR",
           isActive: true,
-          links: item.links || {},
+          links: links || {},
           contributors: {
             create: [
               {
-                userId: "CPtLgjHeOoVy1hznqfJRYjiIjB1jOOaO",
+                userId: "fBTuRnw3G0TqDGp6AD5lhVeUSav97bxR",
                 type: "add",
                 percentage: 100,
               },
               ...(item.lyrics
                 ? [
                     {
-                      userId: "CPtLgjHeOoVy1hznqfJRYjiIjB1jOOaO",
+                      userId: "fBTuRnw3G0TqDGp6AD5lhVeUSav97bxR",
                       type: "lyrics",
                       percentage: 100,
                     },
                   ]
                 : []),
             ],
+          },
+          similarSongs: {
+            connect: await findSimilarSongs({
+              title: item.title || "بدون عنوان",
+              artistIds: [artistRecord.id],
+              genreIds: [],
+            }),
           },
         },
       });

@@ -17,10 +17,6 @@ export async function POST(
       url
     );
 
-    console.log("isValid", isValid);
-    console.log("timestamp", timestamp);
-    console.log("userTimeInfo", userTimeInfo);
-
     if (!isValid) {
       console.warn(
         `[API] Invalid or expired hash for song play request: ${id}`,
