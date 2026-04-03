@@ -191,8 +191,6 @@ export default async function SongDetailPage({
       : undefined,
   };
 
-  console.log(song);
-
   return (
     <div className="space-y-12 pb-24 w-full flex-1">
       <StructuredData data={structuredData} />

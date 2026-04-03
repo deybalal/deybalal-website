@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   },
   allowedDevOrigins: ["locahost", "192.168.1.108", "my.local"],
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
