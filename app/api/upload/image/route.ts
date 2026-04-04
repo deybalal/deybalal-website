@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { logSuspiciousUpload } from "@/lib/logger";
 import { sanitizeFilename } from "@/lib/input-sanitizer";
@@ -11,10 +10,21 @@ import {
   FILE_SIZE_LIMITS,
 } from "@/lib/validators";
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
   try {
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+
+    if (!file) {
+      return NextResponse.json(
+        { success: false, message: "هیچ فایلی انتخاب نشده!" },
+        { status: 400 }
+      );
+    }
     const session = await auth.api.getSession({
-      headers: await headers(),
+      headers: request.headers,
     });
 
     if (!session) {
@@ -26,17 +36,6 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
-
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
-
-    if (!file) {
-      return NextResponse.json(
-        { success: false, message: "هیچ فایلی انتخاب نشده!" },
-        { status: 400 }
-      );
-    }
-
     // Validate file size (5MB max)
     const sizeValidation = validateFileSize(
       file.size,

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import * as mm from "music-metadata";
-import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 // import { logSuspiciousUpload } from "@/lib/logger";
 // import { sanitizeFilename } from "@/lib/input-sanitizer";
@@ -12,10 +11,29 @@ import { auth } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
   try {
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+
+    if (!file) {
+      return NextResponse.json(
+        { success: false, message: "هیچ فایلی انتخاب نشده!" },
+        { status: 400 }
+      );
+    }
+
+    const contentType = request.headers.get("content-type") || "";
+    const contentLength = request.headers.get("content-length") || "unknown";
+
+    console.log(
+      `Upload started. Content-Type: ${contentType}, Content-Length: ${contentLength}`
+    );
+
     const session = await auth.api.getSession({
-      headers: await headers(),
+      headers: request.headers,
     });
 
     if (!session) {
@@ -27,12 +45,10 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
 
-    if (!file) {
+    if (!contentType.includes("multipart/form-data")) {
       return NextResponse.json(
-        { success: false, message: "هیچ فایلی انتخاب نشده!" },
+        { success: false, message: "فرمت درخواست نامعتبر است" },
         { status: 400 }
       );
     }

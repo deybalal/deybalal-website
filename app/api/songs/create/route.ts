@@ -188,12 +188,15 @@ export async function POST(request: Request) {
       finalCoverArt = "/images/cover.png";
     }
 
+    const count = await prisma.song.count();
+
     const song = await prisma.song.create({
       data: {
         title: validatedData.title,
         titleEn: validatedData.titleEn || "",
         artist: validatedData.artist || "",
         artistEn: artistEn || "",
+        index: count,
         artists: {
           connect: validatedData.artistIds?.map((id) => ({ id })) || [],
         },

@@ -3,7 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
-    proxyClientMaxBodySize: 26214400, // 25MB in bytes
+    proxyClientMaxBodySize: 52428800, // 50MB in bytes
+    serverActions: {
+      bodySizeLimit: "50mb",
+    },
   },
   allowedDevOrigins: ["locahost", "192.168.1.108", "my.local"],
   images: {

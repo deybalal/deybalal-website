@@ -24,6 +24,15 @@ import { LyricsMode } from "@/hooks/useLyricsStore";
 import { toast } from "react-hot-toast";
 import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
 import MarqueeText from "@/components/MarqueeText";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import Link from "next/link";
 
 interface RadioState {
   currentTrack: {
@@ -55,8 +64,10 @@ export default function RadioPage() {
   const [showLyricsOverlay, setShowLyricsOverlay] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const [isRadioActive, setIsRadioActive] = useState(false);
 
-  const { setSong, setIsRadio, isPlaying, setSeekTo } = usePlayerStore();
+  const { setSong, setIsRadio, isPlaying, setSeekTo, pause, play } =
+    usePlayerStore();
   const { lyricsMode, setLyricsMode } = useLyricsStore();
   const syncInterval = useRef<NodeJS.Timeout | null>(null);
   const transitionTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -69,7 +80,9 @@ export default function RadioPage() {
       if (data.success) {
         setState(data.data);
         setError(null);
-
+        if (!isRadioActive) {
+          return;
+        }
         const currentStoredSong = usePlayerStore.getState().currentSong;
         const isCurrentlyRadio = usePlayerStore.getState().isRadio;
 
@@ -122,7 +135,7 @@ export default function RadioPage() {
     } finally {
       setLoading(false);
     }
-  }, [setIsRadio, setSong, lyricsMode, setSeekTo]);
+  }, [isRadioActive, setIsRadio, setSong, lyricsMode, setSeekTo]);
 
   useEffect(() => {
     fetchState();
@@ -219,7 +232,7 @@ export default function RadioPage() {
         <h1 className="text-2xl font-bold mb-2">رادیو فعلاً در دسترس نیست</h1>
         <p className="text-muted-foreground max-w-md mx-auto">{error}</p>
         <Button
-          onClick={fetchState}
+          onClick={() => fetchState()}
           className="mt-8 px-8 bg-primary hover:bg-primary/90"
         >
           تلاش مجدد
@@ -466,6 +479,78 @@ export default function RadioPage() {
                   </p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/*User turns Off or On the Radio */}
+          <Card className="glass-card bg-foreground/5 border-foreground/10 shadow-xl overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-foreground/5 border border-foreground/5">
+                {/* Left: Status */}
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-foreground/5 rounded-lg flex items-center justify-center shadow-lg ring-1 ring-foreground/10">
+                    <RadioIcon
+                      className={cn(
+                        "w-7 h-7",
+                        isRadioActive
+                          ? "text-green-500 animate-pulse"
+                          : "text-red-500 opacity-70"
+                      )}
+                    />
+                  </div>
+
+                  <div>
+                    <p className="font-bold text-foreground text-base">
+                      {isRadioActive ? "رادیو روشن است" : "رادیو خاموش است"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right: Action */}
+                {isRadioActive ? (
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      setIsRadioActive(false);
+                      pause();
+                    }}
+                  >
+                    خاموش
+                  </Button>
+                ) : (
+                  <Dialog open={!isRadioActive}>
+                    <DialogTrigger asChild>
+                      <Button className="min-w-[70px]">روشن</Button>
+                    </DialogTrigger>
+
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>روشن کردن رادیو</DialogTitle>
+                        <DialogDescription>
+                          با فعال شدن رادیو، پخش زنده همگام با سرور آغاز می‌شود.
+                        </DialogDescription>
+                      </DialogHeader>
+
+                      <div className="flex flex-col gap-4 pt-4">
+                        <Button
+                          className="w-full bg-green-500 hover:bg-green-300 text-white"
+                          onClick={() => {
+                            setIsRadioActive(true);
+                            fetchState();
+                            play();
+                          }}
+                        >
+                          روشن کردن رادیو
+                        </Button>
+
+                        <Button variant="outline" className="w-full">
+                          <Link href="/">برگشت به دی بلال</Link>
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
             </CardContent>
           </Card>
 
