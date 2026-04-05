@@ -31,8 +31,10 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface RadioState {
   currentTrack: {
@@ -65,6 +67,11 @@ export default function RadioPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const [isRadioActive, setIsRadioActive] = useState(false);
+  
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const { setSong, setIsRadio, isPlaying, setSeekTo, pause, play } =
     usePlayerStore();
@@ -146,6 +153,39 @@ export default function RadioPage() {
       if (transitionTimeout.current) clearTimeout(transitionTimeout.current);
     };
   }, [fetchState]);
+
+  // Intercept navigation
+  useEffect(() => {
+    if (!isRadioActive) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest("a");
+      // Check if it's a valid internal link
+      if (anchor && anchor.href && !anchor.target) {
+        const href = anchor.getAttribute("href");
+        if (href && !href.startsWith("http") && href !== "/radio") {
+          e.preventDefault();
+          e.stopPropagation();
+          setPendingPath(href);
+          setShowWarningDialog(true);
+        }
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("click", handleClick, { capture: true });
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("click", handleClick, { capture: true });
+    };
+  }, [isRadioActive]);
 
   // Check if song is in favorites
   useEffect(() => {
@@ -592,6 +632,46 @@ export default function RadioPage() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-destructive flex items-center gap-2">
+              <AlertCircle className="w-5 h-5" />
+              هشدار خروج از رادیو
+            </DialogTitle>
+            <DialogDescription className="text-base pt-2">
+              شما در حال گوش دادن به رادیو زنده هستید. در صورت ترک این صفحه، پخش
+              آهنگ‌های بعدی مختل خواهد شد و تجربه رادیو قطع می‌شود.
+              <br />
+              <br />
+              آیا مطمئن هستید که می‌خواهید صفحه را ترک کنید؟
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowWarningDialog(false)}
+              className="w-full sm:w-auto"
+            >
+              انصراف
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setShowWarningDialog(false);
+                setIsRadioActive(false);
+                if (pendingPath) {
+                  router.push(pendingPath);
+                }
+              }}
+              className="w-full sm:w-auto block"
+            >
+              خروج و قطع رادیو
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
