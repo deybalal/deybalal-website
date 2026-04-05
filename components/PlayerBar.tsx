@@ -20,6 +20,9 @@ import {
   Menu,
   Settings,
   Radio,
+  Speaker,
+  Smartphone,
+  Cast,
 } from "lucide-react";
 import {
   Sheet,
@@ -70,6 +73,8 @@ const PlayerBar = () => {
     setQueue,
     hasHydrated,
     isRadio,
+    playbackDevice,
+    setPlaybackDevice,
   } = usePlayerStore();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -92,6 +97,14 @@ const PlayerBar = () => {
     { label: "128 kbps", value: 128 },
     { label: "320 kbps", value: 320 },
   ];
+
+  const devicesList = [
+    { label: "دستگاه فعلی", value: "current", icon: Smartphone },
+    { label: "سرور", value: "server", icon: Speaker },
+    { label: "هردو", value: "both", icon: Cast },
+  ];
+  const activeDevice = devicesList.find((d) => d.value === playbackDevice) || devicesList[0];
+  const DeviceIcon = activeDevice.icon;
 
   const togglePlay = useCallback(() => {
     if (isPlaying) pause();
@@ -364,8 +377,39 @@ const PlayerBar = () => {
             />
           </div>
 
-          {/* Volume & Quality */}
-          <div className="hidden md:flex items-center justify-end w-1/4 gap-4">
+          {/* Volume & Quality & Device */}
+          <div className="hidden md:flex items-center justify-end w-1/4 gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs font-bold text-gray-400 hover:text-white gap-1 px-2 h-8 cursor-pointer"
+                >
+                  <DeviceIcon size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="bg-background/95 backdrop-blur-xl border-white/10"
+              >
+                {devicesList.map((d) => (
+                  <DropdownMenuItem
+                    key={d.value}
+                    onClick={() => setPlaybackDevice(d.value as "current" | "server" | "both")}
+                    className={`cursor-pointer ${
+                      playbackDevice === d.value
+                        ? "text-primary font-bold"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    <d.icon size={14} className="mr-2" />
+                    {d.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -440,7 +484,7 @@ const PlayerBar = () => {
                     <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-3 text-center">
                       کیفیت پخش آنلاین
                     </p>
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-center gap-2 mb-4">
                       {qualities.map((q) => (
                         <Button
                           key={q.value}
@@ -454,6 +498,28 @@ const PlayerBar = () => {
                           className="text-[12px] h-7 px-2 cursor-pointer"
                         >
                           {q.label.split(" ")[0]}
+                        </Button>
+                      ))}
+                    </div>
+                    
+                    <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-3 text-center">
+                      دستگاه پخش
+                    </p>
+                    <div className="flex items-center justify-center gap-2">
+                      {devicesList.map((d) => (
+                        <Button
+                          key={d.value}
+                          variant={
+                            playbackDevice === d.value
+                              ? "default"
+                              : "outline"
+                          }
+                          size="sm"
+                          onClick={() => setPlaybackDevice(d.value as "current" | "server" | "both")}
+                          className="text-[12px] h-7 px-2 cursor-pointer flex gap-1 items-center"
+                        >
+                          <d.icon size={12} />
+                          {d.label}
                         </Button>
                       ))}
                     </div>

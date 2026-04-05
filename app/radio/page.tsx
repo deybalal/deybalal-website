@@ -67,7 +67,7 @@ export default function RadioPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const [isRadioActive, setIsRadioActive] = useState(false);
-  
+
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
 
@@ -661,6 +661,7 @@ export default function RadioPage() {
               onClick={() => {
                 setShowWarningDialog(false);
                 setIsRadioActive(false);
+                setIsRadio(false);
                 if (pendingPath) {
                   router.push(pendingPath);
                 }

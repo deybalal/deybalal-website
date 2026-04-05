@@ -20,6 +20,7 @@ interface PlayerState {
   activeId: string | null;
   downloadPreference: number;
   currentQuality: number | null;
+  playbackDevice: "current" | "server" | "both";
   hasHydrated: boolean;
 
   play: () => void;
@@ -42,6 +43,7 @@ interface PlayerState {
   setSeekTo: (time: number | null, initiator?: string) => void;
   setActiveId: (id: string) => void;
   setDownloadPreference: (pref: number) => void;
+  setPlaybackDevice: (device: "current" | "server" | "both") => void;
   setHasHydrated: (state: boolean) => void;
 
   isShuffling: boolean;
@@ -89,6 +91,14 @@ const getBestUri = (
   return { uri: song.uri, quality: 128 };
 };
 
+const sendToServerProxy = (payload: Record<string, unknown> | { type: string; [key: string]: unknown }) => {
+  fetch("/api/server-player", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).catch((e) => console.error("Server API Proxy Error:", e));
+};
+
 export const usePlayerStore = create<PlayerState>()(
   persist<PlayerState>(
     (set, get) => ({
@@ -106,13 +116,27 @@ export const usePlayerStore = create<PlayerState>()(
       activeId: null,
       downloadPreference: 128,
       currentQuality: null,
+      playbackDevice: "current",
       hasHydrated: false,
       isRadio: false,
 
       setIsRadio: (isRadio) => set({ isRadio }),
+      setPlaybackDevice: (device) => set({ playbackDevice: device }),
 
-      play: () => set({ isPlaying: true, activeId: TAB_ID }),
-      pause: () => set({ isPlaying: false }),
+      play: () => {
+        const { playbackDevice } = get();
+        if (playbackDevice === "server" || playbackDevice === "both") {
+          sendToServerProxy({ type: "action", action: "play" });
+        }
+        set({ isPlaying: true, activeId: TAB_ID });
+      },
+      pause: () => {
+        const { playbackDevice } = get();
+        if (playbackDevice === "server" || playbackDevice === "both") {
+          sendToServerProxy({ type: "action", action: "pause" });
+        }
+        set({ isPlaying: false });
+      },
 
       setSong: (song, play) => {
         const pref = get().downloadPreference;
@@ -367,13 +391,22 @@ export const usePlayerStore = create<PlayerState>()(
         }
       },
 
-      setVolume: (volume) => set({ volume }),
+      setVolume: (volume) => {
+        const { playbackDevice } = get();
+        if (playbackDevice === "server" || playbackDevice === "both") {
+          sendToServerProxy({ type: "volume", volume });
+        }
+        set({ volume });
+      },
       setProgress: (progress) => set({ progress }),
       setDuration: (duration) => set({ duration }),
       setSeekTo: (seekTo, initiator) => {
-        const { isRadio } = get();
+        const { isRadio, playbackDevice } = get();
         if (isRadio && initiator !== "radio") {
           return;
+        }
+        if (seekTo !== null && (playbackDevice === "server" || playbackDevice === "both")) {
+          sendToServerProxy({ type: "position", position: seekTo });
         }
         set({ seekTo });
       },
@@ -423,6 +456,7 @@ export const usePlayerStore = create<PlayerState>()(
           activeId: state.activeId,
           downloadPreference: state.downloadPreference,
           currentQuality: state.currentQuality,
+          playbackDevice: state.playbackDevice,
         } as PlayerState),
     }
   )

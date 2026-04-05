@@ -17,6 +17,7 @@ const PlayerProvider = () => {
     seekTo,
     setSeekTo,
     activeId,
+    playbackDevice,
   } = usePlayerStore();
 
   const prevActiveIdRef = useRef<string | null>(null);
@@ -92,6 +93,18 @@ const PlayerProvider = () => {
         if (isPlaying && activeId === TAB_ID) {
           incrementPlayCount(currentSong.id);
         }
+
+        if (playbackDevice === "server" || playbackDevice === "both") {
+          fetch("/api/server-player", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "play",
+              filename: currentSong.filename,
+              volume,
+            }),
+          }).catch(console.error);
+        }
       }
     }
 
@@ -99,7 +112,7 @@ const PlayerProvider = () => {
     playAudio();
 
     return () => {};
-  }, [currentSong, isPlaying, activeId]);
+  }, [currentSong, isPlaying, activeId, volume, playbackDevice]);
 
   // Sync audio time when TAKING OVER as active tab
   useEffect(() => {
@@ -153,9 +166,13 @@ const PlayerProvider = () => {
   // Handle volume
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = volume / 100;
+      if (playbackDevice === "server") {
+        audioRef.current.volume = 0;
+      } else {
+        audioRef.current.volume = volume / 100;
+      }
     }
-  }, [volume]);
+  }, [volume, playbackDevice]);
 
   // Sync state when tab becomes visible
   useEffect(() => {
