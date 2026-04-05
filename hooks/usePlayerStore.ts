@@ -22,6 +22,7 @@ interface PlayerState {
   currentQuality: number | null;
   playbackDevice: "current" | "server" | "both";
   hasHydrated: boolean;
+  serverVolume: number;
 
   play: () => void;
   pause: () => void;
@@ -37,6 +38,7 @@ interface PlayerState {
   next: () => void;
   prev: () => void;
   setVolume: (volume: number) => void;
+  setServerVolume: (serverVolume: number) => void;
   setProgress: (progress: number) => void;
   setDuration: (duration: number) => void;
   seekTo: number | null;
@@ -110,6 +112,7 @@ export const usePlayerStore = create<PlayerState>()(
       priorityQueue: [],
       currentIndex: -1,
       volume: 100,
+      serverVolume: 100,
       progress: 0,
       duration: 0,
       seekTo: null,
@@ -141,7 +144,7 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       setSong: (song, play) => {
-        const { playbackDevice, downloadPreference, volume } = get();
+        const { playbackDevice, downloadPreference, serverVolume } = get();
         const { uri, quality } = getBestUri(song, downloadPreference);
 
         if (quality !== downloadPreference && play !== false) {
@@ -158,7 +161,7 @@ export const usePlayerStore = create<PlayerState>()(
               body: JSON.stringify({
                 type: "play",
                 filename: song.filename,
-                volume,
+                volume: serverVolume,
               }),
             });
           } catch (error) {
@@ -414,11 +417,14 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       setVolume: (volume) => {
+        set({ volume });
+      },
+      setServerVolume: (serverVolume) => {
         const { playbackDevice } = get();
         if (playbackDevice === "server" || playbackDevice === "both") {
-          sendToServerProxy({ type: "volume", volume });
+          sendToServerProxy({ type: "volume", volume: serverVolume });
         }
-        set({ volume });
+        set({ serverVolume });
       },
       setProgress: (progress) => set({ progress }),
       setDuration: (duration) => set({ duration }),
@@ -482,6 +488,7 @@ export const usePlayerStore = create<PlayerState>()(
           downloadPreference: state.downloadPreference,
           currentQuality: state.currentQuality,
           playbackDevice: state.playbackDevice,
+          serverVolume: state.serverVolume,
         } as PlayerState),
     }
   )

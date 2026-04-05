@@ -75,6 +75,8 @@ const PlayerBar = () => {
     isRadio,
     playbackDevice,
     setPlaybackDevice,
+    serverVolume,
+    setServerVolume,
   } = usePlayerStore();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -443,7 +445,7 @@ const PlayerBar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 relative group">
               <Volume2 size={20} className="text-gray-400" />
               <Slider
                 value={[volume]}
@@ -452,6 +454,19 @@ const PlayerBar = () => {
                 step={1}
                 className="w-24 cursor-pointer"
               />
+              {(playbackDevice === "server" || playbackDevice === "both") && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center bg-background/95 backdrop-blur-xl border border-white/10 p-2 rounded-lg shadow-xl pb-4">
+                  <span className="text-xs text-muted-foreground mb-3 whitespace-nowrap">ولوم سرور</span>
+                  <Slider
+                    orientation="vertical"
+                    value={[serverVolume]}
+                    onValueChange={(v) => setServerVolume(v[0])}
+                    max={100}
+                    step={1}
+                    className="h-24 cursor-pointer"
+                  />
+                </div>
+              )}
             </div>
           </div>
           <QueueDrawer />
@@ -523,6 +538,24 @@ const PlayerBar = () => {
                         </Button>
                       ))}
                     </div>
+                    
+                    {(playbackDevice === "server" || playbackDevice === "both") && (
+                      <div className="mt-4 flex flex-col items-center">
+                        <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-3 text-center">
+                          ولوم سرور
+                        </p>
+                        <div className="w-full px-4 flex items-center gap-3">
+                          <Volume2 size={16} className="text-gray-400" />
+                          <Slider
+                            value={[serverVolume]}
+                            onValueChange={(v) => setServerVolume(v[0])}
+                            max={100}
+                            step={1}
+                            className="flex-1 cursor-pointer"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {navItems.map((item) => (
                     <Link

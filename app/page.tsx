@@ -205,6 +205,13 @@ export default async function Home() {
                 <PlayRandomButton />
 
                 <Link
+                  href="/radio"
+                  className="px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
+                >
+                  رادیو لری
+                </Link>
+
+                <Link
                   href="/artist"
                   className="px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
                 >
