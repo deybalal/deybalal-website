@@ -91,7 +91,9 @@ const getBestUri = (
   return { uri: song.uri, quality: 128 };
 };
 
-const sendToServerProxy = (payload: Record<string, unknown> | { type: string; [key: string]: unknown }) => {
+const sendToServerProxy = (
+  payload: Record<string, unknown> | { type: string; [key: string]: unknown }
+) => {
   fetch("/api/server-player", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -139,13 +141,33 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       setSong: (song, play) => {
-        const pref = get().downloadPreference;
-        const { uri, quality } = getBestUri(song, pref);
+        const { playbackDevice, downloadPreference, volume } = get();
+        const { uri, quality } = getBestUri(song, downloadPreference);
 
-        if (quality !== pref && play !== false) {
+        if (quality !== downloadPreference && play !== false) {
           toast.error(
-            `کیفیت ${pref}k یافت نشد، در حال پخش با کیفیت ${quality}k`
+            `کیفیت ${downloadPreference}k یافت نشد، در حال پخش با کیفیت ${quality}k`
           );
+        }
+
+        if (playbackDevice === "server" || playbackDevice === "both") {
+          try {
+            fetch("/api/server-player", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                type: "play",
+                filename: song.filename,
+                volume,
+              }),
+            });
+          } catch (error) {
+            toast.error((error as Error).message);
+          }
+
+          if (!play) {
+            sendToServerProxy({ type: "action", action: "pause" });
+          }
         }
 
         set({
@@ -405,7 +427,10 @@ export const usePlayerStore = create<PlayerState>()(
         if (isRadio && initiator !== "radio") {
           return;
         }
-        if (seekTo !== null && (playbackDevice === "server" || playbackDevice === "both")) {
+        if (
+          seekTo !== null &&
+          (playbackDevice === "server" || playbackDevice === "both")
+        ) {
           sendToServerProxy({ type: "position", position: seekTo });
         }
         set({ seekTo });

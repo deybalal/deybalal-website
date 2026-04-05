@@ -26,6 +26,7 @@ export async function GET() {
                 artistEn: true,
                 coverArt: true,
                 uri: true,
+                filename: true,
                 duration: true,
                 lyrics: true,
                 syncedLyrics: true,
@@ -111,6 +112,7 @@ export async function GET() {
         currentTrack: {
           ...currentTrack.song,
           position: trackPosition,
+          filename: currentTrack.song.filename,
         },
         nextTrack,
         playlistId: playlist.id,
