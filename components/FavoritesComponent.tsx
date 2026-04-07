@@ -9,15 +9,14 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-export default function FavoritesComponent() {
+export default function FavoritesComponent({ page: propPage }: { page?: number }) {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   // const [page, setPage] = useState(1);
   const [totalSongs, setTotalSongs] = useState(0);
 
   const searchParams = useSearchParams();
-
-  const page = Number(searchParams.get("page")) || 1;
+  const page = propPage ?? (Number(searchParams.get("page")) || 1);
 
   const pageSize = 20;
 

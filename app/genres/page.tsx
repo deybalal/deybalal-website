@@ -33,7 +33,7 @@ export default async function GenresPage({
   const totalGenres = await prisma.genre.count();
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
+    <div key={page} className="container mx-auto px-4 py-8 space-y-8">
       <div className="space-y-2">
         <h1 className="text-4xl font-bold tracking-tight">سبک ها</h1>
         <p className="text-muted-foreground text-lg">

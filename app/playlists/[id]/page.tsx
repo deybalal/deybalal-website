@@ -109,7 +109,7 @@ export default async function PlaylistDetailPage({
   };
 
   return (
-    <Suspense fallback={<PlaylistSkeleton />}>
+    <Suspense key={currentPage} fallback={<PlaylistSkeleton />}>
       <PlaylistClient
         playlist={playlist}
         currentPage={currentPage}

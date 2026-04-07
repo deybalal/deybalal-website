@@ -59,7 +59,7 @@ export default async function SongsPage({
   const songs = songsData.map(mapSong);
 
   return (
-    <div className="container mx-auto ps-4 pe-4 py-8 space-y-8 h-max">
+    <div key={page} className="container mx-auto ps-4 pe-4 py-8 space-y-8 h-max">
       <div className="space-y-2">
         <h1 className="text-4xl font-bold tracking-tight">آهنگ های پیشنهادی</h1>
         <p className="text-muted-foreground text-lg">

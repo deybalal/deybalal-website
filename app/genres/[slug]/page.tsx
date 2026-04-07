@@ -122,7 +122,7 @@ export default async function GenrePage({
   }));
 
   return (
-    <div className="container px-4 py-8 space-y-12 pb-24 mb-24 h-max">
+    <div key={currentPage} className="container px-4 py-8 space-y-12 pb-24 mb-24 h-max">
       {/* Header */}
       <div className="relative rounded-3xl overflow-hidden bg-linear-to-br from-primary/10 to-secondary/10 border border-white/5">
         <div className="relative z-10 p-10 flex flex-col items-center text-center space-y-4">
@@ -202,7 +202,7 @@ export default async function GenrePage({
 
       {/* Albums Section */}
       {genre.albums.length > 0 && (
-        <div className="space-y-6">
+        <div key={currentPage} className="space-y-6">
           <h2 className="text-2xl font-bold tracking-tight">آلبوم های محبوب</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {genre.albums.map((album) => (
