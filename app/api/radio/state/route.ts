@@ -39,6 +39,9 @@ export async function GET() {
           },
         },
       },
+      orderBy: {
+        date: "desc",
+      },
     });
 
     if (!playlist) {

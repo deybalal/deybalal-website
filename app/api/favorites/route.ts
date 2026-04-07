@@ -47,6 +47,9 @@ export async function GET(request: Request) {
           take: pageSize,
         },
       },
+      orderBy: {
+        updatedAt: "desc",
+      },
     });
 
     // If no favorites playlist exists, create one
