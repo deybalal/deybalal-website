@@ -77,8 +77,9 @@ const PlayerProvider = () => {
     };
 
     if (currentSong?.uri) {
-      const currentSrc = audio.src;
-      const newSrc = currentSong.uri;
+      const currentSrc = decodeURIComponent(audio.src);
+      const newSrc = decodeURIComponent(currentSong.uri);
+
       const isNewSong = lastSongIdRef.current !== currentSong.id;
       const isSameSource = currentSrc === newSrc || currentSrc.endsWith(newSrc);
 

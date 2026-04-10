@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import PlayRandomButton from "@/components/PlayRandomButton";
 import { StructuredData } from "@/components/StructuredData";
+import { Mic2, Radio } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری به همراه متن آهنگ",
@@ -206,16 +207,16 @@ export default async function Home() {
 
                 <Link
                   href="/radio"
-                  className="px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
+                  className="flex justify-center items-center gap-x-2 px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
                 >
-                  رادیو لری
+                  <Radio className="size-5" /> رادیو لری
                 </Link>
 
                 <Link
                   href="/artist"
-                  className="px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
+                  className="flex justify-center items-center gap-x-2 px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
                 >
-                  مشاهده خواننده ها
+                  <Mic2 className="size-5" /> مشاهده خواننده ها
                 </Link>
               </div>
 
