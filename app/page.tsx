@@ -13,6 +13,8 @@ import Link from "next/link";
 import PlayRandomButton from "@/components/PlayRandomButton";
 import { StructuredData } from "@/components/StructuredData";
 import { Mic2, Radio } from "lucide-react";
+import RadioPlaylistItem from "@/components/RadioPlaylistItem";
+import { formatDuration } from "@/tools/formatDuration";
 
 export const metadata: Metadata = {
   title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری به همراه متن آهنگ",
@@ -32,6 +34,7 @@ export default async function Home() {
     albumsData,
     mostPlayedSongsData,
     genresData,
+    radioPlaylist,
   ] = await Promise.all([
     prisma.song.findMany({
       where: { isActive: true, isFeatured: true },
@@ -62,11 +65,16 @@ export default async function Home() {
       orderBy: { songs: { _count: "desc" } },
       take: 10,
     }),
-    prisma.song.findMany({
-      where: { isActive: true },
-      orderBy: { playlists: { _count: "desc" } },
+    prisma.radioPlaylist.findMany({
+      orderBy: { date: "asc" },
       take: 20,
-      include: { artists: true },
+      include: {
+        tracks: {
+          include: {
+            song: true,
+          },
+        },
+      },
     }),
   ]);
 
@@ -347,6 +355,38 @@ export default async function Home() {
           ) : (
             <p className="text-gray-500 col-span-full">
               آلبومی یافت نشد. در پنل مدیریت آلبوم اضافه کنید!
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* New Releases (Previously Trending/New) */}
+      <section>
+        <SectionHeader title="پلی لیست های رادیو" color="bg-green-500" />
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">
+          {radioPlaylist.length > 0 ? (
+            radioPlaylist.map((playList) => {
+              const totalSeconds = playList.tracks.reduce(
+                (sum, track) => sum + (track.duration || 0),
+                0
+              );
+
+              return (
+                <RadioPlaylistItem
+                  key={playList.id}
+                  id={playList.id}
+                  count={playList.tracks.length}
+                  totalDuration={formatDuration(totalSeconds)}
+                  date={playList.date}
+                  coverArts={playList.tracks
+                    .slice(0, 4)
+                    .map((item) => item.song.coverArt)}
+                />
+              );
+            })
+          ) : (
+            <p className="text-gray-500 col-span-full">
+              هیج پلی لیستی یافت نشد!
             </p>
           )}
         </div>

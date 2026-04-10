@@ -18,12 +18,14 @@ type Props = {
   playlist: Playlist & { doesUserOwnsPlaylist: boolean };
   currentPage: number;
   totalPages: number;
+  searchType?: "artist" | "album" | "playlist" | "radioPlaylist";
 };
 
 export default function PlaylistClient({
   playlist: initialPlaylist,
   currentPage,
   totalPages,
+  searchType = "playlist",
 }: Props) {
   const [playlist, setPlaylist] = useState(initialPlaylist);
 
@@ -115,7 +117,7 @@ export default function PlaylistClient({
             <div className="flex items-center gap-4">
               <SearchModal
                 scope={{
-                  type: "playlist",
+                  type: searchType,
                   id: playlist.id,
                   name: playlist.name,
                 }}

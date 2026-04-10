@@ -13,7 +13,7 @@ interface SearchInterfaceProps {
   onClose?: () => void;
   isPage?: boolean;
   scope?: {
-    type: "artist" | "album" | "playlist";
+    type: "artist" | "album" | "playlist" | "radioPlaylist";
     id: string;
     name: string;
   };

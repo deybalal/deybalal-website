@@ -18,122 +18,138 @@ export async function POST(request: Request) {
 
   const normalizedQuery = query.trim();
   const scope = body.scope as {
-    type: "artist" | "album" | "playlist";
+    type: "artist" | "album" | "playlist" | "radioPlaylist";
     id: string;
   } | null;
 
   try {
     const isScoped = !!scope;
 
-    const [songs, albums, playlists, artists] = await Promise.all([
-      // 1. Search Songs
-      prisma.song.findMany({
-        where: {
-          AND: [
-            {
-              OR: [
-                { title: { contains: normalizedQuery } },
-                { artist: { contains: normalizedQuery } },
-                {
-                  albumName: { contains: normalizedQuery },
-                },
-                { titleEn: { contains: normalizedQuery } },
-              ],
-            },
-            { isActive: true },
-            scope?.type === "artist"
-              ? { artists: { some: { id: scope.id } } }
-              : {},
-            scope?.type === "album" ? { albumId: scope.id } : {},
-            scope?.type === "playlist"
-              ? { playlists: { some: { id: scope.id } } }
-              : {},
-          ],
-        },
-        take: 30, // Get a bit more for ranking
-        select: {
-          id: true,
-          title: true,
-          artist: true,
-          coverArt: true,
-          slug: true,
-          titleEn: true,
-          artistEn: true,
-        },
-      }),
+    const [songs, albums, playlists, artists, radioPlaylist] =
+      await Promise.all([
+        // 1. Search Songs
+        prisma.song.findMany({
+          where: {
+            AND: [
+              {
+                OR: [
+                  { title: { contains: normalizedQuery } },
+                  { artist: { contains: normalizedQuery } },
+                  {
+                    albumName: { contains: normalizedQuery },
+                  },
+                  { titleEn: { contains: normalizedQuery } },
+                ],
+              },
+              { isActive: true },
+              scope?.type === "artist"
+                ? { artists: { some: { id: scope.id } } }
+                : {},
+              scope?.type === "album" ? { albumId: scope.id } : {},
+              scope?.type === "playlist"
+                ? { playlists: { some: { id: scope.id } } }
+                : {},
+            ],
+          },
+          take: 30, // Get a bit more for ranking
+          select: {
+            id: true,
+            title: true,
+            artist: true,
+            coverArt: true,
+            slug: true,
+            titleEn: true,
+            artistEn: true,
+          },
+        }),
 
-      // 2. Search Albums
-      isScoped && scope.type !== "artist"
-        ? Promise.resolve([])
-        : prisma.album.findMany({
-            where: {
-              AND: [
-                {
-                  OR: [
-                    {
-                      name: { contains: normalizedQuery },
-                    },
-                    {
-                      artistName: {
-                        contains: normalizedQuery,
+        // 2. Search Albums
+        isScoped && scope.type !== "artist"
+          ? Promise.resolve([])
+          : prisma.album.findMany({
+              where: {
+                AND: [
+                  {
+                    OR: [
+                      {
+                        name: { contains: normalizedQuery },
                       },
-                    },
-                    {
-                      artistNameEn: {
-                        contains: normalizedQuery,
+                      {
+                        artistName: {
+                          contains: normalizedQuery,
+                        },
                       },
-                    },
-                  ],
-                },
-                { isActive: true },
-                scope?.type === "artist" ? { artistId: scope.id } : {},
-              ],
-            },
-            take: 15,
-            select: {
-              id: true,
-              name: true,
-              artistName: true,
-              artistNameEn: true,
-              coverArt: true,
-            },
-          }),
+                      {
+                        artistNameEn: {
+                          contains: normalizedQuery,
+                        },
+                      },
+                    ],
+                  },
+                  { isActive: true },
+                  scope?.type === "artist" ? { artistId: scope.id } : {},
+                ],
+              },
+              take: 15,
+              select: {
+                id: true,
+                name: true,
+                artistName: true,
+                artistNameEn: true,
+                coverArt: true,
+              },
+            }),
 
-      // 3. Search Playlists
-      isScoped
-        ? Promise.resolve([])
-        : prisma.playlist.findMany({
-            where: {
-              name: { contains: normalizedQuery },
-              isPrivate: false,
-            },
-            take: 10,
-            select: {
-              id: true,
-              name: true,
-              coverArt: true,
-            },
-          }),
+        // 3. Search Playlists
+        isScoped
+          ? Promise.resolve([])
+          : prisma.playlist.findMany({
+              where: {
+                name: { contains: normalizedQuery },
+                isPrivate: false,
+              },
+              take: 10,
+              select: {
+                id: true,
+                name: true,
+                coverArt: true,
+              },
+            }),
 
-      // 4. Search Artists
-      isScoped
-        ? Promise.resolve([])
-        : prisma.artist.findMany({
-            where: {
-              OR: [
-                { name: { contains: normalizedQuery } },
-                { nameEn: { contains: normalizedQuery } },
-              ],
-            },
-            take: 10,
-            select: {
-              id: true,
-              name: true,
-              nameEn: true,
-              image: true,
-            },
-          }),
-    ]);
+        // 4. Search Artists
+        isScoped
+          ? Promise.resolve([])
+          : prisma.artist.findMany({
+              where: {
+                OR: [
+                  { name: { contains: normalizedQuery } },
+                  { nameEn: { contains: normalizedQuery } },
+                ],
+              },
+              take: 10,
+              select: {
+                id: true,
+                name: true,
+                nameEn: true,
+                image: true,
+              },
+            }),
+
+        // 4. Search RadioPlaylists
+        isScoped && scope.type !== "radioPlaylist"
+          ? Promise.resolve([])
+          : prisma.radioTrack.findMany({
+              where: {
+                playlistId: scope?.id,
+              },
+              take: 10,
+              select: {
+                id: true,
+                song: true,
+                duration: true,
+              },
+            }),
+      ]);
 
     // Combine all for Top Result calculation
     const allResults = [
@@ -141,6 +157,7 @@ export async function POST(request: Request) {
       ...artists.map((a) => ({ ...a, type: "artist" })),
       ...albums.map((al) => ({ ...al, type: "album" })),
       ...playlists.map((p) => ({ ...p, type: "playlist" })),
+      ...radioPlaylist.map((p) => ({ ...p, type: "radioPlaylist" })),
     ];
 
     const fuse = new Fuse(allResults, {
@@ -173,6 +190,7 @@ export async function POST(request: Request) {
       artists: artists.slice(0, 20),
       albums: albums.slice(0, 20),
       playlists: playlists.slice(0, 20),
+      radioPlaylist: radioPlaylist.slice(0, 20),
       topResult,
     });
   } catch (error) {

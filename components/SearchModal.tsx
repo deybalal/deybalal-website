@@ -13,7 +13,7 @@ import { useState } from "react";
 
 interface SearchModalProps {
   scope?: {
-    type: "artist" | "album" | "playlist";
+    type: "artist" | "album" | "playlist" | "radioPlaylist";
     id: string;
     name: string;
   };
