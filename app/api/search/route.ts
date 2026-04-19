@@ -117,7 +117,7 @@ export async function POST(request: Request) {
             }),
 
         // 4. Search Artists
-        isScoped
+        isScoped && scope.type !== "artist"
           ? Promise.resolve([])
           : prisma.artist.findMany({
               where: {

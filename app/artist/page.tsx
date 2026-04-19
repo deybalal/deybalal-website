@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { Artist } from "@/types/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { User } from "lucide-react";
+import { Search, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import SearchModal from "@/components/SearchModal";
+import { Button } from "@/components/ui/button";
 
 export default function ArtistPage() {
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -50,6 +52,26 @@ export default function ArtistPage() {
   return (
     <div className="space-y-8 container">
       <h1 className="text-4xl font-bold text-white neon-text">خواننده ها</h1>
+
+      <div className="container">
+        <h3>جست و جو درمیان خواننده ها</h3>
+        <SearchModal
+          scope={{
+            type: "artist",
+            id: undefined,
+            name: "خواننده ها",
+          }}
+          trigger={
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+            >
+              <Search className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+            </Button>
+          }
+        />
+      </div>
 
       {artists.length === 0 ? (
         <div className="text-gray-400 text-lg">خواننده ای پیدا نشد!</div>

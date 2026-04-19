@@ -80,14 +80,18 @@ export async function POST(request: Request) {
     // Delete all last playlists, except for the last three
     const playlistsToDelete = await prisma.radioPlaylist.findMany({
       orderBy: { date: "desc" },
-      skip: 3,
+      skip: 5,
       select: { id: true },
     });
 
     if (playlistsToDelete.length > 0) {
-      await prisma.radioPlaylist.deleteMany({
-        where: {},
-      });
+      for (const playlist of playlistsToDelete) {
+        await prisma.radioPlaylist.deleteMany({
+          where: {
+            id: playlist.id,
+          },
+        });
+      }
     }
 
     // Create new playlist

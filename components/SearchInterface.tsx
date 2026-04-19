@@ -14,7 +14,7 @@ interface SearchInterfaceProps {
   isPage?: boolean;
   scope?: {
     type: "artist" | "album" | "playlist" | "radioPlaylist";
-    id: string;
+    id: string | undefined;
     name: string;
   };
 }
@@ -149,6 +149,8 @@ export default function SearchInterface({
     localStorage.setItem("recentSearches", JSON.stringify(updated));
   };
 
+  const isScoped = !!scope;
+
   return (
     <div className="flex flex-col h-full w-full text-white max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Search Header */}
@@ -190,7 +192,7 @@ export default function SearchInterface({
 
       {/* Results Area */}
       <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full rtl">
+        <ScrollArea className="h-full rtl block">
           <div className="pb-24">
             {query.trim() !== "" &&
             (isPending || isLoading || query !== debouncedQuery) ? (
@@ -217,7 +219,14 @@ export default function SearchInterface({
                 {/* Artists Skeleton */}
                 <section>
                   <div className="h-8 w-32 bg-white/10 rounded mb-6" />
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                  <div
+                    className={cn(
+                      "grid",
+                      isScoped
+                        ? "grid-cols-2"
+                        : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+                    )}
+                  >
                     {[...Array(5)].map((_, i) => (
                       <div key={i} className="flex flex-col items-center">
                         <div
@@ -409,7 +418,14 @@ export default function SearchInterface({
                       <Mic2 className="w-6 h-6 me-3 text-purple-400" />
                       خواننده ها
                     </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    <div
+                      className={cn(
+                        "grid",
+                        isScoped
+                          ? "grid-cols-2"
+                          : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+                      )}
+                    >
                       {results.artists.map((artist) => (
                         <Link
                           key={artist.name}
@@ -450,7 +466,14 @@ export default function SearchInterface({
                       <Disc className="w-6 h-6 me-3 text-pink-400" />
                       آلبوم ها
                     </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    <div
+                      className={cn(
+                        "grid",
+                        isScoped
+                          ? "grid-cols-2"
+                          : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+                      )}
+                    >
                       {results.albums.map((album) => (
                         <Link
                           key={album.id}
@@ -491,7 +514,14 @@ export default function SearchInterface({
                       <ListMusic className="w-6 h-6 me-3 text-emerald-400" />
                       پلی لیست
                     </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    <div
+                      className={cn(
+                        "grid",
+                        isScoped
+                          ? "grid-cols-2"
+                          : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+                      )}
+                    >
                       {results.playlists.map((playlist) => (
                         <Link
                           key={playlist.id}

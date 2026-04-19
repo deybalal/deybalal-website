@@ -144,7 +144,8 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       setSong: (song, play) => {
-        const { playbackDevice, downloadPreference, serverVolume } = get();
+        const { playbackDevice, downloadPreference, serverVolume, isRadio } =
+          get();
         const { uri, quality } = getBestUri(song, downloadPreference);
 
         if (quality !== downloadPreference && play !== false) {
@@ -180,6 +181,7 @@ export const usePlayerStore = create<PlayerState>()(
           progress: 0,
           duration: song.duration || 0,
           activeId: play === false ? get().activeId : TAB_ID,
+          isRadio: isRadio ? true : false,
         });
       },
 

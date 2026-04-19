@@ -88,7 +88,15 @@ export default async function PlaylistDetailPage({
     name: "پلی لیست رادیو",
     duration: 0,
     doesUserOwnsPlaylist: false,
-    description: "پلی لیست رادیو",
+    description: `پلی لیست رادیو در تاریخ ${playlistData.date.toLocaleDateString(
+      "fa-IR",
+      {
+        numberingSystem: "latn",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }
+    )}`,
     coverArt:
       playlistData.tracks[0].song.coverArt || "/images/default-album-art.png",
     songsLength: playlistData._count.tracks,

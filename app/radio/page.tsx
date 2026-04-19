@@ -297,7 +297,7 @@ export default function RadioPage() {
       : null;
 
   return (
-    <div className="max-w-5xl w-full h-max mx-auto py-8 px-4 pb-32">
+    <div className="max-w-5xl w-full h-max mx-auto py-8 px-0.5 md:px-4 pb-32">
       <div className="flex items-center gap-4 mb-10 transition-all duration-500 animate-in fade-in slide-in-from-top-4">
         <div className="bg-primary/20 p-4 rounded-2xl shadow-xl shadow-primary/10">
           <RadioIcon className="w-10 h-10 text-primary animate-pulse" />
@@ -418,8 +418,8 @@ export default function RadioPage() {
                     }
                   />
                 </Button>
-                <div className="flex flex-col w-full">
-                  <h2 className="text-3xl font-black text-foreground mb-2 leading-tight drop-shadow-md">
+                <div className="flex flex-col w-full max-w-10/12">
+                  <h2 className="text-3xl font-black text-foreground mb-2 leading-tight drop-shadow-md overflow-hidden">
                     <MarqueeText
                       text={state?.currentTrack.title || "بدون عنوان"}
                       className="overflow-hidden line-clamp-none"
@@ -489,39 +489,6 @@ export default function RadioPage() {
         </div>
 
         <div className="lg:col-span-2 space-y-6 animate-in fade-in slide-in-from-left-8 duration-700 delay-200">
-          <Card className="glass-card bg-foreground/5 border-foreground/10 shadow-xl overflow-hidden">
-            <div className="bg-foreground/5 p-4 border-b border-foreground/10">
-              <h3 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-primary">
-                <Music className="w-4 h-4" />
-                بعدی در لیست
-              </h3>
-            </div>
-            <CardContent className="p-6">
-              {state?.nextTrack ? (
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-foreground/5 border border-foreground/5 hover:bg-foreground/10 transition-colors group">
-                  <div className="w-14 h-14 bg-foreground/5 rounded-lg relative overflow-hidden shrink-0 shadow-lg ring-1 ring-foreground/10">
-                    <Music className="w-7 h-7 absolute inset-0 m-auto text-foreground group-hover:scale-110 transition-transform" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-foreground truncate text-base mb-0.5 transition-colors group-hover:text-primary">
-                      {state.nextTrack?.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground truncate font-medium">
-                      {state.nextTrack?.artist}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-center opacity-40">
-                  <Music className="w-12 h-12 mb-3 text-muted-foreground" />
-                  <p className="text-muted-foreground italic text-sm font-medium">
-                    لیست پخش به پایان می‌رسد.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           {/*User turns Off or On the Radio */}
           <Card className="glass-card bg-foreground/5 border-foreground/10 shadow-xl overflow-hidden">
             <CardContent className="p-6">
@@ -591,6 +558,38 @@ export default function RadioPage() {
                   </Dialog>
                 )}
               </div>
+            </CardContent>
+          </Card>
+          <Card className="pt-0 glass-card bg-foreground/5 border-foreground/10 shadow-xl overflow-hidden">
+            <div className="bg-foreground/5 p-4 border-b border-foreground/10">
+              <h3 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-primary">
+                <Music className="w-4 h-4" />
+                بعدی در لیست
+              </h3>
+            </div>
+            <CardContent className="p-6">
+              {state?.nextTrack ? (
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-foreground/5 border border-foreground/5 hover:bg-foreground/10 transition-colors group">
+                  <div className="w-14 h-14 bg-foreground/5 rounded-lg relative overflow-hidden shrink-0 shadow-lg ring-1 ring-foreground/10">
+                    <Music className="w-7 h-7 absolute inset-0 m-auto text-foreground group-hover:scale-110 transition-transform" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-foreground truncate text-base mb-0.5 transition-colors group-hover:text-primary">
+                      {state.nextTrack?.title}
+                    </p>
+                    <p className="text-sm text-muted-foreground truncate font-medium">
+                      {state.nextTrack?.artist}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center opacity-40">
+                  <Music className="w-12 h-12 mb-3 text-muted-foreground" />
+                  <p className="text-muted-foreground italic text-sm font-medium">
+                    لیست پخش به پایان می‌رسد.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

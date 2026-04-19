@@ -66,7 +66,8 @@ export default async function Home() {
       take: 10,
     }),
     prisma.radioPlaylist.findMany({
-      orderBy: { date: "asc" },
+      skip: 1,
+      orderBy: { date: "desc" },
       take: 20,
       include: {
         tracks: {
@@ -77,6 +78,10 @@ export default async function Home() {
       },
     }),
   ]);
+
+  const sortedRadioPlaylist = radioPlaylist.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
 
   // Extract unique artists from most played songs as a proxy for "Most Played Artists"
   const artistMap = new Map<string, PrismaArtist>();
@@ -239,7 +244,7 @@ export default async function Home() {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
                   <span className="text-sm md:text-base font-medium">
-                    +100 آهنگ
+                    +1800 آهنگ
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -364,8 +369,8 @@ export default async function Home() {
       <section>
         <SectionHeader title="پلی لیست های رادیو" color="bg-green-500" />
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">
-          {radioPlaylist.length > 0 ? (
-            radioPlaylist.map((playList) => {
+          {sortedRadioPlaylist.length > 0 ? (
+            sortedRadioPlaylist.map((playList) => {
               const totalSeconds = playList.tracks.reduce(
                 (sum, track) => sum + (track.duration || 0),
                 0

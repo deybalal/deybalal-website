@@ -14,7 +14,7 @@ import { useState } from "react";
 interface SearchModalProps {
   scope?: {
     type: "artist" | "album" | "playlist" | "radioPlaylist";
-    id: string;
+    id: string | undefined;
     name: string;
   };
   trigger?: React.ReactNode;
