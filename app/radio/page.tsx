@@ -15,6 +15,7 @@ import {
   EyeOff,
   Heart,
   ListPlus,
+  List,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -57,6 +58,7 @@ interface RadioState {
   } | null;
   serverTime: number;
   elapsedTime: number;
+  playlistId: string;
 }
 
 export default function RadioPage() {
@@ -169,7 +171,12 @@ export default function RadioPage() {
       // Check if it's a valid internal link
       if (anchor && anchor.href && !anchor.target) {
         const href = anchor.getAttribute("href");
-        if (href && !href.startsWith("http") && href !== "/radio") {
+        if (
+          href &&
+          !href.startsWith("http") &&
+          href !== "/radio" &&
+          href !== "/radio/history/today"
+        ) {
           e.preventDefault();
           e.stopPropagation();
           setPendingPath(href);
@@ -589,6 +596,15 @@ export default function RadioPage() {
                     لیست پخش به پایان می‌رسد.
                   </p>
                 </div>
+              )}
+              {state?.playlistId && (
+                <Link
+                  href="/radio/history/today"
+                  className="flex items-center gap-1.5 px-3 mt-4 py-2 rounded-2xl bg-primary/10 text-primary text-[13px] font-bold hover:bg-primary/20 transition-colors border border-primary/20"
+                >
+                  <List className="w-3.5 h-3.5" />
+                  لیست پخش امروز
+                </Link>
               )}
             </CardContent>
           </Card>

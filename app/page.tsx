@@ -66,7 +66,6 @@ export default async function Home() {
       take: 10,
     }),
     prisma.radioPlaylist.findMany({
-      skip: 1,
       orderBy: { date: "desc" },
       take: 20,
       include: {
@@ -80,7 +79,7 @@ export default async function Home() {
   ]);
 
   const sortedRadioPlaylist = radioPlaylist.sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
   // Extract unique artists from most played songs as a proxy for "Most Played Artists"

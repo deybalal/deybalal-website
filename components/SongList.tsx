@@ -50,7 +50,6 @@ const SongList = ({
           <div
             key={song.id + i}
             className="flex items-center p-2 rounded-xl hover:bg-white/5 group transition-all duration-200 cursor-pointer border border-transparent hover:border-white/5"
-            onClick={() => setQueue(songs, i)}
           >
             <div className="w-10 flex items-center justify-center shrink-0">
               {isCurrent && isPlaying ? (
@@ -60,7 +59,7 @@ const SongList = ({
                   <div className="w-0.5 h-full bg-primary group-hover:bg-violet-600 duration-500 animate-bounce animation-duration-[0.7s]" />
                 </div>
               ) : (
-                <>
+                <div onClick={() => setQueue(songs, i)}>
                   <span className="text-sm text-muted-foreground group-hover:hidden">
                     {i + 1}
                   </span>
@@ -68,15 +67,18 @@ const SongList = ({
                     size={14}
                     className="hidden group-hover:block text-primary fill-primary"
                   />
-                </>
+                </div>
               )}
             </div>
 
-            <div className="relative w-12 h-12 bg-white/5 rounded-lg overflow-hidden shrink-0 mx-3 border border-white/5">
+            <div
+              onClick={() => setQueue(songs, i)}
+              className="relative w-12 h-12 bg-white/5 rounded-lg overflow-hidden shrink-0 mx-3 border border-white/5"
+            >
               {song.coverArt ? (
                 <Image
                   src={song.coverArt}
-                  alt={song.title || "Song"}
+                  alt={`پخش ${song.title}` || "پخش آهنگ"}
                   fill
                   className="object-cover"
                 />
@@ -87,7 +89,7 @@ const SongList = ({
               )}
             </div>
 
-            <div className="flex-1 min-w-0">
+            <Link href={`/song/${song.id}`} className="flex-1 min-w-0">
               <h4
                 className={`text-sm font-semibold truncate ${
                   isCurrent ? "text-primary" : "text-foreground"
@@ -124,10 +126,15 @@ const SongList = ({
                     </span>
                   )}
               </div>
-            </div>
+            </Link>
 
             <div className="flex items-center gap-4 ms-4">
               <div className="flex flex-col items-end gap-0.5">
+                {song.playedAtRange && (
+                  <span className="text-[10px] text-primary/80 font-bold tabular-nums">
+                    {song.playedAtRange}
+                  </span>
+                )}
                 <span className="text-xs text-muted-foreground tabular-nums">
                   {formatTime(song.duration)}
                 </span>

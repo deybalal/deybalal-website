@@ -27,6 +27,7 @@ export interface Song {
   lastPlayedAt?: number;
   contributors?: Contributor[];
   genres?: Genre[];
+  playedAtRange?: string;
 }
 
 export interface Genre {
