@@ -77,22 +77,19 @@ export async function POST(request: Request) {
       where: { date: tomorrow },
     });
 
-    // Delete all last playlists, except for the last three
-    const playlistsToDelete = await prisma.radioPlaylist.findMany({
-      orderBy: { date: "desc" },
-      skip: 5,
-      select: { id: true },
-    });
+    const cutoff = new Date(
+      Temporal.Now.zonedDateTimeISO()
+        .subtract({ days: 5 })
+        .startOfDay().epochMilliseconds
+    );
 
-    if (playlistsToDelete.length > 0) {
-      for (const playlist of playlistsToDelete) {
-        await prisma.radioPlaylist.deleteMany({
-          where: {
-            id: playlist.id,
-          },
-        });
-      }
-    }
+    await prisma.radioPlaylist.deleteMany({
+      where: {
+        date: {
+          lt: cutoff,
+        },
+      },
+    });
 
     // Create new playlist
     const playlist = await prisma.radioPlaylist.create({

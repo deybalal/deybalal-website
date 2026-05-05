@@ -93,6 +93,10 @@ const PlayerProvider = () => {
 
         if (isPlaying && activeId === TAB_ID) {
           incrementPlayCount(currentSong.id);
+
+          if (typeof window !== undefined) {
+            document.title = `${currentSong.title} از ${currentSong.artist} - دی بلال`;
+          }
         }
       }
     }

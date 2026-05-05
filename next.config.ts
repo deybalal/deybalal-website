@@ -8,7 +8,13 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "50mb",
     },
   },
-  allowedDevOrigins: ["locahost", "192.168.1.108", "my.local"],
+  allowedDevOrigins: [
+    "locahost",
+    "192.168.1.108",
+    "my.local",
+    "lori.local",
+    "192.168.70.108",
+  ],
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -21,6 +27,12 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "dl2.mytg.ir",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "lori.local",
         port: "",
         pathname: "/**",
       },

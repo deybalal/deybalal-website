@@ -105,7 +105,8 @@ const PlayerBar = () => {
     { label: "سرور", value: "server", icon: Speaker },
     { label: "هردو", value: "both", icon: Cast },
   ];
-  const activeDevice = devicesList.find((d) => d.value === playbackDevice) || devicesList[0];
+  const activeDevice =
+    devicesList.find((d) => d.value === playbackDevice) || devicesList[0];
   const DeviceIcon = activeDevice.icon;
 
   const togglePlay = useCallback(() => {
@@ -154,10 +155,10 @@ const PlayerBar = () => {
         togglePlay();
       } else if (code === "ArrowUp") {
         e.preventDefault();
-        setVolume(Math.min(volume + 2, 100));
+        setVolume(Math.min(volume + 1, 100));
       } else if (code === "ArrowDown") {
         e.preventDefault();
-        setVolume(Math.max(volume - 2, 0));
+        setVolume(Math.max(volume - 1, 0));
       } else if (code === "ArrowRight") {
         e.preventDefault();
         if (shiftKey) {
@@ -398,7 +399,11 @@ const PlayerBar = () => {
                 {devicesList.map((d) => (
                   <DropdownMenuItem
                     key={d.value}
-                    onClick={() => setPlaybackDevice(d.value as "current" | "server" | "both")}
+                    onClick={() =>
+                      setPlaybackDevice(
+                        d.value as "current" | "server" | "both"
+                      )
+                    }
                     className={`cursor-pointer ${
                       playbackDevice === d.value
                         ? "text-primary font-bold"
@@ -456,7 +461,9 @@ const PlayerBar = () => {
               />
               {(playbackDevice === "server" || playbackDevice === "both") && (
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center bg-background/95 backdrop-blur-xl border border-white/10 p-2 rounded-lg shadow-xl pb-4">
-                  <span className="text-xs text-muted-foreground mb-3 whitespace-nowrap">ولوم سرور</span>
+                  <span className="text-xs text-muted-foreground mb-3 whitespace-nowrap">
+                    ولوم سرور
+                  </span>
                   <Slider
                     orientation="vertical"
                     value={[serverVolume]}
@@ -516,7 +523,7 @@ const PlayerBar = () => {
                         </Button>
                       ))}
                     </div>
-                    
+
                     <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-3 text-center">
                       دستگاه پخش
                     </p>
@@ -525,12 +532,14 @@ const PlayerBar = () => {
                         <Button
                           key={d.value}
                           variant={
-                            playbackDevice === d.value
-                              ? "default"
-                              : "outline"
+                            playbackDevice === d.value ? "default" : "outline"
                           }
                           size="sm"
-                          onClick={() => setPlaybackDevice(d.value as "current" | "server" | "both")}
+                          onClick={() =>
+                            setPlaybackDevice(
+                              d.value as "current" | "server" | "both"
+                            )
+                          }
                           className="text-[12px] h-7 px-2 cursor-pointer flex gap-1 items-center"
                         >
                           <d.icon size={12} />
@@ -538,8 +547,9 @@ const PlayerBar = () => {
                         </Button>
                       ))}
                     </div>
-                    
-                    {(playbackDevice === "server" || playbackDevice === "both") && (
+
+                    {(playbackDevice === "server" ||
+                      playbackDevice === "both") && (
                       <div className="mt-4 flex flex-col items-center">
                         <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-3 text-center">
                           ولوم سرور
