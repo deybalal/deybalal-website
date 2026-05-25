@@ -141,10 +141,10 @@ const PlayerProvider = () => {
 
   const handleEnded = () => {
     if (activeId !== TAB_ID) return;
-
-    const { repeatMode, currentSong, isRadio } = usePlayerStore.getState();
-    if (isRadio) return;
-
+ 
+    const { repeatMode, currentSong, isLiveRadio } = usePlayerStore.getState();
+    if (isLiveRadio) return;
+ 
     if (repeatMode === "one" && audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch((e) => console.error("Play error:", e));
@@ -152,7 +152,7 @@ const PlayerProvider = () => {
         incrementPlayCount(currentSong.id);
       }
     } else {
-      next();
+      next(true);
     }
   };
 

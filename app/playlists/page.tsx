@@ -96,7 +96,7 @@ export default async function PlaylistsPage() {
   return (
     <div className="space-y-8 w-full pb-24 h-max">
       <div className="flex items-center">
-        <h1 className="text-4xl font-bold text-white neon-text ml-5">
+        <h1 className="text-3xl font-bold text-white neon-text ml-5">
           پلی لیست ها
         </h1>
         <Button asChild variant="outline">
@@ -112,7 +112,7 @@ export default async function PlaylistsPage() {
       <PlaylistGrid initialPlaylists={playlists} />
 
       <div className="flex flex-col">
-        <h2 className="text-4xl font-bold text-foreground neon-text ml-5 mb-4">
+        <h2 className="text-3xl font-bold text-foreground neon-text ml-5 mb-4">
           پلی لیست های عمومی
         </h2>
         <PlaylistGrid initialPlaylists={publicPlaylists} />

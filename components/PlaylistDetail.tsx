@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import SongList from "@/components/SongList";
-import { Playlist } from "@/types/types";
-import { ListMusic, Lock, Globe } from "lucide-react";
+import { Playlist, Song } from "@/types/types";
+import { ListMusic, Lock, Globe, Play, Loader2 } from "lucide-react";
 import { formatTime } from "@/lib/utils";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Switch } from "@/components/ui/switch";
+import PlayAsRadioButton from "./PlayAsRadioButton";
+import { usePlayerStore } from "@/hooks/usePlayerStore";
+import { Button } from "@/components/ui/button";
 
 interface PlaylistDetailProps {
   initialPlaylist: Playlist;
@@ -19,6 +22,34 @@ export default function PlaylistDetail({
   currentUserId,
 }: PlaylistDetailProps) {
   const [playlist, setPlaylist] = useState<Playlist>(initialPlaylist);
+  const { setQueue } = usePlayerStore();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchAllSongs = useCallback(async (): Promise<Song[] | null> => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/playlists/${playlist.id}/songs`);
+      const data = await res.json();
+      if (data.success && data.data?.length > 0) {
+        return data.data;
+      }
+      return null;
+    } catch {
+      toast.error("خطا در دریافت لیست آهنگ ها");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [playlist.id]);
+
+  const handlePlay = async () => {
+    const allSongs = await fetchAllSongs();
+    if (allSongs && allSongs.length > 0) {
+      setQueue(allSongs);
+    } else if (playlist.songs?.length > 0) {
+      setQueue(playlist.songs);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -97,14 +128,34 @@ export default function PlaylistDetail({
               {playlist.description}
             </p>
           )}
-          <div className="flex items-center gap-2 text-gray-400 mt-2">
-            <span>{playlist.songs?.length || 0} آهنگ</span>
-            {playlist.duration > 0 && (
-              <>
-                <span>•</span>
-                <span>{formatTime(playlist.duration)}</span>
-              </>
-            )}
+          <div className="flex flex-col md:flex-row md:items-center gap-4 mt-2">
+             <div className="flex items-center gap-2 text-gray-400">
+              <span>{playlist.songs?.length || 0} آهنگ</span>
+              {playlist.duration > 0 && (
+                <>
+                  <span>•</span>
+                  <span>{formatTime(playlist.duration)}</span>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={handlePlay}
+                disabled={isLoading}
+                className="gap-2 rounded-full font-bold bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg hover:scale-105 transition-all duration-300 px-6 py-3 h-auto"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 fill-white" />
+                )}
+                پخش همه
+              </Button>
+              <PlayAsRadioButton
+                songs={playlist.songs || []}
+                fetchAllSongs={fetchAllSongs}
+              />
+            </div>
           </div>
         </div>
       </div>

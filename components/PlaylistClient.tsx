@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import SongList from "@/components/SongList";
-import { Playlist } from "@/types/types";
-import { ListMusic, Lock, Globe } from "lucide-react";
+import { Playlist, Song } from "@/types/types";
+import { ListMusic, Lock, Globe, Play, Loader2 } from "lucide-react";
 import { formatTime } from "@/lib/utils";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
@@ -13,6 +13,8 @@ import { ShareButtons } from "@/components/ShareButtons";
 import SearchModal from "@/components/SearchModal";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import PlayAsRadioButton from "@/components/PlayAsRadioButton";
+import { usePlayerStore } from "@/hooks/usePlayerStore";
 
 type Props = {
   playlist: Playlist & { doesUserOwnsPlaylist: boolean };
@@ -28,6 +30,40 @@ export default function PlaylistClient({
   searchType = "playlist",
 }: Props) {
   const [playlist, setPlaylist] = useState(initialPlaylist);
+
+  useEffect(() => {
+    setPlaylist(initialPlaylist);
+  }, [initialPlaylist]);
+
+  const { setQueue } = usePlayerStore();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchAllSongs = useCallback(async (): Promise<Song[] | null> => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/playlists/${playlist.id}/songs`);
+      const data = await res.json();
+      if (data.success && data.data?.length > 0) {
+        return data.data;
+      }
+      return null;
+    } catch {
+      toast.error("خطا در دریافت لیست آهنگ ها");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [playlist.id]);
+
+  const handlePlay = async () => {
+    const allSongs = await fetchAllSongs();
+    if (allSongs && allSongs.length > 0) {
+      setQueue(allSongs);
+    } else if (playlist.songs.length > 0) {
+      // Fallback to paginated songs if API fails
+      setQueue(playlist.songs);
+    }
+  };
 
   return (
     <div className="space-y-8 mb-24 h-max w-full lg:w-7/12">
@@ -137,6 +173,28 @@ export default function PlaylistClient({
               />
             </div>
           </div>
+
+          {/* Play Buttons */}
+          {searchType !== "radioPlaylist" && (
+            <div className="flex items-center gap-3 mt-3">
+              <Button
+                onClick={handlePlay}
+                disabled={isLoading}
+                className="gap-2 rounded-full font-bold bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg hover:scale-105 transition-all duration-300 px-6 py-3 h-auto"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4 fill-white" />
+                )}
+                پخش همه
+              </Button>
+              <PlayAsRadioButton
+                songs={playlist.songs}
+                fetchAllSongs={fetchAllSongs}
+              />
+            </div>
+          )}
         </div>
       </div>
 

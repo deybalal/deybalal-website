@@ -182,7 +182,10 @@ export default async function ArtistDetailPage({
   };
 
   return (
-    <div key={currentPage} className="space-y-12 pb-24 h-max w-full md:w-10/12 max-w-6xl">
+    <div
+      key={currentPage}
+      className="space-y-12 pb-24 h-max w-full md:w-10/12 max-w-6xl"
+    >
       <StructuredData data={structuredData as Record<string, unknown>} />
       {/* Header Section */}
       <div className="relative min-h-[400px] md:h-[50vh] rounded-4xl overflow-hidden rounded-b-[3rem] shadow-2xl flex flex-col justify-center">
@@ -271,7 +274,7 @@ export default async function ArtistDetailPage({
                     }
                   />
                   <FollowButton artistId={artist.id} />
-                  <ArtistPlayButton songs={songs} />
+                  <ArtistPlayButton songs={songs} artistId={artist.id} />
                 </div>
               </div>
             </div>

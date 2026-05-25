@@ -73,6 +73,7 @@ const PlayerBar = () => {
     setQueue,
     hasHydrated,
     isRadio,
+    isLiveRadio,
     playbackDevice,
     setPlaybackDevice,
     serverVolume,
@@ -283,7 +284,7 @@ const PlayerBar = () => {
                     : "text-gray-400 hover:text-foreground"
                 }`}
                 onClick={toggleRepeat}
-                disabled={isRadio}
+                disabled={isLiveRadio}
               >
                 {repeatMode === "one" ? (
                   <Repeat1 size={20} />
@@ -299,7 +300,7 @@ const PlayerBar = () => {
                     ? "opacity-20 cursor-not-allowed"
                     : "text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
                 }`}
-                onClick={next}
+                onClick={() => next()}
                 disabled={isRadio}
               >
                 <SkipForward size={20} className="md:w-6 md:h-6" />
@@ -328,7 +329,7 @@ const PlayerBar = () => {
                     ? "opacity-20 cursor-not-allowed"
                     : "text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
                 }`}
-                onClick={prev}
+                onClick={() => prev()}
                 disabled={isRadio}
               >
                 <SkipBack size={20} className="md:w-6 md:h-6" />
@@ -342,7 +343,7 @@ const PlayerBar = () => {
                     : "text-gray-400 hover:text-foreground"
                 }`}
                 onClick={toggleShuffle}
-                disabled={isRadio}
+                disabled={isLiveRadio}
               >
                 <Shuffle size={20} />
               </Button>

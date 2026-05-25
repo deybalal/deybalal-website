@@ -65,6 +65,9 @@ export default async function PlaylistDetailPage({
       },
       songs: {
         where: { isActive: true },
+        include: {
+          artists: true,
+        },
         skip: (currentPage - 1) * pageSize,
         take: pageSize,
       },
@@ -95,7 +98,7 @@ export default async function PlaylistDetailPage({
       artist: song.artist,
       album: song.albumName,
       albumId: song.albumId,
-      artists: [],
+      artists: [...song.artists],
       index: 0,
       year: null,
       comment: null,

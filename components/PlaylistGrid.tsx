@@ -71,7 +71,7 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pb-10 mx-5">
+    <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 pb-10 mx-5">
       {playlists.map((playlist) => (
         <div key={playlist.id} className="relative group">
           <Link href={`/playlists/${playlist.id}`}>

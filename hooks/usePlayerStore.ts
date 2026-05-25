@@ -26,7 +26,7 @@ interface PlayerState {
 
   play: () => void;
   pause: () => void;
-  setSong: (song: Song, play?: boolean) => void;
+  setSong: (song: Song, play?: boolean, isRadio?: boolean) => void;
   setQueue: (songs: Song[], startIndex?: number, play?: boolean) => void;
   addToQueue: (song: Song) => void;
   playNext: (song: Song) => void;
@@ -35,8 +35,8 @@ interface PlayerState {
   reorderPriorityQueue: (oldIndex: number, newIndex: number) => void;
   moveSongInQueue: (fromIndex: number, toIndex: number) => void;
   clearPriorityQueue: () => void;
-  next: () => void;
-  prev: () => void;
+  next: (force?: boolean) => void;
+  prev: (force?: boolean) => void;
   setVolume: (volume: number) => void;
   setServerVolume: (serverVolume: number) => void;
   setProgress: (progress: number) => void;
@@ -53,7 +53,9 @@ interface PlayerState {
   toggleShuffle: () => void;
   setRepeatMode: (mode: "off" | "all" | "one") => void;
   isRadio: boolean;
-  setIsRadio: (isRadio: boolean) => void;
+  isLiveRadio: boolean;
+  setIsRadio: (isRadio: boolean, isLive?: boolean) => void;
+  setContextRadioQueue: (songs: Song[], startIndex?: number) => void;
 }
 
 const getBestUri = (
@@ -124,8 +126,39 @@ export const usePlayerStore = create<PlayerState>()(
       playbackDevice: "current",
       hasHydrated: false,
       isRadio: false,
+      isLiveRadio: false,
 
-      setIsRadio: (isRadio) => set({ isRadio }),
+      setIsRadio: (isRadio, isLive = false) =>
+        set({ isRadio, isLiveRadio: isRadio ? isLive : false }),
+      setContextRadioQueue: (songs, startIndex = 0) => {
+        const pref = get().downloadPreference;
+        const isShuffling = get().isShuffling;
+        
+        const songsWithUri = songs.map((s) => {
+          const { uri } = getBestUri(s, pref);
+          return { ...s, uri };
+        });
+
+        let actualStartIndex = startIndex;
+        if (isShuffling && songs.length > 0 && startIndex === 0) {
+          actualStartIndex = Math.floor(Math.random() * songs.length);
+        }
+
+        const currentSongData = songsWithUri[actualStartIndex] || null;
+
+        set({
+          queue: songsWithUri,
+          priorityQueue: [],
+          currentIndex: actualStartIndex,
+          currentSong: currentSongData,
+          isPlaying: true,
+          progress: 0,
+          duration: currentSongData?.duration || 0,
+          activeId: TAB_ID,
+          isRadio: true,
+          isLiveRadio: false,
+        });
+      },
       setPlaybackDevice: (device) => set({ playbackDevice: device }),
 
       play: () => {
@@ -143,9 +176,8 @@ export const usePlayerStore = create<PlayerState>()(
         set({ isPlaying: false });
       },
 
-      setSong: (song, play) => {
-        const { playbackDevice, downloadPreference, serverVolume, isRadio } =
-          get();
+      setSong: (song, play, isRadioTrack) => {
+        const { playbackDevice, downloadPreference, serverVolume } = get();
         const { uri, quality } = getBestUri(song, downloadPreference);
 
         if (quality !== downloadPreference && play !== false) {
@@ -181,7 +213,7 @@ export const usePlayerStore = create<PlayerState>()(
           progress: 0,
           duration: song.duration || 0,
           activeId: play === false ? get().activeId : TAB_ID,
-          isRadio: isRadio ? true : false,
+          isRadio: isRadioTrack ?? false,
         });
       },
 
@@ -214,6 +246,8 @@ export const usePlayerStore = create<PlayerState>()(
           progress: 0,
           duration: currentSongData?.duration || 0,
           activeId: play ? TAB_ID : get().activeId,
+          isRadio: false,
+          isLiveRadio: false,
         });
       },
 
@@ -297,7 +331,7 @@ export const usePlayerStore = create<PlayerState>()(
         set({ priorityQueue: [] });
       },
 
-      next: () => {
+      next: (force = false) => {
         const {
           queue,
           priorityQueue,
@@ -308,7 +342,7 @@ export const usePlayerStore = create<PlayerState>()(
           isRadio,
         } = get();
 
-        if (isRadio) return;
+        if (isRadio && !force) return;
 
         if (priorityQueue.length > 0) {
           const nextSong = priorityQueue[0];
@@ -380,11 +414,11 @@ export const usePlayerStore = create<PlayerState>()(
         }
       },
 
-      prev: () => {
+      prev: (force = false) => {
         const { queue, currentIndex, downloadPreference, progress, isRadio } =
           get();
 
-        if (isRadio) return;
+        if (isRadio && !force) return;
 
         if (progress > 5) {
           set({
@@ -491,6 +525,8 @@ export const usePlayerStore = create<PlayerState>()(
           currentQuality: state.currentQuality,
           playbackDevice: state.playbackDevice,
           serverVolume: state.serverVolume,
+          isRadio: state.isRadio,
+          isLiveRadio: state.isLiveRadio,
         } as PlayerState),
     }
   )

@@ -35,7 +35,7 @@ function TodayHistoryPageContent() {
         const reversedTracks = [...raw.tracks].reverse();
 
         const totalTracksCount = reversedTracks.length;
-        setTotalPages(Math.ceil(totalTracksCount / pageSize));
+        setTotalPages(Math.max(1, Math.ceil(totalTracksCount / pageSize)));
 
         const paginatedTracks = reversedTracks.slice(
           (currentPage - 1) * pageSize,
@@ -48,6 +48,7 @@ function TodayHistoryPageContent() {
           description:
             "آهنگ هایی که تا این لحظه در رادیو پخش شده است (به ترتیب از جدید به قدیم)",
           songsLength: totalTracksCount,
+          coverArt: reversedTracks[0].song.coverArt ?? "/images/cover.png",
           songs: paginatedTracks.map(
             (track: {
               startOffset: number;
@@ -145,8 +146,8 @@ function TodayHistoryPageContent() {
           !isCurrentlyRadio ||
           currentStoredSong?.id !== data.data.currentTrack.id
         ) {
-          setIsRadio(true);
-          setSong(data.data.currentTrack, true);
+          setIsRadio(true, true);
+          setSong(data.data.currentTrack, true, true);
           setTimeout(() => {
             usePlayerStore
               .getState()
@@ -214,10 +215,7 @@ function TodayHistoryPageContent() {
   }
 
   return (
-    <div
-      className="container py-12 min-h-screen flex justify-center h-max"
-      key={playlist?.songsLength}
-    >
+    <div className="container py-12 min-h-screen flex justify-center h-max">
       {playlist && (
         <PlaylistClient
           playlist={playlist}

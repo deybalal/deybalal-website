@@ -213,7 +213,7 @@ export default async function AlbumDetailPage({
           </div>
 
           <div className="mt-2 flex items-center gap-4">
-            <PlayAlbumButton songs={songs} />
+            <PlayAlbumButton songs={songs} albumId={album.id} />
             <SearchModal
               scope={{ type: "album", id: album.id, name: album.name }}
               trigger={

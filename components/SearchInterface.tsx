@@ -133,7 +133,7 @@ export default function SearchInterface({
         setIsLoading(false);
       }
     });
-  }, [debouncedQuery, scope, saveRecentSearch]);
+  }, [debouncedQuery, scope?.name, saveRecentSearch]);
 
   const handleLinkClick = () => {
     if (onClose) {

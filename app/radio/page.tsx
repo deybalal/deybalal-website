@@ -68,14 +68,13 @@ export default function RadioPage() {
   const [showLyricsOverlay, setShowLyricsOverlay] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
-  const [isRadioActive, setIsRadioActive] = useState(false);
 
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
 
   const router = useRouter();
 
-  const { setSong, setIsRadio, isPlaying, setSeekTo, pause, play } =
+  const { setSong, setIsRadio, isPlaying, setSeekTo, pause, play, isRadio } =
     usePlayerStore();
   const { lyricsMode, setLyricsMode } = useLyricsStore();
   const syncInterval = useRef<NodeJS.Timeout | null>(null);
@@ -89,7 +88,7 @@ export default function RadioPage() {
       if (data.success) {
         setState(data.data);
         setError(null);
-        if (!isRadioActive) {
+        if (!isRadio) {
           return;
         }
         const currentStoredSong = usePlayerStore.getState().currentSong;
@@ -99,8 +98,8 @@ export default function RadioPage() {
           !isCurrentlyRadio ||
           currentStoredSong?.id !== data.data.currentTrack.id
         ) {
-          setIsRadio(true);
-          setSong(data.data.currentTrack, true);
+          setIsRadio(true, true);
+          setSong(data.data.currentTrack, true, true);
 
           if (
             (data.data.currentTrack.syncedLyrics ||
@@ -144,7 +143,7 @@ export default function RadioPage() {
     } finally {
       setLoading(false);
     }
-  }, [isRadioActive, setIsRadio, setSong, lyricsMode, setSeekTo]);
+  }, [isRadio, setIsRadio, setSong, lyricsMode, setSeekTo]);
 
   useEffect(() => {
     fetchState();
@@ -158,7 +157,7 @@ export default function RadioPage() {
 
   // Intercept navigation
   useEffect(() => {
-    if (!isRadioActive) return;
+    if (!isRadio) return;
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
@@ -174,8 +173,8 @@ export default function RadioPage() {
         if (
           href &&
           !href.startsWith("http") &&
-          href !== "/radio" &&
-          href !== "/radio/history/today"
+          !href.includes("/radio") &&
+          !href.includes("/radio/history/today")
         ) {
           e.preventDefault();
           e.stopPropagation();
@@ -192,7 +191,7 @@ export default function RadioPage() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("click", handleClick, { capture: true });
     };
-  }, [isRadioActive]);
+  }, [isRadio]);
 
   // Check if song is in favorites
   useEffect(() => {
@@ -506,7 +505,7 @@ export default function RadioPage() {
                     <RadioIcon
                       className={cn(
                         "w-7 h-7",
-                        isRadioActive
+                        isRadio
                           ? "text-green-500 animate-pulse"
                           : "text-red-500 opacity-70"
                       )}
@@ -515,24 +514,24 @@ export default function RadioPage() {
 
                   <div>
                     <p className="font-bold text-foreground text-base">
-                      {isRadioActive ? "رادیو روشن است" : "رادیو خاموش است"}
+                      {isRadio ? "رادیو روشن است" : "رادیو خاموش است"}
                     </p>
                   </div>
                 </div>
 
                 {/* Right: Action */}
-                {isRadioActive ? (
+                {isRadio ? (
                   <Button
                     variant="destructive"
                     onClick={() => {
-                      setIsRadioActive(false);
+                      setIsRadio(false);
                       pause();
                     }}
                   >
                     خاموش
                   </Button>
                 ) : (
-                  <Dialog open={!isRadioActive}>
+                  <Dialog open={!isRadio}>
                     <DialogTrigger asChild>
                       <Button className="min-w-[70px]">روشن</Button>
                     </DialogTrigger>
@@ -549,7 +548,7 @@ export default function RadioPage() {
                         <Button
                           className="w-full bg-green-500 hover:bg-green-300 text-white"
                           onClick={() => {
-                            setIsRadioActive(true);
+                            setIsRadio(true, true);
                             fetchState();
                             play();
                           }}
@@ -675,7 +674,6 @@ export default function RadioPage() {
               variant="destructive"
               onClick={() => {
                 setShowWarningDialog(false);
-                setIsRadioActive(false);
                 setIsRadio(false);
                 if (pendingPath) {
                   router.push(pendingPath);
