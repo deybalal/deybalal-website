@@ -141,10 +141,10 @@ const PlayerProvider = () => {
 
   const handleEnded = () => {
     if (activeId !== TAB_ID) return;
- 
+
     const { repeatMode, currentSong, isLiveRadio } = usePlayerStore.getState();
     if (isLiveRadio) return;
- 
+
     if (repeatMode === "one" && audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch((e) => console.error("Play error:", e));
@@ -185,6 +185,63 @@ const PlayerProvider = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
+
+  // Media Session API support (hardware media keys, lock screen controls, etc.)
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) {
+      return;
+    }
+
+    if (currentSong) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong.title,
+        artist: currentSong.artist || "دی بلال",
+        album: currentSong.album || "دی بلال",
+        artwork: currentSong.coverArt
+          ? [
+              {
+                src: currentSong.coverArt,
+                sizes: "512x512",
+                type: "image/jpeg",
+              },
+            ]
+          : [],
+      });
+    } else {
+      navigator.mediaSession.metadata = null;
+    }
+
+    navigator.mediaSession.setActionHandler("play", async () => {
+      const { isPlaying, play } = usePlayerStore.getState();
+      if (!isPlaying) play();
+    });
+
+    navigator.mediaSession.setActionHandler("pause", () => {
+      const { isPlaying, pause } = usePlayerStore.getState();
+      if (isPlaying) pause();
+    });
+
+    navigator.mediaSession.setActionHandler("nexttrack", () => {
+      next(true);
+    });
+
+    navigator.mediaSession.setActionHandler("previoustrack", () => {
+      const { prev } = usePlayerStore.getState();
+      prev?.();
+    });
+
+    navigator.mediaSession.setActionHandler("stop", () => {
+      const { isPlaying, pause } = usePlayerStore.getState();
+      if (isPlaying) pause();
+    });
+
+    navigator.mediaSession.setActionHandler("seekto", (details) => {
+      if (audioRef.current && details.seekTime !== undefined) {
+        audioRef.current.currentTime = details.seekTime;
+        setProgress(details.seekTime);
+      }
+    });
+  }, [currentSong, next, setProgress]);
 
   return (
     <audio
