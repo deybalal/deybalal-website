@@ -241,6 +241,29 @@ const PlayerBar = () => {
 
   if (!currentSong) return null; // Or return a disabled state
 
+  const changeVolumeWithMouseWheel = async (
+    action: "decrease" | "increase"
+  ) => {
+    const currentVolume = volume;
+    const newVolume =
+      action === "decrease"
+        ? Math.max(0, currentVolume - 1)
+        : Math.min(currentVolume + 1, 100);
+    setVolume(newVolume);
+  };
+
+  const changeProgressWithMouseWheel = async (
+    action: "decrease" | "increase"
+  ) => {
+    const currentProgress = progress;
+    const newProgress =
+      action === "decrease"
+        ? Math.max(0, currentProgress - 5)
+        : Math.min(currentProgress + 5, duration);
+    setSeekTo(newProgress);
+    setProgress(newProgress);
+  };
+
   return (
     <div className="fixed flex justify-between items-center bottom-0 start-0 w-full h-20 md:h-24 glass z-50 px-4 md:px-8 bg-black/40 backdrop-blur-lg border-t border-white/10 transition-all duration-300">
       <div className="flex flex-col items-center w-full">
@@ -354,6 +377,11 @@ const PlayerBar = () => {
               <Slider
                 value={[progress]}
                 onValueChange={handleSeek}
+                onWheel={(v) =>
+                  changeProgressWithMouseWheel(
+                    v.deltaY > 0 ? "decrease" : "increase"
+                  )
+                }
                 max={duration || currentSong.duration || 100}
                 step={1}
                 className={`w-full h-1.5 ${
@@ -456,6 +484,11 @@ const PlayerBar = () => {
               <Slider
                 value={[volume]}
                 onValueChange={(v) => setVolume(v[0])}
+                onWheel={(v) =>
+                  changeVolumeWithMouseWheel(
+                    v.deltaY > 0 ? "decrease" : "increase"
+                  )
+                }
                 max={100}
                 step={1}
                 className="w-24 cursor-pointer"
