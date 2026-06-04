@@ -23,6 +23,7 @@ interface PlayerState {
   playbackDevice: "current" | "server" | "both";
   hasHydrated: boolean;
   serverVolume: number;
+  playNonce: number;
 
   play: () => void;
   pause: () => void;
@@ -127,6 +128,7 @@ export const usePlayerStore = create<PlayerState>()(
       hasHydrated: false,
       isRadio: false,
       isLiveRadio: false,
+      playNonce: 0,
 
       setIsRadio: (isRadio, isLive = false) =>
         set({ isRadio, isLiveRadio: isRadio ? isLive : false }),
@@ -157,6 +159,7 @@ export const usePlayerStore = create<PlayerState>()(
           activeId: TAB_ID,
           isRadio: true,
           isLiveRadio: false,
+          playNonce: get().playNonce + 1,
         });
       },
       setPlaybackDevice: (device) => set({ playbackDevice: device }),
@@ -214,6 +217,7 @@ export const usePlayerStore = create<PlayerState>()(
           duration: song.duration || 0,
           activeId: play === false ? get().activeId : TAB_ID,
           isRadio: isRadioTrack ?? false,
+          playNonce: get().playNonce + 1,
         });
       },
 
@@ -248,6 +252,7 @@ export const usePlayerStore = create<PlayerState>()(
           activeId: play ? TAB_ID : get().activeId,
           isRadio: false,
           isLiveRadio: false,
+          playNonce: get().playNonce + 1,
         });
       },
 
@@ -366,6 +371,7 @@ export const usePlayerStore = create<PlayerState>()(
             progress: 0,
             duration: nextSong.duration || 0,
             activeId: TAB_ID,
+            playNonce: get().playNonce + 1,
           });
           return;
         }
@@ -408,6 +414,7 @@ export const usePlayerStore = create<PlayerState>()(
             progress: 0,
             duration: nextSong.duration || 0,
             activeId: TAB_ID,
+            playNonce: get().playNonce + 1,
           });
         } else {
           set({ isPlaying: false });
@@ -448,6 +455,7 @@ export const usePlayerStore = create<PlayerState>()(
             progress: 0,
             duration: prevSong.duration || 0,
             activeId: TAB_ID,
+            playNonce: get().playNonce + 1,
           });
         }
       },

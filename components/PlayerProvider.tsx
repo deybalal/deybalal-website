@@ -7,6 +7,7 @@ import { packRequestHash } from "@/lib/hash";
 const PlayerProvider = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastSongIdRef = useRef<string | null>(null);
+  const lastPlayNonceRef = useRef<number>(0);
   const {
     isPlaying,
     currentSong,
@@ -18,6 +19,7 @@ const PlayerProvider = () => {
     setSeekTo,
     activeId,
     playbackDevice,
+    playNonce,
   } = usePlayerStore();
 
   const prevActiveIdRef = useRef<string | null>(null);
@@ -81,10 +83,12 @@ const PlayerProvider = () => {
       const newSrc = decodeURIComponent(currentSong.uri);
 
       const isNewSong = lastSongIdRef.current !== currentSong.id;
+      const isNewPlay = lastPlayNonceRef.current !== playNonce;
       const isSameSource = currentSrc === newSrc || currentSrc.endsWith(newSrc);
 
-      if (!isSameSource || isNewSong) {
+      if (!isSameSource || isNewSong || isNewPlay) {
         lastSongIdRef.current = currentSong.id;
+        lastPlayNonceRef.current = playNonce;
 
         // When changing source, we must pause first if playing to prevent race conditions
         audio.pause();
@@ -105,7 +109,7 @@ const PlayerProvider = () => {
     playAudio();
 
     return () => {};
-  }, [currentSong, isPlaying, activeId]);
+  }, [currentSong, isPlaying, activeId, playNonce]);
 
   // Sync audio time when TAKING OVER as active tab
   useEffect(() => {
