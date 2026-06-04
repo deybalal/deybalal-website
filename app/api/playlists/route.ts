@@ -33,11 +33,15 @@ export async function GET(request: Request) {
         include: {
           songs: {
             select: {
-              id: true,
-              title: true,
-              coverArt: true,
-              duration: true,
-              artist: true,
+              song: {
+                select: {
+                  id: true,
+                  title: true,
+                  coverArt: true,
+                  duration: true,
+                  artist: true,
+                },
+              },
             },
           },
         },
@@ -52,9 +56,14 @@ export async function GET(request: Request) {
       }),
     ]);
 
+    const formattedPlaylists = playlists.map((p) => ({
+      ...p,
+      songs: p.songs.map((ps) => ps.song),
+    }));
+
     return NextResponse.json({
       success: true,
-      data: playlists,
+      data: formattedPlaylists,
       pagination: {
         page,
         limit,

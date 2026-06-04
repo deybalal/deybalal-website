@@ -35,7 +35,12 @@ export async function POST(
     // Check if playlist exists
     const playlist = await prisma.playlist.findUnique({
       where: { id },
-      include: { songs: true },
+      include: { 
+        songs: { 
+          include: { song: true },
+          orderBy: { addedAt: "asc" } // To correctly identify the first song for cover art
+        } 
+      },
     });
 
     if (!playlist) {
@@ -54,46 +59,45 @@ export async function POST(
     }
 
     // Check if song is in playlist
-    const songIndex = playlist.songs.findIndex((song) => song.id === songId);
-    if (songIndex === -1) {
+    const psIndex = playlist.songs.findIndex((ps) => ps.songId === songId);
+    if (psIndex === -1) {
       return NextResponse.json(
         { success: false, message: "این آهنگ در پلی لیست نیست!" },
         { status: 400 }
       );
     }
 
-    const songToRemove = playlist.songs[songIndex];
+    const playlistSongToRemove = playlist.songs[psIndex];
 
     // Calculate new duration
     const newDuration = Math.max(
       0,
-      playlist.duration - (songToRemove.duration || 0)
+      playlist.duration - (playlistSongToRemove.song.duration || 0)
     );
 
     // Determine new cover art
     let newCoverArt = playlist.coverArt;
 
-    // If we are removing the song that provided the cover art (or if we just want to reset it)
-    // The logic "cover art of the first song" implies we should check the NEW first song.
-    // If the removed song was the first one, we need the next one.
-    // If the playlist becomes empty, cover art is null.
-
-    const remainingSongs = playlist.songs.filter((s) => s.id !== songId);
+    const remainingSongs = playlist.songs.filter((ps) => ps.songId !== songId);
 
     if (remainingSongs.length === 0) {
       newCoverArt = null;
-    } else if (playlist.songs[0].id === songId) {
+    } else if (playlist.songs[0].songId === songId) {
       // We removed the first song, so take the new first song's cover
-      newCoverArt = remainingSongs[0].coverArt;
+      newCoverArt = remainingSongs[0].song.coverArt;
     }
-    // If we removed a song that wasn't the first one, the cover art stays the same (as it comes from the first song).
 
     // Remove song from playlist and update metadata
     await prisma.playlist.update({
       where: { id },
       data: {
         songs: {
-          disconnect: { id: songId },
+          delete: {
+            playlistId_songId: {
+              playlistId: id,
+              songId: songId,
+            },
+          },
         },
         duration: newDuration,
         coverArt: newCoverArt,

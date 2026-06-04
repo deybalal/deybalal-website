@@ -54,7 +54,7 @@ export async function POST(
     }
 
     // Check if song is already in playlist
-    const songExists = playlist.songs.some((song) => song.id === songId);
+    const songExists = playlist.songs.some((ps) => ps.songId === songId);
     if (songExists) {
       return NextResponse.json(
         { success: false, message: "این آهنگ از قبل در پلی لیست موجود است!" },
@@ -90,7 +90,7 @@ export async function POST(
       where: { id },
       data: {
         songs: {
-          connect: { id: songId },
+          create: { songId: songId },
         },
         duration: newDuration,
         coverArt: newCoverArt,

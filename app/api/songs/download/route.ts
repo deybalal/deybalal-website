@@ -48,9 +48,9 @@ export async function POST(request: Request) {
       });
     }
 
-    // Check if song is already in favorites
+    // Check if song is already in download list
     const songExists = downloadPlaylist.songs.some(
-      (song) => song.id === songId
+      (ps) => ps.songId === songId
     );
     if (songExists) {
       return NextResponse.json(
@@ -77,12 +77,12 @@ export async function POST(request: Request) {
     // Calculate new duration
     const newDuration = downloadPlaylist.duration + (song.duration || 0);
 
-    // Add song to favorites and update metadata
+    // Add song to download list and update metadata
     await prisma.playlist.update({
       where: { id: downloadPlaylist.id },
       data: {
         songs: {
-          connect: { id: songId },
+          create: { songId: songId },
         },
         duration: newDuration,
       },

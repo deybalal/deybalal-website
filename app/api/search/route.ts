@@ -47,7 +47,7 @@ export async function POST(request: Request) {
                 : {},
               scope?.type === "album" ? { albumId: scope.id } : {},
               scope?.type === "playlist"
-                ? { playlists: { some: { id: scope.id } } }
+                ? { playlists: { some: { playlistId: scope.id } } }
                 : {},
             ],
           },

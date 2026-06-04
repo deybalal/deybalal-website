@@ -28,6 +28,7 @@ export interface Song {
   contributors?: Contributor[];
   genres?: Genre[];
   playedAtRange?: string;
+  addedAt?: string | number;
 }
 
 export interface Genre {

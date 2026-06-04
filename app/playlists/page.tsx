@@ -23,7 +23,7 @@ export default async function PlaylistsPage() {
     where: {
       userId: session ? session.user.id : "",
     },
-    include: { songs: true },
+    include: { songs: { include: { song: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -31,7 +31,7 @@ export default async function PlaylistsPage() {
     where: {
       isPrivate: false,
     },
-    include: { songs: true, user: true },
+    include: { songs: { include: { song: true } }, user: true },
     orderBy: { createdAt: "desc" },
   });
 
@@ -41,20 +41,31 @@ export default async function PlaylistsPage() {
     doesUserOwnsPlaylist: playlist.userId === session?.user.id,
     createdAt: playlist.createdAt.getTime(),
     updatedAt: playlist.updatedAt.getTime(),
-    songs: playlist.songs.map((song) => ({
-      ...song,
-      album: song.albumName,
-      coverArt: song.coverArt || null,
-      lyrics: song.lyrics || null,
-      syncedLyrics: song.syncedLyrics || null,
-      filename: song.filename || "",
-      year: song.year.toString(),
-      links: song.links as Record<
+    songs: playlist.songs.map((ps: any) => ({
+      id: ps.song.id,
+      title: ps.song.title,
+      titleEn: ps.song.titleEn,
+      artist: ps.song.artist,
+      artistEn: ps.song.artistEn,
+      uri: ps.song.uri,
+      album: ps.song.albumName,
+      albumId: ps.song.albumId,
+      coverArt: ps.song.coverArt || null,
+      lyrics: ps.song.lyrics || null,
+      syncedLyrics: ps.song.syncedLyrics || null,
+      filename: ps.song.filename || "",
+      year: ps.song.year?.toString() || "0",
+      links: ps.song.links as Record<
         number,
         { url: string; size: string; bytes: number }
       > | null,
-      createdAt: song.createdAt.getTime(),
-      updatedAt: song.updatedAt.getTime(),
+      duration: ps.song.duration,
+      playCount: ps.song.playCount,
+      isActive: ps.song.isActive,
+      isFeatured: ps.song.isFeatured,
+      index: ps.song.index,
+      createdAt: ps.song.createdAt.getTime(),
+      updatedAt: ps.song.updatedAt.getTime(),
       artists: [], // Minimal artist info for playlist view
     })),
     songsLength: playlist.songs.length,
@@ -69,20 +80,31 @@ export default async function PlaylistsPage() {
     ...playlist,
     createdAt: playlist.createdAt.getTime(),
     updatedAt: playlist.updatedAt.getTime(),
-    songs: playlist.songs.map((song) => ({
-      ...song,
-      album: song.albumName,
-      coverArt: song.coverArt || null,
-      lyrics: song.lyrics || null,
-      syncedLyrics: song.syncedLyrics || null,
-      filename: song.filename || "",
-      year: song.year.toString(),
-      links: song.links as Record<
+    songs: playlist.songs.map((ps: any) => ({
+      id: ps.song.id,
+      title: ps.song.title,
+      titleEn: ps.song.titleEn,
+      artist: ps.song.artist,
+      artistEn: ps.song.artistEn,
+      uri: ps.song.uri,
+      album: ps.song.albumName,
+      albumId: ps.song.albumId,
+      coverArt: ps.song.coverArt || null,
+      lyrics: ps.song.lyrics || null,
+      syncedLyrics: ps.song.syncedLyrics || null,
+      filename: ps.song.filename || "",
+      year: ps.song.year?.toString() || "0",
+      links: ps.song.links as Record<
         number,
         { url: string; size: string; bytes: number }
       > | null,
-      createdAt: song.createdAt.getTime(),
-      updatedAt: song.updatedAt.getTime(),
+      duration: ps.song.duration,
+      playCount: ps.song.playCount,
+      isActive: ps.song.isActive,
+      isFeatured: ps.song.isFeatured,
+      index: ps.song.index,
+      createdAt: ps.song.createdAt.getTime(),
+      updatedAt: ps.song.updatedAt.getTime(),
       artists: [], // Minimal artist info for playlist view
     })),
     songsLength: playlist.songs.length,

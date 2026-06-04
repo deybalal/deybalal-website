@@ -15,6 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import PlayAsRadioButton from "@/components/PlayAsRadioButton";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
+import { SortDropdown, SortOption } from "@/components/SortDropdown";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Clock, PlayCircle, ArrowDownAZ, Calendar } from "lucide-react";
 
 type Props = {
   playlist: Playlist & { doesUserOwnsPlaylist: boolean };
@@ -37,6 +40,48 @@ export default function PlaylistClient({
 
   const { setQueue } = usePlayerStore();
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const onSortChange = (sortBy: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const currentSortBy = searchParams.get("sortBy");
+    const currentOrder = searchParams.get("sortOrder") || "desc";
+
+    if (currentSortBy === sortBy) {
+      params.set("sortOrder", currentOrder === "desc" ? "asc" : "desc");
+    } else {
+      params.set("sortBy", sortBy);
+      params.set("sortOrder", "desc");
+    }
+    params.set("page", "1");
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  const sortOptions: SortOption[] = [
+    {
+      label: "زمان اضافه شدن",
+      value: "addedAt",
+      icon: <Clock className="w-4 h-4" />,
+    },
+    {
+      label: "جدیدترین انتشار",
+      value: "createdAt",
+      icon: <Calendar className="w-4 h-4" />,
+    },
+    {
+      label: "بیشترین پخش",
+      value: "playCount",
+      icon: <PlayCircle className="w-4 h-4" />,
+    },
+    {
+      label: "نام (الفبا)",
+      value: "title",
+      icon: <ArrowDownAZ className="w-4 h-4" />,
+    },
+  ];
+
+  const sortBy = searchParams.get("sortBy") || "addedAt";
 
   const fetchAllSongs = useCallback(async (): Promise<Song[] | null> => {
     try {
@@ -200,6 +245,16 @@ export default function PlaylistClient({
 
       {/* Songs */}
       <div className="space-y-4">
+        <div className="flex w-full justify-end">
+          <div className="flex items-center max-w-[50%] md:max-w-max">
+            <SortDropdown
+              options={sortOptions}
+              value={sortBy}
+              onChange={onSortChange}
+              className="w-full md:w-[200px]"
+            />
+          </div>
+        </div>
         <SongList
           songs={playlist.songs}
           onRemove={async (songId) => {

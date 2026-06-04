@@ -24,6 +24,8 @@ export default async function PanelPage({
   const userRole = (session?.user as { role?: string })?.role;
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q : undefined;
+  const sortBy = typeof params.sortBy === "string" ? params.sortBy : "createdAt";
+  const sortOrder = (typeof params.sortOrder === "string" ? params.sortOrder : "desc") as "asc" | "desc";
 
   const page = Number(params.page) || 1;
   const pageSize = 20;
@@ -46,7 +48,7 @@ export default async function PanelPage({
   const [songs, songsCount] = await Promise.all([
     prisma.song.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: { [sortBy]: sortOrder },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),

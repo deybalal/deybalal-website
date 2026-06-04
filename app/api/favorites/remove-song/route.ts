@@ -31,7 +31,12 @@ export async function POST(request: Request) {
     // Find favorites playlist
     const favoritesPlaylist = await prisma.playlist.findFirst({
       where: { isFavorite: true, userId: session.user.id },
-      include: { songs: true },
+      include: { 
+        songs: { 
+          where: { songId: songId },
+          include: { song: true }
+        }
+      },
     });
 
     if (!favoritesPlaylist) {
@@ -42,8 +47,8 @@ export async function POST(request: Request) {
     }
 
     // Check if song is in favorites
-    const song = favoritesPlaylist.songs.find((s) => s.id === songId);
-    if (!song) {
+    const playlistSong = favoritesPlaylist.songs[0];
+    if (!playlistSong) {
       return NextResponse.json(
         {
           success: false,
@@ -56,7 +61,7 @@ export async function POST(request: Request) {
     // Calculate new duration
     const newDuration = Math.max(
       0,
-      favoritesPlaylist.duration - (song.duration || 0)
+      favoritesPlaylist.duration - (playlistSong.song.duration || 0)
     );
 
     // Remove song from favorites and update duration
@@ -64,7 +69,12 @@ export async function POST(request: Request) {
       where: { id: favoritesPlaylist.id },
       data: {
         songs: {
-          disconnect: { id: songId },
+          delete: {
+            playlistId_songId: {
+              playlistId: favoritesPlaylist.id,
+              songId: songId,
+            },
+          },
         },
         duration: newDuration,
       },

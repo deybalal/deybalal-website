@@ -46,28 +46,37 @@ export default async function PlaylistDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sortBy?: string; sortOrder?: string }>;
 }) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
   const { id } = await params;
-  const { page } = await searchParams;
+  const { page, sortBy, sortOrder } = await searchParams;
   const currentPage = Number(page) || 1;
+  const sortField = typeof sortBy === "string" ? sortBy : "addedAt";
+  const sortDir = (typeof sortOrder === "string" ? sortOrder : "desc") as "asc" | "desc";
   const pageSize = 20;
 
   const playlistData = await prisma.playlist.findUnique({
     where: { id },
     include: {
       _count: {
-        select: { songs: { where: { isActive: true } } },
+        select: { songs: { where: { song: { isActive: true } } } },
       },
       songs: {
-        where: { isActive: true },
+        where: { song: { isActive: true } },
         include: {
-          artists: true,
+          song: {
+            include: {
+              artists: true,
+            },
+          },
         },
+        orderBy: sortField === "addedAt" 
+          ? { addedAt: sortDir } 
+          : { song: { [sortField]: sortDir } },
         skip: (currentPage - 1) * pageSize,
         take: pageSize,
       },
@@ -91,20 +100,21 @@ export default async function PlaylistDetailPage({
     songsLength: playlistData._count.songs,
     createdAt: playlistData.createdAt.getTime(),
     updatedAt: playlistData.updatedAt.getTime(),
-    songs: playlistData.songs.map((song) => ({
-      ...song,
-      uri: song.uri ?? "",
-      filename: song.filename ?? "",
-      artist: song.artist,
-      album: song.albumName,
-      albumId: song.albumId,
-      artists: [...song.artists],
-      index: 0,
-      year: null,
+    songs: playlistData.songs.map((ps) => ({
+      ...ps.song,
+      addedAt: ps.addedAt.getTime(),
+      uri: ps.song.uri ?? "",
+      filename: ps.song.filename ?? "",
+      artist: ps.song.artist,
+      album: ps.song.albumName,
+      albumId: ps.song.albumId,
+      artists: [...ps.song.artists],
+      index: ps.song.index,
+      year: ps.song.year?.toString() || "0",
       comment: null,
       date: null,
       isFavorite: false,
-      links: song.links as Record<
+      links: ps.song.links as Record<
         number,
         { url: string; size: string; bytes: number }
       > | null,

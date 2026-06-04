@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SortDropdown } from "@/components/SortDropdown";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -32,6 +33,10 @@ interface DataTableProps<TData, TValue> {
   onPageChange?: (pageIndex: number) => void;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  sortBy?: string;
+  sortOrder?: string;
+  onSortChange?: (value: string) => void;
+  sortOptions?: { label: string; value: string; icon?: React.ReactNode }[];
 }
 
 export function DataTable<TData, TValue>({
@@ -44,6 +49,9 @@ export function DataTable<TData, TValue>({
   onPageChange,
   searchValue: externalSearchValue,
   onSearchChange,
+  sortBy,
+  onSortChange,
+  sortOptions,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -102,7 +110,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center py-4 px-2">
+      <div className="flex items-center justify-between py-4 px-2 gap-4">
         <Input
           placeholder={`جستوجو با ${searchKeyTitle}...`}
           value={
@@ -119,6 +127,13 @@ export function DataTable<TData, TValue>({
           }}
           className="max-w-sm"
         />
+        {onSortChange && sortOptions && (
+          <SortDropdown
+            options={sortOptions}
+            value={sortBy || ""}
+            onChange={onSortChange}
+          />
+        )}
       </div>
       <div className="rounded-md border">
         <Table>

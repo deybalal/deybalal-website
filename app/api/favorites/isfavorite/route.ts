@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         songs: {
           some: {
-            id: songId,
+            songId: songId,
           },
         },
       },

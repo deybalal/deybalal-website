@@ -45,7 +45,7 @@ model Song {
   crew                SongCrew[]
   artists             Artist[]           @relation("ArtistToSong")
   genres              Genre[]            @relation("GenreToSong")
-  playlists           Playlist[]         @relation("PlaylistToSong")
+  playlists           PlaylistSong[]
 
   similarSongs Song[] @relation("SongSimilarity")
   similarTo    Song[] @relation("SongSimilarity")
@@ -106,7 +106,7 @@ model Playlist {
   updatedAt   DateTime @updatedAt
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  songs       Song[]   @relation("PlaylistToSong")
+  songs       PlaylistSong[]
 
   @@index([createdAt])
   @@index([isFavorite])
@@ -396,4 +396,17 @@ model RadioTrack {
 
   @@index([playlistId])
   @@index([songId])
+}
+
+model PlaylistSong {
+  playlistId String
+  songId     String
+  addedAt    DateTime @default(now())
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  song       Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@id([playlistId, songId])
+  @@index([playlistId])
+  @@index([songId])
+  @@index([addedAt])
 }

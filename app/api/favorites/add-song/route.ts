@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
     // Check if song is already in favorites
     const songExists = favoritesPlaylist.songs.some(
-      (song) => song.id === songId
+      (ps) => ps.songId === songId
     );
     if (songExists) {
       return NextResponse.json(
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
       where: { id: favoritesPlaylist.id },
       data: {
         songs: {
-          connect: { id: songId },
+          create: { songId: songId },
         },
         duration: newDuration,
         coverArt: newCoverArt,
