@@ -152,19 +152,21 @@ export default async function AlbumDetailPage({
 
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-8 items-end p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl">
-        <div className="relative w-64 h-64 rounded-xl overflow-hidden shadow-2xl shrink-0 group">
-          {album.coverArt ? (
-            <Image
-              src={album.coverArt}
-              alt={album.name}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-              <Music className="w-20 h-20 text-gray-600" />
-            </div>
-          )}
+        <div className="flex w-full md:max-w-max justify-center">
+          <div className="relative w-64 h-64 rounded-xl overflow-hidden shadow-2xl shrink-0 group">
+            {album.coverArt ? (
+              <Image
+                src={album.coverArt}
+                alt={album.name}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                <Music className="w-20 h-20 text-gray-600" />
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 pb-2 w-full">
@@ -212,28 +214,30 @@ export default async function AlbumDetailPage({
             </div>
           </div>
 
-          <div className="mt-2 flex items-center gap-4">
+          <div className="mt-2 flex items-center gap-4 flex-col md:flex-row">
             <PlayAlbumButton songs={songs} albumId={album.id} />
-            <SearchModal
-              scope={{ type: "album", id: album.id, name: album.name }}
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
-                >
-                  <Search className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
-                </Button>
-              }
-            />
-            <ShareButtons title={album.name} url={`/album/${album.id}`} />
+            <div className="flex justify-center items-center gap-2.5 md:mr-4">
+              <SearchModal
+                scope={{ type: "album", id: album.id, name: album.name }}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+                  >
+                    <Search className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                  </Button>
+                }
+              />
+              <ShareButtons title={album.name} url={`/album/${album.id}`} />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Songs List */}
-      <div className="bg-foreground/5 rounded-2xl p-6 border border-white/5">
-        <SongList songs={songs} />
+      <div className="bg-foreground/5 rounded-2xl p-2 md:p-6 border border-white/5">
+        <SongList songs={songs} showAlbum={false} />
       </div>
 
       {/* Comments Section */}

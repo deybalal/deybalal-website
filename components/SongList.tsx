@@ -51,7 +51,7 @@ const SongList = ({
             key={song.id + i}
             className="flex items-center p-2 rounded-xl hover:bg-white/5 group transition-all duration-200 cursor-pointer border border-transparent hover:border-white/5"
           >
-            <div className="w-10 flex items-center justify-center shrink-0">
+            <div className="w-4 md:w-10 flex items-center justify-center shrink-0">
               {isCurrent && isPlaying ? (
                 <div className="flex items-center gap-0.5 h-3 group-hover:scale-150 duration-500">
                   <div className="w-0.5 h-full bg-primary group-hover:bg-violet-600 duration-500 animate-bounce animation-duration-[0.6s]" />

@@ -114,21 +114,23 @@ export default function PlaylistClient({
     <div className="space-y-8 mb-24 h-max w-full lg:w-7/12">
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-8 items-end">
-        <div className="relative w-64 h-64 rounded-lg overflow-hidden shadow-2xl neon-box shrink-0 bg-linear-to-br from-primary to-accent flex items-center justify-center">
-          {playlist.coverArt ? (
-            <Image
-              src={playlist.coverArt}
-              alt={playlist.name}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <ListMusic size={80} className="text-white opacity-50" />
-          )}
+        <div className="flex w-full md:max-w-max justify-center">
+          <div className="relative w-64 h-64 rounded-lg overflow-hidden shadow-2xl neon-box shrink-0 bg-linear-to-br from-primary to-accent flex items-center justify-center">
+            {playlist.coverArt ? (
+              <Image
+                src={playlist.coverArt}
+                alt={playlist.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <ListMusic size={80} className="text-white opacity-50" />
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-2 pb-2 flex-1">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start flex-col md:flex-row">
             <div className="flex flex-col gap-2">
               <span className="text-gray-500 uppercase tracking-widest text-sm font-bold">
                 پلی لیست
@@ -139,7 +141,7 @@ export default function PlaylistClient({
             </div>
 
             {playlist.doesUserOwnsPlaylist && (
-              <div className="flex items-center gap-2 bg-black/20 p-2 rounded-lg backdrop-blur-sm border border-white/10">
+              <div className="flex items-center gap-2 bg-black/20 p-2 rounded-lg backdrop-blur-sm border border-white/10 m-4 md:m-0 mt8">
                 {playlist.isPrivate ? (
                   <Lock size={16} className="text-red-400" />
                 ) : (
@@ -185,7 +187,7 @@ export default function PlaylistClient({
             </p>
           )}
 
-          <div className="flex items-center justify-between text-gray-400 mt-2">
+          <div className="flex items-center justify-between text-gray-400 mt-2 flex-col md:flex-row gap-y-4">
             <div className="flex items-center gap-2">
               <span>{playlist.songsLength} آهنگ</span>
               {playlist.duration > 0 && (

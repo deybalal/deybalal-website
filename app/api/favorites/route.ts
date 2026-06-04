@@ -35,13 +35,17 @@ export async function GET(request: Request) {
       },
       include: {
         _count: {
-          select: { songs: { where: { isActive: true } } },
+          select: { songs: { where: { song: { isActive: true } } } },
         },
         songs: {
-          where: { isActive: true },
+          where: { song: { isActive: true } },
           include: {
-            artists: true,
-            album: true,
+            song: {
+              include: {
+                artists: true,
+                album: true,
+              },
+            },
           },
           skip: (page - 1) * pageSize,
           take: pageSize,
@@ -64,18 +68,45 @@ export async function GET(request: Request) {
         },
         include: {
           _count: {
-            select: { songs: { where: { isActive: true } } },
+            select: { songs: { where: { song: { isActive: true } } } },
           },
           songs: {
-            where: { isActive: true },
+            where: { song: { isActive: true } },
             include: {
-              artists: true,
-              album: true,
+              song: {
+                include: {
+                  artists: true,
+                  album: true,
+                },
+              },
             },
           },
         },
       });
     }
+
+    const songs = favoritesPlaylist.songs.map((song) => ({
+      ...song.song,
+      artists: song.song.artists,
+      album: song.song.albumName || null,
+      coverArt: song.song.coverArt || null,
+      title: song.song.title,
+      titleEn: song.song.titleEn,
+      uri: song.song.uri,
+      filename: song.song.filename || "",
+      index: song.song.index,
+      year: song.song.year.toString(),
+      duration: song.song.duration,
+      playCount: song.song.playCount,
+      id: song.song.id,
+      links: song.song.links as Record<
+        number,
+        { url: string; size: string; bytes: number }
+      > | null,
+    }));
+
+    // @ts-expect-error checked
+    favoritesPlaylist.songs = songs;
 
     return NextResponse.json({ success: true, data: favoritesPlaylist });
   } catch (error) {
