@@ -25,17 +25,27 @@ export default async function UsersPage({
   }
 
   const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
+  const where = {
+    ...(userRole === "administrator" ? {} : { id: session?.user?.id }),
+    ...(q
+      ? {
+          OR: [{ name: { contains: q } }, { email: { contains: q } }],
+        }
+      : {}),
+  };
+
   const [users, usersCount] = await Promise.all([
     prisma.user.findMany({
-      where: userRole === "administrator" ? {} : { id: session?.user?.id },
+      where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.user.count(),
+    prisma.user.count({ where }),
   ]);
 
   return (

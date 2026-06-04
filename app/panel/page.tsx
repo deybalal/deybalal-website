@@ -23,14 +23,25 @@ export default async function PanelPage({
 
   const userRole = (session?.user as { role?: string })?.role;
   const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
 
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
-  const where =
-    userRole === "administrator" || userRole === "moderator"
+  const where = {
+    ...(userRole === "administrator" || userRole === "moderator"
       ? {}
-      : { userId: session?.user?.id };
+      : { userId: session?.user?.id }),
+    ...(q
+      ? {
+          OR: [
+            { title: { contains: q } },
+            { artist: { contains: q } },
+            { titleEn: { contains: q } },
+          ],
+        }
+      : {}),
+  };
 
   const [songs, songsCount] = await Promise.all([
     prisma.song.findMany({

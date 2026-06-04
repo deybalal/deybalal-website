@@ -49,10 +49,23 @@ export default function AdminTable({
     router.push(`?${params.toString()}`);
   };
 
+  const onSearchChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set("q", value);
+    } else {
+      params.delete("q");
+    }
+    params.set("page", "1");
+    router.push(`?${params.toString()}`);
+  };
+
+  const searchValue = searchParams.get("q") || "";
+
   let columns;
   let searchKey = "name";
   let searchKeyTitle = "نام";
-
+// ... (rest of the switch case remains the same)
   switch (type) {
     case "songs":
       columns = getSongColumns(userRole);
@@ -103,6 +116,8 @@ export default function AdminTable({
       pageCount={pageCount}
       pageIndex={pageIndex}
       onPageChange={onPageChange}
+      searchValue={searchValue}
+      onSearchChange={onSearchChange}
     />
   );
 }

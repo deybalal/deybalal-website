@@ -23,14 +23,21 @@ export default async function ArtistsPage({
 
   const userRole = (session?.user as { role?: string })?.role;
   const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
 
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
-  const where =
-    userRole === "administrator" || userRole === "moderator"
+  const where = {
+    ...(userRole === "administrator" || userRole === "moderator"
       ? {}
-      : { userId: session?.user?.id };
+      : { userId: session?.user?.id }),
+    ...(q
+      ? {
+          OR: [{ name: { contains: q } }, { nameEn: { contains: q } }],
+        }
+      : {}),
+  };
 
   const [artists, artistsCount] = await Promise.all([
     prisma.artist.findMany({

@@ -27,17 +27,25 @@ export default async function GenresPage({
     return redirect("/panel");
   }
   const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
 
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
+  const where = q
+    ? {
+        name: { contains: q },
+      }
+    : {};
+
   const [genres, genresCount] = await Promise.all([
     prisma.genre.findMany({
+      where,
       orderBy: { name: "asc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.genre.count(),
+    prisma.genre.count({ where }),
   ]);
 
   return (

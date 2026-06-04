@@ -24,12 +24,18 @@ export default async function CommentsPage({
     return redirect("/panel");
   }
   const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
 
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
   const where = {
     isDeleted: false,
+    ...(q
+      ? {
+          content: { contains: q },
+        }
+      : {}),
   };
 
   const [comments, commentsCount] = await Promise.all([

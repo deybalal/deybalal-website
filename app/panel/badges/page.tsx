@@ -27,17 +27,25 @@ export default async function BadgesPage({
     return redirect("/panel");
   }
   const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
 
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
+  const where = q
+    ? {
+        name: { contains: q },
+      }
+    : {};
+
   const [badges, badgesCount] = await Promise.all([
     prisma.badge.findMany({
+      where,
       orderBy: { name: "asc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    prisma.badge.count(),
+    prisma.badge.count({ where }),
   ]);
 
   return (

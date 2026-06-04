@@ -23,12 +23,20 @@ export default async function PlaylistsPage({
 
   const userRole = (session?.user as { role?: string })?.role;
   const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
   const page = Number(params.page) || 1;
   const pageSize = 20;
-  const where =
-    userRole === "administrator" || userRole === "moderator"
+
+  const where = {
+    ...(userRole === "administrator" || userRole === "moderator"
       ? {}
-      : { userId: session?.user?.id };
+      : { userId: session?.user?.id }),
+    ...(q
+      ? {
+          name: { contains: q },
+        }
+      : {}),
+  };
 
   const [playlists, playlistsCount] = await Promise.all([
     prisma.playlist.findMany({

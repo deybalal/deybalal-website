@@ -30,6 +30,8 @@ interface DataTableProps<TData, TValue> {
   pageCount?: number;
   pageIndex?: number;
   onPageChange?: (pageIndex: number) => void;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -40,18 +42,43 @@ export function DataTable<TData, TValue>({
   pageCount,
   pageIndex,
   onPageChange,
+  searchValue: externalSearchValue,
+  onSearchChange,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [localSearchValue, setLocalSearchValue] = React.useState(
+    externalSearchValue || ""
+  );
 
   const isManualPagination = pageCount !== undefined && pageIndex !== undefined;
+  const isManualFiltering = onSearchChange !== undefined;
+
+  React.useEffect(() => {
+    if (externalSearchValue !== undefined) {
+      setLocalSearchValue(externalSearchValue);
+    }
+  }, [externalSearchValue]);
+
+  React.useEffect(() => {
+    if (!onSearchChange) return;
+
+    const timer = setTimeout(() => {
+      if (localSearchValue !== (externalSearchValue || "")) {
+        onSearchChange(localSearchValue);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [localSearchValue, onSearchChange, externalSearchValue]);
 
   const table = useReactTable({
     data,
     columns,
     pageCount: pageCount,
     manualPagination: isManualPagination,
+    manualFiltering: isManualFiltering,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
@@ -78,10 +105,18 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center py-4 px-2">
         <Input
           placeholder={`جستوجو با ${searchKeyTitle}...`}
-          value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn(searchKey)?.setFilterValue(event.target.value)
+          value={
+            isManualFiltering
+              ? localSearchValue
+              : (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
           }
+          onChange={(event) => {
+            if (isManualFiltering) {
+              setLocalSearchValue(event.target.value);
+            } else {
+              table.getColumn(searchKey)?.setFilterValue(event.target.value);
+            }
+          }}
           className="max-w-sm"
         />
       </div>

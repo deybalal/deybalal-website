@@ -20,27 +20,23 @@ export default async function SuggestionsPage({
 
   const userRole = (session?.user as { role?: string })?.role;
   const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
 
   const page = Number(params.page) || 1;
   const pageSize = 20;
 
   const where = {
-    OR: [
+    AND: [
       userRole === "administrator" || userRole === "moderator"
-        ? {
-            OR: [
-              {
-                status: "PENDING" as const,
-              },
-              {
-                status: "APPROVED" as const,
-              },
-              {
-                status: "REJECTED" as const,
-              },
-            ],
-          }
+        ? {}
         : { userId: session?.user?.id },
+      q
+        ? {
+            song: {
+              title: { contains: q },
+            },
+          }
+        : {},
     ],
   };
 
