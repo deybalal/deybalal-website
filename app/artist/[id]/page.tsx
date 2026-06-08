@@ -5,7 +5,6 @@ import AlbumCard from "@/components/AlbumCard";
 import { User, Music } from "lucide-react";
 import Image from "next/image";
 import { Song, Album } from "@/types/types";
-import ArtistPlayButton from "@/components/ArtistPlayButton";
 import Pagination from "@/components/Pagination";
 import { Suspense } from "react";
 import { FollowButton } from "@/components/FollowButton";
@@ -15,6 +14,7 @@ import { StructuredData } from "@/components/StructuredData";
 import SearchModal from "@/components/SearchModal";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PlayArtistButton from "@/components/PlayArtistButton";
 
 export async function generateMetadata({
   params,
@@ -182,10 +182,7 @@ export default async function ArtistDetailPage({
   };
 
   return (
-    <div
-      key={currentPage}
-      className="space-y-12 pb-24 h-max w-full md:w-10/12 max-w-6xl"
-    >
+    <div key={currentPage} className="space-y-12 pb-24 h-max w-full max-w-6xl">
       <StructuredData data={structuredData as Record<string, unknown>} />
       {/* Header Section */}
       <div className="relative min-h-[400px] md:h-[50vh] rounded-4xl overflow-hidden rounded-b-[3rem] shadow-2xl flex flex-col justify-center">
@@ -203,7 +200,7 @@ export default async function ArtistDetailPage({
           </div>
         )}
 
-        <div className="relative z-10 w-full p-6 md:p-12 mt-12 md:mt-2">
+        <div className="relative z-10 w-full p-6 md:p-3 xl:p-12 mt-12 md:mt-2">
           <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-10">
             <div className="relative w-40 h-40 md:w-64 md:h-64 shrink-0 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/10 group">
               {artist.image ? (
@@ -261,6 +258,7 @@ export default async function ArtistDetailPage({
                 </div>
 
                 <div className="flex items-center gap-3 md:ms-auto">
+                  <FollowButton artistId={artist.id} />
                   <SearchModal
                     scope={{ type: "artist", id: artist.id, name: artist.name }}
                     trigger={
@@ -273,10 +271,9 @@ export default async function ArtistDetailPage({
                       </Button>
                     }
                   />
-                  <FollowButton artistId={artist.id} />
-                  <ArtistPlayButton songs={songs} artistId={artist.id} />
                 </div>
               </div>
+              <PlayArtistButton songs={songs} artistId={artist.id} />
             </div>
           </div>
         </div>
