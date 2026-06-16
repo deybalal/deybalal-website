@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import SongList from "@/components/SongList";
 import AlbumCard from "@/components/AlbumCard";
-import { User, Music } from "lucide-react";
+import { User, Music, Instagram } from "lucide-react";
 import Image from "next/image";
 import { Song, Album } from "@/types/types";
 import Pagination from "@/components/Pagination";
@@ -259,6 +259,20 @@ export default async function ArtistDetailPage({
 
                 <div className="flex items-center gap-3 md:ms-auto">
                   <FollowButton artistId={artist.id} />
+                  {artist.ig && (
+                    <a
+                      href={`https://instagram.com/${artist.ig.replace(
+                        "@",
+                        ""
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 flex items-center justify-center rounded-full bg-linear-to-tr from-purple-600/20 to-pink-600/20 border border-pink-500/20 hover:scale-110 transition-all group"
+                      title="اینستاگرام"
+                    >
+                      <Instagram className="w-5 h-5 text-pink-500 group-hover:text-pink-400" />
+                    </a>
+                  )}
                   <SearchModal
                     scope={{ type: "artist", id: artist.id, name: artist.name }}
                     trigger={
@@ -285,7 +299,10 @@ export default async function ArtistDetailPage({
           <section className="max-w-4xl">
             <SectionHeader title="درباره خواننده" color="bg-blue-500" />
             <div className="glass p-8 rounded-3xl border border-white/5">
-              <ArtistDescription description={artist.description} />
+              <ArtistDescription
+                description={artist.description}
+                instagramHandle={artist.ig}
+              />
             </div>
           </section>
         )}

@@ -124,7 +124,7 @@ model Artist {
   albums      Album[]
   followers   Follow[]
   users       User[]
-  description String?
+  description String?  @db.LongText
   songs       Song[]   @relation("ArtistToSong")
 
   userId      String?
