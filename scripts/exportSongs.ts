@@ -20,6 +20,11 @@ async function main() {
         titleEn: true,
         artist: true,
         artistEn: true,
+        artists: {
+          select: {
+            id: true,
+          },
+        },
         albumName: true,
         coverArt: true,
         year: true,
@@ -43,7 +48,7 @@ async function main() {
       },
     });
 
-    const outputPath = path.join(process.cwd(), "scripts", "songs.json");
+    const outputPath = path.join(process.cwd(), "scripts", "songsId.json");
     await fs.writeFile(outputPath, JSON.stringify(songs, null, 2), "utf-8");
 
     console.log(`✅ Exported ${songs.length} songs to ${outputPath}`);

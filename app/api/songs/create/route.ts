@@ -9,6 +9,7 @@ import { auth } from "@/lib/auth";
 import { getUniqueSongSlug } from "@/lib/slug";
 import { parseFile } from "music-metadata";
 import { findSimilarSongs } from "@/lib/similarity";
+import { applyWatermark } from "@/lib/image-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -174,10 +175,40 @@ export async function POST(request: Request) {
       ) {
         const artist = await prisma.artist.findUnique({
           where: { id: validatedData.artistIds[0] },
-          select: { image: true },
+          select: { image: true, name: true },
         });
+
         if (artist?.image) {
-          finalCoverArt = artist.image;
+          try {
+            // Add watermark to artist image and save as cover
+            const artistImagePath = artist.image.startsWith("/")
+              ? path.join(process.cwd(), "public", artist.image)
+              : artist.image;
+
+            if (existsSync(artistImagePath)) {
+              const fileName = `song-${slug}-${Date.now()}.jpg`;
+              const outputRelPath = `/assets/cover/${fileName}`;
+              const outputPath = path.join(process.cwd(), "public", outputRelPath);
+
+              const success = await applyWatermark(
+                artistImagePath,
+                outputPath,
+                artist.name,
+                validatedData.title
+              );
+
+              if (success) {
+                finalCoverArt = outputRelPath;
+              } else {
+                finalCoverArt = artist.image;
+              }
+            } else {
+              finalCoverArt = artist.image;
+            }
+          } catch (err) {
+            console.error("Failed to watermark artist image:", err);
+            finalCoverArt = artist.image;
+          }
         } else {
           finalCoverArt = "/images/cover.png";
         }

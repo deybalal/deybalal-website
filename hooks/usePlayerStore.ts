@@ -533,7 +533,6 @@ export const usePlayerStore = create<PlayerState>()(
           currentQuality: state.currentQuality,
           playbackDevice: state.playbackDevice,
           serverVolume: state.serverVolume,
-          isRadio: state.isRadio,
           isLiveRadio: state.isLiveRadio,
         } as PlayerState),
     }
