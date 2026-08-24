@@ -15,6 +15,7 @@ import { StructuredData } from "@/components/StructuredData";
 import { Mic2, Radio } from "lucide-react";
 import RadioPlaylistItem from "@/components/RadioPlaylistItem";
 import { formatDuration } from "@/tools/formatDuration";
+import { shuffleArray } from "@/tools/shuffleArray";
 
 export const metadata: Metadata = {
   title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری به همراه متن آهنگ",
@@ -115,7 +116,8 @@ export default async function Home() {
     > | null,
   });
 
-  const featuredSongs = featuredSongsData.map(mapSong);
+  const shuffledFeaturedSongs = shuffleArray(featuredSongsData);
+  const featuredSongs = shuffledFeaturedSongs.map(mapSong);
   const newSongs = newSongsData.map(mapSong);
   const mostPlayedSongs = mostPlayedSongsData.map(mapSong);
 

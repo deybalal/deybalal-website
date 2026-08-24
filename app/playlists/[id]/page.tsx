@@ -56,7 +56,14 @@ export default async function PlaylistDetailPage({
   const { page, sortBy, sortOrder } = await searchParams;
   const currentPage = Number(page) || 1;
   const sortField = typeof sortBy === "string" ? sortBy : "addedAt";
-  const sortDir = (typeof sortOrder === "string" ? sortOrder : "desc") as "asc" | "desc";
+  let sortDir = (typeof sortOrder === "string" ? sortOrder : "desc") as
+    | "asc"
+    | "desc";
+
+  if (sortField === "title") {
+    sortDir = sortDir === "asc" ? "desc" : "asc";
+  }
+
   const pageSize = 20;
 
   const playlistData = await prisma.playlist.findUnique({
@@ -74,9 +81,10 @@ export default async function PlaylistDetailPage({
             },
           },
         },
-        orderBy: sortField === "addedAt" 
-          ? { addedAt: sortDir } 
-          : { song: { [sortField]: sortDir } },
+        orderBy:
+          sortField === "addedAt"
+            ? { addedAt: sortDir }
+            : { song: { [sortField]: sortDir } },
         skip: (currentPage - 1) * pageSize,
         take: pageSize,
       },

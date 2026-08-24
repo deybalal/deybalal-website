@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { Song as PrismaSong, Artist as PrismaArtist } from "@prisma/client";
 
 import { Metadata } from "next";
+import FeaturedSort from "@/components/FeaturedSort";
 
 export const metadata: Metadata = {
   title: "آهنگ های پیشنهادی",
@@ -16,15 +17,24 @@ export const dynamic = "force-dynamic";
 export default async function SongsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sortBy?: string; sortOrder?: string }>;
 }) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
   const pageSize = 20;
+  const { sortBy, sortOrder } = await searchParams;
+  const sortField = typeof sortBy === "string" ? sortBy : "playCount";
+  const sortDir = (typeof sortOrder === "string" ? sortOrder : "desc") as
+    | "asc"
+    | "desc";
 
   const songsData = await prisma.song.findMany({
     where: { isActive: true, isFeatured: true },
-    orderBy: { playCount: "desc" },
+
+    orderBy:
+      sortField === "title"
+        ? { title: sortDir === "asc" ? "desc" : "asc" }
+        : { [sortField]: sortDir },
     skip: (page - 1) * pageSize,
     take: pageSize,
     include: { artists: true },
@@ -59,12 +69,20 @@ export default async function SongsPage({
   const songs = songsData.map(mapSong);
 
   return (
-    <div key={page} className="container mx-auto ps-4 pe-4 py-8 space-y-8 h-max">
+    <div
+      key={page}
+      className="container mx-auto ps-4 pe-4 py-8 space-y-8 h-max"
+    >
       <div className="space-y-2">
         <h1 className="text-4xl font-bold tracking-tight">آهنگ های پیشنهادی</h1>
         <p className="text-muted-foreground text-lg">
           آهنگ های پیشنهادی در پلتفرم دی بلال
         </p>
+        <div className="flex w-full justify-end">
+          <div className="flex items-center max-w-[50%] md:max-w-max">
+            <FeaturedSort />
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">

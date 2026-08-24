@@ -239,11 +239,7 @@ export default function PlaylistClient({
                 title={
                   playlist.isFavorite ? "آهنگ های موردعلاقه" : playlist.name
                 }
-                url={
-                  playlist.isFavorite
-                    ? "/favorites"
-                    : `/playlists/${playlist.id}`
-                }
+                url={`/playlists/${playlist.id}`}
               />
             </div>
           </div>
