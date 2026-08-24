@@ -20,6 +20,7 @@ const PlayerProvider = () => {
     activeId,
     playbackDevice,
     playNonce,
+    isRadio,
   } = usePlayerStore();
 
   const prevActiveIdRef = useRef<string | null>(null);
@@ -226,7 +227,9 @@ const PlayerProvider = () => {
     });
 
     navigator.mediaSession.setActionHandler("nexttrack", () => {
-      next(true);
+      if (!isRadio) {
+        next(true);
+      }
     });
 
     navigator.mediaSession.setActionHandler("previoustrack", () => {
@@ -240,12 +243,12 @@ const PlayerProvider = () => {
     });
 
     navigator.mediaSession.setActionHandler("seekto", (details) => {
-      if (audioRef.current && details.seekTime !== undefined) {
+      if (audioRef.current && details.seekTime !== undefined && !isRadio) {
         audioRef.current.currentTime = details.seekTime;
         setProgress(details.seekTime);
       }
     });
-  }, [currentSong, next, setProgress]);
+  }, [currentSong, isRadio, next, setProgress]);
 
   return (
     <audio

@@ -557,7 +557,15 @@ export default function RadioPage() {
                         </Button>
 
                         <Button variant="outline" className="w-full">
-                          <Link href="/">برگشت به دی بلال</Link>
+                          <Link href="/panel">حساب کاربری</Link>
+                        </Button>
+
+                        <Button variant="outline" className="w-full">
+                          <Link href="/playlists">پلی لیست ها</Link>
+                        </Button>
+
+                        <Button variant="outline" className="w-full">
+                          <Link href="/">صفحه اصلی</Link>
                         </Button>
                       </div>
                     </DialogContent>

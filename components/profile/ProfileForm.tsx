@@ -16,9 +16,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Instagram } from "lucide-react";
-
-import { Switch } from "@/components/ui/switch";
+import { Globe, Instagram, Lock } from "lucide-react";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { Textarea } from "../ui/textarea";
@@ -168,15 +166,32 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                   در صورت فعال بودن، فقط خودتان می‌توانید پروفایل و لیست‌های پخش
                   خود را ببینید.
                 </div>
-                <div>
-                  وضعیت فعلی: {field.value === true ? "خصوصی" : "عمومی"}
-                </div>
               </div>
               <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant={field.value ? "outline" : "default"}
+                    size="sm"
+                    onClick={() => field.onChange(false)}
+                    className={
+                      !field.value ? "bg-green-600 hover:bg-green-700" : ""
+                    }
+                  >
+                    <Globe size={16} className="mr-1" />
+                    عمومی
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={field.value ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => field.onChange(true)}
+                    className={field.value ? "bg-red-600 hover:bg-red-700" : ""}
+                  >
+                    <Lock size={16} className="mr-1" />
+                    خصوصی
+                  </Button>
+                </div>
               </FormControl>
             </FormItem>
           )}
