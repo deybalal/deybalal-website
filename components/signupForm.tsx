@@ -19,6 +19,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { CaptchaWidget } from "@/components/CaptchaWidget";
 
 export function SignupForm({
   className,
@@ -28,6 +29,8 @@ export function SignupForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -52,6 +55,8 @@ export function SignupForm({
           name,
           email,
           password,
+          captchaToken,
+          captchaAnswer,
         }),
       });
 
@@ -118,6 +123,14 @@ export function SignupForm({
                   required
                   disabled={loading}
                   onChange={(e) => setPassword(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <CaptchaWidget
+                  onTokenChange={setCaptchaToken}
+                  onAnswerChange={setCaptchaAnswer}
+                  answer={captchaAnswer}
+                  disabled={loading}
                 />
               </Field>
               <Field>

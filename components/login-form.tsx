@@ -20,6 +20,7 @@ import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
+import { CaptchaWidget } from "@/components/CaptchaWidget";
 import { authClient } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
 
@@ -30,6 +31,8 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -57,6 +60,8 @@ export function LoginForm({
         body: JSON.stringify({
           email,
           password,
+          captchaToken,
+          captchaAnswer,
         }),
       });
 
@@ -207,6 +212,14 @@ export function LoginForm({
                   required
                   disabled={loading}
                   onChange={(e) => setPassword(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <CaptchaWidget
+                  onTokenChange={setCaptchaToken}
+                  onAnswerChange={setCaptchaAnswer}
+                  answer={captchaAnswer}
+                  disabled={loading}
                 />
               </Field>
               <Field>

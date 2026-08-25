@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["svg-captcha"],
   /* config options here */
   experimental: {
     proxyClientMaxBodySize: 52428800, // 50MB in bytes

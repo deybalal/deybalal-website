@@ -3,11 +3,28 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { isValidEmail } from "@/lib/input-sanitizer";
 import { validatePassword } from "@/lib/validators";
+import { verifyCaptchaToken } from "@/lib/captcha";
+import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password } = body;
+    const { name, email, password, captchaToken, captchaAnswer } = body;
+
+    // Validate CAPTCHA
+    const cookieStore = await cookies();
+    const cookieToken = cookieStore.get("captcha_token")?.value;
+    const tokenToVerify = captchaToken || cookieToken || "";
+
+    if (!tokenToVerify || !verifyCaptchaToken(tokenToVerify, captchaAnswer || "")) {
+      return NextResponse.json(
+        { success: false, message: "کد امنیتی نامعتبر است. لطفاً کپچا را مجدداً حل کنید." },
+        { status: 400 }
+      );
+    }
+
+    // Invalidate CAPTCHA cookie after use
+    cookieStore.set("captcha_token", "", { maxAge: 0 });
 
     // Validate inputs
     if (!name || !email || !password) {

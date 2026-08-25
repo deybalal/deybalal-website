@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-
 import { sanitizeTextContent } from "@/lib/input-sanitizer";
 import { validateContentLength, CONTENT_LENGTH_LIMITS } from "@/lib/validators";
+import { verifyCaptchaToken } from "@/lib/captcha";
+import { cookies } from "next/headers";
 
 export async function GET(request: Request) {
   try {
@@ -109,13 +110,30 @@ export async function POST(request: Request) {
       );
     }
 
-    const { content, songId, albumId, parentId } = await request.json();
+    const { content, songId, albumId, parentId, captchaToken, captchaAnswer } = await request.json();
 
     if (!content) {
       return NextResponse.json(
         { success: false, message: "متن نظر اجباری است!" },
         { status: 400 }
       );
+    }
+
+    // Require CAPTCHA for new top-level comments only (not replies)
+    if (!parentId) {
+      const cookieStore = await cookies();
+      const cookieToken = cookieStore.get("captcha_token")?.value;
+      const tokenToVerify = captchaToken || cookieToken || "";
+
+      if (!tokenToVerify || !verifyCaptchaToken(tokenToVerify, captchaAnswer || "")) {
+        return NextResponse.json(
+          { success: false, message: "کد امنیتی نامعتبر است. لطفاً کپچا را مجدداً حل کنید." },
+          { status: 400 }
+        );
+      }
+
+      // Invalidate CAPTCHA cookie after use
+      cookieStore.set("captcha_token", "", { maxAge: 0 });
     }
 
     // Validate content length

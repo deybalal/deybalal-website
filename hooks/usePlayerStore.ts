@@ -515,12 +515,19 @@ export const usePlayerStore = create<PlayerState>()(
     {
       name: "player-storage",
       onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
+        // Reset progress to 0 on rehydration — it is driven exclusively by the
+        // audio element's onTimeUpdate event and must never be stale from storage.
+        if (state) {
+          state.progress = 0;
+          state.setHasHydrated(true);
+        }
       },
       partialize: (state) =>
         ({
           volume: state.volume,
-          progress: state.progress,
+          // NOTE: 'progress' is intentionally excluded — persisting it causes
+          // the progress bar to appear stuck at the last-saved position on
+          // Android until the first onTimeUpdate fires.
           queue: state.queue,
           priorityQueue: state.priorityQueue,
           duration: state.duration,

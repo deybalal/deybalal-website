@@ -10,6 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import DialogAlert from "./DialogAlert";
 import { faIR } from "date-fns/locale";
+import { CaptchaWidget } from "@/components/CaptchaWidget";
 
 interface Comment {
   id: string;
@@ -45,6 +46,8 @@ export function CommentSection({
   const [replyContent, setReplyContent] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
 
   useEffect(() => {
     async function fetchComments() {
@@ -80,6 +83,8 @@ export function CommentSection({
           songId,
           albumId,
           parentId,
+          captchaToken: parentId ? undefined : captchaToken,
+          captchaAnswer: parentId ? undefined : captchaAnswer,
         }),
       });
       const data = await res.json();
@@ -97,6 +102,9 @@ export function CommentSection({
         } else {
           setComments([data.data, ...comments]);
           setContent("");
+          setCaptchaAnswer("");
+          // Refresh CAPTCHA after successful comment — re-mount trick via key change
+          setCaptchaToken("");
         }
         toast.success("نظر شما ارسال شد! پس از تایید نمایش داده می شود.");
       } else {
@@ -162,6 +170,12 @@ export function CommentSection({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="min-h-[100px] bg-foreground/5 border-white/10 focus:border-blue-500/50 transition-all resize-none"
+          />
+          <CaptchaWidget
+            onTokenChange={setCaptchaToken}
+            onAnswerChange={setCaptchaAnswer}
+            answer={captchaAnswer}
+            disabled={isSubmitting}
           />
           <div className="flex justify-end">
             <Button
@@ -246,7 +260,7 @@ export function CommentSection({
                           <DialogAlert
                             title=""
                             description="آیا مطمئنید میخواهید این نظر را حذف کنید؟"
-                            fnButton="Delete"
+                            fnButton="پاک کردن"
                             fn={() => handleDelete(comment.id)}
                           />
                         </div>
