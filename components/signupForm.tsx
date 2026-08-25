@@ -17,7 +17,8 @@ import { Input } from "@/components/ui/input";
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { redirect } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 export function SignupForm({
   className,
@@ -26,27 +27,50 @@ export function SignupForm({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get and sanitize redirect URL to handle callback redirect support safely
+  const rawRedirect = searchParams.get("redirect") || searchParams.get("callbackUrl");
+  const safeRedirect = rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+    ? rawRedirect
+    : "/panel";
 
   const submitHandler = async (e: FormEvent) => {
     e.preventDefault();
-    const request = await fetch("/api/signup", {
-      method: "POST",
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-      }),
-    });
+    if (loading) return;
+    setLoading(true);
 
-    const response = await request.json();
+    try {
+      const request = await fetch("/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
+      });
 
-    if (response.success) {
-      toast.success(
-        response.message ? response.message : "حساب کاربری ساخته شد!"
-      );
-      redirect("/panel");
-    } else {
-      toast.error(`خطا! ${response.message}`);
+      const response = await request.json();
+
+      if (response.success) {
+        toast.success(
+          response.message ? response.message : "حساب کاربری ساخته شد!"
+        );
+        router.push(safeRedirect);
+        router.refresh();
+      } else {
+        toast.error(`خطا! ${response.message || "اطلاعات ثبت نام نامعتبر است"}`);
+      }
+    } catch (error) {
+      console.error("Signup request failed:", error);
+      toast.error("خطا در برقراری ارتباط با سرور");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,7 +86,7 @@ export function SignupForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={submitHandler}>
-            <FieldGroup>
+             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="name">نام</FieldLabel>
                 <Input
@@ -70,6 +94,7 @@ export function SignupForm({
                   type="text"
                   placeholder="نام خود را وارد کنید"
                   required
+                  disabled={loading}
                   onChange={(e) => setName(e.target.value)}
                 />
               </Field>
@@ -80,6 +105,7 @@ export function SignupForm({
                   type="email"
                   placeholder="m@example.com"
                   required
+                  disabled={loading}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </Field>
@@ -90,13 +116,30 @@ export function SignupForm({
                   type="password"
                   placeholder="حداقل 8 کاراکتر"
                   required
+                  disabled={loading}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </Field>
               <Field>
-                <Button type="submit">ثبت نام</Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                      در حال ثبت نام...
+                    </>
+                  ) : (
+                    "ثبت نام"
+                  )}
+                </Button>
                 <FieldDescription className="text-center">
-                  قبلا ثبت نام کرده اید؟ <Link href="/login">ورود به حساب</Link>
+                  قبلا ثبت نام کرده اید؟{" "}
+                  <Link
+                    href={`/login${
+                      searchParams.toString() ? `?${searchParams.toString()}` : ""
+                    }`}
+                  >
+                    ورود به حساب
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

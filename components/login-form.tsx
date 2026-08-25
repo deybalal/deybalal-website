@@ -18,9 +18,10 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
-import { redirect } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { authClient } from "@/lib/auth-client";
+import { Loader2 } from "lucide-react";
 
 export function LoginForm({
   className,
@@ -28,32 +29,56 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const setDownloadPreference = usePlayerStore(
     (state) => state.setDownloadPreference
   );
 
+  // Get and sanitize redirect URL to handle callback redirect support safely
+  const rawRedirect = searchParams.get("redirect") || searchParams.get("callbackUrl");
+  const safeRedirect = rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+    ? rawRedirect
+    : "/panel";
+
   const loginHandler = async (e: FormEvent) => {
     e.preventDefault();
-    const request = await fetch("/api/login", {
-      method: "POST",
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
+    if (loading) return;
+    setLoading(true);
 
-    const response = await request.json();
+    try {
+      const request = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
-    if (response.success) {
-      toast.success(
-        response.message ? response.message : "ورود موفق به حساب کاربری"
-      );
-      if (response.downloadPreference) {
-        setDownloadPreference(response.downloadPreference);
+      const response = await request.json();
+
+      if (response.success) {
+        toast.success(
+          response.message ? response.message : "ورود موفق به حساب کاربری"
+        );
+        if (response.downloadPreference) {
+          setDownloadPreference(response.downloadPreference);
+        }
+        router.push(safeRedirect);
+        router.refresh();
+      } else {
+        toast.error(`خطا! ${response.message || "رمز یا ایمیل نامعتبر است"}`);
       }
-      redirect("/panel");
-    } else {
-      toast.error(`خطا! ${response.message}`);
+    } catch (error) {
+      console.error("Login request failed:", error);
+      toast.error("خطا در برقراری ارتباط با سرور");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,11 +102,19 @@ export function LoginForm({
                 <Button
                   variant="outline"
                   type="button"
+                  disabled={loading}
                   onClick={async () => {
-                    await authClient.signIn.social({
-                      provider: "instagram",
-                      callbackURL: "/panel",
-                    });
+                    setLoading(true);
+                    try {
+                      await authClient.signIn.social({
+                        provider: "instagram",
+                        callbackURL: safeRedirect,
+                      });
+                    } catch (error) {
+                      console.error("Instagram sign in failed:", error);
+                      toast.error("خطا در ورود با اینستاگرام");
+                      setLoading(false);
+                    }
                   }}
                 >
                   <svg
@@ -119,11 +152,19 @@ export function LoginForm({
                 <Button
                   variant="outline"
                   type="button"
+                  disabled={loading}
                   onClick={async () => {
-                    await authClient.signIn.social({
-                      provider: "google",
-                      callbackURL: "/panel",
-                    });
+                    setLoading(true);
+                    try {
+                      await authClient.signIn.social({
+                        provider: "google",
+                        callbackURL: safeRedirect,
+                      });
+                    } catch (error) {
+                      console.error("Google sign in failed:", error);
+                      toast.error("خطا در ورود با گوگل");
+                      setLoading(false);
+                    }
                   }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -145,6 +186,7 @@ export function LoginForm({
                   type="email"
                   placeholder="m@example.com"
                   required
+                  disabled={loading}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </Field>
@@ -163,15 +205,30 @@ export function LoginForm({
                   type="password"
                   placeholder="حداقل 8 کاراکتر"
                   required
+                  disabled={loading}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </Field>
               <Field>
-                <Button className="text-xl" onClick={loginHandler}>
-                  ورود
+                <Button className="text-xl" type="submit" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                      در حال ورود...
+                    </>
+                  ) : (
+                    "ورود"
+                  )}
                 </Button>
                 <FieldDescription className="text-center">
-                  حساب کاربری ندارید؟ <Link href="/signup">ساخت حساب</Link>
+                  حساب کاربری ندارید؟{" "}
+                  <Link
+                    href={`/signup${
+                      searchParams.toString() ? `?${searchParams.toString()}` : ""
+                    }`}
+                  >
+                    ساخت حساب
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

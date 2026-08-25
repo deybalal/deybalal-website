@@ -69,6 +69,16 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Login error:", error);
+
+    if ((error as Error).message.includes("Invalid email or password")) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ایمیل یا رمز عبور اشتباه است",
+        },
+        { status: 401 }
+      );
+    }
     return NextResponse.json(
       {
         success: false,
