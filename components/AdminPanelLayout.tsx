@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Music2,
   Mic2,
@@ -13,9 +14,15 @@ import {
   FileText,
   Tags,
   Award,
+  LogOut,
+  KeyRound,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
+import ChangePasswordModal from "@/components/admin/ChangePasswordModal";
 
 interface AdminPanelLayoutProps {
   children: React.ReactNode;
@@ -37,6 +44,25 @@ export default function AdminPanelLayout({
   stats,
 }: AdminPanelLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await authClient.signOut();
+      toast.success("با موفقیت از حساب کاربری خارج شدید.");
+      router.push("/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("خطا در خروج از حساب کاربری.");
+      setIsLoggingOut(false);
+    }
+  };
+
 
   const statItems = [
     {
@@ -175,7 +201,30 @@ export default function AdminPanelLayout({
             مدیریت آهنگ ها، آلبوم ها، پلی لیست ها، متن آهنگ ها و...
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          <Button
+            type="button"
+            variant="outline"
+            className="glass hover:bg-white/10 flex items-center gap-2"
+            onClick={() => setIsPasswordModalOpen(true)}
+          >
+            <KeyRound className="h-4 w-4" />
+            <span>تغییر رمز عبور</span>
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isLoggingOut}
+            onClick={handleLogout}
+            className="glass bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border-red-500/30 flex items-center gap-2"
+          >
+            {isLoggingOut ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
+            <span>خروج از حساب</span>
+          </Button>
           <Button asChild variant="outline" className="glass hover:bg-white/10">
             <Link href="/">برگشت</Link>
           </Button>
@@ -222,6 +271,11 @@ export default function AdminPanelLayout({
 
         <div className="space-y-4">{children}</div>
       </div>
+
+      <ChangePasswordModal
+        open={isPasswordModalOpen}
+        onOpenChange={setIsPasswordModalOpen}
+      />
     </div>
   );
 }

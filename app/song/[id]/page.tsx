@@ -282,6 +282,17 @@ export default async function SongDetailPage({
                 </Button>
               )}
             </div>
+
+            <span className="flex justify-center mb-2 w-full">
+              <Link
+                href={`https://t.me/deybalalirbot?start=s_${song.id}`}
+                target="_blank"
+                className="flex items-center justify-center w-1/2 mt-6 gap-1 hover:bg-blue-600 text-white font-semibold py-2 rounded-xl transition-colors"
+              >
+                <Download className="w-5 h-5" />
+                دانلود از تلگرام
+              </Link>
+            </span>
           </div>
         )}
 

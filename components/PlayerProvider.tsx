@@ -8,6 +8,9 @@ const PlayerProvider = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastSongIdRef = useRef<string | null>(null);
   const lastPlayNonceRef = useRef<number>(0);
+  const accumulatedTimeRef = useRef<number>(0);
+  const lastTimeRef = useRef<number>(0);
+  const hasCountedRef = useRef<boolean>(false);
   const {
     isPlaying,
     currentSong,
@@ -91,14 +94,17 @@ const PlayerProvider = () => {
         lastSongIdRef.current = currentSong.id;
         lastPlayNonceRef.current = playNonce;
 
+        // Reset play count tracking for the new song / play session
+        accumulatedTimeRef.current = 0;
+        lastTimeRef.current = 0;
+        hasCountedRef.current = false;
+
         // When changing source, we must pause first if playing to prevent race conditions
         audio.pause();
         audio.src = newSrc;
         audio.load();
 
         if (isPlaying && activeId === TAB_ID) {
-          incrementPlayCount(currentSong.id);
-
           if (typeof window !== undefined) {
             document.title = `${currentSong.title} از ${currentSong.artist} - دی بلال`;
           }
@@ -129,20 +135,30 @@ const PlayerProvider = () => {
   }, [activeId]);
 
   const handleTimeUpdate = () => {
-    if (audioRef.current && activeId === TAB_ID) {
-      setProgress(audioRef.current.currentTime);
+    if (!audioRef.current || activeId !== TAB_ID) return;
+
+    const audio = audioRef.current;
+    const currentTime = audio.currentTime;
+    setProgress(currentTime);
+
+    // Track active listening duration delta
+    const delta = currentTime - lastTimeRef.current;
+    if (delta > 0 && delta < 2) {
+      accumulatedTimeRef.current += delta;
+    }
+    lastTimeRef.current = currentTime;
+
+    // Check if play count threshold is met (30s active play, 30s playback, or 80% for short songs)
+    if (!hasCountedRef.current && currentSong?.id) {
+      const duration = audio.duration || currentSong.duration || 0;
+      const thresholdSeconds = duration > 0 ? Math.min(30, duration * 0.8) : 30;
+
+      if (accumulatedTimeRef.current >= thresholdSeconds || currentTime >= thresholdSeconds) {
+        hasCountedRef.current = true;
+        incrementPlayCount(currentSong.id);
+      }
     }
   };
-
-  // const handleLoadedMetadata = () => {
-  //   console.log("audioRef.current ", audioRef.current);
-  //   console.log("activeId ", activeId);
-  //   console.log("TAB_ID ", TAB_ID);
-
-  //   if (audioRef.current && activeId === TAB_ID) {
-  //     setDuration(audioRef.current.duration);
-  //   }
-  // };
 
   const handleEnded = () => {
     if (activeId !== TAB_ID) return;
@@ -150,12 +166,20 @@ const PlayerProvider = () => {
     const { repeatMode, currentSong, isLiveRadio } = usePlayerStore.getState();
     if (isLiveRadio) return;
 
+    // Count play if song finishes before reaching the threshold (e.g. short audio clips)
+    if (!hasCountedRef.current && currentSong?.id) {
+      hasCountedRef.current = true;
+      incrementPlayCount(currentSong.id);
+    }
+
     if (repeatMode === "one" && audioRef.current) {
+      // Reset tracking refs for repeat one loop
+      accumulatedTimeRef.current = 0;
+      lastTimeRef.current = 0;
+      hasCountedRef.current = false;
+
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch((e) => console.error("Play error:", e));
-      if (currentSong && currentSong.id) {
-        incrementPlayCount(currentSong.id);
-      }
     } else {
       next(true);
     }

@@ -23,6 +23,7 @@ import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { CaptchaWidget } from "@/components/CaptchaWidget";
 import { authClient } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
+import ForgotPasswordModal from "@/components/ForgotPasswordModal";
 
 export function LoginForm({
   className,
@@ -31,6 +32,7 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotModalOpen, setForgotModalOpen] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaAnswer, setCaptchaAnswer] = useState("");
   const router = useRouter();
@@ -198,12 +200,13 @@ export function LoginForm({
               <Field>
                 <div className="flex items-center justify-between w-full">
                   <FieldLabel htmlFor="password">رمز</FieldLabel>
-                  <a
-                    href="#"
-                    className="mr-auto text-sm underline-offset-4 hover:underline"
+                  <button
+                    type="button"
+                    onClick={() => setForgotModalOpen(true)}
+                    className="mr-auto text-sm underline-offset-4 hover:underline text-muted-foreground hover:text-foreground cursor-pointer"
                   >
                     فراموشی رمز؟
-                  </a>
+                  </button>
                 </div>
                 <Input
                   id="password"
@@ -251,6 +254,10 @@ export function LoginForm({
       <FieldDescription className="px-6 text-center">
         با ورود به حساب، شما <a href="/tos">شرایط و قوانین</a> را میپذیرید.
       </FieldDescription>
+      <ForgotPasswordModal
+        open={forgotModalOpen}
+        onOpenChange={setForgotModalOpen}
+      />
     </div>
   );
 }
