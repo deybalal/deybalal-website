@@ -17,7 +17,7 @@ const PlayerProvider = () => {
     volume,
     next,
     setProgress,
-    // setDuration,
+    setDuration,
     seekTo,
     setSeekTo,
     activeId,
@@ -124,15 +124,38 @@ const PlayerProvider = () => {
       // If we just became active (transitioned from null or another tab), sync our audio time to the stored progress
       if (prevActiveIdRef.current !== TAB_ID || !isInitializedRef.current) {
         const { progress } = usePlayerStore.getState();
-        // Only sync if difference is significant (> 2 seconds) to avoid glitches
-        if (Math.abs(audioRef.current.currentTime - progress) > 2) {
-          audioRef.current.currentTime = progress;
+        const audio = audioRef.current;
+        const songDuration = audio.duration || currentSong?.duration || 0;
+        if (progress > 0 && songDuration > 0 && progress < songDuration - 2) {
+          if (Math.abs(audio.currentTime - progress) > 2) {
+            audio.currentTime = progress;
+          }
         }
         isInitializedRef.current = true;
       }
     }
     prevActiveIdRef.current = activeId;
-  }, [activeId]);
+  }, [activeId, currentSong]);
+
+  const handleLoadedMetadata = () => {
+    if (!audioRef.current || activeId !== TAB_ID) return;
+    const audio = audioRef.current;
+
+    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+      setDuration(audio.duration);
+    }
+
+    const { progress } = usePlayerStore.getState();
+    const songDuration = audio.duration || currentSong?.duration || 0;
+    if (progress > 0 && songDuration > 0 && progress < songDuration - 2) {
+      if (Math.abs(audio.currentTime - progress) > 1) {
+        audio.currentTime = progress;
+      }
+    } else if (progress >= songDuration - 2 && songDuration > 0) {
+      audio.currentTime = 0;
+      setProgress(0);
+    }
+  };
 
   const handleTimeUpdate = () => {
     if (!audioRef.current || activeId !== TAB_ID) return;
@@ -278,7 +301,7 @@ const PlayerProvider = () => {
     <audio
       ref={audioRef}
       onTimeUpdate={handleTimeUpdate}
-      // onLoadedMetadata={handleLoadedMetadata}
+      onLoadedMetadata={handleLoadedMetadata}
       onEnded={handleEnded}
       className="hidden"
       preload="metadata"

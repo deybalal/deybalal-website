@@ -417,7 +417,7 @@ export const usePlayerStore = create<PlayerState>()(
             playNonce: get().playNonce + 1,
           });
         } else {
-          set({ isPlaying: false });
+          set({ isPlaying: false, progress: 0 });
         }
       },
 
@@ -515,19 +515,21 @@ export const usePlayerStore = create<PlayerState>()(
     {
       name: "player-storage",
       onRehydrateStorage: () => (state) => {
-        // Reset progress to 0 on rehydration — it is driven exclusively by the
-        // audio element's onTimeUpdate event and must never be stale from storage.
         if (state) {
-          state.progress = 0;
+          // If progress was saved at or near the end of the song, reset to 0
+          const songDuration = state.duration || state.currentSong?.duration || 0;
+          if (songDuration > 0 && state.progress >= songDuration - 2) {
+            state.progress = 0;
+          }
+          // Reset activeId to current tab on rehydration so audio events aren't ignored
+          state.activeId = TAB_ID;
           state.setHasHydrated(true);
         }
       },
       partialize: (state) =>
         ({
           volume: state.volume,
-          // NOTE: 'progress' is intentionally excluded — persisting it causes
-          // the progress bar to appear stuck at the last-saved position on
-          // Android until the first onTimeUpdate fires.
+          progress: state.progress,
           queue: state.queue,
           priorityQueue: state.priorityQueue,
           duration: state.duration,
@@ -535,7 +537,7 @@ export const usePlayerStore = create<PlayerState>()(
           currentIndex: state.currentIndex,
           isShuffling: state.isShuffling,
           repeatMode: state.repeatMode,
-          activeId: state.activeId,
+          // NOTE: activeId is intentionally omitted so each tab/session can claim audio control
           downloadPreference: state.downloadPreference,
           currentQuality: state.currentQuality,
           playbackDevice: state.playbackDevice,

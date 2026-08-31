@@ -400,7 +400,7 @@ const PlayerBar = () => {
             <Slider
               value={[progress]}
               onValueChange={handleSeek}
-              max={duration || 100}
+              max={duration || currentSong?.duration || 100}
               step={1}
               className={`w-full h-1 rounded-none ${
                 isRadio
