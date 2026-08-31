@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import path from "path";
-import fs from "fs";
-import axios from "axios";
+// import path from "path";
+// import fs from "fs";
+// import axios from "axios";
 
-export async function POST(req: Request) {
+export async function POST(/* req: Request */) {
+  /*
   try {
     const data = await req.json();
     const { type, volume, position, action, filename } = data;
@@ -103,4 +104,6 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+  */
+  return NextResponse.json({ success: true, message: "dummydata" });
 }

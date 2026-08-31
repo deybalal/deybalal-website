@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { z } from "zod";
-import { rename, unlink } from "fs/promises";
-import path from "path";
-import { existsSync } from "fs";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
-import { getUniqueSongSlug } from "@/lib/slug";
-import { parseFile } from "music-metadata";
-import { findSimilarSongs } from "@/lib/similarity";
-import { applyWatermark } from "@/lib/image-utils";
+// import { prisma } from "@/lib/prisma";
+// import { z } from "zod";
+// import { rename, unlink } from "fs/promises";
+// import path from "path";
+// import { existsSync } from "fs";
+// import { headers } from "next/headers";
+// import { auth } from "@/lib/auth";
+// import { getUniqueSongSlug } from "@/lib/slug";
+// import { parseFile } from "music-metadata";
+// import { findSimilarSongs } from "@/lib/similarity";
+// import { applyWatermark } from "@/lib/image-utils";
 
 export const dynamic = "force-dynamic";
 
+/*
 const songSchema = z.object({
   title: z.string().min(1),
   titleEn: z.string().optional(),
@@ -42,8 +43,10 @@ const songSchema = z.object({
   genreIds: z.array(z.string()).optional(),
   useArtistImage: z.boolean().optional(),
 });
+*/
 
-export async function POST(request: Request) {
+export async function POST(/* request: Request */) {
+  /*
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -297,4 +300,6 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+  */
+  return NextResponse.json({ success: true, message: "dummydata" });
 }

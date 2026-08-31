@@ -1,30 +1,30 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { unlink, stat, rename } from "fs/promises";
-import { existsSync } from "fs";
-import path from "path";
-import { createNotification, notifyFollowers } from "@/lib/notifications";
-import { exec } from "child_process";
-import { promisify } from "util";
-import { slugify } from "@/lib/utils";
-import { parseFile } from "music-metadata";
+// import { prisma } from "@/lib/prisma";
+// import { auth } from "@/lib/auth";
+// import { headers } from "next/headers";
+// import { unlink, stat, rename } from "fs/promises";
+// import { existsSync } from "fs";
+// import path from "path";
+// import { createNotification, notifyFollowers } from "@/lib/notifications";
+// import { exec } from "child_process";
+// import { promisify } from "util";
+// import { slugify } from "@/lib/utils";
+// import { parseFile } from "music-metadata";
 
-const execAsync = promisify(exec);
+// const execAsync = promisify(exec);
 
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
-}
+// function formatFileSize(bytes: number): string {
+//   if (bytes === 0) return "0 Bytes";
+//   const k = 1024;
+//   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+//   const i = Math.floor(Math.log(bytes) / Math.log(k));
+//   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
+// }
 
-export async function POST(
-  request: Request,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function POST() {
+// _request: Request,
+// _context: { params: Promise<{ id: string }> }
+  /*
   const { id } = await context.params;
   const filesToCleanup: string[] = [];
 
@@ -265,4 +265,6 @@ export async function POST(
       { status: 500 }
     );
   }
+  */
+  return NextResponse.json({ success: true, message: "dummydata" });
 }

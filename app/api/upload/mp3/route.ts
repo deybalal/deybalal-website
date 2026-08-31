@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import * as mm from "music-metadata";
-import { auth } from "@/lib/auth";
+// import * as mm from "music-metadata";
+// import { auth } from "@/lib/auth";
 // import { logSuspiciousUpload } from "@/lib/logger";
 // import { sanitizeFilename } from "@/lib/input-sanitizer";
 // import {
@@ -8,12 +8,13 @@ import { auth } from "@/lib/auth";
 //   validateFileSize,
 //   FILE_SIZE_LIMITS,
 // } from "@/lib/validators";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+// import { writeFile, mkdir } from "fs/promises";
+// import path from "path";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
+export async function POST(/* request: Request */) {
+  /*
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -127,4 +128,6 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+  */
+  return NextResponse.json({ success: true, message: "dummydata" });
 }
