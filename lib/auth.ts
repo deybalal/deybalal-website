@@ -22,6 +22,43 @@ export const auth = betterAuth({
               });
             }
           }
+          // Create default playlists for newly created user if they do not already exist
+          try {
+            const existingPlaylists = await prisma.playlist.findMany({
+              where: { userId: user.id },
+              select: { isFavorite: true, isDownload: true },
+            });
+
+            const hasFavorite = existingPlaylists.some((p) => p.isFavorite);
+            const hasDownload = existingPlaylists.some((p) => p.isDownload);
+
+            if (!hasFavorite) {
+              await prisma.playlist.create({
+                data: {
+                  name: "موردعلاقه ها",
+                  description: "آهنگ های موردعلاقه شما",
+                  isFavorite: true,
+                  duration: 0,
+                  userId: user.id,
+                },
+              });
+            }
+
+            if (!hasDownload) {
+              await prisma.playlist.create({
+                data: {
+                  name: "لیست دانلود",
+                  description: "آهنگ هایی که میخواهید دانلود کنید. (روی موبایل)",
+                  isDownload: true,
+                  duration: 0,
+                  userId: user.id,
+                  coverArt: "/images/download.png",
+                },
+              });
+            }
+          } catch (err) {
+            console.error("Error creating default playlists for user:", err);
+          }
         },
       },
       update: {
@@ -41,9 +78,7 @@ export const auth = betterAuth({
     },
   },
   emailAndPassword: {
-    enabled: true,
-    minPasswordLength: 8,
-    maxPasswordLength: 128,
+    enabled: false,
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
