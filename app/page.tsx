@@ -12,7 +12,7 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import PlayRandomButton from "@/components/PlayRandomButton";
 import { StructuredData } from "@/components/StructuredData";
-import { Mic2, Radio } from "lucide-react";
+import { Atom, Mic2, Radio } from "lucide-react";
 import RadioPlaylistItem from "@/components/RadioPlaylistItem";
 import { formatDuration } from "@/tools/formatDuration";
 import { shuffleArray } from "@/tools/shuffleArray";
@@ -221,16 +221,23 @@ export default async function Home() {
 
                 <Link
                   href="/radio"
-                  className="flex justify-center items-center gap-x-2 px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
+                  className="flex justify-center items-center gap-x-2 px-4 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
                 >
                   <Radio className="size-5" /> رادیو لری
+                </Link>
+
+                <Link
+                  href="/identify"
+                  className="flex justify-center items-center gap-x-2 px-4 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-xs hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
+                >
+                  <Atom className="size-5" /> تشخیص هوشمند آهنگ
                 </Link>
 
                 <Link
                   href="/artist"
                   className="flex justify-center items-center gap-x-2 px-8 py-4 bg-white/10 backdrop-blur-xl text-white border-2 border-white/30 rounded-full font-bold text-base md:text-lg hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-all duration-300 shadow-xl"
                 >
-                  <Mic2 className="size-5" /> مشاهده خواننده ها
+                  <Mic2 className="size-5" /> خواننده ها
                 </Link>
               </div>
 

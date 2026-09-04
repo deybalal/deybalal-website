@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: [
     "locahost",
     "192.168.1.108",
+    "192.168.1.109",
+    "192.168.70.109",
     "my.local",
     "lori.local",
     "192.168.70.108",

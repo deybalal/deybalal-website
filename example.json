@@ -1,0 +1,104 @@
+[
+  {
+    "id": "cmniz71ue0001uigpl5v5pot8",
+    "slug": "Vandaar-Sho-Sal",
+    "title": "شو سال",
+    "titleEn": "Sho Sal",
+    "artist": "وندار",
+    "artistEn": "Vandaar",
+    "artists": [
+      {
+        "id": "cmniz8dfv00guuigp59vslgz8",
+        "name": "وندار",
+        "nameEn": "Vandaar",
+        "fileId": "AgACAgQAAyEGAAMBArgkbAACIwFqS_R9uYXHMhLyd7C4bgXWi5Y6GgACBw9rGw5QYVIF-1hBDY07pQEAAwIAA3kAAzwE",
+        "fileUniqueId": "AQADBw9rGw5QYVJ-"
+      }
+    ],
+    "albumName": null,
+    "coverArt": "/assets/cover/Vandaar-Sho-Sal.jpg",
+    "year": 0,
+    "duration": 94,
+    "uri": "/assets/mp3/Vandaar/Vandaar-Sho-Sal-128.mp3",
+    "filename": "Vandaar-Sho-Sal-128.mp3",
+    "index": 0,
+    "lyrics": "ﻗﺪه ﻣﻴﺎﻛﻪ ﺳﺮت ﻣﻴﻨﻪ دﻟﻢ درد ﻋﺰﻳﺰ اﮔﻪ ﻣﺮدم ﺗﻮ ﺳﻰ ﻣﻪ اﺷﻜﻰ ﻧﺮﻳﺰ\r\nآﺧﺮش ﻫﺮﻛﺴﻰ ﺑﺎﻳﺪ ﺑﻤﻴﺮه ﻛﻪ دﻟﻪ ﺧﺎک ﺳﺮم ﺟﺎ ﺑﮕﻴﺮه\r\n ﻗﺪه ﻣﻴﺎﻛﻪ ﺳﺮت ﻣﻴﻨﻪ دﻟﻢ درد ﻋﺰﻳﺰ",
+    "syncedLyrics": null,
+    "playCount": 5,
+    "downloads": 0,
+    "isDisabled": false,
+    "disabledDescription": null,
+    "isActive": true,
+    "isFeatured": false,
+    "albumId": null,
+    "userId": "fBTuRnw3G0TqDGp6AD5lhVeUSav97bxR",
+    "lyricsSource": null,
+    "lyricsSourceUrl": null,
+    "links": {
+      "64": {
+        "url": "/assets/mp3/Vandaar/Vandaar-Sho-Sal-64.mp3",
+        "bytes": 996107
+      },
+      "128": {
+        "url": "/assets/mp3/Vandaar/Vandaar-Sho-Sal-128.mp3",
+        "bytes": 1751568
+      },
+      "320": {
+        "url": "/assets/mp3/Vandaar/Vandaar-Sho-Sal-320.mp3",
+        "bytes": 4017952
+      }
+    },
+    "ogg": "/assets/ogg/cmniz71ue0001uigpl5v5pot8.ogg"
+  },
+  {
+    "id": "cmniz72920005uigpz8wmnakm",
+    "slug": "Esmaeil-Piramoun-Akh-Che-Roozel",
+    "title": "آخ چه روزل عزیزی",
+    "titleEn": "Akh Che Roozel",
+    "artist": "اسماعیل پیرامون",
+    "artistEn": "Esmaeil Piramoun",
+    "artists": [
+      {
+        "id": "cmniz722w0004uigpe2osh7xw",
+        "name": "اسماعیل پیرامون",
+        "nameEn": "Esmaeil Piramoun",
+        "fileId": "AgACAgQAAyEGAAMBArgkbAACItRqS_P2iLFCWeijywABqW7detKc3vEAAtwOaxsOUGFSyQABE4jjvxd7AQADAgADeQADPAQ",
+        "fileUniqueId": "AQAD3A5rGw5QYVJ-"
+      }
+    ],
+    "albumName": null,
+    "coverArt": "/assets/cover/Esmaeil-Piramoun-Akh-Che-Roozel.jpg",
+    "year": 0,
+    "duration": 255,
+    "uri": "/assets/mp3/Esmaeil-Piramoun/Esmaeil-Piramoun-Akh-Che-Roozel-128.mp3",
+    "filename": "Esmaeil-Piramoun-Akh-Che-Roozel-128.mp3",
+    "index": 1,
+    "lyrics": "\r\nروزل ﺧﺸﻮ ﮔﺬﺷﺖ و آخ وه ﺑﺨﺖ ﺳﺮﮔﺬﺷﺖ و ﺧﺎﻃﺮه ﺗﻮ دﻟﻤﻪ ﮔﺸﺖ و\r\nﻳﺎﻳﺖ اﻳﺎ ﻳﻪ رو ﻳﻪ ﺳﺎﻟﻰ رﻳﻢ ﺗﻪ ﻳﮏ ﻣﺎل ﻣﺎﻟﻰ\r\nروز ﻣﺎل ﻛﻨﻨﻮن وه زی زی آخ ﭼﻪ روزل ﻋﺰﻳﺰی\r\nﻗﻮچ ﺳﺮ ﺗﻮال ﺷﺎﺧﻰ وو ﻧﻬﺎ ﻛﻠﻮ ﻛﻠﻮ ﺑﻰ\r\nآخ ﺳﻰ روزﻟﻰ ﻋﺰﻳﺰم ﻟﺮ ﺗﻰ وی دل ﺗﻮ ﻣﺚ دﻟﻮم ﺗﻠﻮ ﺑﻰ\r\nروزل ﺧﺸﻮ ﮔﺬﺷﺘﻮ آخ وه ﺑﺨﺖ ﺳﺮﮔﺬﺷﺖ و ﺧﺎﻃﺮه ﺗﻮ دﻟﻤﻪ ﮔﺸﺖ و\r\nﻳﺎﻳﺖ اﻳﺎ ﻳﻪ ﺗﮏ ﭘﺴﻴﻨﻰ ﮔﻞ ﺗﻮ اوﻣﻰ ﺗﺎ ﻛﺴﻰ ﻧﻰ\r\nﻳﺎﻳﺖ اﻳﺎﻳﻪ زر ﻛﭙﺮ ﺑﻴﻢ ﻫﺮدﻣﻮ وه ﻳﮏ ﺑﺘﺮ ﺑﻴﻢ\r\nﺳﻴﻞ ﻣﻮ ﻛﺮدی ﺧﻨﺪه ﻛﺮدی دل ﻛﺒﺎﺑﻪ رﻧﺪه ﻛﺮدی\r\nوت ﮔﺘﻮم دوور ﮔﻠﺎﺗﻰ وم ﮔﻮﺗﻰ ﻛﻠﻮ وﻟﺎﺗﻰ\r\nروزل ﺧﺸﻮ ﮔﺬﺷﺖ و آخ وه ﺑﺨﺖ ﺳﺮﮔﺬﺷﺖ و ﺧﺎﻃﺮه ﺗﻮ دﻟﻤﻪ ﮔﺸﺖ و\r\nروزل ﺧﺸﻮ ﮔﺬﺷﺖ و آخ وه ﺑﺨﺖ ﺳﺮﮔﺬﺷﺖ و ﺧﺎﻃﺮه ﺗﻮ دﻟﻤﻪ ﮔﺸﺖ و از اﺳﻤﺎﻋﻴﻞ ﭘﻴﺮاﻣﻮن\r\nای ﻳﺎرم ای ﻳﺎروم ﻧﻪ ﺧﺪا ﻣﻨﻪ اﻳﻜﺸﻪ ﻫﻰ ﺑﻤﻴﺮم ﻧﻰ ﻣﺎل اﻳﻜﻨﻪ ﺑﺎر\r\nﺑﻌﺪ ﺧﻮت ﭼﻪ درد وه ﺑﺎر م ﻛﻮﭼﻨﻰ ﻫﻮی ﺑﻬﺎر م\r\nﭘﻪ ﺑﻴﻮ وه ﻏﻢ دراروم\r\nﮔﻞ ﺑﻴﻮ ﻛﻪ ﺗﻬﻠﻪ ﺧﺎروم\r\nروزل ﺧﺸﻮ ﮔﺬﺷﺖ و آخ و ﺑﺨﺖ ﺳﺮﮔﺬﺷﺖ و ﺧﺎﻃﺮه ﺗﻮ دﻟﻤﻪ ﮔﺸﺖ و\r\n",
+    "syncedLyrics": null,
+    "playCount": 9,
+    "downloads": 0,
+    "isDisabled": false,
+    "disabledDescription": null,
+    "isActive": true,
+    "isFeatured": false,
+    "albumId": null,
+    "userId": "fBTuRnw3G0TqDGp6AD5lhVeUSav97bxR",
+    "lyricsSource": null,
+    "lyricsSourceUrl": null,
+    "links": {
+      "64": {
+        "url": "/assets/mp3/Esmaeil-Piramoun/Esmaeil-Piramoun-Akh-Che-Roozel-64.mp3",
+        "bytes": 2169793
+      },
+      "128": {
+        "url": "/assets/mp3/Esmaeil-Piramoun/Esmaeil-Piramoun-Akh-Che-Roozel-128.mp3",
+        "bytes": 4210897
+      },
+      "320": {
+        "url": "/assets/mp3/Esmaeil-Piramoun/Esmaeil-Piramoun-Akh-Che-Roozel-320.mp3",
+        "bytes": 10334208
+      }
+    },
+    "ogg": "/assets/ogg/cmniz72920005uigpz8wmnakm.ogg"
+  }
+]

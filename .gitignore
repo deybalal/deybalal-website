@@ -55,6 +55,7 @@ prisma/migrations
 SECURITY.md
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 scripts/*.json
 scripts/__pycache__
 
@@ -75,3 +76,9 @@ db.json
 =======
 scripts/*.json
 >>>>>>> dc8cd1b (Watermark added, minor edits)
+=======
+scripts/*.json
+scripts/__pycache__
+
+data
+>>>>>>> 167d3b3 (Added Fingerprinting songs and identifying them)
