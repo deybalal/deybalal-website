@@ -37,6 +37,10 @@ interface MatchCandidate {
   };
 }
 
+// ---------------------------------------------------------------------------
+// DEVELOPMENT HELPERS (Local Python Dejavu + SQLite Engine)
+// ---------------------------------------------------------------------------
+
 async function extractSampleFingerprints(
   audioBuffer: Buffer,
   extension = "wav"
@@ -57,7 +61,9 @@ async function extractSampleFingerprints(
       "scripts",
       "dejavu_fingerprint.py"
     );
-    const pythonCmd = process.env.PYTHON_PATH || "python";
+    const pythonCmd =
+      process.env.PYTHON_PATH ||
+      (process.platform === "win32" ? "python" : "python3");
 
     // 15-second sample window provides great match coverage in <300ms
     const { stdout } = await execFileAsync(
@@ -80,7 +86,8 @@ async function extractSampleFingerprints(
     }
   }
 }
-export async function POST(request: Request) {
+
+async function handleDevelopmentIdentify(request: Request) {
   try {
     let audioBuffer: Buffer | null = null;
     let extension = "wav";
@@ -237,10 +244,6 @@ export async function POST(request: Request) {
       const totalMatches = songTotalMatches.get(songId) || maxPeakCount;
       const alignmentRatio = totalMatches > 0 ? maxPeakCount / totalMatches : 0;
 
-      // Confidence formula:
-      // In Shazam, a true match has many peaks aligning at the EXACT same relative offset difference.
-      // - 10+ aligned peaks gives up to 50%
-      // - An alignment ratio above 25% gives up to 50%
       const peakScore = Math.min(maxPeakCount / 10, 1.0) * 50;
       const ratioScore = Math.min(alignmentRatio / 0.25, 1.0) * 50;
       const confidence = Math.min(100, Math.round(peakScore + ratioScore));
@@ -341,20 +344,21 @@ export async function POST(request: Request) {
           matchedPeaks: c.peakCount,
         })),
     });
-  } catch (error) {
-    console.error("Error in /api/identify:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Error in development /api/identify:", error);
     return NextResponse.json(
       {
         success: false,
         message: "Failed to identify audio",
-        error: (error as Error).message || String(error),
+        error: errorMessage,
       },
       { status: 500 }
     );
   }
 }
 
-export async function GET() {
+async function handleDevelopmentGet() {
   try {
     const db = getFingerprintsDb();
     const countSongs =
@@ -372,16 +376,213 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: "Dejavu Fingerprint Recognition Service is active",
+      message: "Dejavu Fingerprint Recognition Service is active (Development)",
       stats: {
         totalSongsIndexed: countSongs,
         totalFingerprints: countFps,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { success: false, error: (error as Error).message },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// PRODUCTION HELPERS (Proxy to Telegram Bot / Hono Backend)
+// ---------------------------------------------------------------------------
+
+async function handleProductionIdentify(request: Request) {
+  try {
+    const rawEndpoint = process.env.IDENTIFY_ENDPOINT;
+    if (!rawEndpoint) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "IDENTIFY_ENDPOINT is not configured in environment variables",
+        },
+        { status: 500 }
+      );
+    }
+
+    const endpoint = rawEndpoint.endsWith("/identify")
+      ? rawEndpoint
+      : `${rawEndpoint.replace(/\/+$/, "")}/identify`;
+
+    const contentType = request.headers.get("content-type") || "";
+    const headers: Record<string, string> = {};
+
+    const authPassword =
+      process.env.IDENTIFY_PASSWPRD || process.env.IDENTIFY_PASSWORD;
+    if (authPassword) {
+      headers["authorization"] = authPassword;
+    }
+
+    let botResponse: Response;
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      botResponse = await fetch(endpoint, {
+        method: "POST",
+        headers,
+        body: formData,
+      });
+    } else {
+      const arrayBuffer = await request.arrayBuffer();
+      if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+        return NextResponse.json(
+          { success: false, message: "No audio data provided" },
+          { status: 400 }
+        );
+      }
+      if (contentType) {
+        headers["content-type"] = contentType;
+      }
+      botResponse = await fetch(endpoint, {
+        method: "POST",
+        headers,
+        body: arrayBuffer,
+      });
+    }
+
+    const data = await botResponse.json().catch(() => null);
+
+    if (!botResponse.ok || !data) {
+      return NextResponse.json(
+        data || {
+          success: false,
+          error: `Bot endpoint returned HTTP status ${botResponse.status}`,
+        },
+        { status: botResponse.status }
+      );
+    }
+
+    // Enrich identified song with full links from Prisma if available
+    if (data.song?.id) {
+      try {
+        const findSong = await prisma.song.findUnique({
+          where: { id: data.song.id },
+          select: { links: true },
+        });
+        if (findSong?.links) {
+          data.song.links = findSong.links;
+        }
+      } catch (err) {
+        console.warn("Could not fetch song links from Prisma:", err);
+      }
+    }
+
+    // Also enrich candidates with links if available
+    if (Array.isArray(data.candidates)) {
+      for (const cand of data.candidates) {
+        if (cand.song?.id && !cand.song.links) {
+          try {
+            const findSong = await prisma.song.findUnique({
+              where: { id: cand.song.id },
+              select: { links: true },
+            });
+            if (findSong?.links) {
+              cand.song.links = findSong.links;
+            }
+          } catch {
+            // Ignore candidate link lookup failure
+          }
+        }
+      }
+    }
+
+    return NextResponse.json(data);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Error in Next.js production /api/identify proxy:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to communicate with Bot identification service",
+        error: errorMessage,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleProductionGet() {
+  try {
+    const rawEndpoint = process.env.IDENTIFY_ENDPOINT;
+    if (!rawEndpoint) {
+      return NextResponse.json({
+        success: false,
+        message: "IDENTIFY_ENDPOINT is not configured",
+      });
+    }
+
+    const endpoint = rawEndpoint.endsWith("/identify")
+      ? rawEndpoint
+      : `${rawEndpoint.replace(/\/+$/, "")}/identify`;
+
+    const headers: Record<string, string> = {};
+    const authPassword =
+      process.env.IDENTIFY_PASSWPRD || process.env.IDENTIFY_PASSWORD;
+    if (authPassword) {
+      headers["auth"] = authPassword;
+      headers["authorization"] = authPassword;
+    }
+
+    const res = await fetch(endpoint, {
+      method: "GET",
+      headers,
+    }).catch(() => null);
+
+    if (res && res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return NextResponse.json({
+        success: true,
+        message: "Bot identification service is online",
+        botEndpoint: endpoint,
+        status: data,
+      });
+    }
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Bot identification endpoint is unreachable",
+        botEndpoint: endpoint,
+      },
+      { status: 502 }
+    );
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return NextResponse.json(
+      { success: false, error: errorMessage },
+      { status: 500 }
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// ROUTE HANDLERS
+// ---------------------------------------------------------------------------
+
+export async function POST(request: Request) {
+  if (
+    process.env.NODE_ENV === "production" ||
+    process.env.USE_PRODUCTION_IDENTIFY === "true"
+  ) {
+    return handleProductionIdentify(request);
+  }
+  return handleDevelopmentIdentify(request);
+}
+
+export async function GET() {
+  if (
+    process.env.NODE_ENV === "production" ||
+    process.env.USE_PRODUCTION_IDENTIFY === "true"
+  ) {
+    return handleProductionGet();
+  }
+  return handleDevelopmentGet();
 }

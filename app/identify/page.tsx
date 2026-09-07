@@ -622,7 +622,7 @@ export default function IdentifyPage() {
                     : "bg-amber-500/10 border-amber-500/20 text-amber-500"
                 }`}
               >
-                {result.confidence}% دقت تشخیص
+                دقت تشخیص: {result.confidence}%
               </div>
             </div>
 
@@ -694,7 +694,7 @@ export default function IdentifyPage() {
                     variant={isPlayingPreview ? "default" : "outline"}
                     size="sm"
                     onClick={() => toggleOggPreview(result.song?.id || "")}
-                    className={`w-11/12 h-11 rounded-xl gap-1.5 font-medium cursor-pointer transition-all text-xs px-2 shadow-sm ${
+                    className={`w-full h-11 rounded-xl gap-1.5 font-medium cursor-pointer transition-all text-xs px-2 shadow-sm ${
                       isPlayingPreview
                         ? "bg-amber-600 hover:bg-amber-700 text-white"
                         : "border-primary/40 hover:bg-primary/10"
@@ -708,7 +708,7 @@ export default function IdentifyPage() {
                     ) : (
                       <>
                         <Volume2 className="w-4 h-4 shrink-0 text-primary" />
-                        <span className="truncate">پیش‌نمایش (۳۰s)</span>
+                        <span className="truncate">پیش‌نمایش</span>
                       </>
                     )}
                   </Button>
@@ -718,7 +718,7 @@ export default function IdentifyPage() {
                     variant="default"
                     size="sm"
                     onClick={() => handlePlayFullSong(result.song!)}
-                    className="w-11/12 h-11 rounded-xl gap-1.5 font-medium cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 shadow-md text-xs px-2"
+                    className="w-full h-11 rounded-xl gap-1.5 font-medium cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 shadow-md text-xs px-2"
                   >
                     {isGlobalPlaying && currentSong?.id === result.song.id ? (
                       <>
