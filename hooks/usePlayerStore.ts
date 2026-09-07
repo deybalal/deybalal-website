@@ -48,6 +48,10 @@ interface PlayerState {
   setDownloadPreference: (pref: number) => void;
   setPlaybackDevice: (device: "current" | "server" | "both") => void;
   setHasHydrated: (state: boolean) => void;
+  hasCountedPlay: boolean;
+  accumulatedPlayTime: number;
+  setHasCountedPlay: (hasCounted: boolean) => void;
+  setAccumulatedPlayTime: (time: number) => void;
 
   isShuffling: boolean;
   repeatMode: "off" | "all" | "one";
@@ -126,9 +130,14 @@ export const usePlayerStore = create<PlayerState>()(
       currentQuality: null,
       playbackDevice: "current",
       hasHydrated: false,
+      hasCountedPlay: false,
+      accumulatedPlayTime: 0,
       isRadio: false,
       isLiveRadio: false,
       playNonce: 0,
+
+      setHasCountedPlay: (hasCountedPlay) => set({ hasCountedPlay }),
+      setAccumulatedPlayTime: (accumulatedPlayTime) => set({ accumulatedPlayTime }),
 
       setIsRadio: (isRadio, isLive = false) =>
         set({ isRadio, isLiveRadio: isRadio ? isLive : false }),
@@ -160,6 +169,8 @@ export const usePlayerStore = create<PlayerState>()(
           isRadio: true,
           isLiveRadio: false,
           playNonce: get().playNonce + 1,
+          hasCountedPlay: false,
+          accumulatedPlayTime: 0,
         });
       },
       setPlaybackDevice: (device) => set({ playbackDevice: device }),
@@ -218,6 +229,8 @@ export const usePlayerStore = create<PlayerState>()(
           activeId: play === false ? get().activeId : TAB_ID,
           isRadio: isRadioTrack ?? false,
           playNonce: get().playNonce + 1,
+          hasCountedPlay: false,
+          accumulatedPlayTime: 0,
         });
       },
 
@@ -253,6 +266,8 @@ export const usePlayerStore = create<PlayerState>()(
           isRadio: false,
           isLiveRadio: false,
           playNonce: get().playNonce + 1,
+          hasCountedPlay: false,
+          accumulatedPlayTime: 0,
         });
       },
 
@@ -372,6 +387,8 @@ export const usePlayerStore = create<PlayerState>()(
             duration: nextSong.duration || 0,
             activeId: TAB_ID,
             playNonce: get().playNonce + 1,
+            hasCountedPlay: false,
+            accumulatedPlayTime: 0,
           });
           return;
         }
@@ -415,6 +432,8 @@ export const usePlayerStore = create<PlayerState>()(
             duration: nextSong.duration || 0,
             activeId: TAB_ID,
             playNonce: get().playNonce + 1,
+            hasCountedPlay: false,
+            accumulatedPlayTime: 0,
           });
         } else {
           set({ isPlaying: false, progress: 0 });
@@ -427,9 +446,12 @@ export const usePlayerStore = create<PlayerState>()(
 
         if (isRadio && !force) return;
 
-        if (progress > 5) {
+        if (progress > 5 || currentIndex === 0) {
           set({
             seekTo: 0,
+            hasCountedPlay: false,
+            accumulatedPlayTime: 0,
+            playNonce: get().playNonce + 1,
           });
           return;
         }
@@ -456,6 +478,8 @@ export const usePlayerStore = create<PlayerState>()(
             duration: prevSong.duration || 0,
             activeId: TAB_ID,
             playNonce: get().playNonce + 1,
+            hasCountedPlay: false,
+            accumulatedPlayTime: 0,
           });
         }
       },
@@ -483,7 +507,16 @@ export const usePlayerStore = create<PlayerState>()(
         ) {
           sendToServerProxy({ type: "position", position: seekTo });
         }
-        set({ seekTo });
+        if (seekTo === 0) {
+          set({
+            seekTo,
+            hasCountedPlay: false,
+            accumulatedPlayTime: 0,
+            playNonce: get().playNonce + 1,
+          });
+        } else {
+          set({ seekTo });
+        }
       },
       setActiveId: (id) => set({ activeId: id }),
       setDownloadPreference: (downloadPreference) => {
@@ -543,6 +576,8 @@ export const usePlayerStore = create<PlayerState>()(
           playbackDevice: state.playbackDevice,
           serverVolume: state.serverVolume,
           isLiveRadio: state.isLiveRadio,
+          hasCountedPlay: state.hasCountedPlay,
+          accumulatedPlayTime: state.hasCountedPlay ? 0 : state.accumulatedPlayTime,
         } as PlayerState),
     }
   )
