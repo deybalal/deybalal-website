@@ -5,6 +5,7 @@ import os from "os";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { getFingerprintsDb } from "@/lib/fingerprints-db";
+import { prisma } from "@/lib/prisma";
 
 const execFileAsync = promisify(execFile);
 
@@ -27,6 +28,10 @@ interface MatchCandidate {
     artist: string;
     artistEn?: string;
     coverArt?: string;
+    links?: Record<
+      string | number,
+      { url: string; size: string; bytes: number }
+    > | null;
     uri?: string;
     duration?: number;
   };
@@ -261,7 +266,11 @@ export async function POST(request: Request) {
 
     // Populate song details from DB using internal integer id
     const songStmt = db.prepare("SELECT * FROM songs WHERE id = ?");
-    for (const cand of candidateList) {
+
+    // only first 20 candidates
+    const topCandidates = candidateList.slice(0, 20);
+
+    for (const cand of topCandidates) {
       const songRow = songStmt.get(cand.songId) as unknown as {
         song_key: string;
         slug: string;
@@ -274,6 +283,15 @@ export async function POST(request: Request) {
         duration?: number;
       };
       if (songRow) {
+        const findSong = await prisma.song.findUnique({
+          where: {
+            id: songRow.song_key,
+          },
+          select: {
+            links: true,
+          },
+        });
+
         cand.songKey = songRow.song_key;
         cand.song = {
           id: songRow.song_key,
@@ -282,6 +300,11 @@ export async function POST(request: Request) {
           titleEn: songRow.title_en,
           artist: songRow.artist,
           artistEn: songRow.artist_en,
+          links:
+            (findSong?.links as Record<
+              string | number,
+              { url: string; size: string; bytes: number }
+            > | null) ?? null,
           coverArt: songRow.cover_art,
           uri: songRow.uri,
           duration: songRow.duration,

@@ -36,6 +36,7 @@ interface IdentifiedSong {
   artist: string;
   artistEn?: string;
   coverArt?: string;
+  links: Record<string | number, { url: string; size: string; bytes: number }>;
   uri?: string;
   duration?: number;
 }
@@ -371,6 +372,7 @@ export default function IdentifyPage() {
         titleEn: song.titleEn,
         uri: song.uri || `/assets/mp3/${song.id}.mp3`,
         filename: song.uri?.split("/").pop() || `${song.id}.mp3`,
+        links: song.links,
         index: 0,
         duration: song.duration || 0,
         coverArt: song.coverArt || null,
