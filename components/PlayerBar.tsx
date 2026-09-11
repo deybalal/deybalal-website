@@ -270,7 +270,7 @@ const PlayerBar = () => {
         <div className="flex w-full flex-nowrap items-center justify-between gap-1 md:justify-around md:gap-0">
           {/* Song Info */}
           <Link
-            href={`/song/${currentSong.id}`}
+            href={isRadio ? "/radio" : `/song/${currentSong.id}`}
             className="flex items-center shrink-0 md:flex-1 min-w-0 md:w-1/4 md:max-w-none pr-1 md:pr-0"
           >
             <div className="w-10 h-10 md:w-14 md:h-14 bg-gray-800 rounded-md neon-box ml-2 md:ml-4 shrink-0 relative overflow-hidden">
@@ -662,7 +662,10 @@ const PlayerBar = () => {
             {formatTime(duration || currentSong.duration)}
           </span>
 
-          <div className="flex w-full items-center gap-x-1.5 justify-center min-w-0 flex-1 md:flex-none">
+          <Link
+            href={isRadio ? "/radio" : `/song/${currentSong.id}`}
+            className="flex w-full items-center gap-x-1.5 justify-center min-w-0 flex-1 md:flex-none"
+          >
             <MarqueeText
               text={currentSong.title || "بدون عنوان"}
               className="text-foreground font-medium text-sm w-1/2 max-w-min"
@@ -672,7 +675,7 @@ const PlayerBar = () => {
               text={currentSong.artist || "خواننده ناشناس"}
               className="text-foreground/80 text-xs w-1/2 max-w-min"
             />
-          </div>
+          </Link>
           <span className="text-[12px] md:text-xs font-medium text-muted-foreground w-10 tabular-nums shrink-0 text-right">
             {formatTime(progress)}
           </span>

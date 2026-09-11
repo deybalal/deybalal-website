@@ -19,9 +19,8 @@ function TodayHistoryPageContent() {
   >(null);
   const [totalPages, setTotalPages] = useState(1);
 
-  const { setSong, setIsRadio, setSeekTo } = usePlayerStore();
+  const currentSongId = usePlayerStore((state) => state.currentSong?.id);
   const syncInterval = useRef<NodeJS.Timeout | null>(null);
-  const transitionTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const fetchPlaylistData = useCallback(async () => {
     try {
@@ -125,78 +124,34 @@ function TodayHistoryPageContent() {
           updatedAt: new Date(raw.updatedAt).getTime(),
         };
         setPlaylist(transformed);
+        setError(null);
+      } else {
+        setError(data.message || "خطا در دریافت لیست پخش");
       }
     } catch (err) {
       console.error("Failed to fetch playlist:", err);
-    }
-  }, [currentPage, pageSize]);
-
-  const fetchState = useCallback(async () => {
-    try {
-      const res = await fetch("/api/radio/state");
-      const data = await res.json();
-
-      if (data.success) {
-        setError(null);
-
-        const currentStoredSong = usePlayerStore.getState().currentSong;
-        const isCurrentlyRadio = usePlayerStore.getState().isRadio;
-
-        if (
-          !isCurrentlyRadio ||
-          currentStoredSong?.id !== data.data.currentTrack.id
-        ) {
-          setIsRadio(true, true);
-          setSong(data.data.currentTrack, true, true);
-          setTimeout(() => {
-            usePlayerStore
-              .getState()
-              .setSeekTo(data.data.currentTrack.position, "radio");
-          }, 500);
-
-          // Re-fetch playlist to get the new track in history
-          fetchPlaylistData();
-        } else {
-          const currentProgress = usePlayerStore.getState().progress;
-          const targetPos = data.data.currentTrack.position;
-          if (Math.abs(currentProgress - targetPos) > 5) {
-            setSeekTo(targetPos, "radio");
-          }
-        }
-
-        if (transitionTimeout.current) clearTimeout(transitionTimeout.current);
-        const remainingTime =
-          (data.data.currentTrack.duration - data.data.currentTrack.position) *
-          1000;
-        if (remainingTime > 0) {
-          transitionTimeout.current = setTimeout(() => {
-            fetchState();
-          }, remainingTime + 500);
-        }
-      } else {
-        setError(data.message);
-        setIsRadio(false);
-      }
-    } catch {
-      setError("خطا در برقراری ارتباط با سرور");
+      setError("خطا در دریافت لیست پخش");
     } finally {
       setLoading(false);
     }
-  }, [setIsRadio, setSong, setSeekTo, fetchPlaylistData]);
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
     fetchPlaylistData();
-    fetchState();
     syncInterval.current = setInterval(() => {
-      fetchState();
       fetchPlaylistData();
     }, 30000);
 
     return () => {
       if (syncInterval.current) clearInterval(syncInterval.current);
-      if (transitionTimeout.current) clearTimeout(transitionTimeout.current);
     };
-  }, [fetchState, fetchPlaylistData]);
+  }, [fetchPlaylistData]);
+
+  useEffect(() => {
+    if (currentSongId) {
+      fetchPlaylistData();
+    }
+  }, [currentSongId, fetchPlaylistData]);
 
   if (loading && !playlist) {
     return (

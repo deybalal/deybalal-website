@@ -39,13 +39,13 @@ const SongList = ({
   showArtist = true,
   showAlbum = true,
 }: SongListProps) => {
-  const { setQueue, playNext, addToQueue, currentSong, isPlaying } =
+  const { setQueue, playNext, addToQueue, currentSong, isPlaying, isRadio } =
     usePlayerStore();
 
   return (
     <div className="space-y-1">
       {songs.map((song, i) => {
-        const isCurrent = currentSong?.id === song.id;
+        const isCurrent = !isRadio && currentSong?.id === song.id;
         return (
           <div
             key={song.id + i}

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlayerStore, TAB_ID } from "@/hooks/usePlayerStore";
+import { useRadioStore } from "@/hooks/useRadioStore";
 import { useEffect, useRef } from "react";
 import { packRequestHash } from "@/lib/hash";
 
@@ -234,7 +235,10 @@ const PlayerProvider = () => {
     if (activeId !== TAB_ID) return;
 
     const { repeatMode, currentSong, isLiveRadio } = usePlayerStore.getState();
-    if (isLiveRadio) return;
+    if (isLiveRadio) {
+      useRadioStore.getState().fetchRadioState();
+      return;
+    }
 
     const audio = audioRef.current;
     const duration = audio?.duration || currentSong?.duration || 0;

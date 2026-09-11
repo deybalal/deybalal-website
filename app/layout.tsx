@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import PlayerBar from "@/components/PlayerBar";
 import PlayerProvider from "@/components/PlayerProvider";
+import RadioSyncProvider from "@/components/RadioSyncProvider";
+import RadioStopWarningDialog from "@/components/RadioStopWarningDialog";
 import { Toaster } from "react-hot-toast";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -68,6 +70,8 @@ export default function RootLayout({
           </div>
           <PlayerBar />
           <PlayerProvider />
+          <RadioSyncProvider />
+          <RadioStopWarningDialog />
           <Toaster position="top-center" />
         </ThemeProvider>
       </body>

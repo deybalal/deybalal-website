@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
+import { useRadioStore, RadioState } from "@/hooks/useRadioStore";
 import { useLyricsStore } from "@/hooks/useLyricsStore";
 import { formatTime } from "@/lib/utils";
 import Image from "next/image";
@@ -32,175 +33,41 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-
-interface RadioState {
-  currentTrack: {
-    id: string;
-    slug: string;
-    title: string;
-    titleEn: string;
-    artist: string;
-    artistEn: string;
-    coverArt: string;
-    uri: string;
-    duration: number;
-    position: number;
-    lyrics?: string | null;
-    syncedLyrics?: string | null;
-  };
-  nextTrack: {
-    title: string;
-    artist: string;
-  } | null;
-  serverTime: number;
-  elapsedTime: number;
-  playlistId: string;
-}
 
 export default function RadioPage() {
-  const [state, setState] = useState<RadioState | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { state, error, loading, fetchRadioState } = useRadioStore();
   const [showLyricsOverlay, setShowLyricsOverlay] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
-  const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const [pendingPath, setPendingPath] = useState<string | null>(null);
-
-  const router = useRouter();
-
-  const { setSong, setIsRadio, isPlaying, setSeekTo, pause, play, isRadio } =
-    usePlayerStore();
+  const { setIsRadio, isPlaying, pause, play, isRadio } = usePlayerStore();
   const { lyricsMode, setLyricsMode } = useLyricsStore();
-  const syncInterval = useRef<NodeJS.Timeout | null>(null);
-  const transitionTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchState = useCallback(async () => {
-    try {
-      const res = await fetch("/api/radio/state");
-      const data = await res.json();
-
-      if (data.success) {
-        setState(data.data);
-        setError(null);
-        if (!isRadio) {
-          return;
-        }
-        const currentStoredSong = usePlayerStore.getState().currentSong;
-        const isCurrentlyRadio = usePlayerStore.getState().isRadio;
-
-        if (
-          !isCurrentlyRadio ||
-          currentStoredSong?.id !== data.data.currentTrack.id
-        ) {
-          setIsRadio(true, true);
-          setSong(data.data.currentTrack, true, true);
-
-          if (
-            (data.data.currentTrack.syncedLyrics ||
-              data.data.currentTrack.lyrics) &&
-            lyricsMode !== "hidden"
-          ) {
-            setShowLyricsOverlay(true);
-          }
-
-          // Wait for player to init
-          setTimeout(() => {
-            usePlayerStore
-              .getState()
-              .setSeekTo(data.data.currentTrack.position, "radio");
-          }, 500);
-        } else {
-          // Drill handling
-          const currentProgress = usePlayerStore.getState().progress;
-          const targetPos = data.data.currentTrack.position;
-          if (Math.abs(currentProgress - targetPos) > 5) {
-            setSeekTo(targetPos, "radio");
-          }
-        }
-
-        // Set up transition timer
-        if (transitionTimeout.current) clearTimeout(transitionTimeout.current);
-        const remainingTime =
-          (data.data.currentTrack.duration - data.data.currentTrack.position) *
-          1000;
-        if (remainingTime > 0) {
-          transitionTimeout.current = setTimeout(() => {
-            fetchState();
-          }, remainingTime + 500); // Add a small buffer
-        }
-      } else {
-        setError(data.message);
-        setIsRadio(false);
-      }
-    } catch {
-      setError("خطا در برقراری ارتباط با سرور");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (
+      state?.currentTrack &&
+      (state.currentTrack.syncedLyrics || state.currentTrack.lyrics) &&
+      lyricsMode !== "hidden"
+    ) {
+      setShowLyricsOverlay(true);
     }
-  }, [isRadio, setIsRadio, setSong, lyricsMode, setSeekTo]);
-
-  useEffect(() => {
-    fetchState();
-    syncInterval.current = setInterval(fetchState, 30000);
-
-    return () => {
-      if (syncInterval.current) clearInterval(syncInterval.current);
-      if (transitionTimeout.current) clearTimeout(transitionTimeout.current);
-    };
-  }, [fetchState]);
-
-  // Intercept navigation
-  useEffect(() => {
-    if (!isRadio) return;
-
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = "";
-    };
-
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const anchor = target.closest("a");
-      // Check if it's a valid internal link
-      if (anchor && anchor.href && !anchor.target) {
-        const href = anchor.getAttribute("href");
-        if (
-          href &&
-          !href.startsWith("http") &&
-          !href.includes("/radio") &&
-          !href.includes("/radio/history/today")
-        ) {
-          e.preventDefault();
-          e.stopPropagation();
-          setPendingPath(href);
-          setShowWarningDialog(true);
-        }
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("click", handleClick, { capture: true });
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("click", handleClick, { capture: true });
-    };
-  }, [isRadio]);
+  }, [state?.currentTrack?.id, lyricsMode]);
 
   // Check if song is in favorites
   useEffect(() => {
+    if (!state?.currentTrack?.id) {
+      setIsFavorite(false);
+      return;
+    }
+
     const checkFavoriteStatus = async () => {
       try {
         const res = await fetch("/api/favorites/isfavorite", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ songId: state?.currentTrack.id }),
+          body: JSON.stringify({ songId: state.currentTrack.id }),
         });
         const data = await res.json();
         if (data.success && data.isFavorite) {
@@ -214,21 +81,21 @@ export default function RadioPage() {
     };
 
     checkFavoriteStatus();
-  }, [state?.currentTrack.id]);
+  }, [state?.currentTrack?.id]);
 
   // Update page title
   useEffect(() => {
-    if (typeof window !== undefined) {
-      document.title = `${state?.currentTrack.title} از ${state?.currentTrack.artist} - رادیو لری دی بلال`;
+    if (typeof window !== "undefined" && state?.currentTrack?.title) {
+      document.title = `${state.currentTrack.title} از ${state.currentTrack.artist} - رادیو لری دی بلال`;
     }
   }, [
-    state?.currentTrack.artist,
-    state?.currentTrack.id,
-    state?.currentTrack.title,
+    state?.currentTrack?.artist,
+    state?.currentTrack?.id,
+    state?.currentTrack?.title,
   ]);
 
   const toggleFavorite = async () => {
-    if (isTogglingFavorite) return;
+    if (isTogglingFavorite || !state?.currentTrack?.id) return;
 
     setIsTogglingFavorite(true);
     try {
@@ -239,7 +106,7 @@ export default function RadioPage() {
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ songId: state?.currentTrack.id }),
+        body: JSON.stringify({ songId: state.currentTrack.id }),
       });
 
       const result = await res.json();
@@ -260,7 +127,7 @@ export default function RadioPage() {
     }
   };
 
-  if (loading) {
+  if (isRadio && loading && !state) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] w-full">
         <Loader2 className="w-12 h-12 animate-spin text-primary" />
@@ -269,7 +136,7 @@ export default function RadioPage() {
     );
   }
 
-  if (error) {
+  if (isRadio && error && !state) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] w-full text-center px-4">
         <div className="bg-destructive/10 p-6 rounded-full mb-6">
@@ -278,7 +145,7 @@ export default function RadioPage() {
         <h1 className="text-2xl font-bold mb-2">رادیو فعلاً در دسترس نیست</h1>
         <p className="text-muted-foreground max-w-md mx-auto">{error}</p>
         <Button
-          onClick={() => fetchState()}
+          onClick={() => fetchRadioState()}
           className="mt-8 px-8 bg-primary hover:bg-primary/90"
         >
           تلاش مجدد
@@ -549,7 +416,6 @@ export default function RadioPage() {
                           className="w-full bg-green-500 hover:bg-green-300 text-white"
                           onClick={() => {
                             setIsRadio(true, true);
-                            fetchState();
                             play();
                           }}
                         >
@@ -655,45 +521,6 @@ export default function RadioPage() {
         </div>
       </div>
 
-      <Dialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-destructive flex items-center gap-2">
-              <AlertCircle className="w-5 h-5" />
-              هشدار خروج از رادیو
-            </DialogTitle>
-            <DialogDescription className="text-base pt-2">
-              شما در حال گوش دادن به رادیو زنده هستید. در صورت ترک این صفحه، پخش
-              آهنگ‌های بعدی مختل خواهد شد و تجربه رادیو قطع می‌شود.
-              <br />
-              <br />
-              آیا مطمئن هستید که می‌خواهید صفحه را ترک کنید؟
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => setShowWarningDialog(false)}
-              className="w-full sm:w-auto"
-            >
-              انصراف
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                setShowWarningDialog(false);
-                setIsRadio(false);
-                if (pendingPath) {
-                  router.push(pendingPath);
-                }
-              }}
-              className="w-full sm:w-auto block"
-            >
-              خروج و قطع رادیو
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

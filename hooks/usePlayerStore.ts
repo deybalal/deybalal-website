@@ -61,6 +61,11 @@ interface PlayerState {
   isLiveRadio: boolean;
   setIsRadio: (isRadio: boolean, isLive?: boolean) => void;
   setContextRadioQueue: (songs: Song[], startIndex?: number) => void;
+  isRadioWarningOpen: boolean;
+  pendingPlayAction: (() => void) | null;
+  openRadioWarning: (action: () => void) => void;
+  confirmPendingPlayAction: () => void;
+  cancelPendingPlayAction: () => void;
 }
 
 const getBestUri = (
@@ -134,14 +139,40 @@ export const usePlayerStore = create<PlayerState>()(
       accumulatedPlayTime: 0,
       isRadio: false,
       isLiveRadio: false,
+      isRadioWarningOpen: false,
+      pendingPlayAction: null,
       playNonce: 0,
 
       setHasCountedPlay: (hasCountedPlay) => set({ hasCountedPlay }),
       setAccumulatedPlayTime: (accumulatedPlayTime) => set({ accumulatedPlayTime }),
 
+      openRadioWarning: (action) =>
+        set({ isRadioWarningOpen: true, pendingPlayAction: action }),
+      confirmPendingPlayAction: () => {
+        const action = get().pendingPlayAction;
+        set({
+          isRadio: false,
+          isLiveRadio: false,
+          isRadioWarningOpen: false,
+          pendingPlayAction: null,
+        });
+        if (action) {
+          action();
+        }
+      },
+      cancelPendingPlayAction: () =>
+        set({ isRadioWarningOpen: false, pendingPlayAction: null }),
+
       setIsRadio: (isRadio, isLive = false) =>
         set({ isRadio, isLiveRadio: isRadio ? isLive : false }),
       setContextRadioQueue: (songs, startIndex = 0) => {
+        if (get().isRadio && get().isLiveRadio) {
+          get().openRadioWarning(() => {
+            get().setContextRadioQueue(songs, startIndex);
+          });
+          return;
+        }
+
         const pref = get().downloadPreference;
         const isShuffling = get().isShuffling;
         
@@ -191,6 +222,13 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       setSong: (song, play, isRadioTrack) => {
+        if (get().isRadio && !isRadioTrack && play !== false) {
+          get().openRadioWarning(() => {
+            get().setSong(song, play, false);
+          });
+          return;
+        }
+
         const { playbackDevice, downloadPreference, serverVolume } = get();
         const { uri, quality } = getBestUri(song, downloadPreference);
 
@@ -235,6 +273,13 @@ export const usePlayerStore = create<PlayerState>()(
       },
 
       setQueue: (songs, startIndex = 0, play = true) => {
+        if (get().isRadio && play !== false) {
+          get().openRadioWarning(() => {
+            get().setQueue(songs, startIndex, play);
+          });
+          return;
+        }
+
         const pref = get().downloadPreference;
         const songsWithUri = songs.map((s) => {
           const { uri } = getBestUri(s, pref);
@@ -556,6 +601,8 @@ export const usePlayerStore = create<PlayerState>()(
           }
           // Reset activeId to current tab on rehydration so audio events aren't ignored
           state.activeId = TAB_ID;
+          state.isRadio = false;
+          state.isLiveRadio = false;
           state.setHasHydrated(true);
         }
       },
@@ -575,7 +622,6 @@ export const usePlayerStore = create<PlayerState>()(
           currentQuality: state.currentQuality,
           playbackDevice: state.playbackDevice,
           serverVolume: state.serverVolume,
-          isLiveRadio: state.isLiveRadio,
           hasCountedPlay: state.hasCountedPlay,
           accumulatedPlayTime: state.hasCountedPlay ? 0 : state.accumulatedPlayTime,
         } as PlayerState),
