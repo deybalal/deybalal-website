@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Song } from "@/types/types";
-import { Play, Pause, Heart, ListPlus } from "lucide-react";
+import { Play, Pause, Heart, ListPlus, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
 import SongProgressSlider from "@/components/SongProgressSlider";
@@ -10,6 +10,7 @@ import Image from "next/image";
 import Lyrics from "@/components/Lyrics";
 import Link from "next/link";
 import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
+import ShareStoryModal from "@/components/ShareStoryModal";
 import { toast } from "react-hot-toast";
 import { useLyricsStore } from "@/hooks/useLyricsStore";
 import { formatPlayCount } from "@/lib/utils";
@@ -348,6 +349,29 @@ export default function SongDetailClient({
 
         {/* Controls */}
         <div className="flex items-center gap-6 md:gap-8">
+          <ShareStoryModal
+            song={{
+              id: song.id,
+              title: song.title || "",
+              artist: song.artist || "",
+              coverArt: song.coverArt,
+              album: song.album,
+              duration: song.duration,
+              lyrics: song.lyrics,
+              syncedLyrics: song.syncedLyrics,
+              index: song.index,
+            }}
+            trigger={
+              <Button
+                variant="outline"
+                size="icon"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-linear-to-tr from-amber-500/10 via-pink-500/10 to-purple-500/10 hover:from-amber-500/20 hover:via-pink-500/20 hover:to-purple-500/20 border-pink-500/30 text-pink-400 hover:text-pink-300 shadow-md cursor-pointer transition-transform hover:scale-105"
+                title="اشتراک‌گذاری در استوری"
+              >
+                <Instagram className="w-5 h-5 md:w-6 md:h-6" />
+              </Button>
+            }
+          />
           <div className="relative group">
             {/* Pulsing effect when playing */}
             {isCurrentSong && isPlaying && (

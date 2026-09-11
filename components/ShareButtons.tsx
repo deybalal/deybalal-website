@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Twitter, Send, Link, Share2, MessageSquareText } from "lucide-react";
+import { Twitter, Send, Link, Share2, MessageSquareText, Instagram } from "lucide-react";
 import { toast } from "react-hot-toast";
+import ShareStoryModal, { SongShareData } from "./ShareStoryModal";
 
 interface ShareButtonsProps {
   title: string;
   url: string;
   shortUrl?: string;
+  song?: SongShareData;
 }
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -25,7 +27,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
-export function ShareButtons({ title, url, shortUrl }: ShareButtonsProps) {
+export function ShareButtons({ title, url, shortUrl, song }: ShareButtonsProps) {
   const [isShareSupported, setIsShareSupported] = useState(false);
 
   useEffect(() => {
@@ -76,6 +78,22 @@ export function ShareButtons({ title, url, shortUrl }: ShareButtonsProps) {
 
   return (
     <div className="flex items-center gap-3">
+      {/* Story Share */}
+      {song && (
+        <ShareStoryModal
+          song={song}
+          trigger={
+            <Button
+              variant="outline"
+              size="icon"
+              className="cursor-pointer rounded-full bg-linear-to-tr from-amber-500/15 via-pink-500/15 to-purple-500/15 hover:from-amber-500/25 hover:via-pink-500/25 hover:to-purple-500/25 border-pink-500/30 text-pink-400 hover:text-pink-300 h-9 w-9 shadow-xs"
+              title="اشتراک در استوری اینستاگرام / تلگرام"
+            >
+              <Instagram className="w-4 h-4" />
+            </Button>
+          }
+        />
+      )}
       {/* WhatsApp */}
       <Button
         variant="outline"

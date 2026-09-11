@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
-import { ArrowBigUpIcon, ListPlus, Mic2, PlayCircle } from "lucide-react";
+import { ArrowBigUpIcon, ListPlus, Mic2, PlayCircle, Instagram } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
   ContextMenu,
@@ -13,6 +14,7 @@ import {
 import Link from "next/link";
 import { Artist } from "@/types/types";
 import AddToPlaylistDialog from "./AddToPlaylistDialog";
+import ShareStoryModal from "./ShareStoryModal";
 
 interface SongCardContextMenuProps {
   songId: string;
@@ -30,6 +32,8 @@ interface SongCardContextMenuProps {
   albumId: string | null;
   year: string;
   links: Record<number, { url: string; size: string; bytes: number }> | null;
+  lyrics?: string | null;
+  syncedLyrics?: string | null;
   children: React.ReactNode;
 }
 
@@ -49,9 +53,12 @@ export default function SongCardContextMenu({
   albumId,
   year,
   links,
+  lyrics,
+  syncedLyrics,
   children,
 }: SongCardContextMenuProps) {
   const { setSong, addToQueue, playNext } = usePlayerStore();
+  const [storyModalOpen, setStoryModalOpen] = useState(false);
 
   const song = {
     id: songId,
@@ -72,18 +79,41 @@ export default function SongCardContextMenu({
   };
 
   return (
-    <ContextMenu>
-      <ContextMenuTrigger>{children}</ContextMenuTrigger>
-      <ContextMenuContent className="rtl">
-        <ContextMenuItem>
-          <Link
-            href={`/song/${songId}`}
-            className="flex items-center flex-row hover:scale-105"
+    <>
+      <ShareStoryModal
+        song={{
+          id: songId,
+          title: title || "",
+          artist: artist || "",
+          coverArt: coverArt,
+          album: album,
+          duration: duration,
+          lyrics: lyrics,
+          syncedLyrics: syncedLyrics,
+          index: index,
+        }}
+        open={storyModalOpen}
+        onOpenChange={setStoryModalOpen}
+      />
+      <ContextMenu>
+        <ContextMenuTrigger>{children}</ContextMenuTrigger>
+        <ContextMenuContent className="rtl">
+          <ContextMenuItem>
+            <Link
+              href={`/song/${songId}`}
+              className="flex items-center flex-row hover:scale-105"
+            >
+              <ArrowBigUpIcon className="w-4 h-4 me-2" />
+              نمایش آهنگ
+            </Link>
+          </ContextMenuItem>
+          <ContextMenuItem
+            className="cursor-pointer hover:scale-105"
+            onClick={() => setStoryModalOpen(true)}
           >
-            <ArrowBigUpIcon className="w-4 h-4 me-2" />
-            نمایش آهنگ
-          </Link>
-        </ContextMenuItem>
+            <Instagram className="w-4 h-4 me-2 text-pink-400" />
+            اشتراک در استوری
+          </ContextMenuItem>
         {artists.length > 0 && (
           <ContextMenuItem className="cursor-pointer hover:scale-105">
             <Link
@@ -150,5 +180,6 @@ export default function SongCardContextMenu({
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
-  );
+  </>
+);
 }

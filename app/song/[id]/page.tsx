@@ -354,6 +354,17 @@ export default async function SongDetailPage({
               title={song.title}
               url={`${process.env.NEXT_PUBLIC_DEPLOYED_URL}/song/${song.id}`}
               shortUrl={`${process.env.NEXT_PUBLIC_DEPLOYED_URL}/s/${song.index}`}
+              song={{
+                id: song.id,
+                title: song.title || "",
+                artist: song.artist || "",
+                coverArt: song.coverArt,
+                album: songData.album?.name ?? null,
+                duration: song.duration,
+                lyrics: song.lyrics,
+                syncedLyrics: song.syncedLyrics,
+                index: song.index,
+              }}
             />
           </div>
         </div>

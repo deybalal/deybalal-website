@@ -29,6 +29,8 @@ const SongCard = ({ song }: SongCardProps) => {
       albumId={song.albumId}
       year={song.year ?? ""}
       links={song.links ?? null}
+      lyrics={song.lyrics}
+      syncedLyrics={song.syncedLyrics}
     >
       <Card className="group relative overflow-hidden cursor-pointer border-0 bg-transparent">
         <CardContent className="p-0">
