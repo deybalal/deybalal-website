@@ -35,6 +35,7 @@ interface RadioStoreState {
   setError: (error: string | null) => void;
   setLoading: (loading: boolean) => void;
   fetchRadioState: () => Promise<void>;
+  fetchPreviewState: () => Promise<void>;
 }
 
 export const useRadioStore = create<RadioStoreState>((set) => ({
@@ -91,6 +92,24 @@ export const useRadioStore = create<RadioStoreState>((set) => ({
       } else {
         set({ error: data.message });
         setIsRadio(false);
+      }
+    } catch {
+      set({ error: "خطا در برقراری ارتباط با سرور" });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  fetchPreviewState: async () => {
+    try {
+      set({ loading: true, error: null });
+      const res = await fetch("/api/radio/state");
+      const data = await res.json();
+
+      if (data.success) {
+        set({ state: data.data, error: null });
+      } else {
+        set({ error: data.message });
       }
     } catch {
       set({ error: "خطا در برقراری ارتباط با سرور" });

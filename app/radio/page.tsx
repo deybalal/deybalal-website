@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
-import { useRadioStore, RadioState } from "@/hooks/useRadioStore";
+import { useRadioStore } from "@/hooks/useRadioStore";
 import { useLyricsStore } from "@/hooks/useLyricsStore";
 import { formatTime } from "@/lib/utils";
 import Image from "next/image";
@@ -37,13 +37,63 @@ import {
 import Link from "next/link";
 
 export default function RadioPage() {
-  const { state, error, loading, fetchRadioState } = useRadioStore();
+  const { state, error, loading, fetchRadioState, fetchPreviewState } =
+    useRadioStore();
   const [showLyricsOverlay, setShowLyricsOverlay] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   const { setIsRadio, isPlaying, pause, play, isRadio } = usePlayerStore();
   const { lyricsMode, setLyricsMode } = useLyricsStore();
+
+  const previewTransitionTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Fetch state once on page load to fill details even if radio is off
+  useEffect(() => {
+    if (!isRadio) {
+      fetchPreviewState();
+    }
+  }, [isRadio, fetchPreviewState]);
+
+  // When radio is off, re-fetch preview state when the song finishes
+  useEffect(() => {
+    if (isRadio || !state?.currentTrack) {
+      if (previewTransitionTimeout.current) {
+        clearTimeout(previewTransitionTimeout.current);
+        previewTransitionTimeout.current = null;
+      }
+      return;
+    }
+
+    if (previewTransitionTimeout.current) {
+      clearTimeout(previewTransitionTimeout.current);
+      previewTransitionTimeout.current = null;
+    }
+
+    const { duration, position } = state.currentTrack;
+    const remainingTime = (duration - position) * 1000;
+
+    if (remainingTime > 0) {
+      previewTransitionTimeout.current = setTimeout(() => {
+        if (!usePlayerStore.getState().isRadio) {
+          fetchPreviewState();
+        }
+      }, remainingTime + 500);
+    } else {
+      previewTransitionTimeout.current = setTimeout(() => {
+        if (!usePlayerStore.getState().isRadio) {
+          fetchPreviewState();
+        }
+      }, 1000);
+    }
+
+    return () => {
+      if (previewTransitionTimeout.current) {
+        clearTimeout(previewTransitionTimeout.current);
+        previewTransitionTimeout.current = null;
+      }
+    };
+  }, [isRadio, state?.currentTrack, fetchPreviewState]);
 
   useEffect(() => {
     if (
@@ -53,7 +103,7 @@ export default function RadioPage() {
     ) {
       setShowLyricsOverlay(true);
     }
-  }, [state?.currentTrack?.id, lyricsMode]);
+  }, [state?.currentTrack.id, lyricsMode, state?.currentTrack]);
 
   // Check if song is in favorites
   useEffect(() => {
@@ -127,7 +177,7 @@ export default function RadioPage() {
     }
   };
 
-  if (isRadio && loading && !state) {
+  if (loading && !state) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] w-full">
         <Loader2 className="w-12 h-12 animate-spin text-primary" />
@@ -136,7 +186,7 @@ export default function RadioPage() {
     );
   }
 
-  if (isRadio && error && !state) {
+  if (error && !state) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] w-full text-center px-4">
         <div className="bg-destructive/10 p-6 rounded-full mb-6">
@@ -145,7 +195,7 @@ export default function RadioPage() {
         <h1 className="text-2xl font-bold mb-2">رادیو فعلاً در دسترس نیست</h1>
         <p className="text-muted-foreground max-w-md mx-auto">{error}</p>
         <Button
-          onClick={() => fetchRadioState()}
+          onClick={() => (isRadio ? fetchRadioState() : fetchPreviewState())}
           className="mt-8 px-8 bg-primary hover:bg-primary/90"
         >
           تلاش مجدد
@@ -520,7 +570,6 @@ export default function RadioPage() {
           </Card>
         </div>
       </div>
-
     </div>
   );
 }
