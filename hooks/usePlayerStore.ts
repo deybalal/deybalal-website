@@ -59,14 +59,31 @@ interface PlayerState {
   setRepeatMode: (mode: "off" | "all" | "one") => void;
   isRadio: boolean;
   isLiveRadio: boolean;
+  isContextRadio: boolean;
+  contextRadioId: string | null;
+  contextRadioType: "artist" | "album" | "playlist" | null;
   setIsRadio: (isRadio: boolean, isLive?: boolean) => void;
-  setContextRadioQueue: (songs: Song[], startIndex?: number) => void;
+  setContextRadioQueue: (
+    songs: Song[],
+    contextId?: string,
+    contextType?: "artist" | "album" | "playlist",
+    startIndex?: number
+  ) => void;
   isRadioWarningOpen: boolean;
   pendingPlayAction: (() => void) | null;
   openRadioWarning: (action: () => void) => void;
   confirmPendingPlayAction: () => void;
   cancelPendingPlayAction: () => void;
 }
+
+const shuffleArray = <T>(array: T[]): T[] => {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
 
 const getBestUri = (
   song: Song,
@@ -139,6 +156,9 @@ export const usePlayerStore = create<PlayerState>()(
       accumulatedPlayTime: 0,
       isRadio: false,
       isLiveRadio: false,
+      isContextRadio: false,
+      contextRadioId: null,
+      contextRadioType: null,
       isRadioWarningOpen: false,
       pendingPlayAction: null,
       playNonce: 0,
@@ -164,34 +184,53 @@ export const usePlayerStore = create<PlayerState>()(
         set({ isRadioWarningOpen: false, pendingPlayAction: null }),
 
       setIsRadio: (isRadio, isLive = false) =>
-        set({ isRadio, isLiveRadio: isRadio ? isLive : false }),
-      setContextRadioQueue: (songs, startIndex = 0) => {
+        set({
+          isRadio,
+          isLiveRadio: isRadio ? isLive : false,
+          ...(isRadio && isLive
+            ? {
+                isContextRadio: false,
+                contextRadioId: null,
+                contextRadioType: null,
+              }
+            : {}),
+        }),
+      setContextRadioQueue: (songs, contextId, contextType, startIndex) => {
         if (get().isRadio && get().isLiveRadio) {
           get().openRadioWarning(() => {
-            get().setContextRadioQueue(songs, startIndex);
+            get().setContextRadioQueue(songs, contextId, contextType, startIndex);
           });
           return;
         }
 
+        if (!songs || songs.length === 0) return;
+
         const pref = get().downloadPreference;
-        const isShuffling = get().isShuffling;
-        
         const songsWithUri = songs.map((s) => {
           const { uri } = getBestUri(s, pref);
           return { ...s, uri };
         });
 
-        let actualStartIndex = startIndex;
-        if (isShuffling && songs.length > 0 && startIndex === 0) {
-          actualStartIndex = Math.floor(Math.random() * songs.length);
+        // Always randomize queue for genuine radio experience
+        let randomizedQueue = shuffleArray(songsWithUri);
+        if (
+          startIndex !== undefined &&
+          startIndex >= 0 &&
+          startIndex < songsWithUri.length
+        ) {
+          const chosenSong = songsWithUri[startIndex];
+          randomizedQueue = [
+            chosenSong,
+            ...randomizedQueue.filter((s) => s.id !== chosenSong.id),
+          ];
         }
 
-        const currentSongData = songsWithUri[actualStartIndex] || null;
+        const currentSongData = randomizedQueue[0] || null;
 
         set({
-          queue: songsWithUri,
+          queue: randomizedQueue,
           priorityQueue: [],
-          currentIndex: actualStartIndex,
+          currentIndex: 0,
           currentSong: currentSongData,
           isPlaying: true,
           progress: 0,
@@ -199,6 +238,11 @@ export const usePlayerStore = create<PlayerState>()(
           activeId: TAB_ID,
           isRadio: true,
           isLiveRadio: false,
+          isContextRadio: true,
+          contextRadioId: contextId || null,
+          contextRadioType: contextType || null,
+          repeatMode: "all",
+          isShuffling: true,
           playNonce: get().playNonce + 1,
           hasCountedPlay: false,
           accumulatedPlayTime: 0,
@@ -266,6 +310,10 @@ export const usePlayerStore = create<PlayerState>()(
           duration: song.duration || 0,
           activeId: play === false ? get().activeId : TAB_ID,
           isRadio: isRadioTrack ?? false,
+          isLiveRadio: isRadioTrack ?? false,
+          isContextRadio: false,
+          contextRadioId: null,
+          contextRadioType: null,
           playNonce: get().playNonce + 1,
           hasCountedPlay: false,
           accumulatedPlayTime: 0,
@@ -310,6 +358,9 @@ export const usePlayerStore = create<PlayerState>()(
           activeId: play ? TAB_ID : get().activeId,
           isRadio: false,
           isLiveRadio: false,
+          isContextRadio: false,
+          contextRadioId: null,
+          contextRadioType: null,
           playNonce: get().playNonce + 1,
           hasCountedPlay: false,
           accumulatedPlayTime: 0,
@@ -603,6 +654,9 @@ export const usePlayerStore = create<PlayerState>()(
           state.activeId = TAB_ID;
           state.isRadio = false;
           state.isLiveRadio = false;
+          state.isContextRadio = false;
+          state.contextRadioId = null;
+          state.contextRadioType = null;
           state.setHasHydrated(true);
         }
       },

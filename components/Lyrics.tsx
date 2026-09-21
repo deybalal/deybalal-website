@@ -16,7 +16,7 @@ export default function Lyrics({
   songId,
 }: LyricsProps & { songId?: string }) {
   const currentSong = usePlayerStore((state) => state.currentSong);
-  const isRadio = usePlayerStore((state) => state.isRadio);
+  const isLiveRadio = usePlayerStore((state) => state.isLiveRadio);
   const setSeekTo = usePlayerStore((state) => state.setSeekTo);
   const progress = usePlayerStore((state) => state.progress);
   const setProgress = usePlayerStore((state) => state.setProgress);
@@ -115,7 +115,7 @@ export default function Lyrics({
         <div
           className={cn(
             "text-center whitespace-pre-wrap text-muted-foreground leading-loose",
-            isRadio
+            isLiveRadio
               ? " text-base md:text-lg lg:text-xl"
               : " text-xl md:text-2xl lg:text-3xl"
           )}

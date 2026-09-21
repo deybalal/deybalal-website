@@ -48,9 +48,10 @@ export const useRadioStore = create<RadioStoreState>((set) => ({
   setLoading: (loading) => set({ loading }),
 
   fetchRadioState: async () => {
-    const { isRadio, setSong, setIsRadio, setSeekTo } = usePlayerStore.getState();
-    // Only fetch if isRadio is true
-    if (!isRadio) {
+    const { isLiveRadio, setSong, setIsRadio, setSeekTo } =
+      usePlayerStore.getState();
+    // Only fetch if isLiveRadio is true
+    if (!isLiveRadio) {
       return;
     }
 
@@ -61,16 +62,16 @@ export const useRadioStore = create<RadioStoreState>((set) => ({
       if (data.success) {
         set({ state: data.data, error: null });
 
-        // Verify isRadio is still true before affecting player
-        if (!usePlayerStore.getState().isRadio) {
+        // Verify isLiveRadio is still true before affecting player
+        if (!usePlayerStore.getState().isLiveRadio) {
           return;
         }
 
         const currentStoredSong = usePlayerStore.getState().currentSong;
-        const isCurrentlyRadio = usePlayerStore.getState().isRadio;
+        const isCurrentlyLiveRadio = usePlayerStore.getState().isLiveRadio;
 
         if (
-          !isCurrentlyRadio ||
+          !isCurrentlyLiveRadio ||
           currentStoredSong?.id !== data.data.currentTrack.id
         ) {
           setIsRadio(true, true);

@@ -342,7 +342,7 @@ const PlayerBar = () => {
                 {isPlaying && (
                   <div className="absolute inset-0 rounded-full bg-indigo-500/50 animate-ping" />
                 )}
-                {isRadio ? (
+                {isLiveRadio ? (
                   <Button
                     onClick={() => handleRadioPlayButton()}
                     size="icon"
@@ -442,7 +442,9 @@ h-7.4L13.9,22z"
                 max={duration || currentSong.duration || 100}
                 step={1}
                 className={`w-full h-1.5 ${
-                  isRadio ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                  isRadio
+                    ? "cursor-not-allowed opacity-50"
+                    : "cursor-pointer"
                 }`}
                 disabled={isRadio}
               />
@@ -718,7 +720,7 @@ h-7.4L13.9,22z"
           </span>
 
           <Link
-            href={isRadio ? "/radio" : `/song/${currentSong.id}`}
+            href={isLiveRadio ? "/radio" : `/song/${currentSong.id}`}
             className="flex w-full items-center gap-x-1.5 justify-center min-w-0 flex-1 md:flex-none"
           >
             <MarqueeText

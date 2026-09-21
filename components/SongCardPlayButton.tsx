@@ -36,7 +36,7 @@ export default function SongCardPlayButton({
   year,
   links,
 }: SongCardPlayButtonProps) {
-  const { pause, play, currentSong, isPlaying, setSong, isRadio } = usePlayerStore();
+  const { pause, play, currentSong, isPlaying, setSong, isLiveRadio } = usePlayerStore();
 
   const song = {
     id: songId,
@@ -59,7 +59,7 @@ export default function SongCardPlayButton({
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!isRadio && songId === currentSong?.id) {
+    if (!isLiveRadio && songId === currentSong?.id) {
       if (isPlaying) {
         pause();
       } else {
@@ -81,7 +81,7 @@ export default function SongCardPlayButton({
           onClick={handleClick}
           className="z-200 relative w-16 h-16 rounded-full bg-white dark:bg-white/95 backdrop-blur-md flex items-center justify-center transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-2xl shadow-purple-500/30 dark:shadow-black/50 hover:shadow-purple-500/50"
         >
-          {isPlaying && !isRadio && songId === currentSong?.id ? (
+          {isPlaying && !isLiveRadio && songId === currentSong?.id ? (
             <Pause
               fill="currentColor"
               className="text-purple-600 dark:text-black w-7 h-7 ms-1"

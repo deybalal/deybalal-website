@@ -34,10 +34,10 @@ export default function SongDetailClient({
   const currentSong = usePlayerStore((state) => state.currentSong);
   const play = usePlayerStore((state) => state.play);
   const pause = usePlayerStore((state) => state.pause);
-  const isRadio = usePlayerStore((state) => state.isRadio);
+  const isLiveRadio = usePlayerStore((state) => state.isLiveRadio);
   const { lyricsMode } = useLyricsStore();
 
-  const isCurrentSong = !isRadio && currentSong?.id === song.id;
+  const isCurrentSong = !isLiveRadio && currentSong?.id === song.id;
 
   const handlePlayPause = () => {
     if (isCurrentSong) {

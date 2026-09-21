@@ -31,7 +31,7 @@ const PlayerProvider = () => {
     activeId,
     playbackDevice,
     playNonce,
-    isRadio,
+    isLiveRadio,
     hasCountedPlay,
     setHasCountedPlay,
     accumulatedPlayTime,
@@ -363,7 +363,7 @@ const PlayerProvider = () => {
     });
 
     navigator.mediaSession.setActionHandler("nexttrack", () => {
-      if (!isRadio) {
+      if (!isLiveRadio) {
         next(true);
       }
     });
@@ -379,13 +379,13 @@ const PlayerProvider = () => {
     });
 
     navigator.mediaSession.setActionHandler("seekto", (details) => {
-      if (audioRef.current && details.seekTime !== undefined && !isRadio) {
+      if (audioRef.current && details.seekTime !== undefined && !isLiveRadio) {
         audioRef.current.currentTime = details.seekTime;
         lastTimeRef.current = details.seekTime;
         setProgress(details.seekTime);
       }
     });
-  }, [currentSong, isRadio, next, setProgress]);
+  }, [currentSong, isLiveRadio, next, setProgress]);
 
   // Persist listening time on beforeunload
   useEffect(() => {

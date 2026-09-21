@@ -13,6 +13,8 @@ interface PlayAsRadioButtonProps {
   className?: string;
   variant?: "outline" | "secondary" | "ghost" | "default";
   fetchAllSongs?: () => Promise<Song[] | null>;
+  contextId?: string;
+  contextType?: "artist" | "album" | "playlist";
 }
 
 export default function PlayAsRadioButton({
@@ -20,11 +22,32 @@ export default function PlayAsRadioButton({
   className,
   variant = "outline",
   fetchAllSongs,
+  contextId,
+  contextType,
 }: PlayAsRadioButtonProps) {
-  const { setContextRadioQueue, isRadio, isLiveRadio } = usePlayerStore();
+  const {
+    setContextRadioQueue,
+    isContextRadio,
+    contextRadioId,
+    isPlaying,
+    pause,
+    play,
+  } = usePlayerStore();
   const [isLoading, setIsLoading] = useState(false);
 
+  const isActive =
+    isContextRadio && (!contextId || contextRadioId === contextId);
+
   const handlePlayRadio = async () => {
+    if (isActive) {
+      if (isPlaying) {
+        pause();
+      } else {
+        play();
+      }
+      return;
+    }
+
     let songsToPlay = songs;
 
     if (fetchAllSongs) {
@@ -42,11 +65,12 @@ export default function PlayAsRadioButton({
     }
 
     if (songsToPlay && songsToPlay.length > 0) {
-      setContextRadioQueue(songsToPlay);
+      setContextRadioQueue(songsToPlay, contextId, contextType);
+      toast.success("پخش رادیو آغاز شد");
+    } else {
+      toast.error("آهنگی برای پخش یافت نشد");
     }
   };
-
-  const isActive = isRadio && !isLiveRadio;
 
   return (
     <Button
@@ -55,16 +79,23 @@ export default function PlayAsRadioButton({
       disabled={isLoading}
       className={cn(
         "gap-2 rounded-full font-bold transition-all duration-300",
-        isActive ? "bg-primary/20 text-primary border-primary" : "hover:scale-105",
+        isActive
+          ? "bg-primary/20 text-primary border-primary hover:bg-primary/30"
+          : "hover:scale-105",
         className
       )}
     >
       {isLoading ? (
         <Loader2 className={cn("w-4 h-4 animate-spin")} />
       ) : (
-        <Radio className={cn("w-4 h-4", isActive && "animate-pulse")} />
+        <Radio
+          className={cn(
+            "w-4 h-4",
+            isActive && isPlaying && "animate-pulse text-primary"
+          )}
+        />
       )}
-      پخش به عنوان رادیو
+      {isActive && isPlaying ? "توقف رادیو" : "پخش به عنوان رادیو"}
     </Button>
   );
 }

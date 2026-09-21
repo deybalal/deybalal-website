@@ -5,15 +5,15 @@ import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { useRadioStore } from "@/hooks/useRadioStore";
 
 export default function RadioSyncProvider() {
-  const isRadio = usePlayerStore((state) => state.isRadio);
+  const isLiveRadio = usePlayerStore((state) => state.isLiveRadio);
   const { fetchRadioState, state: radioState, setLoading } = useRadioStore();
 
   const syncInterval = useRef<NodeJS.Timeout | null>(null);
   const transitionTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Interval sync (every 30 seconds) only when isRadio is true
+  // Interval sync (every 30 seconds) only when isLiveRadio is true
   useEffect(() => {
-    if (!isRadio) {
+    if (!isLiveRadio) {
       if (syncInterval.current) {
         clearInterval(syncInterval.current);
         syncInterval.current = null;
@@ -43,11 +43,11 @@ export default function RadioSyncProvider() {
         transitionTimeout.current = null;
       }
     };
-  }, [isRadio, fetchRadioState, setLoading]);
+  }, [isLiveRadio, fetchRadioState, setLoading]);
 
   // Transition timer for next track
   useEffect(() => {
-    if (!isRadio || !radioState?.currentTrack) {
+    if (!isLiveRadio || !radioState?.currentTrack) {
       if (transitionTimeout.current) {
         clearTimeout(transitionTimeout.current);
         transitionTimeout.current = null;
@@ -65,7 +65,7 @@ export default function RadioSyncProvider() {
 
     if (remainingTime > 0) {
       transitionTimeout.current = setTimeout(() => {
-        if (usePlayerStore.getState().isRadio) {
+        if (usePlayerStore.getState().isLiveRadio) {
           fetchRadioState();
         }
       }, remainingTime + 500);
@@ -77,7 +77,7 @@ export default function RadioSyncProvider() {
         transitionTimeout.current = null;
       }
     };
-  }, [isRadio, radioState?.currentTrack, fetchRadioState]);
+  }, [isLiveRadio, radioState?.currentTrack, fetchRadioState]);
 
   return null;
 }

@@ -61,6 +61,8 @@ export default function PlayArtistButton({
       <PlayAsRadioButton
         fetchAllSongs={fetchAllSongs}
         songs={songs}
+        contextId={artistId}
+        contextType="artist"
         variant="secondary"
         className="px-8 py-3 h-auto"
       />

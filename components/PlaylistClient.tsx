@@ -261,6 +261,8 @@ export default function PlaylistClient({
               </Button>
               <PlayAsRadioButton
                 songs={playlist.songs}
+                contextId={playlist.id}
+                contextType="playlist"
                 fetchAllSongs={fetchAllSongs}
               />
             </div>

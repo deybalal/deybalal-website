@@ -43,21 +43,21 @@ export default function RadioPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
-  const { setIsRadio, isPlaying, pause, play, isRadio } = usePlayerStore();
+  const { setIsRadio, isPlaying, pause, play, isLiveRadio } = usePlayerStore();
   const { lyricsMode, setLyricsMode } = useLyricsStore();
 
   const previewTransitionTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch state once on page load to fill details even if radio is off
   useEffect(() => {
-    if (!isRadio) {
+    if (!isLiveRadio) {
       fetchPreviewState();
     }
-  }, [isRadio, fetchPreviewState]);
+  }, [isLiveRadio, fetchPreviewState]);
 
   // When radio is off, re-fetch preview state when the song finishes
   useEffect(() => {
-    if (isRadio || !state?.currentTrack) {
+    if (isLiveRadio || !state?.currentTrack) {
       if (previewTransitionTimeout.current) {
         clearTimeout(previewTransitionTimeout.current);
         previewTransitionTimeout.current = null;
@@ -75,13 +75,13 @@ export default function RadioPage() {
 
     if (remainingTime > 0) {
       previewTransitionTimeout.current = setTimeout(() => {
-        if (!usePlayerStore.getState().isRadio) {
+        if (!usePlayerStore.getState().isLiveRadio) {
           fetchPreviewState();
         }
       }, remainingTime + 500);
     } else {
       previewTransitionTimeout.current = setTimeout(() => {
-        if (!usePlayerStore.getState().isRadio) {
+        if (!usePlayerStore.getState().isLiveRadio) {
           fetchPreviewState();
         }
       }, 1000);
@@ -93,7 +93,7 @@ export default function RadioPage() {
         previewTransitionTimeout.current = null;
       }
     };
-  }, [isRadio, state?.currentTrack, fetchPreviewState]);
+  }, [isLiveRadio, state?.currentTrack, fetchPreviewState]);
 
   useEffect(() => {
     if (
@@ -195,7 +195,7 @@ export default function RadioPage() {
         <h1 className="text-2xl font-bold mb-2">رادیو فعلاً در دسترس نیست</h1>
         <p className="text-muted-foreground max-w-md mx-auto">{error}</p>
         <Button
-          onClick={() => (isRadio ? fetchRadioState() : fetchPreviewState())}
+          onClick={() => (isLiveRadio ? fetchRadioState() : fetchPreviewState())}
           className="mt-8 px-8 bg-primary hover:bg-primary/90"
         >
           تلاش مجدد
@@ -422,7 +422,7 @@ export default function RadioPage() {
                     <RadioIcon
                       className={cn(
                         "w-7 h-7",
-                        isRadio
+                        isLiveRadio
                           ? "text-green-500 animate-pulse"
                           : "text-red-500 opacity-70"
                       )}
@@ -431,13 +431,13 @@ export default function RadioPage() {
 
                   <div>
                     <p className="font-bold text-foreground text-base">
-                      {isRadio ? "رادیو روشن است" : "رادیو خاموش است"}
+                      {isLiveRadio ? "رادیو روشن است" : "رادیو خاموش است"}
                     </p>
                   </div>
                 </div>
 
                 {/* Right: Action */}
-                {isRadio ? (
+                {isLiveRadio ? (
                   <Button
                     variant="destructive"
                     onClick={() => {
@@ -448,7 +448,7 @@ export default function RadioPage() {
                     خاموش
                   </Button>
                 ) : (
-                  <Dialog open={!isRadio}>
+                  <Dialog open={!isLiveRadio}>
                     <DialogTrigger asChild>
                       <Button className="min-w-[70px]">روشن</Button>
                     </DialogTrigger>

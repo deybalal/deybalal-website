@@ -153,6 +153,8 @@ export default function PlaylistDetail({
               </Button>
               <PlayAsRadioButton
                 songs={playlist.songs || []}
+                contextId={playlist.id}
+                contextType="playlist"
                 fetchAllSongs={fetchAllSongs}
               />
             </div>
