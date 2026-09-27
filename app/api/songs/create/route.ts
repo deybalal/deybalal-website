@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { rename, unlink, writeFile, mkdir } from "fs/promises";
+import { rename, unlink } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
 import { headers } from "next/headers";
