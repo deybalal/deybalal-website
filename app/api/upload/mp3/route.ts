@@ -1,40 +1,18 @@
 import { NextResponse } from "next/server";
-// import * as mm from "music-metadata";
-// import { auth } from "@/lib/auth";
-// import { logSuspiciousUpload } from "@/lib/logger";
-// import { sanitizeFilename } from "@/lib/input-sanitizer";
-// import {
-//   validateFileType,
-//   validateFileSize,
-//   FILE_SIZE_LIMITS,
-// } from "@/lib/validators";
-// import { writeFile, mkdir } from "fs/promises";
-// import path from "path";
+import * as mm from "music-metadata";
+import { auth } from "@/lib/auth";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
+import { headers } from "next/headers";
+import axios from "axios";
+import { validateFileSize, FILE_SIZE_LIMITS } from "@/lib/validators";
 
 export const runtime = "nodejs";
 
-export async function POST(/* request: Request */) {
-  /*
+export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
-
-    if (!file) {
-      return NextResponse.json(
-        { success: false, message: "هیچ فایلی انتخاب نشده!" },
-        { status: 400 }
-      );
-    }
-
-    const contentType = request.headers.get("content-type") || "";
-    const contentLength = request.headers.get("content-length") || "unknown";
-
-    console.log(
-      `Upload started. Content-Type: ${contentType}, Content-Length: ${contentLength}`
-    );
-
     const session = await auth.api.getSession({
-      headers: request.headers,
+      headers: await headers(),
     });
 
     if (!session) {
@@ -47,18 +25,105 @@ export async function POST(/* request: Request */) {
       );
     }
 
-    if (!contentType.includes("multipart/form-data")) {
+    const contentType = request.headers.get("content-type") || "";
+    let buffer: Buffer;
+    let originalFilename = "";
+
+    if (contentType.includes("application/json")) {
+      const body = await request.json();
+      const { url } = body;
+
+      if (!url || typeof url !== "string") {
+        return NextResponse.json(
+          { success: false, message: "آدرس اینترنتی (URL) آهنگ نامعتبر است." },
+          { status: 400 }
+        );
+      }
+
+      const trimmedUrl = url.trim();
+      if (
+        !trimmedUrl.startsWith("http://") &&
+        !trimmedUrl.startsWith("https://")
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "آدرس URL باید با http:// یا https:// آغاز شود.",
+          },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const response = await axios.get(trimmedUrl, {
+          responseType: "arraybuffer",
+          timeout: 300000,
+          maxContentLength: FILE_SIZE_LIMITS.AUDIO_MAX,
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          },
+        });
+
+        buffer = Buffer.from(response.data);
+
+        try {
+          const urlObj = new URL(trimmedUrl);
+          originalFilename =
+            path.basename(urlObj.pathname) || "downloaded-song.mp3";
+        } catch {
+          originalFilename = "downloaded-song.mp3";
+        }
+      } catch (err) {
+        console.error(
+          "Error downloading MP3 from URL:",
+          (err as Error)?.message || err
+        );
+        return NextResponse.json(
+          {
+            success: false,
+            message:
+              (err as { response: { status: number } })?.response?.status ===
+              404
+                ? "فایل آهنگ در آدرس وارد شده یافت نشد (خطای ۴۰۴)."
+                : "خطا در دانلود آهنگ از آدرس داده شده. لطفا از صحت لینک مستقیم اطمینان حاصل کنید.",
+          },
+          { status: 400 }
+        );
+      }
+    } else if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      const file = formData.get("file") as File;
+
+      if (!file) {
+        return NextResponse.json(
+          { success: false, message: "هیچ فایلی انتخاب نشده!" },
+          { status: 400 }
+        );
+      }
+
+      originalFilename = file.name;
+      buffer = Buffer.from(await file.arrayBuffer());
+    } else {
       return NextResponse.json(
         { success: false, message: "فرمت درخواست نامعتبر است" },
         { status: 400 }
       );
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    // Validate size
+    const sizeValidation = validateFileSize(
+      buffer.length,
+      FILE_SIZE_LIMITS.AUDIO_MAX
+    );
+    if (!sizeValidation.valid) {
+      return NextResponse.json(
+        { success: false, message: sizeValidation.message },
+        { status: 400 }
+      );
+    }
 
     const uploadDir = path.join(process.cwd(), "public/assets/mp3");
-
-    // Ensure directory exists
     try {
       await mkdir(uploadDir, { recursive: true });
     } catch {
@@ -74,12 +139,12 @@ export async function POST(/* request: Request */) {
     await writeFile(filepath, buffer);
 
     // Parse metadata
-    let metadata;
+    let metadata: mm.IAudioMetadata | undefined;
     let coverArtPath = "";
     let tempCoverArtPath = "";
 
     try {
-      metadata = await mm.parseBuffer(buffer, file.type || "audio/mpeg");
+      metadata = await mm.parseBuffer(buffer, "audio/mpeg");
 
       const picture = metadata.common.picture?.[0];
       if (picture) {
@@ -96,11 +161,23 @@ export async function POST(/* request: Request */) {
 
         await writeFile(tempCoverFilepath, picture.data);
         coverArtPath = `/assets/cover/${tempCoverFilename}`;
-        tempCoverArtPath = tempCoverFilename; // Just the filename for easier handling
+        tempCoverArtPath = tempCoverFilename;
       }
     } catch (error) {
       console.error("Error parsing metadata:", error);
-      // Continue even if metadata parsing fails, but warn
+    }
+
+    // Fallback title from original filename if metadata title is missing
+    let extractedTitle = metadata?.common.title || "";
+    if (!extractedTitle && originalFilename) {
+      const cleanName = decodeURIComponent(originalFilename)
+        .replace(/\.[^/.]+$/, "")
+        .replace(/temp_\d+_[a-z0-9]+/i, "")
+        .replace(/[-_]/g, " ")
+        .trim();
+      if (cleanName) {
+        extractedTitle = cleanName;
+      }
     }
 
     const publicPath = `/assets/mp3/${tempFilename}`;
@@ -113,7 +190,7 @@ export async function POST(/* request: Request */) {
         coverArt: coverArtPath,
         tempCoverArt: tempCoverArtPath,
         metadata: {
-          title: metadata?.common.title || "",
+          title: extractedTitle,
           artist: metadata?.common.artist || "",
           album: metadata?.common.album || "",
           year: metadata?.common.year || undefined,
@@ -122,12 +199,10 @@ export async function POST(/* request: Request */) {
       },
     });
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error("Error processing MP3:", error);
     return NextResponse.json(
-      { success: false, message: "خطا در آپلود آهنگ" },
+      { success: false, message: "خطا در آپلود یا دانلود آهنگ" },
       { status: 500 }
     );
   }
-  */
-  return NextResponse.json({ success: true, message: "dummydata" });
 }

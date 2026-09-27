@@ -19,7 +19,7 @@ model Song {
   duration            Int                @default(0)
   uri                 String
   filename            String?
-  index               Int                @unique @default(0)
+  index               Int                @unique @default(autoincrement())
   lyrics              String?            @db.LongText
   syncedLyrics        String?            @db.LongText
   playCount           Int                @default(0)

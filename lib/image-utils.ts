@@ -1,6 +1,24 @@
-import sharp from "sharp";
 import path from "path";
 import { existsSync, mkdirSync } from "fs";
+
+function escapeXml(unsafe: string) {
+  return (unsafe || "").replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case "&":
+        return "&amp;";
+      case "'":
+        return "&apos;";
+      case '"':
+        return "&quot;";
+      default:
+        return c;
+    }
+  });
+}
 
 /**
  * Applies a watermark at the TOP Center of an image.
@@ -17,6 +35,7 @@ export async function applyWatermark(
   songTitle: string
 ) {
   const appName = "دی بلال";
+  const details = [artistName, songTitle].filter(Boolean).join(" - ");
 
   try {
     // Ensure the output directory exists
@@ -25,7 +44,8 @@ export async function applyWatermark(
       mkdirSync(outputDir, { recursive: true });
     }
 
-    const image = sharp(inputSource);
+    const sharp = (await import("sharp")).default;
+    const image = sharp(inputSource).rotate();
     const metadata = await image.metadata();
 
     // Scale font sizes based on image dimensions
@@ -77,10 +97,14 @@ export async function applyWatermark(
         </style>
         <text x="50%" y="${Math.round(
           height * 0.07
-        )}" text-anchor="middle" class="text app-name">${appName}</text>
+        )}" text-anchor="middle" class="text app-name">${escapeXml(
+      appName
+    )}</text>
         <text x="50%" y="${Math.round(
           height * 0.125
-        )}" text-anchor="middle" class="text details">${artistName} - ${songTitle}</text>
+        )}" text-anchor="middle" class="text details">${escapeXml(
+      details
+    )}</text>
       </svg>
     `;
 

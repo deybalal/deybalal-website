@@ -1,19 +1,20 @@
 import { NextResponse } from "next/server";
-// import { prisma } from "@/lib/prisma";
-// import { z } from "zod";
-// import { rename, unlink } from "fs/promises";
-// import path from "path";
-// import { existsSync } from "fs";
-// import { headers } from "next/headers";
-// import { auth } from "@/lib/auth";
-// import { getUniqueSongSlug } from "@/lib/slug";
-// import { parseFile } from "music-metadata";
-// import { findSimilarSongs } from "@/lib/similarity";
-// import { applyWatermark } from "@/lib/image-utils";
+import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+import { rename, unlink, writeFile, mkdir } from "fs/promises";
+import path from "path";
+import { existsSync } from "fs";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { getUniqueSongSlug } from "@/lib/slug";
+import { parseFile } from "music-metadata";
+import { findSimilarSongs } from "@/lib/similarity";
+import { applyWatermark } from "@/lib/image-utils";
+import axios from "axios";
+import { FILE_SIZE_LIMITS } from "@/lib/validators";
 
 export const dynamic = "force-dynamic";
 
-/*
 const songSchema = z.object({
   title: z.string().min(1),
   titleEn: z.string().optional(),
@@ -43,10 +44,8 @@ const songSchema = z.object({
   genreIds: z.array(z.string()).optional(),
   useArtistImage: z.boolean().optional(),
 });
-*/
 
-export async function POST(/* request: Request */) {
-  /*
+export async function POST(request: Request) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -143,7 +142,7 @@ export async function POST(/* request: Request */) {
           validatedData.coverArt &&
           validatedData.coverArt.includes(validatedData.tempCoverArt)
         ) {
-          // User kept the extracted cover art -> Rename it
+          // User kept the extracted / downloaded cover art -> Rename it
           const mp3Filename =
             validatedData.filename || `song-${Date.now()}.mp3`;
           const baseName =
@@ -170,6 +169,42 @@ export async function POST(/* request: Request */) {
       }
     }
 
+    // If coverArt is a direct external URL and wasn't already processed as tempCoverArt
+    if (
+      finalCoverArt &&
+      (finalCoverArt.startsWith("http://") ||
+        finalCoverArt.startsWith("https://"))
+    ) {
+      try {
+        const coverResponse = await axios.get(finalCoverArt, {
+          responseType: "arraybuffer",
+          timeout: 30000,
+          maxContentLength: FILE_SIZE_LIMITS.IMAGE_MAX,
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          },
+        });
+        const coverBuffer = Buffer.from(coverResponse.data);
+        const fileName = `song-${slug}-${Date.now()}.jpg`;
+        const outputRelPath = `/assets/cover/${fileName}`;
+        const outputPath = path.join(process.cwd(), "public", outputRelPath);
+
+        const watermarked = await applyWatermark(
+          coverBuffer,
+          outputPath,
+          validatedData.artist,
+          validatedData.title
+        );
+
+        if (watermarked) {
+          finalCoverArt = outputRelPath;
+        }
+      } catch (err) {
+        console.error("Failed to download and watermark coverArt URL:", err);
+      }
+    }
+
     if (!finalCoverArt) {
       if (
         validatedData.useArtistImage &&
@@ -191,7 +226,11 @@ export async function POST(/* request: Request */) {
             if (existsSync(artistImagePath)) {
               const fileName = `song-${slug}-${Date.now()}.jpg`;
               const outputRelPath = `/assets/cover/${fileName}`;
-              const outputPath = path.join(process.cwd(), "public", outputRelPath);
+              const outputPath = path.join(
+                process.cwd(),
+                "public",
+                outputRelPath
+              );
 
               const success = await applyWatermark(
                 artistImagePath,
@@ -222,7 +261,7 @@ export async function POST(/* request: Request */) {
       finalCoverArt = "/images/cover.png";
     }
 
-    const count = await prisma.song.count();
+    // const count = await prisma.song.count();
 
     const song = await prisma.song.create({
       data: {
@@ -230,7 +269,7 @@ export async function POST(/* request: Request */) {
         titleEn: validatedData.titleEn || "",
         artist: validatedData.artist || "",
         artistEn: artistEn || "",
-        index: count,
+        // index: count,
         artists: {
           connect: validatedData.artistIds?.map((id) => ({ id })) || [],
         },
@@ -292,6 +331,7 @@ export async function POST(/* request: Request */) {
         },
       },
     });
+
     return NextResponse.json({ success: true, data: song });
   } catch (error) {
     console.error("Error creating song:", error);
@@ -300,6 +340,4 @@ export async function POST(/* request: Request */) {
       { status: 500 }
     );
   }
-  */
-  return NextResponse.json({ success: true, message: "dummydata" });
 }

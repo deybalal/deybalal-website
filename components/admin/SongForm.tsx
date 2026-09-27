@@ -26,7 +26,18 @@ import {
 } from "@/components/ui/select";
 import { toast } from "react-hot-toast";
 import { Album, Genre } from "@prisma/client";
-import { Check, ChevronsUpDown, Trash2, Loader2, Plus } from "lucide-react";
+import {
+  Check,
+  ChevronsUpDown,
+  Trash2,
+  Loader2,
+  Plus,
+  UploadCloud,
+  Link2,
+  Sparkles,
+  Download,
+  CheckCircle2,
+} from "lucide-react";
 import { cn, getStringSimilarity } from "@/lib/utils";
 import {
   Command,
@@ -120,6 +131,17 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   const [similarSongs, setSimilarSongs] = useState<SimilarSong[]>([]);
   const [showSimilarityDialog, setShowSimilarityDialog] = useState(false);
   const [checkingDuplicates, setCheckingDuplicates] = useState(false);
+
+  // Audio URL states
+  const [audioSourceType, setAudioSourceType] = useState<"file" | "url">("file");
+  const [songUrl, setSongUrl] = useState("");
+  const [downloadedSongUrl, setDownloadedSongUrl] = useState("");
+
+  // Cover Art URL states
+  const [coverSourceType, setCoverSourceType] = useState<"file" | "url">("file");
+  const [coverUrl, setCoverUrl] = useState("");
+  const [downloadedCoverUrl, setDownloadedCoverUrl] = useState("");
+  const [coverLoading, setCoverLoading] = useState(false);
 
   const router = useRouter();
 
@@ -286,6 +308,20 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   async function onSubmit(values: SongFormValues) {
     setLoading(true);
     try {
+      if (
+        coverSourceType === "url" &&
+        coverUrl.trim() &&
+        downloadedCoverUrl !== coverUrl.trim()
+      ) {
+        const coverSuccess = await handleDownloadCoverUrl(coverUrl.trim());
+        if (!coverSuccess) {
+          setLoading(false);
+          return;
+        }
+        values.coverArt = form.getValues("coverArt");
+        values.tempCoverArt = form.getValues("tempCoverArt");
+      }
+
       const endpoint =
         mode === "edit" ? `/api/songs/${songId}` : "/api/songs/create";
       const method = mode === "edit" ? "PUT" : "POST";
@@ -313,6 +349,11 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
         form.reset();
         setSelectedArtists([]);
         setSelectedGenres([]);
+        setSongUrl("");
+        setDownloadedSongUrl("");
+        setCoverUrl("");
+        setDownloadedCoverUrl("");
+        setManualCoverArt(null);
         setFileInputKey((prev) => prev + 1); // Reset file inputs by changing key
       }
       setStep(1);
@@ -356,6 +397,135 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
     return false;
   };
 
+  const populateSongMetadata = (data: {
+    filename: string;
+    metadata: {
+      title?: string;
+      artist?: string;
+      album?: string;
+      year?: number;
+      duration?: number;
+    };
+    coverArt?: string;
+    tempCoverArt?: string;
+  }) => {
+    const { filename, metadata, coverArt, tempCoverArt } = data;
+
+    form.setValue("filename", filename);
+
+    if (metadata.title) {
+      form.setValue("titleEn", metadata.title);
+      if (!form.getValues("title")) {
+        form.setValue("title", metadata.title);
+      }
+    }
+    if (metadata.duration) {
+      form.setValue("duration", Math.round(metadata.duration));
+    }
+
+    // Search for matching artist by name or nameEn with fuzzy matching
+    if (metadata.artist) {
+      // First try exact match
+      let matchingArtist = artists.find(
+        (artist) =>
+          artist.name === metadata.artist || artist.nameEn === metadata.artist
+      );
+
+      // If no exact match, try fuzzy matching with 70% similarity threshold
+      if (!matchingArtist) {
+        const SIMILARITY_THRESHOLD = 0.7;
+        let bestMatch: Artist | null = null;
+        let bestSimilarity = 0;
+
+        artists.forEach((artist) => {
+          const nameSimilarity = getStringSimilarity(
+            artist.name,
+            metadata.artist!
+          );
+          const nameEnSimilarity = artist.nameEn
+            ? getStringSimilarity(artist.nameEn, metadata.artist!)
+            : 0;
+
+          const maxSimilarity = Math.max(nameSimilarity, nameEnSimilarity);
+
+          if (
+            maxSimilarity > bestSimilarity &&
+            maxSimilarity >= SIMILARITY_THRESHOLD
+          ) {
+            bestSimilarity = maxSimilarity;
+            bestMatch = artist;
+          }
+        });
+
+        matchingArtist = bestMatch || undefined;
+      }
+
+      if (matchingArtist) {
+        // Set both artist name and IDs
+        form.setValue("artist", matchingArtist.name);
+        const currentIds = form.getValues("artistIds") || [];
+        if (!currentIds.includes(matchingArtist.id)) {
+          form.setValue("artistIds", [...currentIds, matchingArtist.id]);
+        }
+
+        // Update selectedArtists
+        setSelectedArtists((prev) => {
+          const updatedArtists = prev.find((a) => a.id === matchingArtist!.id)
+            ? prev
+            : [...prev, matchingArtist!];
+
+          return updatedArtists;
+        });
+      } else {
+        // If no match found, just set the name
+        form.setValue("artist", metadata.artist);
+      }
+    }
+
+    // Search for matching album by name with fuzzy matching
+    if (metadata.album) {
+      let matchingAlbum = albums.find(
+        (album) => album.name === metadata.album
+      );
+
+      if (!matchingAlbum) {
+        const SIMILARITY_THRESHOLD = 0.7;
+        let bestMatch: Album | null = null;
+        let bestSimilarity = 0;
+
+        albums.forEach((album) => {
+          const nameSimilarity = getStringSimilarity(
+            album.name,
+            metadata.album!
+          );
+
+          if (
+            nameSimilarity > bestSimilarity &&
+            nameSimilarity >= SIMILARITY_THRESHOLD
+          ) {
+            bestSimilarity = nameSimilarity;
+            bestMatch = album;
+          }
+        });
+
+        matchingAlbum = bestMatch || undefined;
+      }
+
+      if (matchingAlbum) {
+        form.setValue("albumId", matchingAlbum.id);
+        form.setValue("albumName", matchingAlbum.name);
+      }
+    }
+
+    if (metadata.year) form.setValue("year", Math.round(metadata.year));
+
+    if (coverArt) {
+      form.setValue("coverArt", coverArt);
+      form.setValue("tempCoverArt", tempCoverArt);
+      setManualCoverArt(coverArt);
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -378,125 +548,57 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       const result = await res.json();
       if (!res.ok || !result.success) {
         toast.error(result?.message || "خطا در ارسال آهنگ");
+        return;
       }
 
-      const { filename, metadata, coverArt, tempCoverArt } = result.data;
-
-      form.setValue("filename", filename);
-
-      if (metadata.title) form.setValue("titleEn", metadata.title);
-      if (metadata.duration)
-        form.setValue("duration", Math.round(metadata.duration));
-
-      // Search for matching artist by name or nameEn with fuzzy matching
-      if (metadata.artist) {
-        // First try exact match
-        let matchingArtist = artists.find(
-          (artist) =>
-            artist.name === metadata.artist || artist.nameEn === metadata.artist
-        );
-
-        // If no exact match, try fuzzy matching with 70% similarity threshold
-        if (!matchingArtist) {
-          const SIMILARITY_THRESHOLD = 0.7;
-          let bestMatch: Artist | null = null;
-          let bestSimilarity = 0;
-
-          artists.forEach((artist) => {
-            const nameSimilarity = getStringSimilarity(
-              artist.name,
-              metadata.artist
-            );
-            const nameEnSimilarity = artist.nameEn
-              ? getStringSimilarity(artist.nameEn, metadata.artist)
-              : 0;
-
-            const maxSimilarity = Math.max(nameSimilarity, nameEnSimilarity);
-
-            if (
-              maxSimilarity > bestSimilarity &&
-              maxSimilarity >= SIMILARITY_THRESHOLD
-            ) {
-              bestSimilarity = maxSimilarity;
-              bestMatch = artist;
-            }
-          });
-
-          matchingArtist = bestMatch || undefined;
-        }
-
-        if (matchingArtist) {
-          // Set both artist name and IDs
-          form.setValue("artist", matchingArtist.name);
-          const currentIds = form.getValues("artistIds") || [];
-          if (!currentIds.includes(matchingArtist.id)) {
-            form.setValue("artistIds", [...currentIds, matchingArtist.id]);
-          }
-
-          // Update selectedArtists (artistEn will be updated by useEffect)
-          setSelectedArtists((prev) => {
-            const updatedArtists = prev.find((a) => a.id === matchingArtist.id)
-              ? prev
-              : [...prev, matchingArtist];
-
-            return updatedArtists;
-          });
-        } else {
-          // If no match found, just set the name
-          form.setValue("artist", metadata.artist);
-        }
-      }
-
-      // Search for matching album by name with fuzzy matching
-      if (metadata.album) {
-        // First try exact match
-        let matchingAlbum = albums.find(
-          (album) => album.name === metadata.album
-        );
-
-        // If no exact match, try fuzzy matching with 70% similarity threshold
-        if (!matchingAlbum) {
-          const SIMILARITY_THRESHOLD = 0.7;
-          let bestMatch: Album | null = null;
-          let bestSimilarity = 0;
-
-          albums.forEach((album) => {
-            const nameSimilarity = getStringSimilarity(
-              album.name,
-              metadata.album
-            );
-
-            if (
-              nameSimilarity > bestSimilarity &&
-              nameSimilarity >= SIMILARITY_THRESHOLD
-            ) {
-              bestSimilarity = nameSimilarity;
-              bestMatch = album;
-            }
-          });
-
-          matchingAlbum = bestMatch || undefined;
-        }
-
-        if (matchingAlbum) {
-          // Set both album name and ID
-          form.setValue("albumId", matchingAlbum.id);
-          form.setValue("albumName", matchingAlbum.name);
-        }
-      }
-
-      if (metadata.year) form.setValue("year", Math.round(metadata.year));
-
-      if (coverArt) {
-        form.setValue("coverArt", coverArt);
-        form.setValue("tempCoverArt", tempCoverArt);
-        setManualCoverArt(coverArt);
-      }
+      populateSongMetadata(result.data);
+      setSongUrl("");
+      setDownloadedSongUrl("");
 
       toast.success("آهنگ آپلود شد! لطفا به مرحله بعد بروید!");
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("خطا در آپلود فایل");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDownloadSongUrl = async (urlToDownload: string): Promise<boolean> => {
+    const cleanUrl = urlToDownload.trim();
+    if (!cleanUrl) {
+      toast.error("لطفا آدرس URL آهنگ را وارد کنید.");
+      return false;
+    }
+
+    if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+      toast.error("آدرس اینترنتی باید با http:// یا https:// آغاز شود.");
+      return false;
+    }
+
+    setUploading(true);
+    try {
+      const res = await fetch("/api/upload/mp3", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: cleanUrl }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        toast.error(result?.message || "خطا در دریافت آهنگ از آدرس داده شده");
+        return false;
+      }
+
+      populateSongMetadata(result.data);
+      setDownloadedSongUrl(cleanUrl);
+
+      toast.success("آهنگ از اینترنت دریافت شد! لطفا به مرحله بعد بروید!");
+      return true;
+    } catch (error) {
+      console.error("Download URL error:", error);
+      toast.error("خطا در دانلود فایل آهنگ از آدرس داده شده");
+      return false;
     } finally {
       setUploading(false);
     }
@@ -531,6 +633,8 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       form.setValue("coverArt", filePath);
       form.setValue("tempCoverArt", filename);
       setManualCoverArt(filePath);
+      setCoverUrl("");
+      setDownloadedCoverUrl("");
 
       toast.success("عکس این آهنگ آپلود شد!");
     } catch (error) {
@@ -541,17 +645,98 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
     }
   };
 
-  const nextStep = async () => {
-    if (step === 1 && !form.getValues("filename")) {
-      toast.error("لطفا یک فایل MP3 آپلود کنید.");
-      return;
+  const handleDownloadCoverUrl = async (urlToDownload: string): Promise<boolean> => {
+    const cleanUrl = urlToDownload.trim();
+    if (!cleanUrl) {
+      toast.error("لطفا آدرس URL کاور را وارد کنید.");
+      return false;
     }
+
+    if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+      toast.error("آدرس اینترنتی کاور باید با http:// یا https:// آغاز شود.");
+      return false;
+    }
+
+    setCoverLoading(true);
+    try {
+      const currentArtist =
+        form.getValues("artist") ||
+        selectedArtists.map((a) => a.name).join(", ") ||
+        "دی بلال";
+      const currentTitle =
+        form.getValues("title") || form.getValues("titleEn") || "";
+
+      const res = await fetch("/api/upload/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: cleanUrl,
+          artist: currentArtist,
+          title: currentTitle,
+        }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        toast.error(result?.message || "خطا در دریافت کاور از آدرس اینترنتی");
+        return false;
+      }
+
+      const { filePath, filename } = result.data;
+
+      form.setValue("coverArt", filePath);
+      form.setValue("tempCoverArt", filename);
+      setManualCoverArt(filePath);
+      setDownloadedCoverUrl(cleanUrl);
+
+      toast.success("تصویر کاور دریافت و واترمارک دی بلال روی آن اعمال شد!");
+      return true;
+    } catch (error) {
+      console.error("Cover URL error:", error);
+      toast.error("خطا در دریافت و اعمال واترمارک کاور");
+      return false;
+    } finally {
+      setCoverLoading(false);
+    }
+  };
+
+  const nextStep = async () => {
+    if (step === 1) {
+      const isUrlMode = audioSourceType === "url";
+      const cleanUrl = songUrl.trim();
+      const hasUrl = Boolean(cleanUrl);
+
+      if (isUrlMode || (hasUrl && !form.getValues("filename"))) {
+        if (!cleanUrl) {
+          toast.error("لطفا آدرس اینترنتی (URL) آهنگ را وارد کنید یا فایل MP3 آپلود کنید.");
+          return;
+        }
+
+        if (downloadedSongUrl !== cleanUrl || !form.getValues("filename")) {
+          const success = await handleDownloadSongUrl(cleanUrl);
+          if (!success) return;
+        }
+      } else if (!form.getValues("filename")) {
+        toast.error("لطفا یک فایل MP3 آپلود کنید یا آدرس URL آهنگ را وارد نمایید.");
+        return;
+      }
+    }
+
     if (step === 2 && selectedArtists.length === 0) {
       toast.error("لطفا حداقل یک خواننده را انتخاب کنید.");
       return;
     }
 
     if (step === 3) {
+      if (
+        coverSourceType === "url" &&
+        coverUrl.trim() &&
+        downloadedCoverUrl !== coverUrl.trim()
+      ) {
+        const success = await handleDownloadCoverUrl(coverUrl.trim());
+        if (!success) return;
+      }
+
       const hasDuplicates = await checkDuplicates();
       if (hasDuplicates) return;
     }
@@ -615,7 +800,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
         </h3>
         <p className="text-sm text-muted-foreground">
           {step === 1
-            ? "ابتدا فایل MP3 را انتخاب کنید. پلتفرم بطور خودکار فایل را آپلود می کند و نام آهنگ و خواننده و آلبوم را استخراج میکند!"
+            ? "فایل صوتی MP3 آهنگ را از سیستم انتخاب کنید یا آدرس مستقیم (URL) آن را وارد نمایید. در صورت درج لینک، با کلیک بر روی دکمه «بعدی» آهنگ به صورت خودکار دانلود و مشخصات آن استخراج خواهد شد."
             : step === 2
             ? "از لیست موجود، خواننده یا خواننده های آهنگ را انتخاب کنید. اگر خواننده در لیست وجود نداشت، میتوانید روی دکمه ی ساخت خواننده ی جدید کلیک کنید."
             : step === 3
@@ -696,75 +881,147 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
           }}
           className="space-y-6 w-full"
         >
-          {/* Step 1: MP3 Upload */}
+          {/* Step 1: MP3 Upload or URL */}
           {step === 1 && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-              <FormItem>
-                <FormLabel className="text-lg font-semibold">
-                  فایل MP3 را انتخاب و آپلود کنید.
-                </FormLabel>
-                <div
+            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+              {/* Audio Source Selector Tabs */}
+              <div className="flex border rounded-lg p-1 bg-muted/40 max-w-md mx-auto">
+                <button
+                  type="button"
+                  onClick={() => setAudioSourceType("file")}
                   className={cn(
-                    "border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center gap-4 transition-colors",
-                    uploading
-                      ? "border-primary bg-primary/5"
-                      : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+                    "flex-1 py-2 text-sm font-medium rounded-md transition-all cursor-pointer flex items-center justify-center gap-2",
+                    audioSourceType === "file"
+                      ? "bg-primary text-primary-foreground shadow"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <FormControl>
-                    <Input
-                      key={`mp3-${fileInputKey}`}
-                      type="file"
-                      accept=".mp3,audio/mpeg"
-                      onChange={handleFileUpload}
-                      disabled={uploading}
-                      className="hidden"
-                      id="mp3-upload"
-                    />
-                  </FormControl>
-                  <label
-                    htmlFor="mp3-upload"
-                    className="cursor-pointer flex flex-col items-center gap-2"
+                  <UploadCloud className="w-4 h-4" />
+                  آپلود فایل از دستگاه
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAudioSourceType("url")}
+                  className={cn(
+                    "flex-1 py-2 text-sm font-medium rounded-md transition-all cursor-pointer flex items-center justify-center gap-2",
+                    audioSourceType === "url"
+                      ? "bg-primary text-primary-foreground shadow"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Link2 className="w-4 h-4" />
+                  لینک مستقیم آهنگ (URL)
+                </button>
+              </div>
+
+              {audioSourceType === "file" ? (
+                <FormItem>
+                  <FormLabel className="text-lg font-semibold">
+                    فایل MP3 را انتخاب و آپلود کنید.
+                  </FormLabel>
+                  <div
+                    className={cn(
+                      "border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center gap-4 transition-colors",
+                      uploading
+                        ? "border-primary bg-primary/5"
+                        : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+                    )}
                   >
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
-                      {uploading ? (
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="32"
-                          height="32"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="17 8 12 3 7 8" />
-                          <line x1="12" x2="12" y1="3" y2="15" />
-                        </svg>
-                      )}
+                    <FormControl>
+                      <Input
+                        key={`mp3-${fileInputKey}`}
+                        type="file"
+                        accept=".mp3,audio/mpeg"
+                        onChange={handleFileUpload}
+                        disabled={uploading}
+                        className="hidden"
+                        id="mp3-upload"
+                      />
+                    </FormControl>
+                    <label
+                      htmlFor="mp3-upload"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
+                        {uploading ? (
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        ) : (
+                          <UploadCloud className="w-8 h-8" />
+                        )}
+                      </div>
+                      <span className="text-lg font-medium">
+                        {uploading
+                          ? "درحال آپلود و تحلیل فایل..."
+                          : form.getValues("filename")
+                          ? "فایل با موفقیت بارگذاری شد. لطفا به مرحله بعدی بروید!"
+                          : "انتخاب فایل"}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {form.getValues("filename") || "فرمت پشتیبانی شده: mp3"}
+                      </span>
+                    </label>
+                  </div>
+                  {uploading && (
+                    <p className="text-center text-sm text-muted-foreground animate-pulse">
+                      لطفا کمی صبر کنید...
+                    </p>
+                  )}
+                </FormItem>
+              ) : (
+                <div className="space-y-4">
+                  <FormItem>
+                    <FormLabel className="text-lg font-semibold">
+                      آدرس مستقیم فایل صوتی (MP3 URL)
+                    </FormLabel>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        type="url"
+                        dir="ltr"
+                        placeholder="https://example.com/music/song.mp3"
+                        value={songUrl}
+                        onChange={(e) => setSongUrl(e.target.value)}
+                        disabled={uploading}
+                        className="h-12 text-sm font-mono flex-1"
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => handleDownloadSongUrl(songUrl)}
+                        disabled={uploading || !songUrl.trim()}
+                        className="h-12 px-5 gap-2 cursor-pointer"
+                        variant="secondary"
+                      >
+                        {uploading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
+                        بررسی و دانلود آهنگ
+                      </Button>
                     </div>
-                    <span className="text-lg font-medium">
-                      {uploading
-                        ? "درحال آپلود..."
-                        : form.getValues("filename")
-                        ? "فایل با موفقیت آپلود شد. لطفا به مرحله بعدی بروید!"
-                        : "انتخاب فایل"}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {form.getValues("filename") || "فرمت پشتیبانی شده: mp3"}
-                    </span>
-                  </label>
+                    <p className="text-xs text-muted-foreground">
+                      لینک مستقیم فایل MP3 را وارد کنید. با کلیک بر روی دکمه «بعدی»، آهنگ به صورت خودکار دانلود شده و مشخصات آن استخراج خواهد شد.
+                    </p>
+                  </FormItem>
+
+                  {form.getValues("filename") && (
+                    <div className="flex items-center gap-3 p-4 rounded-lg bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-300 animate-in fade-in">
+                      <CheckCircle2 className="w-6 h-6 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm">
+                          آهنگ با موفقیت دریافت و آماده است
+                        </p>
+                        <p className="text-xs truncate font-mono mt-0.5 opacity-80">
+                          {form.getValues("filename")}
+                          {Boolean(form.getValues("duration")) &&
+                            ` (${Math.floor((form.getValues("duration") || 0) / 60)}:${((form.getValues("duration") || 0) % 60)
+                              .toString()
+                              .padStart(2, "0")})`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {uploading && (
-                  <p className="text-center text-sm text-muted-foreground animate-pulse">
-                    لطفا کمی صبر کنید...
-                  </p>
-                )}
-              </FormItem>
+              )}
             </div>
           )}
 
@@ -974,16 +1231,80 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                         <FormLabel>تصویر آهنگ (Cover Art)</FormLabel>
                         <FormControl>
                           <div className="flex flex-col gap-4">
-                            <div className="flex items-center gap-4">
-                              <Input
-                                key={`cover-${fileInputKey}`}
-                                type="file"
-                                accept="image/*"
-                                onChange={handleCoverUpload}
-                                disabled={uploading}
-                                className="w-full"
-                              />
+                            {/* Cover Source Selector Tabs */}
+                            <div className="flex border rounded-lg p-1 bg-muted/40">
+                              <button
+                                type="button"
+                                onClick={() => setCoverSourceType("file")}
+                                className={cn(
+                                  "flex-1 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5",
+                                  coverSourceType === "file"
+                                    ? "bg-primary text-primary-foreground shadow"
+                                    : "text-muted-foreground hover:text-foreground"
+                                )}
+                              >
+                                <UploadCloud className="w-3.5 h-3.5" />
+                                آپلود عکس از دستگاه
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setCoverSourceType("url")}
+                                className={cn(
+                                  "flex-1 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5",
+                                  coverSourceType === "url"
+                                    ? "bg-primary text-primary-foreground shadow"
+                                    : "text-muted-foreground hover:text-foreground"
+                                )}
+                              >
+                                <Link2 className="w-3.5 h-3.5" />
+                                لینک مستقیم عکس (URL)
+                              </button>
                             </div>
+
+                            {coverSourceType === "file" ? (
+                              <div className="flex items-center gap-4">
+                                <Input
+                                  key={`cover-${fileInputKey}`}
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleCoverUpload}
+                                  disabled={uploading || coverLoading}
+                                  className="w-full"
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex flex-col gap-2">
+                                <div className="flex gap-2">
+                                  <Input
+                                    type="url"
+                                    dir="ltr"
+                                    placeholder="https://example.com/cover.jpg"
+                                    value={coverUrl}
+                                    onChange={(e) => setCoverUrl(e.target.value)}
+                                    disabled={coverLoading}
+                                    className="h-10 text-xs font-mono flex-1"
+                                  />
+                                  <Button
+                                    type="button"
+                                    onClick={() => handleDownloadCoverUrl(coverUrl)}
+                                    disabled={coverLoading || !coverUrl.trim()}
+                                    className="h-10 px-3 gap-1.5 text-xs cursor-pointer shrink-0"
+                                    variant="secondary"
+                                  >
+                                    {coverLoading ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <Sparkles className="w-3.5 h-3.5" />
+                                    )}
+                                    دریافت و اعمال واترمارک
+                                  </Button>
+                                </div>
+                                <p className="text-[11px] text-muted-foreground">
+                                  کاور از لینک دانلود شده و واترمارک دی بلال به همراه نام خواننده و عنوان آهنگ روی آن درج می‌شود.
+                                </p>
+                              </div>
+                            )}
+
                             {field.value ? (
                               <div className="relative w-full aspect-square rounded-md overflow-hidden border shadow-sm">
                                 <Image
@@ -1363,17 +1684,23 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                 onClick={nextStep}
                 className={cn(
                   "transition-colors cursor-pointer",
-                  ((step === 1 && selectedArtists.length > 0) ||
-                    (step === 2 && form.getValues("filename")) ||
+                  ((step === 1 &&
+                    (form.getValues("filename") ||
+                      (audioSourceType === "url" && songUrl.trim()))) ||
+                    (step === 2 && selectedArtists.length > 0) ||
                     (step === 3 && form.getValues("title"))) &&
                     "bg-green-600 hover:bg-green-700 text-white border-green-700"
                 )}
-                disabled={checkingDuplicates}
+                disabled={checkingDuplicates || uploading || coverLoading}
               >
-                {checkingDuplicates && (
+                {(checkingDuplicates || uploading || coverLoading) && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                بعدی
+                {uploading && step === 1
+                  ? "درحال دریافت آهنگ..."
+                  : coverLoading && step === 3
+                  ? "درحال دریافت کاور..."
+                  : "بعدی"}
               </Button>
             ) : (
               <Button
