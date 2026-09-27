@@ -17,6 +17,7 @@ import {
   Heart,
   ListPlus,
   List,
+  NotebookText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +36,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Link from "next/link";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 export default function RadioPage() {
   const { state, error, loading, fetchRadioState, fetchPreviewState } =
@@ -195,7 +201,9 @@ export default function RadioPage() {
         <h1 className="text-2xl font-bold mb-2">رادیو فعلاً در دسترس نیست</h1>
         <p className="text-muted-foreground max-w-md mx-auto">{error}</p>
         <Button
-          onClick={() => (isLiveRadio ? fetchRadioState() : fetchPreviewState())}
+          onClick={() =>
+            isLiveRadio ? fetchRadioState() : fetchPreviewState()
+          }
           className="mt-8 px-8 bg-primary hover:bg-primary/90"
         >
           تلاش مجدد
@@ -342,18 +350,23 @@ export default function RadioPage() {
                   />
                 </Button>
                 <div className="flex flex-col w-full max-w-10/12">
-                  <h2 className="text-3xl font-black text-foreground mb-2 leading-tight drop-shadow-md overflow-hidden">
-                    <MarqueeText
-                      text={state?.currentTrack.title || "بدون عنوان"}
-                      className="overflow-hidden line-clamp-none"
-                    />
-                  </h2>
-                  <div className="text-foreground/80 text-lg font-medium drop-shadow-md">
+                  <Link href={`/song/${state?.currentTrack.id}`}>
+                    <h2 className="text-3xl font-black text-foreground hover:text-muted-foreground mb-2 leading-tight drop-shadow-md overflow-hidden">
+                      <MarqueeText
+                        text={state?.currentTrack.title || "بدون عنوان"}
+                        className="overflow-hidden line-clamp-none"
+                      />
+                    </h2>
+                  </Link>
+                  <Link
+                    href={`/artist/${state?.currentTrack.artists[0].id}`}
+                    className="text-foreground/80 hover:text-foreground/50 text-lg font-medium drop-shadow-md"
+                  >
                     <MarqueeText
                       text={state?.currentTrack.artist || "ناشناس"}
                       className="overflow-hidden line-clamp-none"
                     />
-                  </div>
+                  </Link>
                 </div>
                 <div className="flex ml-1">
                   <AddToPlaylistDialog
@@ -500,16 +513,46 @@ export default function RadioPage() {
             <CardContent className="p-6">
               {state?.nextTrack ? (
                 <div className="flex items-center gap-4 p-4 rounded-xl bg-foreground/5 border border-foreground/5 hover:bg-foreground/10 transition-colors group">
-                  <div className="w-14 h-14 bg-foreground/5 rounded-lg relative overflow-hidden shrink-0 shadow-lg ring-1 ring-foreground/10">
-                    <Music className="w-7 h-7 absolute inset-0 m-auto text-foreground group-hover:scale-110 transition-transform" />
+                  <div className="flex gap-3.5 w-full">
+                    <Link
+                      href={`/song/${state.nextTrack.id}`}
+                      className="w-14 h-14 bg-foreground/5 rounded-lg relative overflow-hidden shrink-0 shadow-lg ring-1 ring-foreground/10"
+                    >
+                      <Image
+                        alt="عکس آهنگ"
+                        fill
+                        src={`${state.nextTrack.coverArt}`}
+                        className="w-7 h-7 absolute inset-0 m-auto text-foreground group-hover:scale-110 transition-transform"
+                      />
+                    </Link>
+                    <div className="min-w-0">
+                      <Link
+                        href={`/song/${state.nextTrack.id}`}
+                        className="block font-bold text-foreground truncate text-base mb-0.5 transition-colors group-hover:text-primary hover:text-muted-foreground hover:scale-110"
+                      >
+                        {state.nextTrack?.title}
+                      </Link>
+                      <Link
+                        href={`/artist/${state.nextTrack.artists[0].id}`}
+                        className="block text-sm text-muted-foreground truncate font-medium hover:text-primary hover:scale-110"
+                      >
+                        {state.nextTrack?.artist}
+                      </Link>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-foreground truncate text-base mb-0.5 transition-colors group-hover:text-primary">
-                      {state.nextTrack?.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground truncate font-medium">
-                      {state.nextTrack?.artist}
-                    </p>
+                  <div>
+                    {!!state.nextTrack.lyrics ? (
+                      <HoverCard>
+                        <HoverCardTrigger>
+                          <NotebookText size={20} />
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-full text-[12px]">
+                          دارای متن آهنگ
+                        </HoverCardContent>
+                      </HoverCard>
+                    ) : (
+                      ""
+                    )}
                   </div>
                 </div>
               ) : (

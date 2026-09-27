@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { usePlayerStore } from "./usePlayerStore";
+import { Artist } from "@prisma/client";
 
 export interface RadioTrack {
   id: string;
@@ -14,6 +15,7 @@ export interface RadioTrack {
   position: number;
   lyrics?: string | null;
   syncedLyrics?: string | null;
+  artists: Artist[];
 }
 
 export interface RadioState {
@@ -21,6 +23,10 @@ export interface RadioState {
   nextTrack: {
     title: string;
     artist: string;
+    id: string;
+    coverArt: string;
+    artists: Artist[];
+    lyrics: string;
   } | null;
   serverTime: number;
   elapsedTime: number;

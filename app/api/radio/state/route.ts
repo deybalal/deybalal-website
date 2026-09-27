@@ -31,6 +31,7 @@ export async function GET() {
                 lyrics: true,
                 syncedLyrics: true,
                 links: true,
+                artists: true,
               },
             },
           },
