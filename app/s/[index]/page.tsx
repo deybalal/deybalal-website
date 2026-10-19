@@ -16,7 +16,7 @@ export default async function ShortLinkPage({ params }: ShortLinkPageProps) {
     return notFound();
   }
 
-  const song = await prisma.song.findUnique({
+  const song = await prisma.song.findFirst({
     where: {
       index: songIndex,
     },

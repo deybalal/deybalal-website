@@ -15,12 +15,12 @@ const SongCard = ({ song }: SongCardProps) => {
   return (
     <SongCardContextMenu
       songId={song.id}
-      artists={song.artists}
+      artists={song.artists || []}
       title={song.title ?? ""}
       titleEn={song.titleEn ?? null}
       uri={song.uri}
-      filename={song.filename}
-      index={song.index}
+      filename={song.filename ?? ""}
+      index={song.index ?? 0}
       duration={song.duration}
       coverArt={song.coverArt}
       artist={song.artist ?? ""}

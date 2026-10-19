@@ -273,15 +273,15 @@ const PlayerBar = () => {
   };
 
   return (
-    <div className="fixed flex justify-between items-center bottom-0 start-0 w-full h-20 md:h-24 glass z-50 px-4 md:px-8 bg-black/40 backdrop-blur-lg border-t border-white/10 transition-all duration-300">
+    <div className="fixed flex justify-between items-center bottom-0 start-0 w-full h-20 lg:h-24 glass z-50 px-4 lg:px-8 bg-black/40 backdrop-blur-lg border-t border-white/10 transition-all duration-300">
       <div className="flex flex-col items-center w-full">
-        <div className="flex w-full flex-nowrap items-center justify-between gap-1 md:justify-around md:gap-0">
+        <div className="flex w-full flex-nowrap items-center justify-between gap-1 lg:justify-around lg:gap-0">
           {/* Song Info */}
           <Link
             href={`/song/${currentSong.id}`}
-            className="flex items-center shrink-0 md:flex-1 min-w-0 md:w-1/4 md:max-w-none pr-1 md:pr-0"
+            className="flex items-center shrink-0 lg:flex-1 min-w-0 lg:w-1/4 lg:max-w-none pr-1 lg:pr-0"
           >
-            <div className="w-10 h-10 md:w-14 md:h-14 bg-gray-800 rounded-md neon-box ml-2 md:ml-4 shrink-0 relative overflow-hidden">
+            <div className="w-10 h-10 lg:w-14 lg:h-14 bg-gray-800 rounded-md neon-box ml-2 lg:ml-4 shrink-0 relative overflow-hidden">
               <Image
                 src={currentSong.coverArt || "/images/cover.png"}
                 alt="Cover"
@@ -290,14 +290,14 @@ const PlayerBar = () => {
                 className="object-cover w-full h-full"
               />
             </div>
-            <div className="overflow-hidden flex-1 hidden md:flex flex-col">
+            <div className="overflow-hidden flex-1 hidden lg:flex flex-col">
               <MarqueeText
                 text={currentSong.title || "بدون عنوان"}
-                className="text-foreground font-medium text-sm md:text-base"
+                className="text-foreground font-medium text-sm lg:text-base"
               />
               <MarqueeText
                 text={currentSong.artist || "خواننده ناشناس"}
-                className="text-muted-foreground text-xs md:text-sm"
+                className="text-muted-foreground text-xs lg:text-sm"
               />
             </div>
           </Link>
@@ -306,12 +306,12 @@ const PlayerBar = () => {
           <div className="shrink-0">
             <NotificationCenter />
           </div>
-          <div className="flex items-center justify-end flex-none ml-2 md:ml-0 md:flex-col md:items-center md:w-1/2 md:max-w-2xl xl:max-w-3xl md:px-4 md:static md:translate-x-0">
-            <div className="flex items-center gap-2 md:gap-6 mb-1 md:mb-2">
+          <div className="flex items-center justify-end flex-none ml-2 lg:ml-0 lg:flex-col lg:items-center lg:w-1/2 lg:max-w-2xl xl:max-w-3xl lg:px-4 lg:static lg:translate-x-0">
+            <div className="flex items-center gap-2 lg:gap-6 mb-1 lg:mb-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className={`hidden md:inline-flex hover:bg-transparent cursor-pointer ${
+                className={`hidden lg:inline-flex hover:bg-transparent cursor-pointer ${
                   repeatMode !== "off"
                     ? "text-foreground"
                     : "text-gray-400 hover:text-foreground"
@@ -336,7 +336,7 @@ const PlayerBar = () => {
                 onClick={() => next()}
                 disabled={isRadio}
               >
-                <SkipForward size={20} className="md:w-6 md:h-6" />
+                <SkipForward size={20} className="lg:w-6 lg:h-6" />
               </Button>
               <div className="relative group">
                 {isPlaying && (
@@ -347,7 +347,7 @@ const PlayerBar = () => {
                     onClick={() => handleRadioPlayButton()}
                     size="icon"
                     className={cn(
-                      "relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-br text-white shadow-lg shadow-indigo-500/40 hover:scale-110 hover:shadow-indigo-500/60 ring-2 ring-white/10 transition-all duration-300 flex items-center justify-center cursor-pointer",
+                      "relative z-10 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-linear-to-br text-white shadow-lg shadow-indigo-500/40 hover:scale-110 hover:shadow-indigo-500/60 ring-2 ring-white/10 transition-all duration-300 flex items-center justify-center cursor-pointer",
                       isPlaying
                         ? "from-violet-600 to-indigo-600"
                         : "from-gray-600 to-zinc-600"
@@ -390,13 +390,13 @@ h-7.4L13.9,22z"
                 ) : (
                   <Button
                     size="icon"
-                    className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/40 hover:scale-110 hover:shadow-indigo-500/60 ring-2 ring-white/10 transition-all duration-300 flex items-center justify-center cursor-pointer"
+                    className="relative z-10 w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/40 hover:scale-110 hover:shadow-indigo-500/60 ring-2 ring-white/10 transition-all duration-300 flex items-center justify-center cursor-pointer"
                     onClick={togglePlay}
                   >
                     {isPlaying ? (
-                      <Pause className="size-4 md:size-6 fill-white" />
+                      <Pause className="size-4 lg:size-6 fill-white" />
                     ) : (
-                      <Play className="size-4 md:size-6 fill-white" />
+                      <Play className="size-4 lg:size-6 fill-white" />
                     )}
                   </Button>
                 )}
@@ -412,12 +412,12 @@ h-7.4L13.9,22z"
                 onClick={() => prev()}
                 disabled={isRadio}
               >
-                <SkipBack size={20} className="md:w-6 md:h-6" />
+                <SkipBack size={20} className="lg:w-6 lg:h-6" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className={`hidden md:inline-flex hover:bg-transparent cursor-pointer ${
+                className={`hidden lg:inline-flex hover:bg-transparent cursor-pointer ${
                   isShuffling
                     ? "text-foreground"
                     : "text-gray-400 hover:text-foreground"
@@ -429,7 +429,7 @@ h-7.4L13.9,22z"
               </Button>
             </div>
             {/* Progress Bar */}
-            <div className="w-64 md:w-full items-center gap-2 md:gap-3 text-[10px] md:text-xs text-gray-400 hidden md:flex">
+            <div className="w-64 lg:w-full items-center gap-2 lg:gap-3 text-[10px] lg:text-xs text-gray-400 hidden lg:flex">
               <span>{formatTime(duration || currentSong.duration)}</span>
               <Slider
                 value={[progress]}
@@ -442,9 +442,7 @@ h-7.4L13.9,22z"
                 max={duration || currentSong.duration || 100}
                 step={1}
                 className={`w-full h-1.5 ${
-                  isRadio
-                    ? "cursor-not-allowed opacity-50"
-                    : "cursor-pointer"
+                  isRadio ? "cursor-not-allowed opacity-50" : "cursor-pointer"
                 }`}
                 disabled={isRadio}
               />
@@ -453,7 +451,7 @@ h-7.4L13.9,22z"
           </div>
 
           {/* Mobile Progress Bar */}
-          <div className="absolute -top-1 start-0 w-full md:hidden">
+          <div className="absolute -top-1 start-0 w-full lg:hidden">
             <Slider
               value={[progress]}
               onValueChange={handleSeek}
@@ -469,7 +467,7 @@ h-7.4L13.9,22z"
           </div>
 
           {/* Volume & Quality & Device */}
-          <div className="hidden md:flex items-center justify-end w-1/4 gap-2">
+          <div className="hidden lg:flex items-center justify-end w-1/4 gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -573,7 +571,7 @@ h-7.4L13.9,22z"
             <QueueDrawer />
           </div>
           {/* Mobile Menu Trigger */}
-          <div className="md:hidden flex items-center justify-end flex-none">
+          <div className="lg:hidden flex items-center justify-end flex-none">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button
@@ -586,9 +584,9 @@ h-7.4L13.9,22z"
               </SheetTrigger>
               <SheetContent
                 side="left"
-                className="w-64 bg-background/95 backdrop-blur-xl border-s border-white/10 p-0"
+                className="w-64 bg-background/95 backdrop-blur-xl border-s border-white/10 p-0 flex flex-col"
               >
-                <SheetHeader className="p-6 border-b border-white/5">
+                <SheetHeader className="p-6 border-b border-white/5 shrink-0">
                   <SheetTitle className="text-center text-xl font-bold text-foreground">
                     دی بلال
                   </SheetTitle>
@@ -596,7 +594,7 @@ h-7.4L13.9,22z"
                     آهنگ لری
                   </SheetDescription>
                 </SheetHeader>
-                <div className="flex flex-col py-4">
+                <div className="flex flex-col py-4 overflow-y-auto flex-1">
                   <div className="px-6 pb-4 border-b border-white/5">
                     <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-3 text-center">
                       کیفیت پخش آنلاین
@@ -714,14 +712,14 @@ h-7.4L13.9,22z"
             </Sheet>
           </div>
         </div>
-        <div className="flex md:hidden justify-center items-center w-full gap-2 px-2 md:px-0 max-w-full">
-          <span className="text-[12px] md:text-xs font-medium text-muted-foreground w-10 tabular-nums shrink-0 text-left">
+        <div className="flex lg:hidden justify-center items-center w-full gap-2 px-2 lg:px-0 max-w-full">
+          <span className="text-[12px] lg:text-xs font-medium text-muted-foreground w-10 tabular-nums shrink-0 text-left">
             {formatTime(duration || currentSong.duration)}
           </span>
 
           <Link
             href={isLiveRadio ? "/radio" : `/song/${currentSong.id}`}
-            className="flex w-full items-center gap-x-1.5 justify-center min-w-0 flex-1 md:flex-none"
+            className="flex w-full items-center gap-x-1.5 justify-center min-w-0 flex-1 lg:flex-none"
           >
             <MarqueeText
               text={currentSong.title || "بدون عنوان"}
@@ -733,7 +731,7 @@ h-7.4L13.9,22z"
               className="text-foreground/80 text-xs w-1/2 max-w-min"
             />
           </Link>
-          <span className="text-[12px] md:text-xs font-medium text-muted-foreground w-10 tabular-nums shrink-0 text-right">
+          <span className="text-[12px] lg:text-xs font-medium text-muted-foreground w-10 tabular-nums shrink-0 text-right">
             {formatTime(progress)}
           </span>
         </div>

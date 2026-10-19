@@ -117,7 +117,7 @@ export default function Lyrics({
             "text-center whitespace-pre-wrap text-muted-foreground leading-loose",
             isLiveRadio
               ? " text-base md:text-lg lg:text-xl"
-              : " text-xl md:text-2xl lg:text-3xl"
+              : " text-lg md:text-xl lg:text-2xl"
           )}
         >
           {plainLyrics}

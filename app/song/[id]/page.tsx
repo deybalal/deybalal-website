@@ -208,26 +208,26 @@ export default async function SongDetailPage({
                 کیفیت مورد نظرتان را انتخاب کنید:
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4">
               {song.links[64] && (
                 <Button
                   asChild
-                  className="bg-blue-600 hover:bg-blue-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-6 group transition-all"
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-3 lg:px-6 group transition-all overflow-hidden"
                 >
                   <a
                     href={song.links[64].url}
                     download={`${song.artist} - ${song.title} (64kbps).mp3`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
-                        <Download className="w-5 h-5" />
+                    <div className="flex items-center gap-1.5 lg:gap-3 min-w-0">
+                      <div className="p-1.5 lg:p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform shrink-0">
+                        <Download className="w-4 h-4 lg:w-5 lg:h-5" />
                       </div>
-                      <div className="flex flex-col items-start">
-                        <span className="font-bold text-lg ltr">64 kbps</span>
-                        <span className="text-xs opacity-80">کیفیت پایین</span>
+                      <div className="flex flex-col items-start min-w-0">
+                        <span className="font-bold text-sm lg:text-lg ltr truncate w-full">64 kbps</span>
+                        <span className="text-[10px] lg:text-xs opacity-80 truncate w-full">کیفیت پایین</span>
                       </div>
                     </div>
-                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full ltr">
+                    <span className="text-xs lg:text-sm font-medium bg-white/20 px-2 lg:px-3 py-1 rounded-full ltr shrink-0 ml-1">
                       {song.links[64].size}
                     </span>
                   </a>
@@ -236,22 +236,22 @@ export default async function SongDetailPage({
               {song.links[128] && (
                 <Button
                   asChild
-                  className="bg-purple-600 hover:bg-purple-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-6 group transition-all"
+                  className="bg-purple-600 hover:bg-purple-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-3 lg:px-6 group transition-all overflow-hidden"
                 >
                   <a
                     href={song.links[128].url}
                     download={`${song.artist} - ${song.title} (128kbps).mp3`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
-                        <Download className="w-5 h-5" />
+                    <div className="flex items-center gap-1.5 lg:gap-3 min-w-0">
+                      <div className="p-1.5 lg:p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform shrink-0">
+                        <Download className="w-4 h-4 lg:w-5 lg:h-5" />
                       </div>
-                      <div className="flex flex-col items-start">
-                        <span className="font-bold text-lg ltr">128 kbps</span>
-                        <span className="text-xs opacity-80">کیفیت متوسط</span>
+                      <div className="flex flex-col items-start min-w-0">
+                        <span className="font-bold text-sm lg:text-lg ltr truncate w-full">128 kbps</span>
+                        <span className="text-[10px] lg:text-xs opacity-80 truncate w-full">کیفیت متوسط</span>
                       </div>
                     </div>
-                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full ltr">
+                    <span className="text-xs lg:text-sm font-medium bg-white/20 px-2 lg:px-3 py-1 rounded-full ltr shrink-0 ml-1">
                       {song.links[128].size}
                     </span>
                   </a>
@@ -260,22 +260,22 @@ export default async function SongDetailPage({
               {song.links[320] && (
                 <Button
                   asChild
-                  className="bg-green-600 hover:bg-green-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-6 group transition-all"
+                  className="bg-green-600 hover:bg-green-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-3 lg:px-6 group transition-all overflow-hidden"
                 >
                   <a
                     href={song.links[320].url}
                     download={`${song.artist} - ${song.title} (320kbps).mp3`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
-                        <Download className="w-5 h-5" />
+                    <div className="flex items-center gap-1.5 lg:gap-3 min-w-0">
+                      <div className="p-1.5 lg:p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform shrink-0">
+                        <Download className="w-4 h-4 lg:w-5 lg:h-5" />
                       </div>
-                      <div className="flex flex-col items-start">
-                        <span className="font-bold text-lg ltr">320 kbps</span>
-                        <span className="text-xs opacity-80">کیفیت عالی</span>
+                      <div className="flex flex-col items-start min-w-0">
+                        <span className="font-bold text-sm lg:text-lg ltr truncate w-full">320 kbps</span>
+                        <span className="text-[10px] lg:text-xs opacity-80 truncate w-full">کیفیت عالی</span>
                       </div>
                     </div>
-                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full ltr">
+                    <span className="text-xs lg:text-sm font-medium bg-white/20 px-2 lg:px-3 py-1 rounded-full ltr shrink-0 ml-1">
                       {song.links[320].size}
                     </span>
                   </a>

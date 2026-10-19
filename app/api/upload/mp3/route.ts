@@ -103,7 +103,15 @@ export async function POST(request: Request) {
       }
 
       originalFilename = file.name;
-      buffer = Buffer.from(await file.arrayBuffer());
+      // Workaround for Next.js bug: "TypeError: Response body object should not be disturbed or locked"
+      const chunks = [];
+      const reader = file.stream().getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+      buffer = Buffer.concat(chunks);
     } else {
       return NextResponse.json(
         { success: false, message: "فرمت درخواست نامعتبر است" },

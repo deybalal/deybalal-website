@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
+import { mkdir, readFile } from "fs/promises";
 import path from "path";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -52,52 +52,77 @@ export async function POST(request: Request) {
       const trimmedUrl = url.trim();
       if (
         !trimmedUrl.startsWith("http://") &&
-        !trimmedUrl.startsWith("https://")
+        !trimmedUrl.startsWith("https://") &&
+        !trimmedUrl.startsWith("/")
       ) {
         return NextResponse.json(
           {
             success: false,
-            message: "آدرس URL باید با http:// یا https:// آغاز شود.",
+            message: "آدرس URL باید با http:// یا https:// یا مسیر نسبی / آغاز شود.",
           },
           { status: 400 }
         );
       }
 
       let buffer: Buffer;
-      try {
-        const response = await axios.get(trimmedUrl, {
-          responseType: "arraybuffer",
-          timeout: 30000,
-          maxContentLength: FILE_SIZE_LIMITS.IMAGE_MAX,
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          },
-        });
+      if (
+        trimmedUrl.startsWith("http://") ||
+        trimmedUrl.startsWith("https://")
+      ) {
+        try {
+          const response = await axios.get(trimmedUrl, {
+            responseType: "arraybuffer",
+            timeout: 30000,
+            maxContentLength: FILE_SIZE_LIMITS.IMAGE_MAX,
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            },
+          });
 
-        buffer = Buffer.from(response.data);
-      } catch (err) {
-        console.error(
-          "Error downloading image from URL:",
-          (err as Error)?.message || err
-        );
+          buffer = Buffer.from(response.data);
+        } catch (err) {
+          console.error(
+            "Error downloading image from URL:",
+            (err as Error)?.message || err
+          );
+          return NextResponse.json(
+            {
+              success: false,
+              message:
+                (err as { response: { status: number } })?.response?.status ===
+                404
+                  ? "فایل تصویر در آدرس وارد شده یافت نشد (خطای ۴۰۴)."
+                  : "خطا در دریافت تصویر از آدرس اینترنتی.",
+            },
+            { status: 400 }
+          );
+        }
+      } else if (trimmedUrl.startsWith("/")) {
+        try {
+          const localPath = path.join(process.cwd(), "public", trimmedUrl);
+          buffer = await readFile(localPath);
+        } catch (err) {
+          console.error("Error reading local image:", err);
+          return NextResponse.json(
+            { success: false, message: "فایل تصویر در سرور یافت نشد." },
+            { status: 400 }
+          );
+        }
+      } else {
         return NextResponse.json(
           {
             success: false,
-            message:
-              (err as { response: { status: number } })?.response?.status ===
-              404
-                ? "فایل تصویر در آدرس وارد شده یافت نشد (خطای ۴۰۴)."
-                : "خطا در دریافت تصویر از آدرس اینترنتی.",
+            message: "آدرس URL نامعتبر است.",
           },
           { status: 400 }
         );
       }
 
-      // Validate image format using sharp
+      // Validate image format using canvas
       try {
-        const sharp = (await import("sharp")).default;
-        await sharp(buffer).metadata();
+        const { loadImage } = await import("canvas");
+        await loadImage(buffer);
       } catch {
         return NextResponse.json(
           { success: false, message: "فایل دریافت شده یک تصویر معتبر نیست." },
@@ -138,6 +163,8 @@ export async function POST(request: Request) {
     } else if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
       const file = formData.get("file") as File;
+      const artist = (formData.get("artist") as string) || "";
+      const title = (formData.get("title") as string) || "";
 
       if (!file) {
         return NextResponse.json(
@@ -157,7 +184,14 @@ export async function POST(request: Request) {
         );
       }
 
-      const buffer = Buffer.from(await file.arrayBuffer());
+      const chunks = [];
+      const reader = file.stream().getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+      const buffer = Buffer.concat(chunks);
 
       // Validate file type
       const typeValidation = await validateFileType(buffer, [
@@ -174,12 +208,33 @@ export async function POST(request: Request) {
         );
       }
 
+      const skipWatermark = formData.get("skipWatermark") === "true";
+
       const timestamp = Date.now();
-      const safeFilename = sanitizeFilename(file.name);
-      const filename = `temp_${timestamp}_${safeFilename}`;
+      const randomStr = Math.random().toString(36).substring(7);
+      const safeFilename = sanitizeFilename(file.name).replace(/\.[^/.]+$/, "");
+      const filename = `temp_${timestamp}_${safeFilename}_${randomStr}.jpg`;
       const filepath = path.join(uploadDir, filename);
 
-      await writeFile(filepath, buffer);
+      let watermarkSuccess = true;
+      if (!skipWatermark) {
+        watermarkSuccess = await applyWatermark(
+          buffer,
+          filepath,
+          artist,
+          title
+        );
+      } else {
+        const fs = await import("fs/promises");
+        await fs.writeFile(filepath, buffer);
+      }
+
+      if (!watermarkSuccess) {
+        return NextResponse.json(
+          { success: false, message: "خطا در اعمال واترمارک روی تصویر." },
+          { status: 500 }
+        );
+      }
 
       const publicPath = `/assets/cover/${filename}`;
 

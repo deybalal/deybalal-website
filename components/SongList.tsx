@@ -39,8 +39,14 @@ const SongList = ({
   showArtist = true,
   showAlbum = true,
 }: SongListProps) => {
-  const { setQueue, playNext, addToQueue, currentSong, isPlaying, isLiveRadio } =
-    usePlayerStore();
+  const {
+    setQueue,
+    playNext,
+    addToQueue,
+    currentSong,
+    isPlaying,
+    isLiveRadio,
+  } = usePlayerStore();
 
   return (
     <div className="space-y-1">
@@ -177,7 +183,7 @@ const SongList = ({
                       className="cursor-pointer hover:scale-105"
                     >
                       <Link
-                        href={`/artist/${song?.artists[0]?.id}`}
+                        href={`/artist/${song?.artists?.[0]?.id}`}
                         className="flex items-center flex-row hover:scale-105"
                       >
                         <Mic2 className="w-4 h-4 me-2" />

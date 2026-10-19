@@ -130,9 +130,9 @@ export default function PlaylistClient({
   };
 
   return (
-    <div className="space-y-8 mb-24 h-max w-full lg:w-7/12">
+    <div className="space-y-8 mb-24 h-max w-full lg:w-10/12 xl:w-7/12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row gap-8 items-end">
+      <div className="flex flex-col mt-7 md:mt-2 md:flex-row gap-8 justify-center md:justify-normal items-center md:items-end">
         <div className="flex w-full md:max-w-max justify-center">
           <div
             className={`relative w-64 h-64 rounded-lg overflow-hidden shadow-2xl neon-box shrink-0 flex items-center justify-center ${
@@ -154,50 +154,16 @@ export default function PlaylistClient({
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 pb-2 flex-1">
+        <div className="flex flex-col gap-2 pb-2 flex-1 justify-center md:justify-normal items-center md:items-stretch">
           <div className="flex justify-between items-start flex-col md:flex-row">
             <div className="flex flex-col gap-2">
               <span className="text-gray-500 uppercase tracking-widest text-sm font-bold">
                 پلی لیست
               </span>
-              <h1 className="text-3xl md:text-5xl font-bold neon-text">
+              <h1 className="text-3xl md:text-3xl lg:text-4xl xl:text-5xl font-bold neon-text">
                 {playlist.isFavorite ? "آهنگ های موردعلاقه" : playlist.name}
               </h1>
             </div>
-
-            {playlist.doesUserOwnsPlaylist && (
-              <div className="flex items-center gap-3 bg-black/20 p-3 rounded-lg backdrop-blur-sm border border-white/10 m-4 md:m-0 mt-8">
-                <span className="text-sm font-medium text-gray-300">
-                  نمایش:
-                </span>
-                <Button
-                  variant={playlist.isPrivate ? "outline" : "default"}
-                  size="sm"
-                  onClick={async () => {
-                    await handlePlaylistPrivacyToggle(false);
-                  }}
-                  className={
-                    !playlist.isPrivate ? "bg-green-600 hover:bg-green-700" : ""
-                  }
-                >
-                  <Globe size={16} className="mr-1" />
-                  عمومی
-                </Button>
-                <Button
-                  variant={playlist.isPrivate ? "default" : "outline"}
-                  size="sm"
-                  onClick={async () => {
-                    await handlePlaylistPrivacyToggle(true);
-                  }}
-                  className={
-                    playlist.isPrivate ? "bg-red-600 hover:bg-red-700" : ""
-                  }
-                >
-                  <Lock size={16} className="mr-1" />
-                  خصوصی
-                </Button>
-              </div>
-            )}
           </div>
 
           {playlist.description && (
@@ -206,7 +172,39 @@ export default function PlaylistClient({
             </p>
           )}
 
-          <div className="flex items-center justify-between text-gray-400 mt-2 flex-col md:flex-row gap-y-4">
+          {playlist.doesUserOwnsPlaylist && (
+            <div className="flex items-center w-max gap-3 bg-black/20 p-3 rounded-lg backdrop-blur-sm border border-white/10 m-4 md:m-0 mt-8">
+              <span className="text-sm font-medium text-gray-300">نمایش:</span>
+              <Button
+                variant={playlist.isPrivate ? "outline" : "default"}
+                size="sm"
+                onClick={async () => {
+                  await handlePlaylistPrivacyToggle(false);
+                }}
+                className={
+                  !playlist.isPrivate ? "bg-green-600 hover:bg-green-700" : ""
+                }
+              >
+                <Globe size={16} className="mr-1" />
+                عمومی
+              </Button>
+              <Button
+                variant={playlist.isPrivate ? "default" : "outline"}
+                size="sm"
+                onClick={async () => {
+                  await handlePlaylistPrivacyToggle(true);
+                }}
+                className={
+                  playlist.isPrivate ? "bg-red-600 hover:bg-red-700" : ""
+                }
+              >
+                <Lock size={16} className="mr-1" />
+                خصوصی
+              </Button>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between text-gray-400 mt-2 flex-col lg:flex-row gap-y-4">
             <div className="flex items-center gap-2">
               <span>{playlist.songsLength} آهنگ</span>
               {playlist.duration > 0 && (

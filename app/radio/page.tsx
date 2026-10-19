@@ -358,15 +358,41 @@ export default function RadioPage() {
                       />
                     </h2>
                   </Link>
-                  <Link
-                    href={`/artist/${state?.currentTrack.artists[0].id}`}
-                    className="text-foreground/80 hover:text-foreground/50 text-lg font-medium drop-shadow-md"
-                  >
-                    <MarqueeText
-                      text={state?.currentTrack.artist || "ناشناس"}
-                      className="overflow-hidden line-clamp-none"
-                    />
-                  </Link>
+                  <div className="flex flex-row justify-center items-center">
+                    {state?.currentTrack.artists.length === 1 ? (
+                      <Link
+                        href={`/artist/${state?.currentTrack.artists[0].id}`}
+                        className="text-foreground/80 hover:text-foreground/50 text-lg font-medium drop-shadow-md"
+                      >
+                        <MarqueeText
+                          text={state?.currentTrack.artist || "ناشناس"}
+                          className="overflow-hidden line-clamp-none"
+                        />
+                      </Link>
+                    ) : (
+                      state?.currentTrack.artists.map((ar, i) => (
+                        <div
+                          key={ar.id}
+                          className="flex justify-center items-center gap-x-1"
+                        >
+                          <Link
+                            href={`/artist/${ar.id}`}
+                            className="text-foreground/80 hover:text-foreground/50 text-lg font-medium drop-shadow-md"
+                          >
+                            <MarqueeText
+                              text={ar.name}
+                              className="overflow-hidden line-clamp-none"
+                            />
+                          </Link>
+                          {i == state?.currentTrack.artists.length - 1 ? (
+                            ""
+                          ) : (
+                            <span className="mx-1">و</span>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
                 <div className="flex ml-1">
                   <AddToPlaylistDialog
@@ -513,7 +539,7 @@ export default function RadioPage() {
             <CardContent className="p-6">
               {state?.nextTrack ? (
                 <div className="flex items-center gap-4 p-4 rounded-xl bg-foreground/5 border border-foreground/5 hover:bg-foreground/10 transition-colors group">
-                  <div className="flex gap-3.5 w-full">
+                  <div className="flex gap-3.5 w-11/12">
                     <Link
                       href={`/song/${state.nextTrack.id}`}
                       className="w-14 h-14 bg-foreground/5 rounded-lg relative overflow-hidden shrink-0 shadow-lg ring-1 ring-foreground/10"

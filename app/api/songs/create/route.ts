@@ -240,7 +240,7 @@ export async function POST(request: Request) {
               );
 
               if (success) {
-                finalCoverArt = outputRelPath;
+                finalCoverArt = outputPath;
               } else {
                 finalCoverArt = artist.image;
               }
@@ -261,7 +261,10 @@ export async function POST(request: Request) {
       finalCoverArt = "/images/cover.png";
     }
 
-    // const count = await prisma.song.count();
+    const index = await prisma.song.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: { index: true },
+    });
 
     const song = await prisma.song.create({
       data: {
@@ -269,7 +272,7 @@ export async function POST(request: Request) {
         titleEn: validatedData.titleEn || "",
         artist: validatedData.artist || "",
         artistEn: artistEn || "",
-        // index: count,
+        index: (index?.index || 0) + 1 || 1,
         artists: {
           connect: validatedData.artistIds?.map((id) => ({ id })) || [],
         },

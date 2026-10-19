@@ -1,40 +1,84 @@
+export interface TelegramFile {
+  songId: string;
+  type: string;
+  quality: string;
+  fileId: string;
+  file_id: string;
+  fileUniqueId: string;
+  file_unique_id: string;
+  uploadedAt?: number | Date;
+}
+
 export interface Song {
-  uri: string;
-  links?: Record<
-    string | number,
-    { url: string; size: string; bytes: number }
-  > | null;
-  localUri?: string;
-  filename: string;
-  title: string | undefined;
-  titleEn: string | undefined;
-  artist: string | null;
-  album: string | null;
-  albumId: string | null;
-  artists: Artist[];
-  coverArt: string | null;
-  index: number;
-  year?: string | null;
-  comment?: string | null;
-  date?: number | null;
-  duration: number | 0;
   id: string;
-  isFavorite?: boolean;
+  slug?: string;
+  title?: string;
+  titleEn?: string | null;
+  artist: string;
+  artistEn?: string | null;
+  artists: Artist[];
+  albumName?: string | null;
+  coverArt: string | null;
+  year?: string | null;
+  duration: number;
+  uri: string;
+  filename: string;
+  songIndex?: number;
+  index: number;
   lyrics?: string | null;
   syncedLyrics?: string | null;
-  size?: number;
   playCount?: number;
-  lastPlayedAt?: number;
-  contributors?: Contributor[];
+  downloads?: number;
+  isDisabled?: boolean | number;
+  disabledDescription?: string | null;
+  isActive?: boolean | number;
+  isFeatured?: boolean | number;
+  album: string | null;
+  albumId: string | null;
+  userId?: string | null;
+  lyricsSource?: string | null;
+  lyricsSourceUrl?: string | null;
+  ogg?: string | null;
+  links?: Record<string | number, { url: string; size: string; bytes: number }> | null;
+  date?: number | null;
   genres?: Genre[];
+  contributors?: Contributor[];
+
   playedAtRange?: string;
   addedAt?: string | number;
+  createdAt?: number | Date;
+  updatedAt?: number | Date;
 }
 
 export interface Genre {
   id: string;
   name: string;
   slug: string;
+}
+
+export interface TelegramSongWithFiles extends Song {
+  telegram?: {
+    coverArt: TelegramFile | null;
+    ogg: TelegramFile | null;
+    "64": TelegramFile | null;
+    "128": TelegramFile | null;
+    "320": TelegramFile | null;
+  };
+}
+
+export interface Artist {
+  id: string;
+  name: string;
+  nameEn?: string | null;
+  image?: string | null;
+  isVerified?: boolean | number;
+  ig?: string | null;
+  description?: string | null;
+  followers?: number;
+  userId?: string | null;
+  songs?: Song[];
+  fileId?: string | null;
+  fileUniqueId?: string | null;
 }
 
 export interface Contributor {
@@ -49,16 +93,46 @@ export interface Contributor {
   };
 }
 
-export type Artist = {
-  id: string;
-  name: string;
-  nameEn?: string | null;
-  description?: string | null;
-  image: string | null;
-  userId: string | null;
-  // songs: Song[];
-  isVerified: boolean;
+export interface SearchResult {
+  song: Song;
+  reason: "title" | "artist" | "lyrics";
+  snippet?: string;
+}
+
+export interface TelegramUser {
+  id: number;
+  is_bot?: boolean;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code?: string;
+  is_premium?: boolean;
+}
+
+export type LyricVideoState = {
+  songId: string;
+  images: string[];
+  jobDir: string;
+  startMs?: number;
+  endMs?: number;
+  progressMessageId?: number;
+  step: "waiting_images" | "waiting_range" | "rendering" | "waiting_resolution";
+  resolution?: VideoResolution;
 };
+
+export type VideoResolution = "big" | "small";
+
+export interface VideoJob {
+  userId: number;
+  chatId: number;
+
+  songId: string;
+
+  title: string;
+
+  resolve: () => void;
+  reject: (err: Error) => void;
+}
 
 export type Playlist = {
   id: string;

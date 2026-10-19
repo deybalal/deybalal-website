@@ -1,13 +1,25 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 import fs from "fs/promises";
 import path from "path";
 import "dotenv/config";
 
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
 async function main(): Promise<void> {
   console.log("🚀 Starting Full Database Export...\n");
 
-  const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+  const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
 
   try {
@@ -53,11 +65,74 @@ async function main(): Promise<void> {
     const albums = await fetchTable("albums", () => prisma.album.findMany());
 
     console.log("\n--- 4. Songs & Media ---");
-    const songs = await fetchTable("songs", () =>
-      prisma.song.findMany({
-        orderBy: { index: "asc" },
-      })
-    );
+    const rawSongs = await prisma.song.findMany({
+      orderBy: { index: "asc" },
+      include: {
+        artists: {
+          select: {
+            id: true,
+            name: true,
+            nameEn: true,
+            fileId: true,
+            fileUniqueId: true,
+          },
+        },
+        telegram: true,
+      },
+    });
+
+    const songs = rawSongs.map((song) => {
+      const { telegram, ...rest } = song;
+
+      const telegramObj = {
+        "64": telegram?.file_id_64
+          ? {
+              file_id: telegram.file_id_64,
+              file_unique_id: telegram.file_unique_id_64,
+            }
+          : null,
+        "128": telegram?.file_id_128
+          ? {
+              file_id: telegram.file_id_128,
+              file_unique_id: telegram.file_unique_id_128,
+            }
+          : null,
+        "320": telegram?.file_id_320
+          ? {
+              file_id: telegram.file_id_320,
+              file_unique_id: telegram.file_unique_id_320,
+            }
+          : null,
+        coverArt: telegram?.cover_art_file_id
+          ? {
+              file_id: telegram.cover_art_file_id,
+              file_unique_id: telegram.cover_art_file_unique_id,
+            }
+          : null,
+        ogg:
+          telegram?.ogg_file_id || telegram?.file_id_ogg
+            ? {
+                file_id: telegram.ogg_file_id || telegram.file_id_ogg,
+                file_unique_id:
+                  telegram.ogg_file_unique_id || telegram.file_unique_id_ogg,
+              }
+            : null,
+      };
+
+      const postObj = {
+        has_posted: telegram?.has_posted ?? false,
+        message_id: telegram?.message_id ?? null,
+        ogg_message_id: telegram?.ogg_message_id ?? null,
+      };
+
+      return {
+        ...rest,
+        telegram: telegramObj,
+        post: postObj,
+      };
+    });
+    console.log(`  📦 Exported songs               : ${songs.length} records`);
+
     const songCrews = await fetchTable("songCrews", () =>
       prisma.songCrew.findMany()
     );
@@ -81,8 +156,14 @@ async function main(): Promise<void> {
     const notifications = await fetchTable("notifications", () =>
       prisma.notification.findMany()
     );
-    const playHistories = await fetchTable("playHistories", () =>
-      prisma.playHistory.findMany()
+    const radioPlaylists = await fetchTable("radioPlaylists", () =>
+      prisma.radioPlaylist.findMany()
+    );
+    const radioTracks = await fetchTable("radioTracks", () =>
+      prisma.radioTrack.findMany()
+    );
+    const telegrams = await fetchTable("telegrams", () =>
+      prisma.telegram.findMany()
     );
 
     console.log("\n--- 6. Many-to-Many Relations ---");
@@ -93,7 +174,7 @@ async function main(): Promise<void> {
     ): Promise<{ A: string; B: string }[]> => {
       try {
         const rows = await prisma.$queryRawUnsafe<{ A: string; B: string }[]>(
-          `SELECT \`A\`, \`B\` FROM \`${tableName}\``
+          `SELECT "A", "B" FROM "${tableName}"`
         );
         console.log(
           `  🔗 Relation ${relationName.padEnd(17)}: ${rows.length} links`
@@ -189,7 +270,9 @@ async function main(): Promise<void> {
       lyricsSuggestions: lyricsSuggestions.length,
       notifications: notifications.length,
       contributors: contributors.length,
-      playHistories: playHistories.length,
+      radioPlaylists: radioPlaylists.length,
+      radioTracks: radioTracks.length,
+      telegrams: telegrams.length,
       artistToSong: artistToSong.length,
       genreToSong: genreToSong.length,
       albumToGenre: albumToGenre.length,
@@ -222,9 +305,9 @@ async function main(): Promise<void> {
         lyricsSuggestions,
         notifications,
         contributors,
-        playHistories,
-      },
-      relations: {
+        radioPlaylists,
+        radioTracks,
+        telegrams,
         artistToSong,
         genreToSong,
         albumToGenre,

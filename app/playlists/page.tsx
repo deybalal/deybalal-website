@@ -116,15 +116,15 @@ export default async function PlaylistsPage() {
   }));
 
   return (
-    <div className="space-y-8 w-full pb-24 h-max">
-      <div className="flex items-center">
-        <h1 className="text-3xl font-bold text-white neon-text ml-5">
+    <div className="space-y-10 w-full pb-24 h-max px-4 sm:px-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white neon-text">
           پلی لیست ها
         </h1>
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" className="w-full sm:w-auto">
           <Link
             href="/panel/new/playlist"
-            className=" text-foreground px-4 py-2 rounded-md transition-colors"
+            className="text-foreground transition-colors"
           >
             ساخت پلی لیست جدید
           </Link>
@@ -133,8 +133,8 @@ export default async function PlaylistsPage() {
 
       <PlaylistGrid initialPlaylists={playlists} />
 
-      <div className="flex flex-col">
-        <h2 className="text-3xl font-bold text-foreground neon-text ml-5 mb-4">
+      <div className="flex flex-col pt-4">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground neon-text mb-6">
           پلی لیست های عمومی
         </h2>
         <PlaylistGrid initialPlaylists={publicPlaylists} />

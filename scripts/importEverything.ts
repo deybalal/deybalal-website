@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   PrismaClient,
   Prisma,
@@ -5,7 +6,8 @@ import {
   SuggestionStatus,
   SuggestionType,
 } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 import fs from "fs/promises";
 import path from "path";
 import "dotenv/config";
@@ -23,6 +25,10 @@ interface UserJson {
   userIndex: number;
   userSlug: string;
   instagramHandle?: string | null;
+  telegramId?: string | number | bigint | null;
+  telegramUsername?: string | null;
+  telegramFirstName?: string | null;
+  telegramLastName?: string | null;
   role?: Role | string;
   isVerified?: boolean;
   isUserAnArtist?: boolean;
@@ -144,6 +150,7 @@ interface SongJson {
   lyrics?: string | null;
   syncedLyrics?: string | null;
   playCount?: number;
+  downloads?: number;
   isDisabled?: boolean;
   disabledDescription?: string | null;
   isActive?: boolean;
@@ -156,6 +163,25 @@ interface SongJson {
   ogg?: string | null;
   createdAt?: string | Date;
   updatedAt?: string | Date;
+  artists?: {
+    id: string;
+    name: string;
+    nameEn?: string | null;
+    fileId?: string | null;
+    fileUniqueId?: string | null;
+  }[];
+  telegram?: {
+    "64"?: { file_id: string; file_unique_id: string } | null;
+    "128"?: { file_id: string; file_unique_id: string } | null;
+    "320"?: { file_id: string; file_unique_id: string } | null;
+    coverArt?: { file_id: string; file_unique_id: string } | null;
+    ogg?: { file_id: string; file_unique_id: string } | null;
+  } | null;
+  post?: {
+    has_posted?: boolean;
+    message_id?: number | null;
+    ogg_message_id?: number | null;
+  } | null;
 }
 
 interface SongCrewJson {
@@ -242,6 +268,46 @@ interface PlayHistoryJson {
   playedAt?: string | Date;
 }
 
+interface RadioPlaylistJson {
+  id: string;
+  date: string | Date;
+  startTime: string | Date;
+  totalDuration: number;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}
+
+interface RadioTrackJson {
+  id: string;
+  playlistId: string;
+  songId: string;
+  order: number;
+  duration: number;
+  startOffset: number;
+}
+
+interface TelegramJson {
+  id: string;
+  songId: string;
+  file_id_64?: string | null;
+  file_unique_id_64?: string | null;
+  file_id_128?: string | null;
+  file_unique_id_128?: string | null;
+  file_id_320?: string | null;
+  file_unique_id_320?: string | null;
+  file_id_ogg?: string | null;
+  file_unique_id_ogg?: string | null;
+  cover_art_file_id?: string | null;
+  cover_art_file_unique_id?: string | null;
+  ogg_file_id?: string | null;
+  ogg_file_unique_id?: string | null;
+  has_posted?: boolean;
+  message_id?: number | null;
+  ogg_message_id?: number | null;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}
+
 interface RelationLink {
   A: string;
   B: string;
@@ -286,6 +352,14 @@ interface BackupData {
   Contributor?: ContributorJson[];
   playHistories?: PlayHistoryJson[];
   PlayHistory?: PlayHistoryJson[];
+
+  radioPlaylists?: RadioPlaylistJson[];
+  RadioPlaylist?: RadioPlaylistJson[];
+  radioTracks?: RadioTrackJson[];
+  RadioTrack?: RadioTrackJson[];
+  telegrams?: TelegramJson[];
+  Telegram?: TelegramJson[];
+
   relations?: BackupRelations;
 }
 
@@ -349,10 +423,7 @@ async function fileExists(filePath: string): Promise<boolean> {
 }
 
 async function findLatestBackupFile(): Promise<string | null> {
-  const searchDirs = [
-    path.join(process.cwd(), "scripts"),
-    process.cwd(),
-  ];
+  const searchDirs = [path.join(process.cwd(), "scripts"), process.cwd()];
 
   for (const dir of searchDirs) {
     try {
@@ -374,7 +445,10 @@ async function findLatestBackupFile(): Promise<string | null> {
 async function main(): Promise<void> {
   console.log("🚀 Starting Full Database Import...\n");
 
-  const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+
+  console.log("process.env.DATABASE_URL ", process.env.DATABASE_URL);
+  const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
 
   // 1. Resolve Input File
@@ -416,11 +490,12 @@ async function main(): Promise<void> {
 
   console.log(`📂 Reading backup file: ${inputPath}`);
   const rawData = await fs.readFile(inputPath, "utf-8");
+  console.log("rawData.le ", rawData.length);
   const payload: BackupPayload & BackupData = JSON.parse(rawData);
-
+  console.log("payload ", payload.data?.songs?.length);
+  console.log("Hallo");
   const data: BackupData = payload.data || payload;
-  const relations: BackupRelations =
-    payload.relations || data.relations || {};
+  const relations: BackupRelations = payload.relations || data.relations || {};
 
   const stats: Record<
     string,
@@ -473,9 +548,11 @@ async function main(): Promise<void> {
   };
 
   try {
-    // Disable Foreign Key checks for clean bulk import in MySQL/MariaDB
+    // Disable Foreign Key checks for clean bulk import in PostgreSQL
     try {
-      await prisma.$executeRawUnsafe("SET FOREIGN_KEY_CHECKS = 0;");
+      await prisma.$executeRawUnsafe(
+        "SET session_replication_role = 'replica';"
+      );
       console.log("🔒 Temporarily disabled foreign key checks for import.");
     } catch {
       console.warn(
@@ -526,26 +603,30 @@ async function main(): Promise<void> {
     });
 
     const verifications = data.verifications || data.Verification;
-    await importBatch("verifications", verifications, async (v: VerificationJson) => {
-      await prisma.verification.upsert({
-        where: { id: v.id },
-        update: {
-          identifier: v.identifier,
-          value: v.value,
-          expiresAt: parseDate(v.expiresAt) || new Date(),
-          createdAt: parseDate(v.createdAt),
-          updatedAt: parseDate(v.updatedAt),
-        },
-        create: {
-          id: v.id,
-          identifier: v.identifier,
-          value: v.value,
-          expiresAt: parseDate(v.expiresAt) || new Date(),
-          createdAt: parseDate(v.createdAt),
-          updatedAt: parseDate(v.updatedAt),
-        },
-      });
-    });
+    await importBatch(
+      "verifications",
+      verifications,
+      async (v: VerificationJson) => {
+        await prisma.verification.upsert({
+          where: { id: v.id },
+          update: {
+            identifier: v.identifier,
+            value: v.value,
+            expiresAt: parseDate(v.expiresAt) || new Date(),
+            createdAt: parseDate(v.createdAt),
+            updatedAt: parseDate(v.updatedAt),
+          },
+          create: {
+            id: v.id,
+            identifier: v.identifier,
+            value: v.value,
+            expiresAt: parseDate(v.expiresAt) || new Date(),
+            createdAt: parseDate(v.createdAt),
+            updatedAt: parseDate(v.updatedAt),
+          },
+        });
+      }
+    );
 
     // --- 2. Users & User Relations ---
     console.log("\n--- 2. Importing Users ---");
@@ -571,9 +652,13 @@ async function main(): Promise<void> {
           bio: u.bio ?? "",
           isPrivate: Boolean(u.isPrivate),
           isBanned: Boolean(u.isBanned),
-          userIndex: u.userIndex,
+          // userIndex: u.userIndex, // Omitted to avoid Postgres sequence collisions
           userSlug: u.userSlug,
           instagramHandle: u.instagramHandle ?? null,
+          telegramId: u.telegramId ? BigInt(u.telegramId) : null,
+          telegramUsername: u.telegramUsername ?? null,
+          telegramFirstName: u.telegramFirstName ?? null,
+          telegramLastName: u.telegramLastName ?? null,
           role: roleValue,
           isVerified: Boolean(u.isVerified),
           isUserAnArtist: Boolean(u.isUserAnArtist),
@@ -591,9 +676,13 @@ async function main(): Promise<void> {
           isPrivate: Boolean(u.isPrivate),
           isBanned: Boolean(u.isBanned),
           artistId: null, // Set deferred after artists exist
-          userIndex: u.userIndex,
+          // userIndex: u.userIndex, // Omitted to avoid Postgres sequence collisions
           userSlug: u.userSlug,
           instagramHandle: u.instagramHandle ?? null,
+          telegramId: u.telegramId ? BigInt(u.telegramId) : null,
+          telegramUsername: u.telegramUsername ?? null,
+          telegramFirstName: u.telegramFirstName ?? null,
+          telegramLastName: u.telegramLastName ?? null,
           role: roleValue,
           isVerified: Boolean(u.isVerified),
           isUserAnArtist: Boolean(u.isUserAnArtist),
@@ -789,6 +878,7 @@ async function main(): Promise<void> {
     // --- 5. Songs & Song Relations ---
     console.log("\n--- 5. Importing Songs ---");
     const songs = data.songs || data.Song;
+    console.log("songs.le ", songs?.length);
     await importBatch("songs", songs, async (s: SongJson) => {
       const parsedLinks = parseJsonField(s.links);
 
@@ -810,6 +900,7 @@ async function main(): Promise<void> {
           lyrics: s.lyrics ?? null,
           syncedLyrics: s.syncedLyrics ?? null,
           playCount: s.playCount ?? 0,
+          downloads: s.downloads ?? 0,
           isDisabled: Boolean(s.isDisabled),
           disabledDescription: s.disabledDescription ?? null,
           isActive: Boolean(s.isActive),
@@ -840,6 +931,7 @@ async function main(): Promise<void> {
           lyrics: s.lyrics ?? null,
           syncedLyrics: s.syncedLyrics ?? null,
           playCount: s.playCount ?? 0,
+          downloads: s.downloads ?? 0,
           isDisabled: Boolean(s.isDisabled),
           disabledDescription: s.disabledDescription ?? null,
           isActive: Boolean(s.isActive),
@@ -854,6 +946,69 @@ async function main(): Promise<void> {
           updatedAt: parseDate(s.updatedAt),
         },
       });
+
+      if (s.artists && s.artists.length > 0) {
+        for (const art of s.artists) {
+          try {
+            await prisma.artist.update({
+              where: { id: art.id },
+              data: {
+                ...(art.fileId ? { fileId: art.fileId } : {}),
+                ...(art.fileUniqueId ? { fileUniqueId: art.fileUniqueId } : {}),
+              },
+            });
+          } catch {
+            // ignore if artist not found
+          }
+        }
+        await prisma.song.update({
+          where: { id: s.id },
+          data: {
+            artists: {
+              connect: s.artists.map((a) => ({ id: a.id })),
+            },
+          },
+        });
+      }
+
+      if (s.telegram || s.post) {
+        const tg = s.telegram;
+        const pt = s.post;
+        await prisma.telegram.upsert({
+          where: { songId: s.id },
+          update: {
+            file_id_64: tg?.["64"]?.file_id ?? null,
+            file_unique_id_64: tg?.["64"]?.file_unique_id ?? null,
+            file_id_128: tg?.["128"]?.file_id ?? null,
+            file_unique_id_128: tg?.["128"]?.file_unique_id ?? null,
+            file_id_320: tg?.["320"]?.file_id ?? null,
+            file_unique_id_320: tg?.["320"]?.file_unique_id ?? null,
+            cover_art_file_id: tg?.coverArt?.file_id ?? null,
+            cover_art_file_unique_id: tg?.coverArt?.file_unique_id ?? null,
+            ogg_file_id: tg?.ogg?.file_id ?? null,
+            ogg_file_unique_id: tg?.ogg?.file_unique_id ?? null,
+            has_posted: pt?.has_posted ?? false,
+            message_id: pt?.message_id ?? null,
+            ogg_message_id: pt?.ogg_message_id ?? null,
+          },
+          create: {
+            songId: s.id,
+            file_id_64: tg?.["64"]?.file_id ?? null,
+            file_unique_id_64: tg?.["64"]?.file_unique_id ?? null,
+            file_id_128: tg?.["128"]?.file_id ?? null,
+            file_unique_id_128: tg?.["128"]?.file_unique_id ?? null,
+            file_id_320: tg?.["320"]?.file_id ?? null,
+            file_unique_id_320: tg?.["320"]?.file_unique_id ?? null,
+            cover_art_file_id: tg?.coverArt?.file_id ?? null,
+            cover_art_file_unique_id: tg?.coverArt?.file_unique_id ?? null,
+            ogg_file_id: tg?.ogg?.file_id ?? null,
+            ogg_file_unique_id: tg?.ogg?.file_unique_id ?? null,
+            has_posted: pt?.has_posted ?? false,
+            message_id: pt?.message_id ?? null,
+            ogg_message_id: pt?.ogg_message_id ?? null,
+          },
+        });
+      }
     });
 
     const songCrews = data.songCrews || data.SongCrew;
@@ -902,8 +1057,7 @@ async function main(): Promise<void> {
       }
     );
 
-    const lyricsSuggestions =
-      data.lyricsSuggestions || data.LyricsSuggestion;
+    const lyricsSuggestions = data.lyricsSuggestions || data.LyricsSuggestion;
     await importBatch(
       "lyricsSuggestions",
       lyricsSuggestions,
@@ -1127,7 +1281,7 @@ async function main(): Promise<void> {
         const item = list[i];
         try {
           await prisma.$executeRawUnsafe(
-            `INSERT IGNORE INTO \`${tableName}\` (\`A\`, \`B\`) VALUES (?, ?)`,
+            `INSERT INTO \"${tableName}\" (\"A\", \"B\") VALUES ($1, $2) ON CONFLICT DO NOTHING`,
             item.A,
             item.B
           );
@@ -1157,7 +1311,10 @@ async function main(): Promise<void> {
     };
 
     const artistToSong =
-      relations.artistToSong || relations._ArtistToSong;
+      relations.artistToSong ||
+      relations._ArtistToSong ||
+      data.artistToSong ||
+      data._ArtistToSong;
     await importRelation(
       "ArtistToSong",
       "_ArtistToSong",
@@ -1170,7 +1327,11 @@ async function main(): Promise<void> {
       }
     );
 
-    const genreToSong = relations.genreToSong || relations._GenreToSong;
+    const genreToSong =
+      relations.genreToSong ||
+      relations._GenreToSong ||
+      data.genreToSong ||
+      data._GenreToSong;
     await importRelation(
       "GenreToSong",
       "_GenreToSong",
@@ -1184,7 +1345,10 @@ async function main(): Promise<void> {
     );
 
     const albumToGenre =
-      relations.albumToGenre || relations._AlbumToGenre;
+      relations.albumToGenre ||
+      relations._AlbumToGenre ||
+      data.albumToGenre ||
+      data._AlbumToGenre;
     await importRelation(
       "AlbumToGenre",
       "_AlbumToGenre",
@@ -1198,7 +1362,10 @@ async function main(): Promise<void> {
     );
 
     const songSimilarity =
-      relations.songSimilarity || relations._SongSimilarity;
+      relations.songSimilarity ||
+      relations._SongSimilarity ||
+      data.songSimilarity ||
+      data._SongSimilarity;
     await importRelation(
       "SongSimilarity",
       "_SongSimilarity",
@@ -1220,7 +1387,9 @@ async function main(): Promise<void> {
     process.exit(1);
   } finally {
     try {
-      await prisma.$executeRawUnsafe("SET FOREIGN_KEY_CHECKS = 1;");
+      await prisma.$executeRawUnsafe(
+        "SET session_replication_role = 'origin';"
+      );
       console.log("🔓 Re-enabled foreign key checks.");
     } catch {}
     await prisma.$disconnect();

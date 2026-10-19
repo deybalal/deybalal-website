@@ -119,6 +119,10 @@ export default async function GenrePage({
     })),
     links: song.links as unknown as Song["links"],
     year: song.year.toString(),
+    slug: song.slug,
+    isDisabled: song.isDisabled,
+    isActive: song.isActive,
+    isFeatured: song.isFeatured,
   }));
 
   return (

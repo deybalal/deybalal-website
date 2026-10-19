@@ -1,25 +1,6 @@
 import path from "path";
 import { existsSync, mkdirSync } from "fs";
 
-function escapeXml(unsafe: string) {
-  return (unsafe || "").replace(/[<>&'"]/g, (c) => {
-    switch (c) {
-      case "<":
-        return "&lt;";
-      case ">":
-        return "&gt;";
-      case "&":
-        return "&amp;";
-      case "'":
-        return "&apos;";
-      case '"':
-        return "&quot;";
-      default:
-        return c;
-    }
-  });
-}
-
 /**
  * Applies a watermark at the TOP Center of an image.
  *
@@ -43,81 +24,78 @@ export async function applyWatermark(
     if (!existsSync(outputDir)) {
       mkdirSync(outputDir, { recursive: true });
     }
+    const { createCanvas, loadImage, registerFont } = await import("canvas");
+    
+    // Register local Farsi font to ensure beautiful rendering across all OSes
+    const fontPath = path.join(process.cwd(), "public/assets/Vazirmatn-Bold.ttf");
+    if (existsSync(fontPath)) {
+      try {
+        registerFont(fontPath, { family: "Vazirmatn", weight: "bold" });
+      } catch (e) {
+        console.error("Failed to register font:", e);
+      }
+    }
 
-    const sharp = (await import("sharp")).default;
-    const image = sharp(inputSource).rotate();
-    const metadata = await image.metadata();
+    const image = await loadImage(inputSource);
 
-    // Scale font sizes based on image dimensions
-    const width = metadata.width || 1000;
-    const height = metadata.height || 1000;
+    const width = image.width || 1000;
+    const height = image.height || 1000;
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
 
+    // Draw the image
+    ctx.drawImage(image, 0, 0, width, height);
+
+    // Draw a background gradient (mimics original SVG backdrop)
+    const gradientHeight = Math.round(height * 0.25);
+    const gradient = ctx.createLinearGradient(0, 0, 0, gradientHeight);
+    gradient.addColorStop(0, 'rgba(0,0,0,0.6)');
+    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, gradientHeight);
+
+    // Calculate font sizes
     const appNameFontSize = Math.round(width * 0.05);
     const detailsFontSize = Math.round(width * 0.035);
 
-    // Create SVG watermark overlay
-    const svgOverlay = `
-      <svg width="${width}" height="${height}">
-        <defs>
-          <linearGradient id="topGradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stop-color="black" stop-opacity="0.6" />
-            <stop offset="100%" stop-color="black" stop-opacity="0" />
-           </linearGradient>
-          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="${Math.max(
-              2,
-              width / 200
-            )}" />
-            <feOffset dx="0" dy="0" result="offsetblur" />
-            <feComponentTransfer>
-              <feFuncA type="linear" slope="0.8" />
-            </feComponentTransfer>
-            <feMerge>
-              <feMergeNode />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        <!-- Backdrop gradient for better readability on bright backgrounds -->
-        <rect width="${width}" height="${Math.round(
-      height * 0.25
-    )}" fill="url(#topGradient)" />
-        <style>
-          .text { 
-            fill: white; 
-            font-family: "Vazir", "Tahoma", "Arial", sans-serif; 
-            font-weight: bold;
-            filter: url(#shadow);
-            paint-order: stroke fill;
-            stroke: rgba(0,0,0,0.5);
-            stroke-width: ${Math.max(1, width / 500)}px;
-          }
-          .app-name { font-size: ${appNameFontSize}px; }
-          .details { font-size: ${detailsFontSize}px; }
-        </style>
-        <text x="50%" y="${Math.round(
-          height * 0.07
-        )}" text-anchor="middle" class="text app-name">${escapeXml(
-      appName
-    )}</text>
-        <text x="50%" y="${Math.round(
-          height * 0.125
-        )}" text-anchor="middle" class="text details">${escapeXml(
-      details
-    )}</text>
-      </svg>
-    `;
+    // Set text styles
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round';
+    
+    // Add Drop Shadow
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = Math.max(2, width / 200);
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 
-    await image
-      .composite([
-        {
-          input: Buffer.from(svgOverlay),
-          top: 0,
-          left: 0,
-        },
-      ])
-      .jpeg({ quality: 94 })
-      .toFile(outputPath);
+    const strokeWidth = Math.max(1, width / 500);
+
+    // Draw app name
+    ctx.font = `bold ${appNameFontSize}px Vazirmatn, Vazir, Tahoma, Arial, sans-serif`;
+    
+    // Draw stroke (mimics SVG paint-order: stroke fill)
+    ctx.lineWidth = strokeWidth * 2; 
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.strokeText(appName, width / 2, height * 0.07);
+    
+    // Draw fill
+    ctx.fillStyle = 'white';
+    ctx.fillText(appName, width / 2, height * 0.07);
+
+    // Draw details
+    ctx.font = `bold ${detailsFontSize}px Vazirmatn, Vazir, Tahoma, Arial, sans-serif`;
+    
+    ctx.lineWidth = strokeWidth * 2;
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.strokeText(details, width / 2, height * 0.125);
+    
+    ctx.fillStyle = 'white';
+    ctx.fillText(details, width / 2, height * 0.125);
+
+    const fs = await import("fs/promises");
+    const buffer = canvas.toBuffer('image/jpeg', { quality: 0.94 });
+    await fs.writeFile(outputPath, buffer);
 
     return true;
   } catch (error) {

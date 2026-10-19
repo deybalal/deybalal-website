@@ -136,6 +136,10 @@ export default async function ArtistDetailPage({
     playCount: song.playCount,
     albumId: song.albumId,
     year: song.year.toString(),
+    slug: song.slug,
+    isDisabled: song.isDisabled,
+    isActive: song.isActive,
+    isFeatured: song.isFeatured,
     links: song.links as Song["links"],
     artists: [
       {

@@ -26,9 +26,16 @@ export default async function Page({
     return (
       <div className="size-full flex items-center justify-center p-4 min-h-[70vh]">
         <div className="text-center py-12 text-muted-foreground w-full max-w-md bg-black/20 p-8 rounded-2xl border border-white/5 backdrop-blur-md flex flex-col items-center">
-          <Heart size={64} className="text-red-500 fill-red-500 animate-pulse mb-6 opacity-80" />
-          <h2 className="text-2xl font-bold text-white mb-2">لیست آهنگ های موردعلاقه</h2>
-          <p className="text-gray-300 mb-6 text-sm">برای مشاهده آهنگ های موردعلاقه خود باید ابتدا وارد حساب کاربری شوید.</p>
+          <Heart
+            size={64}
+            className="text-red-500 fill-red-500 animate-pulse mb-6 opacity-80"
+          />
+          <h2 className="text-2xl font-bold text-white mb-2">
+            لیست آهنگ های موردعلاقه
+          </h2>
+          <p className="text-gray-300 mb-6 text-sm">
+            برای مشاهده آهنگ های موردعلاقه خود باید ابتدا وارد حساب کاربری شوید.
+          </p>
           <Link
             href="/login"
             className="inline-block w-full py-3 px-6 rounded-full font-bold bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-lg hover:scale-105 transition-all duration-300 text-center"
@@ -43,7 +50,9 @@ export default async function Page({
   const { page, sortBy, sortOrder } = await searchParams;
   const currentPage = Number(page) || 1;
   const sortField = typeof sortBy === "string" ? sortBy : "addedAt";
-  const sortDir = (typeof sortOrder === "string" ? sortOrder : "desc") as "asc" | "desc";
+  const sortDir = (typeof sortOrder === "string" ? sortOrder : "desc") as
+    | "asc"
+    | "desc";
   const pageSize = 20;
 
   // Try to find the favorites playlist or create it if not present
@@ -82,9 +91,10 @@ export default async function Page({
             },
           },
         },
-        orderBy: sortField === "addedAt" 
-          ? { addedAt: sortDir } 
-          : { song: { [sortField]: sortDir } },
+        orderBy:
+          sortField === "addedAt"
+            ? { addedAt: sortDir }
+            : { song: { [sortField]: sortDir } },
         skip: (currentPage - 1) * pageSize,
         take: pageSize,
       },

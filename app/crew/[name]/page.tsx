@@ -74,7 +74,7 @@ export default async function CrewPage({
         syncedLyrics: contribution.song.syncedLyrics || null,
         filename: contribution.song.filename || "",
         year: contribution.song.year.toString(),
-        date: contribution.song.createdAt.getTime(),
+        createdAt: contribution.song.createdAt.getTime(),
         links: contribution.song.links as Record<
           number,
           { url: string; size: string; bytes: number }

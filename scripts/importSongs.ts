@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 import fs from "fs/promises";
 import path from "path";
 import "dotenv/config";
@@ -7,10 +8,26 @@ import "dotenv/config";
 async function main() {
   console.log("🚀 Starting Song Import...");
 
-  const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
 
-  const inputPath = path.join(process.cwd(), "scripts", "songs.json");
+  let inputPath = process.argv[2] ? path.resolve(process.argv[2]) : "";
+
+  if (!inputPath) {
+    const examplePath = path.join(
+      process.cwd(),
+      "data",
+      "fancysongsexample.json"
+    );
+    const defaultPath = path.join(process.cwd(), "scripts", "songs.json");
+    try {
+      await fs.access(examplePath);
+      inputPath = examplePath;
+    } catch {
+      inputPath = defaultPath;
+    }
+  }
 
   try {
     const rawData = await fs.readFile(inputPath, "utf-8");
@@ -57,6 +74,7 @@ async function main() {
           where: {
             OR: [{ id: jsonSong.id }, { slug: jsonSong.slug }],
           },
+          include: { telegram: true },
         });
 
         if (!dbSong) {
@@ -69,17 +87,15 @@ async function main() {
           continue;
         }
 
-        const updates: any = {};
+        const updates: Record<string, unknown> = {};
         let hasChanges = false;
+        const changedFields: string[] = [];
 
         for (const field of fieldsToSync) {
-          // Priority: JSON content, but ONLY if the field exists in the JSON object
           if (Object.prototype.hasOwnProperty.call(jsonSong, field)) {
             const jsonValue = jsonSong[field];
-            const dbValue = (dbSong as any)[field];
+            const dbValue = (dbSong as Record<string, unknown>)[field];
 
-            // Comparison logic
-            // Use JSON.stringify for deep comparison of JSON fields (like 'links')
             const isDifferent =
               typeof jsonValue === "object" && jsonValue !== null
                 ? JSON.stringify(jsonValue) !== JSON.stringify(dbValue)
@@ -88,6 +104,36 @@ async function main() {
             if (isDifferent) {
               updates[field] = jsonValue;
               hasChanges = true;
+              changedFields.push(field);
+            }
+          }
+        }
+
+        // Handle artists
+        if (
+          jsonSong.artists &&
+          Array.isArray(jsonSong.artists) &&
+          jsonSong.artists.length > 0
+        ) {
+          updates.artists = {
+            connect: jsonSong.artists.map((a: { id: string }) => ({ id: a.id })),
+          };
+          hasChanges = true;
+          if (!changedFields.includes("artists")) changedFields.push("artists");
+
+          for (const art of jsonSong.artists) {
+            try {
+              await prisma.artist.update({
+                where: { id: art.id },
+                data: {
+                  ...(art.fileId ? { fileId: art.fileId } : {}),
+                  ...(art.fileUniqueId
+                    ? { fileUniqueId: art.fileUniqueId }
+                    : {}),
+                },
+              });
+            } catch {
+              // Ignore if artist not found
             }
           }
         }
@@ -97,10 +143,73 @@ async function main() {
             where: { id: dbSong.id },
             data: updates,
           });
+        }
+
+        // Handle telegram and post data
+        let telegramChanges = false;
+        if (jsonSong.telegram || jsonSong.post) {
+          const tg = jsonSong.telegram;
+          const pt = jsonSong.post;
+
+          const tgUpdateData = {
+            file_id_64:
+              tg?.["64"]?.file_id ?? dbSong.telegram?.file_id_64 ?? null,
+            file_unique_id_64:
+              tg?.["64"]?.file_unique_id ??
+              dbSong.telegram?.file_unique_id_64 ??
+              null,
+            file_id_128:
+              tg?.["128"]?.file_id ?? dbSong.telegram?.file_id_128 ?? null,
+            file_unique_id_128:
+              tg?.["128"]?.file_unique_id ??
+              dbSong.telegram?.file_unique_id_128 ??
+              null,
+            file_id_320:
+              tg?.["320"]?.file_id ?? dbSong.telegram?.file_id_320 ?? null,
+            file_unique_id_320:
+              tg?.["320"]?.file_unique_id ??
+              dbSong.telegram?.file_unique_id_320 ??
+              null,
+            cover_art_file_id:
+              tg?.coverArt?.file_id ??
+              dbSong.telegram?.cover_art_file_id ??
+              null,
+            cover_art_file_unique_id:
+              tg?.coverArt?.file_unique_id ??
+              dbSong.telegram?.cover_art_file_unique_id ??
+              null,
+            ogg_file_id:
+              tg?.ogg?.file_id ?? dbSong.telegram?.ogg_file_id ?? null,
+            ogg_file_unique_id:
+              tg?.ogg?.file_unique_id ??
+              dbSong.telegram?.ogg_file_unique_id ??
+              null,
+            has_posted: pt?.has_posted ?? dbSong.telegram?.has_posted ?? false,
+            message_id: pt?.message_id ?? dbSong.telegram?.message_id ?? null,
+            ogg_message_id:
+              pt?.ogg_message_id ?? dbSong.telegram?.ogg_message_id ?? null,
+          };
+
+          await prisma.telegram.upsert({
+            where: { songId: dbSong.id },
+            update: tgUpdateData,
+            create: {
+              songId: dbSong.id,
+              ...tgUpdateData,
+            },
+          });
+
+          // To track if telegram was updated for console logging
+          telegramChanges = true;
+        }
+
+        if (hasChanges || telegramChanges) {
           console.log(
-            `✅ Updated song: "${dbSong.title}" (Changes: ${Object.keys(
-              updates
-            ).join(", ")})`
+            `✅ Updated song: "${dbSong.title}" (Changes: ${
+              changedFields.length > 0
+                ? changedFields.join(", ")
+                : "telegram/post"
+            })`
           );
           updatedCount++;
         } else {

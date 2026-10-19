@@ -308,12 +308,35 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
   async function onSubmit(values: SongFormValues) {
     setLoading(true);
     try {
-      if (
+      if (values.useArtistImage && selectedArtists.length > 0) {
+        const artistImage = selectedArtists[0].image;
+        if (artistImage) {
+          const coverSuccess = await handleDownloadCoverUrl(artistImage);
+          if (!coverSuccess) {
+            setLoading(false);
+            return;
+          }
+          values.coverArt = form.getValues("coverArt");
+          values.tempCoverArt = form.getValues("tempCoverArt");
+        }
+      } else if (
         coverSourceType === "url" &&
         coverUrl.trim() &&
         downloadedCoverUrl !== coverUrl.trim()
       ) {
         const coverSuccess = await handleDownloadCoverUrl(coverUrl.trim());
+        if (!coverSuccess) {
+          setLoading(false);
+          return;
+        }
+        values.coverArt = form.getValues("coverArt");
+        values.tempCoverArt = form.getValues("tempCoverArt");
+      } else if (
+        coverSourceType === "file" &&
+        manualCoverArt &&
+        values.coverArt === manualCoverArt
+      ) {
+        const coverSuccess = await handleDownloadCoverUrl(manualCoverArt);
         if (!coverSuccess) {
           setLoading(false);
           return;
@@ -617,6 +640,12 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
     const formData = new FormData();
     formData.append("file", file);
 
+    const currentArtist = form.getValues("artist") || selectedArtists.map((a) => a.name).join(", ") || "دی بلال";
+    const currentTitle = form.getValues("title") || form.getValues("titleEn") || "";
+    formData.append("artist", currentArtist);
+    formData.append("title", currentTitle);
+    formData.append("skipWatermark", "true");
+
     try {
       const res = await fetch("/api/upload/image", {
         method: "POST",
@@ -652,8 +681,8 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
       return false;
     }
 
-    if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
-      toast.error("آدرس اینترنتی کاور باید با http:// یا https:// آغاز شود.");
+    if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://") && !cleanUrl.startsWith("/")) {
+      toast.error("آدرس اینترنتی کاور باید با http:// یا https:// و یا مسیر نسبی / آغاز شود.");
       return false;
     }
 

@@ -3,26 +3,27 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 model Song {
   id                  String             @id @default(cuid())
-  slug                String             @unique @db.VarChar(191)
-  title               String             @db.VarChar(255)
-  titleEn             String             @db.VarChar(255)
-  artist              String             @db.VarChar(255)
-  artistEn            String             @db.VarChar(255)
+  slug                String             @unique
+  title               String
+  titleEn             String
+  artist              String
+  artistEn            String
   albumName           String?
   coverArt            String?
   year                Int                @default(0)
   duration            Int                @default(0)
   uri                 String
   filename            String?
-  index               Int                @unique @default(autoincrement())
-  lyrics              String?            @db.LongText
-  syncedLyrics        String?            @db.LongText
+  index               Int                @default(0)
+  lyrics              String?
+  syncedLyrics        String?
   playCount           Int                @default(0)
+  downloads           Int                @default(0)
   isDisabled          Boolean            @default(false)
   disabledDescription String?
   isActive            Boolean            @default(false)
@@ -33,7 +34,7 @@ model Song {
   updatedAt           DateTime           @updatedAt
   lyricsSource        String?
   lyricsSourceUrl     String?
-  links               Json?              @db.Json
+  links               Json?
   ogg                 String?
   comments            Comment[]
   contributors        Contributor[]
@@ -49,8 +50,11 @@ model Song {
   similarSongs Song[] @relation("SongSimilarity")
   similarTo    Song[] @relation("SongSimilarity")
 
-  radioTracks RadioTrack[]
+  radioTracks  RadioTrack[]
+  telegram     Telegram?
+  songOfTheDay SongOfTheDay[]
 
+  @@index([index])
   @@index([title])
   @@index([artist])
   @@index([albumId])
@@ -123,13 +127,16 @@ model Artist {
   albums      Album[]
   followers   Follow[]
   users       User[]
-  description String?  @db.LongText
+  description String?
   songs       Song[]   @relation("ArtistToSong")
 
   userId      String?
   user        User?   @relation("ArtistCreator", fields: [userId], references: [id])
   ig          String?
   igFollowers Int?
+
+  fileId       String?
+  fileUniqueId String?
 
   @@index([igFollowers])
   @@index([nameEn])
@@ -222,11 +229,17 @@ model User {
   isBanned           Boolean            @default(false)
   artistId           String?
   userIndex          Int                @unique @default(autoincrement())
-  userSlug           String             @unique @default(nanoid(10)) @db.VarChar(10)
-  instagramHandle    String?            @unique
+  userSlug           String             @unique @default(nanoid(10))
+  instagramHandle    String?
+  telegramId         BigInt?            @unique
+  telegramUsername   String?
+  telegramFirstName  String?
+  telegramLastName   String?
   role               Role               @default(user)
   isVerified         Boolean            @default(false)
   isUserAnArtist     Boolean            @default(false)
+  sendDailyFeatured  Boolean            @default(false)
+  hasBlockedBot      Boolean            @default(false)
   downloadPreference Int                @default(128)
   albums             Album[]
   comments           Comment[]
@@ -411,4 +424,47 @@ model PlaylistSong {
   @@index([playlistId])
   @@index([songId])
   @@index([addedAt])
+}
+
+model Telegram {
+  id     String @id @default(cuid())
+  songId String @unique
+  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  file_id_64         String?
+  file_unique_id_64  String?
+  file_id_128        String?
+  file_unique_id_128 String?
+  file_id_320        String?
+  file_unique_id_320 String?
+  file_id_ogg        String?
+  file_unique_id_ogg String?
+
+  cover_art_file_id        String?
+  cover_art_file_unique_id String?
+
+  ogg_file_id        String?
+  ogg_file_unique_id String?
+
+  has_posted     Boolean @default(false)
+  message_id     Int?
+  ogg_message_id Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([songId])
+}
+
+model SongOfTheDay {
+  id        String   @id @default(cuid())
+  songId    String
+  ts        Int
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  song      Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@index([songId])
+  @@index([date])
 }
