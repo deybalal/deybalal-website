@@ -3,25 +3,26 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
+  // url      = env("DATABASE_URL")
 }
 
 model Song {
   id                  String             @id @default(cuid())
-  slug                String             @unique
-  title               String
-  titleEn             String
-  artist              String
-  artistEn            String
+  slug                String             @unique @db.VarChar(191)
+  title               String             @db.VarChar(255)
+  titleEn             String             @db.VarChar(255)
+  artist              String             @db.VarChar(255)
+  artistEn            String             @db.VarChar(255)
   albumName           String?
   coverArt            String?
   year                Int                @default(0)
   duration            Int                @default(0)
   uri                 String
   filename            String?
-  index               Int                @default(autoincrement())
-  lyrics              String?
-  syncedLyrics        String?
+  index               Int                @unique @default(0)
+  lyrics              String?            @db.LongText
+  syncedLyrics        String?            @db.LongText
   playCount           Int                @default(0)
   isDisabled          Boolean            @default(false)
   disabledDescription String?
@@ -33,7 +34,7 @@ model Song {
   updatedAt           DateTime           @updatedAt
   lyricsSource        String?
   lyricsSourceUrl     String?
-  links               Json?
+  links               Json?              @db.Json
   ogg                 String?
   comments            Comment[]
   contributors        Contributor[]
@@ -48,6 +49,8 @@ model Song {
 
   similarSongs Song[] @relation("SongSimilarity")
   similarTo    Song[] @relation("SongSimilarity")
+
+  radioTracks RadioTrack[]
 
   @@index([title])
   @@index([artist])
@@ -367,4 +370,30 @@ enum SuggestionStatus {
 enum SuggestionType {
   LYRICS
   SYNCED
+}
+
+model RadioPlaylist {
+  id            String       @id @default(cuid())
+  date          DateTime     @unique // The day this playlist is for (at 00:00:00 UTC)
+  startTime     DateTime // The exact start time (usually same as date)
+  totalDuration Int // Total duration in seconds
+  tracks        RadioTrack[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([date])
+}
+
+model RadioTrack {
+  id          String        @id @default(cuid())
+  playlistId  String
+  songId      String
+  order       Int
+  duration    Int // Duration in seconds
+  startOffset Int // Cumulative offset in seconds from playlist start
+  playlist    RadioPlaylist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  song        Song          @relation(fields: [songId], references: [id])
+
+  @@index([playlistId])
+  @@index([songId])
 }

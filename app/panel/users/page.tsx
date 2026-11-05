@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import AdminTable from "@/components/AdminTable";
+import { Suspense } from "react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -43,13 +44,15 @@ export default async function UsersPage({
         <h2 className="text-xl font-semibold">مدیریت کاربران</h2>
       </div>
       <div className="glass rounded-lg border border-white/10 overflow-hidden">
-        <AdminTable
-          type="users"
-          userRole={userRole}
-          data={users}
-          pageCount={Math.ceil(usersCount / pageSize)}
-          pageIndex={page - 1}
-        />
+        <Suspense>
+          <AdminTable
+            type="users"
+            userRole={userRole}
+            data={users}
+            pageCount={Math.ceil(usersCount / pageSize)}
+            pageIndex={page - 1}
+          />
+        </Suspense>
       </div>
     </div>
   );

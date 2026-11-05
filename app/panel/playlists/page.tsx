@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import AdminTable from "@/components/AdminTable";
+import { Suspense } from "react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -53,13 +54,15 @@ export default async function PlaylistsPage({
         </Button>
       </div>
       <div className="glass rounded-lg border border-white/10 overflow-hidden">
-        <AdminTable
-          type="playlists"
-          userRole={userRole}
-          data={playlists}
-          pageCount={Math.ceil(playlistsCount / pageSize)}
-          pageIndex={page - 1}
-        />
+        <Suspense>
+          <AdminTable
+            type="playlists"
+            userRole={userRole}
+            data={playlists}
+            pageCount={Math.ceil(playlistsCount / pageSize)}
+            pageIndex={page - 1}
+          />
+        </Suspense>
       </div>
     </div>
   );

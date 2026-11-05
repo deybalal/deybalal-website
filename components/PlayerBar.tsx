@@ -19,6 +19,7 @@ import {
   Search,
   Menu,
   Settings,
+  Radio,
 } from "lucide-react";
 import {
   Sheet,
@@ -68,6 +69,7 @@ const PlayerBar = () => {
     setSong,
     setQueue,
     hasHydrated,
+    isRadio,
   } = usePlayerStore();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -75,6 +77,7 @@ const PlayerBar = () => {
 
   const navItems = [
     { name: "صفحه اصلی", href: "/", icon: Home },
+    { name: "رادیو", href: "/radio", icon: Radio },
     { name: "جستوجو", href: "/search", icon: Search },
     { name: "حساب کاربری", href: "/panel", icon: User },
     { name: "آلبوم ها", href: "/album", icon: Disc },
@@ -143,18 +146,22 @@ const PlayerBar = () => {
       } else if (code === "ArrowRight") {
         e.preventDefault();
         if (shiftKey) {
-          next();
+          if (!isRadio) next();
         } else {
-          setSeekTo(progress + 5);
-          setProgress(progress + 5);
+          if (!isRadio) {
+            setSeekTo(progress + 5);
+            setProgress(progress + 5);
+          }
         }
       } else if (code === "ArrowLeft") {
         e.preventDefault();
         if (shiftKey) {
-          prev();
+          if (!isRadio) prev();
         } else {
-          setSeekTo(progress - 5);
-          setProgress(progress - 5);
+          if (!isRadio) {
+            setSeekTo(progress - 5);
+            setProgress(progress - 5);
+          }
         }
       } else if (code === "KeyM") {
         e.preventDefault();
@@ -191,6 +198,7 @@ const PlayerBar = () => {
     prev,
     toggleShuffle,
     toggleRepeat,
+    isRadio,
   ]);
 
   useEffect(() => {
@@ -259,6 +267,7 @@ const PlayerBar = () => {
                     : "text-gray-400 hover:text-foreground"
                 }`}
                 onClick={toggleRepeat}
+                disabled={isRadio}
               >
                 {repeatMode === "one" ? (
                   <Repeat1 size={20} />
@@ -269,8 +278,13 @@ const PlayerBar = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
+                className={`${
+                  isRadio
+                    ? "opacity-20 cursor-not-allowed"
+                    : "text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
+                }`}
                 onClick={next}
+                disabled={isRadio}
               >
                 <SkipForward size={20} className="md:w-6 md:h-6" />
               </Button>
@@ -293,8 +307,13 @@ const PlayerBar = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
+                className={`${
+                  isRadio
+                    ? "opacity-20 cursor-not-allowed"
+                    : "text-foreground hover:text-gray-400 hover:bg-transparent cursor-pointer"
+                }`}
                 onClick={prev}
+                disabled={isRadio}
               >
                 <SkipBack size={20} className="md:w-6 md:h-6" />
               </Button>
@@ -307,6 +326,7 @@ const PlayerBar = () => {
                     : "text-gray-400 hover:text-foreground"
                 }`}
                 onClick={toggleShuffle}
+                disabled={isRadio}
               >
                 <Shuffle size={20} />
               </Button>
@@ -319,7 +339,10 @@ const PlayerBar = () => {
                 onValueChange={handleSeek}
                 max={duration || currentSong.duration || 100}
                 step={1}
-                className="w-full cursor-pointer h-1.5"
+                className={`w-full h-1.5 ${
+                  isRadio ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                }`}
+                disabled={isRadio}
               />
               <span>{formatTime(progress)}</span>
             </div>
@@ -332,7 +355,12 @@ const PlayerBar = () => {
               onValueChange={handleSeek}
               max={duration || 100}
               step={1}
-              className="w-full cursor-pointer h-1 rounded-none"
+              className={`w-full h-1 rounded-none ${
+                isRadio
+                  ? "cursor-not-allowed opacity-50 pointer-events-none"
+                  : "cursor-pointer"
+              }`}
+              disabled={isRadio}
             />
           </div>
 

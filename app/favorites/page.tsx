@@ -5,15 +5,19 @@ import SongList from "@/components/SongList";
 import { Song } from "@/types/types";
 import { Heart, LoaderPinwheel } from "lucide-react";
 import Pagination from "@/components/Pagination";
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Link from "next/link";
 
 export default function FavoritesPage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [totalSongs, setTotalSongs] = useState(0);
-  const searchParams = useSearchParams();
-  const page = Number(searchParams.get("page")) || 1;
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setPage(Number(params.get("page")) || 1);
+  }, []);
   const pageSize = 20;
 
   useEffect(() => {
@@ -49,7 +53,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="space-y-8 w-[95%] md:w-7/12">
+    <div className="space-y-8 mb-24 h-max w-[95%] md:w-7/12">
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
         <div className="relative w-64 h-64 rounded-lg overflow-hidden shadow-2xl neon-box shrink-0 bg-linear-to-br from-pink-600 to-purple-700 flex items-center justify-center">
@@ -73,10 +77,12 @@ export default function FavoritesPage() {
         {songs.length > 0 ? (
           <>
             <SongList songs={songs} />
-            <Pagination
-              currentPage={page}
-              totalPages={Math.ceil(totalSongs / pageSize)}
-            />
+            <Suspense>
+              <Pagination
+                currentPage={page}
+                totalPages={Math.ceil(totalSongs / pageSize)}
+              />
+            </Suspense>
           </>
         ) : (
           <div className="text-center py-12 text-muted-foreground">

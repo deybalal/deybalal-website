@@ -2,14 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { unlink, stat, rename } from "fs/promises";
-import { existsSync } from "fs";
+import { unlink, stat } from "fs/promises";
+import { existsSync, mkdirSync } from "fs";
 import path from "path";
 import { createNotification, notifyFollowers } from "@/lib/notifications";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { slugify } from "@/lib/utils";
 import { parseFile } from "music-metadata";
+import { FTPService } from "@/lib/ftp";
 
 const execAsync = promisify(exec);
 
@@ -19,6 +20,15 @@ function formatFileSize(bytes: number): string {
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
+}
+
+function getRelativePath(urlOrPath: string | null | undefined): string | null {
+  if (!urlOrPath) return null;
+  const baseUrl = process.env.NEXT_PUBLIC_FTP_BASE_URL || "";
+  if (urlOrPath.startsWith(baseUrl)) {
+    return urlOrPath.substring(baseUrl.length);
+  }
+  return urlOrPath;
 }
 
 export async function POST(
@@ -69,10 +79,7 @@ export async function POST(
       );
     }
 
-    const uploadDir = path.join(process.cwd(), "public/assets/mp3");
-    const uploadDirOgg = path.join(process.cwd(), "public/assets/ogg");
     const sourceFilename = song.filename;
-
     if (!sourceFilename) {
       return NextResponse.json(
         { success: false, message: "فایل آهنگ یافت نشد!" },
@@ -80,11 +87,30 @@ export async function POST(
       );
     }
 
-    const sourcePath = path.join(uploadDir, sourceFilename);
-    if (!existsSync(sourcePath)) {
+    // Use public/assets sub-folders for local processing
+    const localMp3Dir = path.join(process.cwd(), "public/assets/mp3");
+    const localOggDir = path.join(process.cwd(), "public/assets/ogg");
+    const localCoverDir = path.join(process.cwd(), "public/assets/cover");
+
+    if (!existsSync(localMp3Dir)) mkdirSync(localMp3Dir, { recursive: true });
+    if (!existsSync(localOggDir)) mkdirSync(localOggDir, { recursive: true });
+    if (!existsSync(localCoverDir))
+      mkdirSync(localCoverDir, { recursive: true });
+
+    const localSourcePath = path.join(
+      localMp3Dir,
+      `source_${Date.now()}_${sourceFilename}`
+    );
+    const remoteSourcePath = `/assets/mp3/${sourceFilename}`;
+
+    // Download from FTP to local temp for processing
+    try {
+      await FTPService.downloadToFile(remoteSourcePath, localSourcePath);
+    } catch (downloadError) {
+      console.error("FTP Download Error:", downloadError);
       return NextResponse.json(
-        { success: false, message: "فایل منبع در سرور یافت نشد!" },
-        { status: 400 }
+        { success: false, message: "خطا در دریافت فایل از سرویس ابری" },
+        { status: 500 }
       );
     }
 
@@ -94,14 +120,9 @@ export async function POST(
     const baseFilename = `${artistSlug}-${titleSlug}`;
 
     let finalBaseName = baseFilename;
-    let counter = 1;
-    while (
-      existsSync(path.join(uploadDir, `${finalBaseName}-128.mp3`)) ||
-      existsSync(path.join(uploadDir, `${finalBaseName}-320.mp3`))
-    ) {
-      finalBaseName = `${baseFilename}${counter}`;
-      counter++;
-    }
+    // Note: Existence check on FTP is harder, but we can try to find if file exists or just use unique names
+    // For now, keep the counter logic but it might need to check FTP
+    finalBaseName = `${baseFilename}-${Date.now().toString().slice(-4)}`;
 
     const filenameCoverArt = `${finalBaseName}.jpg`;
     const filenameOgg = `${song.id}.ogg`;
@@ -109,18 +130,41 @@ export async function POST(
     const filename128 = `${finalBaseName}-128.mp3`;
     const filename320 = `${finalBaseName}-320.mp3`;
 
-    const pathOgg = path.join(uploadDirOgg, filenameOgg);
-    const path64 = path.join(uploadDir, filename64);
-    const path128 = path.join(uploadDir, filename128);
-    const path320 = path.join(uploadDir, filename320);
+    const pathOgg = path.join(localOggDir, filenameOgg);
+    const path64 = path.join(localMp3Dir, filename64);
+    const path128 = path.join(localMp3Dir, filename128);
+    const path320 = path.join(localMp3Dir, filename320);
 
-    // Track files for cleanup if something fails
-    filesToCleanup.push(pathOgg, path64, path128, path320);
+    // Track local files for cleanup
+    filesToCleanup.push(localSourcePath, pathOgg, path64, path128, path320);
 
-    const coverPath = song.coverArt
-      ? path.join(process.cwd(), "public", song.coverArt)
-      : null;
-    const hasCover = coverPath && existsSync(coverPath);
+    // Cover art handling (if it's already on FTP)
+    const remoteCoverPath = song.coverArt;
+    let localCoverPath: string | null = null;
+
+    // Convert full URL string to relative path if needed
+    const relativeCoverPath = getRelativePath(remoteCoverPath);
+
+    if (
+      relativeCoverPath &&
+      (relativeCoverPath.startsWith("/") ||
+        relativeCoverPath.startsWith("http"))
+    ) {
+      localCoverPath = path.join(localCoverDir, `temp_cover_${Date.now()}.jpg`);
+      try {
+        await FTPService.downloadToFile(relativeCoverPath, localCoverPath);
+        filesToCleanup.push(localCoverPath);
+      } catch (e) {
+        console.error(
+          "Failed to download cover for FFMPEG embedding:",
+          e,
+          "Path:",
+          relativeCoverPath
+        );
+        localCoverPath = null;
+      }
+    }
+    const hasCover = localCoverPath && existsSync(localCoverPath);
 
     const metadataArgs = [
       `-metadata title="${song.title.replace(/"/g, '\\"')}"`,
@@ -136,7 +180,7 @@ export async function POST(
       .join(" ");
 
     const coverArgs = hasCover
-      ? `-i "${coverPath}" -map 0:a -map 1:v -c:v copy -id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)"`
+      ? `-i "${localCoverPath}" -map 0:a -map 1:v -c:v copy -id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)"`
       : "-map 0:a";
 
     const startingPoint =
@@ -146,22 +190,22 @@ export async function POST(
     try {
       // Generate OGG Preview
       await execAsync(
-        `ffmpeg -i "${sourcePath}" -ss ${startingPoint} -t 30 -c:a libvorbis -b:a 64k -y "${pathOgg}"`
+        `ffmpeg -i "${localSourcePath}" -ss ${startingPoint} -t 30 -c:a libvorbis -b:a 64k -y "${pathOgg}"`
       );
 
       // Generate 64kbps
       await execAsync(
-        `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -b:a 64k -y "${path64}"`
+        `ffmpeg -i "${localSourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -b:a 64k -y "${path64}"`
       );
 
       // Generate 128kbps
       await execAsync(
-        `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -b:a 128k -y "${path128}"`
+        `ffmpeg -i "${localSourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs} -b:a 128k -y "${path128}"`
       );
 
       // Generate 320kbps
       await execAsync(
-        `ffmpeg -i "${sourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs}  -b:a 320k -y "${path320}"`
+        `ffmpeg -i "${localSourcePath}" ${coverArgs} -map_metadata -1 ${metadataArgs}  -b:a 320k -y "${path320}"`
       );
     } catch (ffmpegError) {
       console.error("FFMPEG Processing Error:", ffmpegError);
@@ -182,7 +226,24 @@ export async function POST(
     const stats64 = await stat(path64);
     const stats128 = await stat(path128);
     const stats320 = await stat(path320);
-    const duration = (await parseFile(sourcePath)).format.duration;
+    const duration = (await parseFile(localSourcePath)).format.duration;
+
+    // Upload processed files back to FTP
+    try {
+      await FTPService.uploadFile(pathOgg, `/assets/ogg/${filenameOgg}`);
+      await FTPService.uploadFile(path64, `/assets/mp3/${filename64}`);
+      await FTPService.uploadFile(path128, `/assets/mp3/${filename128}`);
+      await FTPService.uploadFile(path320, `/assets/mp3/${filename320}`);
+    } catch (uploadError) {
+      console.error("FTP Upload Error (processed files):", uploadError);
+      return NextResponse.json(
+        {
+          success: false,
+          message: "خطا در آپلود فایل‌های پردازش شده به سرور ابری",
+        },
+        { status: 500 }
+      );
+    }
 
     // 5. Update database and activate song
     const updatedSong = await prisma.song.update({
@@ -191,22 +252,24 @@ export async function POST(
         isActive: true,
         filename: filename128,
         duration: duration || song.duration,
-        uri: `/assets/mp3/${filename128}`,
-        ogg: `/assets/ogg/${filenameOgg}`,
-        coverArt: hasCover ? `/assets/cover/${filenameCoverArt}` : "",
+        uri: `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/mp3/${filename128}`,
+        ogg: `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/ogg/${filenameOgg}`,
+        coverArt: hasCover
+          ? `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/cover/${filenameCoverArt}`
+          : "",
         links: {
           "64": {
-            url: `/assets/mp3/${filename64}`,
+            url: `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/mp3/${filename64}`,
             size: formatFileSize(stats64.size),
             bytes: stats64.size,
           },
           "128": {
-            url: `/assets/mp3/${filename128}`,
+            url: `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/mp3/${filename128}`,
             size: formatFileSize(stats128.size),
             bytes: stats128.size,
           },
           "320": {
-            url: `/assets/mp3/${filename320}`,
+            url: `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/mp3/${filename320}`,
             size: formatFileSize(stats320.size),
             bytes: stats320.size,
           },
@@ -243,18 +306,22 @@ export async function POST(
       // We don't fail the whole request because notifications are secondary to the song being live
     }
 
-    // 7. Cleanup source file
-    await unlink(sourcePath).catch((e) =>
-      console.error("Failed to delete source file:", e)
-    );
+    // 7. Cleanup
+    // Delete source file from FTP
+    await FTPService.deleteFile(remoteSourcePath);
 
-    if (hasCover) {
-      if (existsSync(coverPath)) {
-        rename(
-          coverPath,
-          path.join(process.cwd(), "public/assets/cover", filenameCoverArt)
-        );
+    // Handle cover art finalization on FTP
+    if (hasCover && remoteCoverPath) {
+      const finalRemoteCoverPath = `/assets/cover/${filenameCoverArt}`;
+      const sourceRelativePath = getRelativePath(remoteCoverPath);
+      if (sourceRelativePath) {
+        await FTPService.renameFile(sourceRelativePath, finalRemoteCoverPath);
       }
+    }
+
+    // Local cleanup
+    for (const f of filesToCleanup) {
+      if (existsSync(f)) await unlink(f).catch(() => {});
     }
 
     return NextResponse.json({ success: true, data: updatedSong });

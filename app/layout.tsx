@@ -38,41 +38,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "./",
   },
-  openGraph: {
-    type: "website",
-    locale: "fa_IR",
-    url: "https://deybalal.com",
-    siteName: "دی بلال",
-    title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری",
-    description:
-      "آهنگ لری مورد علاقه ی خود را پیدا و آنلاین پخش کنید یا با کیفیت عالی دانلود کنید.",
-    images: [
-      {
-        url: "/images/download.png",
-        width: 1200,
-        height: 630,
-        alt: "دی بلال",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری",
-    description:
-      "آهنگ لری مورد علاقه ی خود را پیدا و آنلاین پخش کنید یا با کیفیت عالی دانلود کنید.",
-    images: ["/images/download.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
 };
 
 export const viewport: Viewport = {

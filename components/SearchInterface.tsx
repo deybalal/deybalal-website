@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import { Search, X, Music, Disc, Mic2, ListMusic } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,7 +19,7 @@ interface SearchInterfaceProps {
   };
 }
 
-type SearchResults = {
+interface SearchResults {
   songs: {
     id: string;
     title: string;
@@ -28,6 +28,7 @@ type SearchResults = {
     slug: string;
   }[];
   artists: {
+    id: string;
     name: string;
     image: string | null;
   }[];
@@ -42,7 +43,13 @@ type SearchResults = {
     name: string;
     coverArt: string | null;
   }[];
-};
+  topResult:
+    | ({ type: "song" } & SearchResults["songs"][0])
+    | ({ type: "artist" } & SearchResults["artists"][0])
+    | ({ type: "album" } & SearchResults["albums"][0])
+    | ({ type: "playlist" } & SearchResults["playlists"][0])
+    | null;
+}
 
 export default function SearchInterface({
   onClose,
@@ -54,9 +61,27 @@ export default function SearchInterface({
   const [isPending, startTransition] = useTransition();
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q");
+
+  // Load recent searches
+  useEffect(() => {
+    const saved = localStorage.getItem("recentSearches");
+    if (saved) {
+      setRecentSearches(JSON.parse(saved));
+    }
+  }, []);
+
+  const saveRecentSearch = useCallback((term: string) => {
+    if (!term.trim()) return;
+    setRecentSearches((prev) => {
+      const updated = [term, ...prev.filter((s) => s !== term)].slice(0, 5);
+      localStorage.setItem("recentSearches", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
   useEffect(() => {
     if (isPage) {
@@ -94,6 +119,9 @@ export default function SearchInterface({
         if (res.ok) {
           const data = await res.json();
           setResults(data);
+          if (debouncedQuery.length > 2) {
+            saveRecentSearch(debouncedQuery);
+          }
         } else {
           console.error("Search failed");
           setResults(null);
@@ -105,12 +133,20 @@ export default function SearchInterface({
         setIsLoading(false);
       }
     });
-  }, [debouncedQuery, scope]);
+  }, [debouncedQuery, scope, saveRecentSearch]);
 
   const handleLinkClick = () => {
     if (onClose) {
       onClose();
     }
+  };
+
+  const removeRecentSearch = (e: React.MouseEvent, term: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const updated = recentSearches.filter((s) => s !== term);
+    setRecentSearches(updated);
+    localStorage.setItem("recentSearches", JSON.stringify(updated));
   };
 
   return (
@@ -209,22 +245,117 @@ export default function SearchInterface({
                 <p className="text-zinc-500">عبارت دیگری را جستوجو کنید</p>
               </div>
             ) : !results || query.trim() === "" ? (
-              <div className="flex flex-col items-center justify-center h-80 text-zinc-500 gap-6 animate-in fade-in duration-500">
-                <div className="p-8 rounded-full bg-white/5 ring-1 ring-white/10 shadow-2xl">
-                  <Search className="w-12 h-12 opacity-40" />
-                </div>
-                <div className="text-center">
-                  <p className="text-xl font-medium text-white mb-2">
-                    هر آنچه دوست دارید پخش کنید
-                  </p>
-                  <p className="text-base max-w-md mx-auto">
-                    برای شروع گوش دادن، آهنگ، خواننده، آلبوم یا پلی لیست را
-                    جستوجو کنید.
-                  </p>
+              <div className="flex flex-col items-center justify-center h-80 text-zinc-500 gap-8 animate-in fade-in duration-500">
+                {recentSearches.length > 0 && !query.trim() && (
+                  <div className="w-full max-w-md">
+                    <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-4 text-center">
+                      جستوجوهای اخیر
+                    </h3>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {recentSearches.map((term) => (
+                        <div
+                          key={term}
+                          onClick={() => setQuery(term)}
+                          className="group flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-full cursor-pointer hover:border-zinc-600 transition-colors"
+                        >
+                          <span className="text-sm font-medium">{term}</span>
+                          <button
+                            onClick={(e) => removeRecentSearch(e, term)}
+                            className="p-1 rounded-full hover:bg-zinc-800 text-zinc-600 group-hover:text-zinc-400 transition-colors"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex flex-col items-center gap-6">
+                  <div className="p-8 rounded-full bg-white/5 ring-1 ring-white/10 shadow-2xl">
+                    <Search className="w-12 h-12 opacity-40" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-medium text-white mb-2">
+                      هر آنچه دوست دارید پخش کنید
+                    </p>
+                    <p className="text-base max-w-md mx-auto">
+                      برای شروع گوش دادن، آهنگ، خواننده، آلبوم یا پلی لیست را
+                      جستوجو کنید.
+                    </p>
+                  </div>
                 </div>
               </div>
             ) : results ? (
               <div className="space-y-12 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {/* Top Result Section */}
+                {results.topResult && query.length > 1 && (
+                  <section className="animate-in fade-in zoom-in duration-500">
+                    <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-6">
+                      بهترین نتیجه
+                    </h3>
+                    <Link
+                      href={
+                        results.topResult.type === "song"
+                          ? `/song/${results.topResult.id}`
+                          : results.topResult.type === "artist"
+                          ? `/artist/${results.topResult.id}`
+                          : results.topResult.type === "album"
+                          ? `/album/${results.topResult.id}`
+                          : `/playlists/${results.topResult.id}`
+                      }
+                      onClick={handleLinkClick}
+                      className="group block relative p-6 rounded-3xl bg-zinc-900/40 border border-white/5 hover:border-white/10 hover:bg-zinc-900/60 transition-all duration-300 max-w-xl shadow-2xl overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-linear-to-br from-indigo-500/10 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="relative z-10 flex gap-6 items-center">
+                        <div
+                          className={cn(
+                            "relative w-28 h-28 shrink-0 overflow-hidden shadow-2xl transition-transform duration-500 group-hover:scale-105",
+                            results.topResult.type === "artist"
+                              ? "rounded-full"
+                              : "rounded-2xl"
+                          )}
+                        >
+                          <Image
+                            src={
+                              results.topResult.type === "song" ||
+                              results.topResult.type === "album" ||
+                              results.topResult.type === "playlist"
+                                ? results.topResult.coverArt ||
+                                  "/images/default-album-art.png"
+                                : results.topResult.image ||
+                                  "/images/default-album-art.png"
+                            }
+                            alt={
+                              results.topResult.type === "song"
+                                ? results.topResult.title
+                                : results.topResult.name
+                            }
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-3xl font-black text-white mb-2 truncate">
+                            {results.topResult.type === "song"
+                              ? results.topResult.title
+                              : results.topResult.name}
+                          </h4>
+                          <span className="inline-block px-3 py-1 rounded-full bg-white/5 text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                            {results.topResult.type === "song"
+                              ? "آهنگ"
+                              : results.topResult.type === "artist"
+                              ? "خواننده"
+                              : results.topResult.type === "album"
+                              ? "آلبوم"
+                              : "پلی لیست"}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  </section>
+                )}
+
                 {/* Songs Section */}
                 {results.songs.length > 0 && (
                   <section>
@@ -282,7 +413,7 @@ export default function SearchInterface({
                       {results.artists.map((artist) => (
                         <Link
                           key={artist.name}
-                          href={`/artist/${encodeURIComponent(artist.name)}`}
+                          href={`/artist/${encodeURIComponent(artist.id)}`}
                           onClick={handleLinkClick}
                           className="group flex flex-col items-center p-4 rounded-2xl hover:bg-white/5 transition-all duration-300 border border-transparent hover:border-white/5"
                         >
@@ -364,7 +495,7 @@ export default function SearchInterface({
                       {results.playlists.map((playlist) => (
                         <Link
                           key={playlist.id}
-                          href={`/playlist/${playlist.id}`}
+                          href={`/playlists/${playlist.id}`}
                           onClick={handleLinkClick}
                           className="group p-4 rounded-2xl bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 hover:border-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                         >
@@ -384,9 +515,6 @@ export default function SearchInterface({
                           </div>
                           <div className="text-white font-bold truncate text-base group-hover:text-emerald-400 transition-colors">
                             {playlist.name}
-                          </div>
-                          <div className="text-sm text-zinc-400 mt-1">
-                            توسط {playlist.name}{" "}
                           </div>
                         </Link>
                       ))}

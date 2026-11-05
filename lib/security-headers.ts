@@ -10,9 +10,9 @@ export function getSecurityHeaders(): Record<string, string> {
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // unsafe-inline needed for Next.js
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "img-src 'self' data: blob: https:",
-      "media-src 'self' blob: data:",
-      "connect-src 'self'",
+      "img-src 'self' data: blob: https: https://dl2.mytg.ir",
+      "media-src 'self' blob: data: https://dl2.mytg.ir",
+      "connect-src 'self' https://dl2.mytg.ir",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

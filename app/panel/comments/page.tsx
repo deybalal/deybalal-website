@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import AdminTable from "@/components/AdminTable";
+import { Suspense } from "react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -47,13 +48,15 @@ export default async function CommentsPage({
         <h2 className="text-xl font-semibold">مدیریت نظرات</h2>
       </div>
       <div className="glass rounded-lg border border-white/10 overflow-hidden">
-        <AdminTable
-          type="comments"
-          userRole={userRole}
-          data={comments}
-          pageCount={Math.ceil(commentsCount / pageSize)}
-          pageIndex={page - 1}
-        />
+        <Suspense>
+          <AdminTable
+            type="comments"
+            userRole={userRole}
+            data={comments}
+            pageCount={Math.ceil(commentsCount / pageSize)}
+            pageIndex={page - 1}
+          />
+        </Suspense>
       </div>
     </div>
   );

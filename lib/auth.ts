@@ -79,6 +79,7 @@ export const auth = betterAuth({
       },
       instagramHandle: {
         type: "string",
+        required: false,
       },
     },
   },

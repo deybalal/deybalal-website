@@ -33,7 +33,6 @@ export async function generateMetadata({
   const artistNames = song.artists.map((a) => a.name).join(", ");
   const title = `${song.title} از ${artistNames}`;
   const description = `${song.title} از ${artistNames}. پخش آنلاین یا دانلود با کیفیت بالا در پلتفرم آهنگ لری دی بلال.`;
-  const ogImageUrl = `/api/og/song/${id}`;
 
   return {
     title,
@@ -44,7 +43,6 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      images: [ogImageUrl],
       type: "music.song",
       siteName: "دی بلال",
     },
@@ -52,7 +50,6 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [ogImageUrl],
     },
   };
 }
@@ -193,6 +190,8 @@ export default async function SongDetailPage({
         }
       : undefined,
   };
+
+  console.log(song);
 
   return (
     <div className="space-y-12 pb-24 w-full flex-1">
@@ -345,7 +344,7 @@ export default async function SongDetailPage({
             <ShareButtons
               title={song.title}
               url={`${process.env.NEXT_PUBLIC_DEPLOYED_URL}/song/${song.id}`}
-              type="song"
+              shortUrl={`${process.env.NEXT_PUBLIC_DEPLOYED_URL}/s/${song.index}`}
             />
           </div>
         </div>

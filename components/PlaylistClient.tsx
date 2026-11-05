@@ -28,7 +28,7 @@ export default function PlaylistClient({
   const [playlist, setPlaylist] = useState(initialPlaylist);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 mb-24 h-max w-full lg:w-7/12">
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-8 items-end">
         <div className="relative w-64 h-64 rounded-lg overflow-hidden shadow-2xl neon-box shrink-0 bg-linear-to-br from-primary to-accent flex items-center justify-center">
@@ -132,7 +132,6 @@ export default function PlaylistClient({
               <ShareButtons
                 title={playlist.name}
                 url={`/playlists/${playlist.id}`}
-                type="playlist"
               />
             </div>
           </div>

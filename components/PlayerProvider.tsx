@@ -2,9 +2,11 @@
 
 import { usePlayerStore, TAB_ID } from "@/hooks/usePlayerStore";
 import { useEffect, useRef } from "react";
+import { packRequestHash } from "@/lib/hash";
 
 const PlayerProvider = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastSongIdRef = useRef<string | null>(null);
   const {
     isPlaying,
     currentSong,
@@ -17,10 +19,28 @@ const PlayerProvider = () => {
     activeId,
   } = usePlayerStore();
 
-  const incrementPlayCount = (songId: string) => {
-    fetch(`/api/songs/${songId}/play`, { method: "POST" }).catch((e) =>
-      console.error("Failed to increment play count:", e)
-    );
+  const incrementPlayCount = async (songId: string) => {
+    try {
+      const url = `/api/songs/${songId}/play`;
+      const userTimeInfo = {
+        localTime: new Date().toLocaleString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
+
+      const hash = await packRequestHash(url, userTimeInfo);
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          hash,
+        }),
+      }).catch((e) => console.error("Failed to increment play count:", e));
+    } catch (error) {
+      console.error("Failed to generate hash for play count:", error);
+    }
   };
 
   // Handle seeking
@@ -31,48 +51,55 @@ const PlayerProvider = () => {
     }
   }, [seekTo, setSeekTo]);
 
-  // Handle play/pause
+  // Consolidated Audio Logic: Handles Source changes and Play/Pause
   useEffect(() => {
-    if (audioRef.current) {
-      if (isPlaying && activeId === TAB_ID) {
-        audioRef.current.play().catch((e) => console.error("Play error:", e));
-      } else {
-        audioRef.current.pause();
+    if (!audioRef.current) return;
+
+    const audio = audioRef.current;
+    const playAudio = async () => {
+      try {
+        if (isPlaying && activeId === TAB_ID) {
+          // If the audio is already playing, calling play() is fine and doesn't cause harm.
+          await audio.play().catch((e) => console.error("Play error:", e));
+        } else {
+          audio.pause();
+        }
+      } catch (e: unknown) {
+        // Ignore AbortError: usually caused by a new load request or manual pause
+        if (e instanceof Error && e.name !== "AbortError") {
+          console.error("Play error:", e);
+        }
       }
-    }
-  }, [isPlaying, activeId]);
+    };
 
-  // Handle volume
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume / 100;
-    }
-  }, [volume]);
-
-  // Handle song source changes
-  useEffect(() => {
-    if (audioRef.current && currentSong?.uri) {
-      // Only update src if it's different to avoid resetting progress
-      // We check against the current src (which might be a full URL)
-      const currentSrc = audioRef.current.src;
+    if (currentSong?.uri) {
+      const currentSrc = audio.src;
       const newSrc = currentSong.uri;
-
-      // Simple check: if the src ends with the uri (handling relative/absolute)
-      // or if they are exactly equal.
+      const isNewSong = lastSongIdRef.current !== currentSong.id;
       const isSameSource = currentSrc === newSrc || currentSrc.endsWith(newSrc);
 
-      if (!isSameSource) {
-        audioRef.current.src = newSrc;
-        // If we are the active tab and supposed to be playing, play the new track
-        if (isPlaying && activeId === TAB_ID) {
-          audioRef.current.play().catch((e) => console.error("Play error:", e));
+      if (!isSameSource || isNewSong) {
+        console.log(
+          `[Player] Swapping source to ${newSrc} (IsNewSong: ${isNewSong})`
+        );
+        lastSongIdRef.current = currentSong.id;
 
-          // Increment play count
+        // When changing source, we must pause first if playing to prevent race conditions
+        audio.pause();
+        audio.src = newSrc;
+        audio.load();
+
+        if (isPlaying && activeId === TAB_ID) {
           incrementPlayCount(currentSong.id);
         }
       }
     }
-  }, [currentSong, activeId, isPlaying]);
+
+    // Always attempt to sync play/pause state
+    playAudio();
+
+    return () => {};
+  }, [currentSong, isPlaying, activeId]);
 
   // Sync audio time when becoming active
   useEffect(() => {
@@ -106,7 +133,9 @@ const PlayerProvider = () => {
   const handleEnded = () => {
     if (activeId !== TAB_ID) return;
 
-    const { repeatMode, currentSong } = usePlayerStore.getState();
+    const { repeatMode, currentSong, isRadio } = usePlayerStore.getState();
+    if (isRadio) return;
+
     if (repeatMode === "one" && audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch((e) => console.error("Play error:", e));
@@ -117,6 +146,13 @@ const PlayerProvider = () => {
       next();
     }
   };
+
+  // Handle volume
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 100;
+    }
+  }, [volume]);
 
   // Sync state when tab becomes visible
   useEffect(() => {
@@ -139,6 +175,7 @@ const PlayerProvider = () => {
       // onLoadedMetadata={handleLoadedMetadata}
       onEnded={handleEnded}
       className="hidden"
+      preload="metadata"
     />
   );
 };

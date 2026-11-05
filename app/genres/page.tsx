@@ -1,4 +1,5 @@
 import Pagination from "@/components/Pagination";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -66,10 +67,12 @@ export default async function GenresPage({
         </div>
       )}
 
-      <Pagination
-        currentPage={page}
-        totalPages={Math.ceil(totalGenres / pageSize)}
-      />
+      <Suspense>
+        <Pagination
+          currentPage={page}
+          totalPages={Math.ceil(totalGenres / pageSize)}
+        />
+      </Suspense>
     </div>
   );
 }

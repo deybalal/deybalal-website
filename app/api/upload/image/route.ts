@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { FTPService } from "@/lib/ftp";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { logSuspiciousUpload } from "@/lib/logger";
@@ -75,24 +74,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const uploadDir = path.join(process.cwd(), "public/assets/cover");
-
-    // Ensure directory exists
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch {
-      // Ignore if exists
-    }
-
-    // Create a temp filename with sanitized name
+    const publicPathPrefix = "/assets/cover/";
     const timestamp = Date.now();
     const safeFilename = sanitizeFilename(file.name);
     const filename = `temp_${timestamp}_${safeFilename}`;
-    const filepath = path.join(uploadDir, filename);
+    const remotePath = `${publicPathPrefix}${filename}`;
 
-    await writeFile(filepath, buffer);
+    await FTPService.uploadBuffer(buffer, remotePath);
 
-    const publicPath = `/assets/cover/${filename}`;
+    const publicPath = `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/cover/${filename}`;
 
     return NextResponse.json({
       success: true,

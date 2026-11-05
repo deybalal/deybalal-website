@@ -29,7 +29,6 @@ export async function generateMetadata({
 
   const title = `آلبوم ${album.name} از ${album.artistName} - دی بلال`;
   const description = `استریم و دانلود آلبوم ${album.name} از ${album.artistName} در پلتفرم دی بلال + متن آهنگ ها.`;
-  const ogImageUrl = `/api/og/album/${id}`;
 
   return {
     title,
@@ -40,7 +39,6 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      images: [ogImageUrl],
       type: "music.album",
       siteName: "دی بلال",
     },
@@ -48,7 +46,6 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [ogImageUrl],
     },
   };
 }
@@ -229,11 +226,7 @@ export default async function AlbumDetailPage({
                 </Button>
               }
             />
-            <ShareButtons
-              title={album.name}
-              url={`/album/${album.id}`}
-              type="album"
-            />
+            <ShareButtons title={album.name} url={`/album/${album.id}`} />
           </div>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { FTPService } from "@/lib/ftp";
 import * as mm from "music-metadata";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -79,22 +78,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const uploadDir = path.join(process.cwd(), "public/assets/mp3");
-
-    // Ensure directory exists
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch {
-      // Ignore if exists
-    }
-
-    // Create a temporary filename
     const tempFilename = `temp_${Date.now()}_${Math.random()
       .toString(36)
       .substring(7)}.mp3`;
-    const filepath = path.join(uploadDir, tempFilename);
+    const remoteMp3Path = `/assets/mp3/${tempFilename}`;
 
-    await writeFile(filepath, buffer);
+    await FTPService.uploadBuffer(buffer, remoteMp3Path);
 
     // Parse metadata
     let metadata;
@@ -106,19 +95,15 @@ export async function POST(request: Request) {
 
       const picture = metadata.common.picture?.[0];
       if (picture) {
-        const coverDir = path.join(process.cwd(), "public/assets/cover");
-        try {
-          await mkdir(coverDir, { recursive: true });
-        } catch {
-          // Ignore
-        }
-
         const ext = picture.format === "image/jpeg" ? "jpg" : "png";
         const tempCoverFilename = `temp_${tempFilename}.${ext}`;
-        const tempCoverFilepath = path.join(coverDir, tempCoverFilename);
+        const remoteCoverPath = `/assets/cover/${tempCoverFilename}`;
 
-        await writeFile(tempCoverFilepath, picture.data);
-        coverArtPath = `/assets/cover/${tempCoverFilename}`;
+        await FTPService.uploadBuffer(
+          Buffer.from(picture.data),
+          remoteCoverPath
+        );
+        coverArtPath = `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/cover/${tempCoverFilename}`;
         tempCoverArtPath = tempCoverFilename; // Just the filename for easier handling
       }
     } catch (error) {
@@ -126,7 +111,7 @@ export async function POST(request: Request) {
       // Continue even if metadata parsing fails, but warn
     }
 
-    const publicPath = `/assets/mp3/${tempFilename}`;
+    const publicPath = `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/mp3/${tempFilename}`;
 
     return NextResponse.json({
       success: true,

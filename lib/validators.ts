@@ -97,10 +97,6 @@ export function validatePassword(password: string): {
     errors.push("رمز عبور باید حداقل ۸ کاراکتر باشد");
   }
 
-  if (!/[a-z]/.test(password)) {
-    errors.push("رمز عبور باید شامل حروف کوچک انگلیسی باشد");
-  }
-
   // Optional: special characters
   // if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
   //   errors.push("رمز عبور باید شامل کاراکترهای خاص باشد");

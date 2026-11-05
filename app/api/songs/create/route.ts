@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { rename, unlink } from "fs/promises";
+import { FTPService } from "@/lib/ftp";
 import path from "path";
-import { existsSync } from "fs";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getUniqueSongSlug } from "@/lib/slug";
-import { parseFile } from "music-metadata";
 import { findSimilarSongs } from "@/lib/similarity";
 
 export const dynamic = "force-dynamic";
@@ -102,22 +100,8 @@ export async function POST(request: Request) {
     }
 
     // Fetch duration from file if not provided
-    let duration = validatedData.duration || 0;
-    if (!duration && validatedData.filename) {
-      const filePath = path.join(
-        process.cwd(),
-        "public/assets/mp3",
-        validatedData.filename
-      );
-      if (existsSync(filePath)) {
-        try {
-          const metadata = await parseFile(filePath);
-          duration = Math.round(metadata.format.duration || 0);
-        } catch (err) {
-          console.error("Failed to parse duration on creation:", err);
-        }
-      }
-    }
+    // Note: Since files are on FTP, we skip local duration check here.
+    // The client typically sends the duration parsed during upload.
 
     const slugBase =
       validatedData.slug ||
@@ -131,37 +115,34 @@ export async function POST(request: Request) {
 
     // Handle temporary cover art
     if (validatedData.tempCoverArt) {
-      const coverDir = path.join(process.cwd(), "public/assets/cover");
-      const tempPath = path.join(coverDir, validatedData.tempCoverArt);
+      const coverPathPrefix = "/assets/cover/";
+      const tempRemotePath = `${coverPathPrefix}${validatedData.tempCoverArt}`;
 
-      if (existsSync(tempPath)) {
-        if (
-          validatedData.coverArt &&
-          validatedData.coverArt.includes(validatedData.tempCoverArt)
-        ) {
-          // User kept the extracted cover art -> Rename it
-          const mp3Filename =
-            validatedData.filename || `song-${Date.now()}.mp3`;
-          const baseName =
-            mp3Filename.substring(0, mp3Filename.lastIndexOf(".")) ||
-            mp3Filename;
-          const ext = path.extname(validatedData.tempCoverArt);
-          const newFilename = `${baseName}${ext}`;
-          const newPath = path.join(coverDir, newFilename);
+      // We assume the file exists on FTP as it was just uploaded
+      if (
+        validatedData.coverArt &&
+        validatedData.coverArt.includes(validatedData.tempCoverArt)
+      ) {
+        // User kept the extracted cover art -> Rename it
+        const mp3Filename = validatedData.filename || `song-${Date.now()}.mp3`;
+        const baseName =
+          mp3Filename.substring(0, mp3Filename.lastIndexOf(".")) || mp3Filename;
+        const ext = path.extname(validatedData.tempCoverArt);
+        const newFilename = `${baseName}${ext}`;
+        const newRemotePath = `${coverPathPrefix}${newFilename}`;
 
-          try {
-            await rename(tempPath, newPath);
-            finalCoverArt = `/assets/cover/${newFilename}`;
-          } catch (err) {
-            console.error("Failed to rename cover art:", err);
-          }
-        } else {
-          // User changed the cover art -> Delete the temp file
-          try {
-            await unlink(tempPath);
-          } catch (err) {
-            console.error("Failed to delete temp cover art:", err);
-          }
+        try {
+          await FTPService.renameFile(tempRemotePath, newRemotePath);
+          finalCoverArt = `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/cover/${newFilename}`;
+        } catch (err) {
+          console.error("Failed to rename cover art on FTP:", err);
+        }
+      } else {
+        // User changed the cover art -> Delete the temp file from FTP
+        try {
+          await FTPService.deleteFile(tempRemotePath);
+        } catch (err) {
+          console.error("Failed to delete temp cover art on FTP:", err);
         }
       }
     }
@@ -188,8 +169,11 @@ export async function POST(request: Request) {
       finalCoverArt = "/images/cover.png";
     }
 
+    const count = await prisma.song.count();
+
     const song = await prisma.song.create({
       data: {
+        index: count,
         title: validatedData.title,
         titleEn: validatedData.titleEn || "",
         artist: validatedData.artist || "",
@@ -202,12 +186,12 @@ export async function POST(request: Request) {
         uri:
           validatedData.uri ||
           (validatedData.filename
-            ? `/assets/mp3/${validatedData.filename}`
+            ? `${process.env.NEXT_PUBLIC_FTP_BASE_URL}/assets/mp3/${validatedData.filename}`
             : ""),
         links: validatedData.links || undefined,
         coverArt: finalCoverArt,
         year: validatedData.year || 0,
-        duration: duration,
+        duration: validatedData.duration || 0,
         filename: validatedData.filename,
         lyrics: validatedData.lyrics,
         syncedLyrics: validatedData.syncedLyrics,

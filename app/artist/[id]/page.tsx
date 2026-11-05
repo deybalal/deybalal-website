@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Song, Album } from "@/types/types";
 import ArtistPlayButton from "@/components/ArtistPlayButton";
 import Pagination from "@/components/Pagination";
+import { Suspense } from "react";
 import { FollowButton } from "@/components/FollowButton";
 import ArtistDescription from "@/components/ArtistDescription";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -181,10 +182,10 @@ export default async function ArtistDetailPage({
   };
 
   return (
-    <div className="space-y-12 pb-24 h-max w-full md:w-auto max-w-6xl">
+    <div className="space-y-12 pb-24 h-max w-full md:w-10/12 max-w-6xl">
       <StructuredData data={structuredData as Record<string, unknown>} />
       {/* Header Section */}
-      <div className="relative min-h-[400px] md:h-[50vh] -mt-8 overflow-hidden rounded-b-[3rem] shadow-2xl flex flex-col justify-center">
+      <div className="relative min-h-[400px] md:h-[50vh] rounded-4xl overflow-hidden rounded-b-[3rem] shadow-2xl flex flex-col justify-center">
         {/* Blurred Background */}
         {artist.image && (
           <div className="absolute inset-0 z-0">
@@ -296,10 +297,12 @@ export default async function ArtistDetailPage({
             <div className="glass rounded-3xl p-1 md:p-8 border border-white/5 w-full">
               <SongList songs={songs} showArtist={false} />
               <div className="mt-8">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={Math.ceil(artist._count.songs / pageSize)}
-                />
+                <Suspense>
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={Math.ceil(artist._count.songs / pageSize)}
+                  />
+                </Suspense>
               </div>
             </div>
           ) : (

@@ -8,6 +8,7 @@ import {
   User,
   Search,
   LayoutDashboard,
+  Radio,
 } from "lucide-react";
 import Link from "next/link";
 import DynamicDarkModeToggle from "@/components/DynamicDarkModeToggle";
@@ -15,6 +16,7 @@ import DynamicDarkModeToggle from "@/components/DynamicDarkModeToggle";
 const Navbar = () => {
   const navItems = [
     { name: "صفحه اصلی", href: "/", icon: Home },
+    { name: "رادیو", href: "/radio", icon: Radio },
     { name: "جستوجو", href: "/search", icon: Search },
     { name: "داشبورد", href: "/panel", icon: LayoutDashboard },
     { name: "آلبوم ها", href: "/album", icon: Disc },

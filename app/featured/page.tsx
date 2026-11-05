@@ -1,4 +1,5 @@
 import Pagination from "@/components/Pagination";
+import { Suspense } from "react";
 import SongCard from "@/components/SongCard";
 import { prisma } from "@/lib/prisma";
 import { Song as PrismaSong, Artist as PrismaArtist } from "@prisma/client";
@@ -78,10 +79,12 @@ export default async function SongsPage({
         </div>
       )}
 
-      <Pagination
-        currentPage={page}
-        totalPages={Math.ceil(totalSongs / pageSize)}
-      />
+      <Suspense>
+        <Pagination
+          currentPage={page}
+          totalPages={Math.ceil(totalSongs / pageSize)}
+        />
+      </Suspense>
     </div>
   );
 }

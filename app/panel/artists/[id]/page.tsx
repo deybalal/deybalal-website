@@ -41,13 +41,14 @@ export default async function EditArtistPage({
   }
 
   // Map Prisma artist to our Artist type
-  const artistData: Artist = {
+  const artistData: Artist & { songs: Song[] } = {
     id: artist.id,
     name: artist.name,
     nameEn: artist.nameEn,
     description: artist.description,
     image: artist.image,
     isVerified: artist.isVerified,
+    userId: "",
     songs: artist.songs.map((song) => ({
       id: song.id,
       title: song.title,

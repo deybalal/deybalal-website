@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
@@ -9,9 +9,9 @@ export async function GET() {
       headers: await headers(),
     });
 
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json(
-        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
+        { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
@@ -23,33 +23,81 @@ export async function GET() {
       orderBy: {
         createdAt: "desc",
       },
-      take: 50,
     });
 
-    return NextResponse.json({ success: true, data: notifications });
+    return NextResponse.json({
+      success: true,
+      data: notifications,
+    });
   } catch (error) {
     console.error("Error fetching notifications:", error);
     return NextResponse.json(
-      { success: false, message: "خطا در دریافت اعلان ها" },
+      { success: false, message: "Internal Server Error" },
       { status: 500 }
     );
   }
 }
 
-export async function PATCH(request: Request) {
+export async function POST(req: Request) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session) {
+    const userRole = (session?.user as { role?: string })?.role;
+    if (userRole !== "administrator") {
       return NextResponse.json(
-        { success: false, message: "شما مجاز به انجام این کار نیستید!" },
+        { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const { id, all } = await request.json();
+    const { userId, title, message, link } = await req.json();
+
+    if (!userId || !title || !message) {
+      return NextResponse.json(
+        { success: false, message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const notification = await prisma.notification.create({
+      data: {
+        userId,
+        type: "ADMIN_CUSTOM",
+        title,
+        message,
+        link: link || null,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: notification,
+    });
+  } catch (error) {
+    console.error("Error creating notification:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { id, all } = await req.json();
 
     if (all) {
       await prisma.notification.updateMany({
@@ -61,43 +109,30 @@ export async function PATCH(request: Request) {
           isRead: true,
         },
       });
-      return NextResponse.json({
-        success: true,
-        message: "همه ی اعلان ها خوانده شدند!",
+    } else if (id) {
+      await prisma.notification.update({
+        where: {
+          id,
+          userId: session.user.id,
+        },
+        data: {
+          isRead: true,
+        },
       });
-    }
-
-    if (!id) {
+    } else {
       return NextResponse.json(
-        { success: false, message: "آیدی اعلان اجباری است!" },
+        { success: false, message: "Missing id or all flag" },
         { status: 400 }
       );
     }
 
-    const notification = await prisma.notification.findUnique({
-      where: { id },
-    });
-
-    if (!notification || notification.userId !== session.user.id) {
-      return NextResponse.json(
-        { success: false, message: "اعلان پیدا نشد!" },
-        { status: 404 }
-      );
-    }
-
-    await prisma.notification.update({
-      where: { id },
-      data: { isRead: true },
-    });
-
     return NextResponse.json({
       success: true,
-      message: "اعلان خوانده شد!",
     });
   } catch (error) {
     console.error("Error updating notification:", error);
     return NextResponse.json(
-      { success: false, message: "خطا در ویرایش اعلان!" },
+      { success: false, message: "Internal Server Error" },
       { status: 500 }
     );
   }

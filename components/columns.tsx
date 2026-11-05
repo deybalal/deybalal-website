@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import ManageBadgesDialog from "./admin/ManageBadgesDialog";
 import AssignArtistDialog from "./admin/AssignArtistDialog";
+import SendNotificationDialog from "./admin/SendNotificationDialog";
 import LyricsDiff from "./admin/LyricsDiff";
 import Link from "next/link";
 
@@ -860,6 +861,14 @@ const UserActionsCell = ({
                 الصاق به خواننده
               </DropdownMenuItem>
             </AssignArtistDialog>
+            <SendNotificationDialog user={user}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(e) => e.preventDefault()}
+              >
+                ارسال اعلان
+              </DropdownMenuItem>
+            </SendNotificationDialog>
             <DropdownMenuItem
               className="cursor-pointer text-red-500 hover:text-red-600"
               onClick={toggleBanned}

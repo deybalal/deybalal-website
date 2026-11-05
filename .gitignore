@@ -16,6 +16,8 @@ public/assets/mp3/*.mp3
 public/assets/ogg/*.ogg
 public/assets/*.ts
 
+*.wav
+*.mp3
 
 # testing
 /coverage

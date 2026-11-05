@@ -16,24 +16,16 @@ export default function Lyrics({
   songId,
 }: LyricsProps & { songId?: string }) {
   const currentSong = usePlayerStore((state) => state.currentSong);
+  const isRadio = usePlayerStore((state) => state.isRadio);
   const setSeekTo = usePlayerStore((state) => state.setSeekTo);
   const progress = usePlayerStore((state) => state.progress);
   const setProgress = usePlayerStore((state) => state.setProgress);
 
+  const isSynced = !!lrc;
   const parsedLyrics = useMemo(() => (lrc ? parseLRC(lrc) : []), [lrc]);
 
-  const [activeIndex, setActiveIndex] = useState(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [manualScroll, setManualScroll] = useState(false);
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  const isSynced = !!lrc;
-
-  // Find active line based on progress
-  useEffect(() => {
-    if (!isSynced || parsedLyrics.length === 0) return;
-
-    let targetIndex = 0;
+  const activeIndex = useMemo(() => {
+    if (!isSynced || parsedLyrics.length === 0) return 0;
 
     // Only sync if the playing song matches the displayed song
     if (!songId || currentSong?.id === songId) {
@@ -42,27 +34,34 @@ export default function Lyrics({
           progress >= line.time &&
           (i === parsedLyrics.length - 1 || progress < parsedLyrics[i + 1].time)
       );
-      if (foundIndex !== -1) {
-        targetIndex = foundIndex;
-      }
+      return foundIndex !== -1 ? foundIndex : 0;
     }
 
-    if (targetIndex !== activeIndex) {
-      setActiveIndex(targetIndex);
-    }
-  }, [progress, parsedLyrics, isSynced, activeIndex, currentSong, songId]);
+    return 0;
+  }, [progress, parsedLyrics, isSynced, currentSong, songId]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [manualScroll, setManualScroll] = useState(false);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-scroll to active line
   useEffect(() => {
     if (!isSynced || manualScroll || !scrollContainerRef.current) return;
 
-    const activeElement = scrollContainerRef.current.children[
-      activeIndex
-    ] as HTMLElement;
+    const container = scrollContainerRef.current;
+    const activeElement = container.children[activeIndex] as HTMLElement;
+
     if (activeElement) {
-      activeElement.scrollIntoView({
+      const containerHeight = container.offsetHeight;
+      const elementOffsetTop = activeElement.offsetTop;
+      const elementHeight = activeElement.offsetHeight;
+
+      // Calculate the target scroll position to center the active element
+      const targetScrollTop =
+        elementOffsetTop - containerHeight / 2 + elementHeight / 2;
+
+      container.scrollTo({
+        top: targetScrollTop,
         behavior: "smooth",
-        block: "center",
       });
     }
   }, [activeIndex, manualScroll, isSynced]);
@@ -113,7 +112,14 @@ export default function Lyrics({
           </p>
         ))
       ) : (
-        <div className="text-center whitespace-pre-wrap text-xl md:text-2xl lg:text-3xl text-muted-foreground leading-loose">
+        <div
+          className={cn(
+            "text-center whitespace-pre-wrap text-muted-foreground leading-loose",
+            isRadio
+              ? " text-base md:text-lg lg:text-xl"
+              : " text-xl md:text-2xl lg:text-3xl"
+          )}
+        >
           {plainLyrics}
         </div>
       )}

@@ -1,6 +1,5 @@
-import path from "path";
+import { FTPService } from "@/lib/ftp";
 import crypto from "crypto";
-// import fs from "fs";
 
 /**
  * Downloads an image from a URL and saves it to the public/assets/avatars directory.
@@ -40,18 +39,11 @@ export async function downloadAvatar(
       .slice(0, 16);
     const fileName = `${hashedId}.${ext}`;
     const relativePath = `/assets/avatars/${fileName}`;
-    const absolutePath = path.join(
-      process.cwd(),
-      "public",
-      "assets",
-      "avatars",
-      fileName
-    );
 
-    // @ts-expect-error: Bun global is available in the target environment
-    await Bun.write(absolutePath, buffer);
+    // Upload to FTP
+    await FTPService.uploadBuffer(buffer, relativePath);
 
-    return relativePath;
+    return `${process.env.NEXT_PUBLIC_FTP_BASE_URL}${relativePath}`;
   } catch (error) {
     console.error("Error downloading avatar:", error);
     return null;

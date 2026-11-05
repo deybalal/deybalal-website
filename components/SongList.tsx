@@ -54,20 +54,22 @@ const SongList = ({
           >
             <div className="w-10 flex items-center justify-center shrink-0">
               {isCurrent && isPlaying ? (
-                <div className="flex items-center gap-0.5 h-3">
-                  <div className="w-0.5 h-full bg-primary animate-bounce animation-duration-[0.6s]" />
-                  <div className="w-0.5 h-full bg-primary animate-bounce animation-duration-[0.8s]" />
-                  <div className="w-0.5 h-full bg-primary animate-bounce animation-duration-[0.7s]" />
+                <div className="flex items-center gap-0.5 h-3 group-hover:scale-150 duration-500">
+                  <div className="w-0.5 h-full bg-primary group-hover:bg-violet-600 duration-500 animate-bounce animation-duration-[0.6s]" />
+                  <div className="w-0.5 h-full bg-primary group-hover:bg-violet-600 duration-500 animate-bounce animation-duration-[0.8s]" />
+                  <div className="w-0.5 h-full bg-primary group-hover:bg-violet-600 duration-500 animate-bounce animation-duration-[0.7s]" />
                 </div>
               ) : (
-                <span className="text-sm text-muted-foreground group-hover:hidden">
-                  {i + 1}
-                </span>
+                <>
+                  <span className="text-sm text-muted-foreground group-hover:hidden">
+                    {i + 1}
+                  </span>
+                  <Play
+                    size={14}
+                    className="hidden group-hover:block text-primary fill-primary"
+                  />
+                </>
               )}
-              <Play
-                size={14}
-                className="hidden group-hover:block text-primary fill-primary"
-              />
             </div>
 
             <div className="relative w-12 h-12 bg-white/5 rounded-lg overflow-hidden shrink-0 mx-3 border border-white/5">
@@ -96,17 +98,31 @@ const SongList = ({
               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                 {showArtist && (
                   <span className="truncate hover:text-foreground transition-colors">
-                    {song.artist}
+                    {typeof song.artist === "string"
+                      ? song.artist
+                      : (song.artist as unknown as { name?: string })?.name ||
+                        song.artists?.[0]?.name ||
+                        "Unknown Artist"}
                   </span>
                 )}
-                {showArtist && showAlbum && song.album && (
-                  <span className="shrink-0">•</span>
-                )}
-                {showAlbum && song.album && (
-                  <span className="truncate hover:text-foreground transition-colors">
-                    {song.album}
-                  </span>
-                )}
+                {showArtist &&
+                  showAlbum &&
+                  (song.album ||
+                    (song as unknown as { albumName?: string }).albumName) && (
+                    <span className="shrink-0">•</span>
+                  )}
+                {showAlbum &&
+                  (song.album ||
+                    (song as unknown as { albumName?: string }).albumName) && (
+                    <span className="truncate hover:text-foreground transition-colors">
+                      {typeof song.album === "string"
+                        ? song.album
+                        : (song.album as unknown as { name?: string })?.name ||
+                          (song as unknown as { albumName?: string })
+                            .albumName ||
+                          "Unknown Album"}
+                    </span>
+                  )}
               </div>
             </div>
 

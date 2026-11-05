@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import AdminTable from "@/components/AdminTable";
+import { Suspense } from "react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -53,13 +54,15 @@ export default async function GenresPage({
         </Button>
       </div>
       <div className="glass rounded-lg border border-white/10 overflow-hidden">
-        <AdminTable
-          type="genres"
-          userRole={userRole}
-          data={genres}
-          pageCount={Math.ceil(genresCount / pageSize)}
-          pageIndex={page - 1}
-        />
+        <Suspense>
+          <AdminTable
+            type="genres"
+            userRole={userRole}
+            data={genres}
+            pageCount={Math.ceil(genresCount / pageSize)}
+            pageIndex={page - 1}
+          />
+        </Suspense>
       </div>
     </div>
   );

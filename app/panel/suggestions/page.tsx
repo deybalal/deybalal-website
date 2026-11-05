@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import AdminTable from "@/components/AdminTable";
+import { Suspense } from "react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -77,13 +78,15 @@ export default async function SuggestionsPage({
         </h2>
       </div>
       <div className="glass rounded-lg border border-white/10 overflow-hidden">
-        <AdminTable
-          type="suggestions"
-          userRole={userRole}
-          data={suggestions}
-          pageCount={Math.ceil(suggestionsCount / pageSize)}
-          pageIndex={page - 1}
-        />
+        <Suspense>
+          <AdminTable
+            type="suggestions"
+            userRole={userRole}
+            data={suggestions}
+            pageCount={Math.ceil(suggestionsCount / pageSize)}
+            pageIndex={page - 1}
+          />
+        </Suspense>
       </div>
     </div>
   );

@@ -18,12 +18,11 @@ export async function generateMetadata({
     include: { user: true },
   });
 
-  if (!playlist) return { title: "Playlist Not Found" };
+  if (!playlist) return { title: "پلی لیست پیدا نشد" };
 
-  const creator = playlist.user?.name || "User";
-  const title = `${playlist.name} by ${creator}`;
-  const description = `Listen to ${playlist.name}, a curated playlist by ${creator} on دی بلال.`;
-  const ogImageUrl = `/api/og/playlist/${id}`;
+  const creator = playlist.user?.name || "کاربر";
+  const title = `${playlist.name} توسط ${creator}`;
+  const description = `به آهنگ های پلی لیست ${playlist.name}, توسط ${creator} در پلتفلرم دی بلال گوش دهید.`;
 
   return {
     title,
@@ -31,7 +30,6 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      images: [ogImageUrl],
       type: "music.playlist",
       siteName: "دی بلال",
     },
@@ -39,7 +37,6 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [ogImageUrl],
     },
   };
 }
