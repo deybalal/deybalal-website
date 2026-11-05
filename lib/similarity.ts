@@ -1,5 +1,5 @@
-import { prisma } from "./prisma";
-import { getStringSimilarity } from "./utils";
+import { prisma } from "./prisma.ts";
+import { getStringSimilarity } from "./utils.ts";
 
 interface SimilarSongParams {
   title: string;

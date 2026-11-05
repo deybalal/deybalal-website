@@ -164,7 +164,8 @@ export const usePlayerStore = create<PlayerState>()(
       playNonce: 0,
 
       setHasCountedPlay: (hasCountedPlay) => set({ hasCountedPlay }),
-      setAccumulatedPlayTime: (accumulatedPlayTime) => set({ accumulatedPlayTime }),
+      setAccumulatedPlayTime: (accumulatedPlayTime) =>
+        set({ accumulatedPlayTime }),
 
       openRadioWarning: (action) =>
         set({ isRadioWarningOpen: true, pendingPlayAction: action }),
@@ -198,7 +199,12 @@ export const usePlayerStore = create<PlayerState>()(
       setContextRadioQueue: (songs, contextId, contextType, startIndex) => {
         if (get().isRadio && get().isLiveRadio) {
           get().openRadioWarning(() => {
-            get().setContextRadioQueue(songs, contextId, contextType, startIndex);
+            get().setContextRadioQueue(
+              songs,
+              contextId,
+              contextType,
+              startIndex
+            );
           });
           return;
         }
@@ -284,14 +290,11 @@ export const usePlayerStore = create<PlayerState>()(
 
         if (playbackDevice === "server" || playbackDevice === "both") {
           try {
-            fetch("/api/server-player", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                type: "play",
-                filename: song.filename,
-                volume: serverVolume,
-              }),
+            sendToServerProxy({
+              type: "play",
+              filename: song.filename,
+              songId: song.id,
+              volume: serverVolume,
             });
           } catch (error) {
             toast.error((error as Error).message);
@@ -328,21 +331,39 @@ export const usePlayerStore = create<PlayerState>()(
           return;
         }
 
-        const pref = get().downloadPreference;
+        const { playbackDevice, downloadPreference, serverVolume } = get();
         const songsWithUri = songs.map((s) => {
-          const { uri } = getBestUri(s, pref);
+          const { uri } = getBestUri(s, downloadPreference);
           return { ...s, uri };
         });
+
         const currentSongData = songsWithUri[startIndex] || null;
         let currentQuality = null;
 
         if (currentSongData) {
-          const { quality } = getBestUri(songs[startIndex], pref);
+          const { quality } = getBestUri(songs[startIndex], downloadPreference);
           currentQuality = quality;
-          if (quality !== pref) {
+          if (quality !== downloadPreference) {
             toast.error(
-              `کیفیت ${pref}k یافت نشد، در حال پخش با کیفیت ${quality}k`
+              `کیفیت ${downloadPreference}k یافت نشد، در حال پخش با کیفیت ${quality}k`
             );
+          }
+        }
+
+        if (playbackDevice === "server" || playbackDevice === "both") {
+          try {
+            sendToServerProxy({
+              type: "play",
+              filename: currentSongData.filename,
+              songId: currentSongData.id,
+              volume: serverVolume,
+            });
+          } catch (error) {
+            toast.error((error as Error).message);
+          }
+
+          if (!play) {
+            sendToServerProxy({ type: "action", action: "pause" });
           }
         }
 
@@ -646,7 +667,8 @@ export const usePlayerStore = create<PlayerState>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           // If progress was saved at or near the end of the song, reset to 0
-          const songDuration = state.duration || state.currentSong?.duration || 0;
+          const songDuration =
+            state.duration || state.currentSong?.duration || 0;
           if (songDuration > 0 && state.progress >= songDuration - 2) {
             state.progress = 0;
           }
@@ -677,7 +699,9 @@ export const usePlayerStore = create<PlayerState>()(
           playbackDevice: state.playbackDevice,
           serverVolume: state.serverVolume,
           hasCountedPlay: state.hasCountedPlay,
-          accumulatedPlayTime: state.hasCountedPlay ? 0 : state.accumulatedPlayTime,
+          accumulatedPlayTime: state.hasCountedPlay
+            ? 0
+            : state.accumulatedPlayTime,
         } as PlayerState),
     }
   )

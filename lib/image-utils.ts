@@ -25,9 +25,12 @@ export async function applyWatermark(
       mkdirSync(outputDir, { recursive: true });
     }
     const { createCanvas, loadImage, registerFont } = await import("canvas");
-    
+
     // Register local Farsi font to ensure beautiful rendering across all OSes
-    const fontPath = path.join(process.cwd(), "public/assets/Vazirmatn-Bold.ttf");
+    const fontPath = path.join(
+      process.cwd(),
+      "public/assets/Vazirmatn-Bold.ttf"
+    );
     if (existsSync(fontPath)) {
       try {
         registerFont(fontPath, { family: "Vazirmatn", weight: "bold" });
@@ -41,7 +44,7 @@ export async function applyWatermark(
     const width = image.width || 1000;
     const height = image.height || 1000;
     const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
 
     // Draw the image
     ctx.drawImage(image, 0, 0, width, height);
@@ -49,8 +52,8 @@ export async function applyWatermark(
     // Draw a background gradient (mimics original SVG backdrop)
     const gradientHeight = Math.round(height * 0.25);
     const gradient = ctx.createLinearGradient(0, 0, 0, gradientHeight);
-    gradient.addColorStop(0, 'rgba(0,0,0,0.6)');
-    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+    gradient.addColorStop(0, "rgba(0,0,0,0.6)");
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, gradientHeight);
 
@@ -59,12 +62,12 @@ export async function applyWatermark(
     const detailsFontSize = Math.round(width * 0.035);
 
     // Set text styles
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.lineJoin = 'round';
-    
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineJoin = "round";
+
     // Add Drop Shadow
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
     ctx.shadowBlur = Math.max(2, width / 200);
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
@@ -73,28 +76,28 @@ export async function applyWatermark(
 
     // Draw app name
     ctx.font = `bold ${appNameFontSize}px Vazirmatn, Vazir, Tahoma, Arial, sans-serif`;
-    
+
     // Draw stroke (mimics SVG paint-order: stroke fill)
-    ctx.lineWidth = strokeWidth * 2; 
-    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-    ctx.strokeText(appName, width / 2, height * 0.07);
-    
+    ctx.lineWidth = strokeWidth * 2;
+    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    ctx.strokeText(appName, width / 2, height * 0.09);
+
     // Draw fill
-    ctx.fillStyle = 'white';
-    ctx.fillText(appName, width / 2, height * 0.07);
+    ctx.fillStyle = "white";
+    ctx.fillText(appName, width / 2, height * 0.09);
 
     // Draw details
     ctx.font = `bold ${detailsFontSize}px Vazirmatn, Vazir, Tahoma, Arial, sans-serif`;
-    
+
     ctx.lineWidth = strokeWidth * 2;
-    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-    ctx.strokeText(details, width / 2, height * 0.125);
-    
-    ctx.fillStyle = 'white';
-    ctx.fillText(details, width / 2, height * 0.125);
+    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    ctx.strokeText(details, width / 2, height * 0.145);
+
+    ctx.fillStyle = "white";
+    ctx.fillText(details, width / 2, height * 0.145);
 
     const fs = await import("fs/promises");
-    const buffer = canvas.toBuffer('image/jpeg', { quality: 0.94 });
+    const buffer = canvas.toBuffer("image/jpeg", { quality: 0.94 });
     await fs.writeFile(outputPath, buffer);
 
     return true;

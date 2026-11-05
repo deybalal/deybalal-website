@@ -443,9 +443,6 @@ model Telegram {
   cover_art_file_id        String?
   cover_art_file_unique_id String?
 
-  ogg_file_id        String?
-  ogg_file_unique_id String?
-
   has_posted     Boolean @default(false)
   message_id     Int?
   ogg_message_id Int?

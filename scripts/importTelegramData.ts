@@ -209,8 +209,6 @@ async function main() {
         file_unique_id_320: tgData?.["320"]?.file_unique_id ?? null,
         file_id_ogg: tgData?.ogg?.file_id ?? null,
         file_unique_id_ogg: tgData?.ogg?.file_unique_id ?? null,
-        ogg_file_id: tgData?.ogg?.file_id ?? null,
-        ogg_file_unique_id: tgData?.ogg?.file_unique_id ?? null,
         cover_art_file_id: tgData?.coverArt?.file_id ?? null,
         cover_art_file_unique_id: tgData?.coverArt?.file_unique_id ?? null,
 

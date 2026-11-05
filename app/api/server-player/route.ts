@@ -2,12 +2,18 @@ import { NextResponse } from "next/server";
 // import path from "path";
 // import fs from "fs";
 // import axios from "axios";
+// import { prisma } from "@/lib/prisma";
 
-export async function POST(/* req: Request */) {
-  /*
-  try {
+// const f = (s: string) =>
+//   s
+//     .split(/\s+/)
+//     .map((w) => w[0].toUpperCase() + w.slice(1))
+//     .join("-");
+
+export async function POST(/*req: Request*/) {
+  /* try {
     const data = await req.json();
-    const { type, volume, position, action, filename } = data;
+    const { type, volume, position, action, filename, songId } = data;
     const serverUrl =
       process.env.AUDIO_SERVER_URL || "http://192.168.1.108:3001";
 
@@ -48,13 +54,28 @@ export async function POST(/* req: Request */) {
           message: "No filename provided",
         });
 
-      // Clean filename - usually starts with /assets/mp3/
-      // process.cwd() / public / assets / mp3 / song.mp3
+      const song = await prisma.song.findUnique({
+        where: {
+          id: songId,
+        },
+        include: {
+          artists: true,
+        },
+      });
+
+      if (!song)
+        return NextResponse.json({
+          success: false,
+          message: "Song not found!",
+        });
+
+      // process.cwd() / public / assets / mp3 / artist folder / song.mp3
       const filePath = path.join(
         process.cwd(),
         "public",
         "assets",
         "mp3",
+        f(song.artistEn),
         filename
       );
 
@@ -104,6 +125,6 @@ export async function POST(/* req: Request */) {
       { status: 500 }
     );
   }
-  */
+*/
   return NextResponse.json({ success: true, message: "dummydata" });
 }

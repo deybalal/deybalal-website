@@ -45,6 +45,7 @@
     "diff": "^8.0.2",
     "fuse.js": "^7.1.0",
     "fuzzysort": "^4.0.2",
+    "https-proxy-agent": "^9.1.0",
     "jimp": "^1.6.1",
     "lucide-react": "^0.554.0",
     "music-metadata": "^11.10.3",
@@ -60,7 +61,6 @@
     "svg-captcha": "^1.4.0",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.13",
-    "canvas": "^2.11.2",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

@@ -9,6 +9,11 @@ export interface TelegramFile {
   uploadedAt?: number | Date;
 }
 
+export type SongLinks = Record<
+  string | number,
+  { url: string; size: string; bytes: number }
+>;
+
 export interface Song {
   id: string;
   slug?: string;
@@ -79,6 +84,8 @@ export interface Artist {
   songs?: Song[];
   fileId?: string | null;
   fileUniqueId?: string | null;
+  telegramFileId?: string | null;
+  telegramFileUniqueId?: string | null;
 }
 
 export interface Contributor {
