@@ -71,6 +71,7 @@ data
 !searchPrompt.md
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 merge.json
 uniqueSongsFinal.json
 kourosh-asadpour.json
@@ -93,3 +94,12 @@ data
 =======
 merge.json
 >>>>>>> 9e2e05f (Merge added)
+=======
+merge.json
+db.json
+dbExample.json
+errored.json
+example.json
+uniqueSongsFinal.json
+kourosh-asadpour.json
+>>>>>>> cfbe99b (Updated gitignore)
