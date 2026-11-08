@@ -56,6 +56,7 @@ import { toast } from "react-hot-toast";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import DialogAlert from "./DialogAlert";
+import RegenerateSongDialog from "./RegenerateSongDialog";
 import { cn } from "@/lib/utils";
 
 const SongActionsCell = ({
@@ -131,6 +132,32 @@ const SongActionsCell = ({
     });
   };
 
+  const regenerateSong = async () => {
+    const toastId = toast.loading("در حال ساخت مجدد کاور و فایل‌های صوتی آهنگ...");
+    try {
+      const response = await fetch(`/api/songs/${song.id}/regenerate`, {
+        method: "POST",
+      });
+      const result = await response.json();
+      if (result.success) {
+        toast.success(
+          result.message || "آهنگ با موفقیت مجدداً ساخته شد!",
+          { id: toastId }
+        );
+        router.refresh();
+      } else {
+        toast.error(result.message || "خطا در ساخت مجدد آهنگ", {
+          id: toastId,
+        });
+      }
+    } catch (error) {
+      console.error("Error regenerating song:", error);
+      toast.error("خطا در ساخت مجدد آهنگ", {
+        id: toastId,
+      });
+    }
+  };
+
   const deleteSong = async () => {
     startTransition(async () => {
       try {
@@ -193,6 +220,20 @@ const SongActionsCell = ({
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem
+            className="cursor-pointer text-blue-500 hover:text-blue-600"
+            disabled={isPending}
+            asChild
+          >
+            <RegenerateSongDialog
+              title="ساخت مجدد"
+              songTitle={song.title}
+              fn={regenerateSong}
+              disabled={isPending}
+            />
+          </DropdownMenuItem>
+        )}
         {isAdmin && (
           <DropdownMenuItem
             className="cursor-pointer text-red-500 hover:text-red-600"

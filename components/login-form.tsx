@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,140 +11,256 @@ import {
   Field,
   FieldDescription,
   FieldGroup,
+  FieldLabel,
+  FieldSeparator,
 } from "@/components/ui/field";
-import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { usePlayerStore } from "@/hooks/usePlayerStore";
+import { CaptchaWidget } from "@/components/CaptchaWidget";
 import { authClient } from "@/lib/auth-client";
-import { TelegramLoginModal } from "@/components/TelegramLoginModal";
+import { Loader2 } from "lucide-react";
+import ForgotPasswordModal from "@/components/ForgotPasswordModal";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
-  const [telegramModalOpen, setTelegramModalOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [forgotModalOpen, setForgotModalOpen] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Get and sanitize redirect URL to handle callback redirect support safely
-  const rawRedirect = searchParams.get("redirect") || searchParams.get("callbackUrl");
-  const safeRedirect = rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
-    ? rawRedirect
-    : "/panel";
+  const setDownloadPreference = usePlayerStore(
+    (state) => state.setDownloadPreference,
+  );
 
-  const handleOAuthSignIn = async (provider: "google" | "instagram" | "github") => {
-    if (loadingProvider) return;
-    setLoadingProvider(provider);
+  // Get and sanitize redirect URL to handle callback redirect support safely
+  const rawRedirect =
+    searchParams.get("redirect") || searchParams.get("callbackUrl");
+  const safeRedirect =
+    rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/panel";
+
+  const loginHandler = async (e: FormEvent) => {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+
     try {
-      await authClient.signIn.social({
-        provider,
-        callbackURL: safeRedirect,
+      const request = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          captchaToken,
+          captchaAnswer,
+        }),
       });
+
+      const response = await request.json();
+
+      if (response.success) {
+        toast.success(
+          response.message ? response.message : "ورود موفق به حساب کاربری",
+        );
+        if (response.downloadPreference) {
+          setDownloadPreference(response.downloadPreference);
+        }
+        router.push(safeRedirect);
+        router.refresh();
+      } else {
+        toast.error(`خطا! ${response.message || "رمز یا ایمیل نامعتبر است"}`);
+      }
     } catch (error) {
-      console.error(`${provider} sign in failed:`, error);
-      toast.error(`خطا در ورود با ${provider === "google" ? "گوگل" : provider === "instagram" ? "اینستاگرام" : "گیت‌هاب"}`);
-      setLoadingProvider(null);
+      console.error("Login request failed:", error);
+      toast.error("خطا در برقراری ارتباط با سرور");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="shadow-lg border-border/60">
+      <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-black flex flex-col gap-y-1 text-primary">
+          <CardTitle className="text-xl flex flex-col gap-y-4">
             <span>خَش اومیی!</span>
-            <span className="text-lg font-semibold text-muted-foreground">خوش آمدید</span>
+            <span>خوش آمدید!</span>
           </CardTitle>
-          <CardDescription className="text-sm mt-2 leading-relaxed">
-            برای ارسال نظر، ساخت و مدیریت پلی‌لیست، پیشنهاد و ویرایش متن آهنگ، وارد حساب کاربری خود شوید.
+          <CardDescription>
+            برای ارسال نظر، ساخت و مدیریت پلی لیست، ارسال آهنگ و متن آهنگ و...
+            وارد حساب کاربری خود شوید!
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <FieldGroup className="gap-3">
-            <Field>
-              {/* Telegram Bot Login */}
-              <Button
-                size="lg"
-                type="button"
-                className="w-full bg-[#229ED9] hover:bg-[#1c8ec4] text-white font-semibold py-6 text-base gap-3 shadow-md transition-all active:scale-[0.99]"
-                onClick={() => setTelegramModalOpen(true)}
-              >
-                <svg
-                  className="h-6 w-6 fill-current shrink-0"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+          <form onSubmit={loginHandler}>
+            <FieldGroup>
+              <Field>
+                <Button
+                  variant="outline"
+                  type="button"
+                  disabled={loading}
+                  onClick={async () => {
+                    setLoading(true);
+                    try {
+                      await authClient.signIn.social({
+                        provider: "instagram",
+                        callbackURL: safeRedirect,
+                      });
+                    } catch (error) {
+                      console.error("Instagram sign in failed:", error);
+                      toast.error("خطا در ورود با اینستاگرام");
+                      setLoading(false);
+                    }
+                  }}
                 >
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.872-1.025 4.887-1.442 6.848-.176.828-.485 1.106-.782 1.133-.647.059-1.138-.428-1.764-.838-.98-.642-1.534-1.042-2.484-1.668-1.098-.724-.386-1.121.24-1.771.164-.17 3.008-2.756 3.064-2.993.007-.03.013-.14-.053-.198-.065-.058-.161-.038-.231-.023-.099.022-1.678 1.066-4.736 3.131-.448.308-.854.458-1.218.45-.401-.008-1.173-.227-1.747-.413-.705-.229-1.267-.35-1.218-.739.026-.203.307-.41.845-.623 3.312-1.442 5.522-2.393 6.63-2.855 3.155-1.312 3.811-1.54 4.238-1.548.094-.002.304.022.44.133.115.094.147.221.16.311.014.09.031.291.017.45z" />
-                </svg>
-                <span>ورود با ربات تلگرام</span>
-              </Button>
-            </Field>
-
-            <Field>
-              {/* Instagram OAuth */}
-              <Button
-                variant="outline"
-                size="lg"
-                type="button"
-                disabled={loadingProvider !== null}
-                className="w-full py-6 text-base gap-3 border-border hover:bg-muted/80 transition-all font-medium"
-                onClick={() => handleOAuthSignIn("instagram")}
-              >
-                <svg
-                  className="h-5 w-5 shrink-0 fill-[#E4405F]"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+                  <svg
+                    id="instagram"
+                    fill="rgb(217, 50, 117)"
+                    version="1.1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    x="0px"
+                    y="0px"
+                    width="169.063px"
+                    height="169.063px"
+                    viewBox="0 0 169.063 169.063"
+                  >
+                    <g>
+                      <path
+                        d="M122.406,0H46.654C20.929,0,0,20.93,0,46.655v75.752c0,25.726,20.929,46.655,46.654,46.655h75.752
+                          c25.727,0,46.656-20.93,46.656-46.655V46.655C169.063,20.93,148.133,0,122.406,0z M154.063,122.407
+                          c0,17.455-14.201,31.655-31.656,31.655H46.654C29.2,154.063,15,139.862,15,122.407V46.655C15,29.201,29.2,15,46.654,15h75.752
+                          c17.455,0,31.656,14.201,31.656,31.655V122.407z"
+                      />
+                      <path
+                        d="M84.531,40.97c-24.021,0-43.563,19.542-43.563,43.563c0,24.02,19.542,43.561,43.563,43.561s43.563-19.541,43.563-43.561
+                          C128.094,60.512,108.552,40.97,84.531,40.97z M84.531,113.093c-15.749,0-28.563-12.812-28.563-28.561
+                          c0-15.75,12.813-28.563,28.563-28.563s28.563,12.813,28.563,28.563C113.094,100.281,100.28,113.093,84.531,113.093z"
+                      />
+                      <path
+                        d="M129.921,28.251c-2.89,0-5.729,1.17-7.77,3.22c-2.051,2.04-3.23,4.88-3.23,7.78c0,2.891,1.18,5.73,3.23,7.78
+                          c2.04,2.04,4.88,3.22,7.77,3.22c2.9,0,5.73-1.18,7.78-3.22c2.05-2.05,3.22-4.89,3.22-7.78c0-2.9-1.17-5.74-3.22-7.78
+                          C135.661,29.421,132.821,28.251,129.921,28.251z"
+                      />
+                    </g>
+                  </svg>
+                  لاگین با حساب اینستاگرام
+                </Button>
+                <Button
+                  variant="outline"
+                  type="button"
+                  disabled={loading}
+                  onClick={async () => {
+                    setLoading(true);
+                    try {
+                      await authClient.signIn.social({
+                        provider: "google",
+                        callbackURL: safeRedirect,
+                      });
+                    } catch (error) {
+                      console.error("Google sign in failed:", error);
+                      toast.error("خطا در ورود با گوگل");
+                      setLoading(false);
+                    }
+                  }}
                 >
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                </svg>
-                <span>{loadingProvider === "instagram" ? "در حال انتقال..." : "ورود با اینستاگرام"}</span>
-              </Button>
-            </Field>
-
-            <Field>
-              {/* Google OAuth */}
-              <Button
-                variant="outline"
-                size="lg"
-                type="button"
-                disabled={loadingProvider !== null}
-                className="w-full py-6 text-base gap-3 border-border hover:bg-muted/80 transition-all font-medium"
-                onClick={() => handleOAuthSignIn("google")}
-              >
-                <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                    fill="#EA4335"
-                  />
-                </svg>
-                <span>{loadingProvider === "google" ? "در حال انتقال..." : "ورود با حساب گوگل"}</span>
-              </Button>
-            </Field>
-          </FieldGroup>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path
+                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  لاگین با حساب گوگل
+                </Button>
+              </Field>
+              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+                یا ورود با ایمیل و رمز
+              </FieldSeparator>
+              <Field>
+                <FieldLabel htmlFor="email">ایمیل</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  disabled={loading}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <div className="flex items-center justify-between w-full">
+                  <FieldLabel htmlFor="password">رمز</FieldLabel>
+                  <button
+                    type="button"
+                    onClick={() => setForgotModalOpen(true)}
+                    className="mr-auto text-sm underline-offset-4 hover:underline text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    فراموشی رمز؟
+                  </button>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="حداقل 8 کاراکتر"
+                  required
+                  disabled={loading}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <CaptchaWidget
+                  onTokenChange={setCaptchaToken}
+                  onAnswerChange={setCaptchaAnswer}
+                  answer={captchaAnswer}
+                  disabled={loading}
+                />
+              </Field>
+              <Field>
+                <Button className="text-xl" type="submit" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                      در حال ورود...
+                    </>
+                  ) : (
+                    "ورود"
+                  )}
+                </Button>
+                <FieldDescription className="text-center">
+                  حساب کاربری ندارید؟{" "}
+                  <Link
+                    href={`/signup${
+                      searchParams.toString()
+                        ? `?${searchParams.toString()}`
+                        : ""
+                    }`}
+                  >
+                    ساخت حساب
+                  </Link>
+                </FieldDescription>
+              </Field>
+            </FieldGroup>
+          </form>
         </CardContent>
       </Card>
-
-      <FieldDescription className="px-6 text-center text-xs text-muted-foreground">
-        با ورود به حساب، شما <a href="/tos" className="underline hover:text-foreground">شرایط و قوانین</a> سرویس دی‌بلال را می‌پذیرید.
+      <FieldDescription className="px-6 text-center">
+        با ورود به حساب، شما <a href="/tos">شرایط و قوانین</a> را میپذیرید.
       </FieldDescription>
-
-      {/* Telegram Login Modal */}
-      <TelegramLoginModal
-        open={telegramModalOpen}
-        onOpenChange={setTelegramModalOpen}
-        redirectUrl={safeRedirect}
+      <ForgotPasswordModal
+        open={forgotModalOpen}
+        onOpenChange={setForgotModalOpen}
       />
     </div>
   );
