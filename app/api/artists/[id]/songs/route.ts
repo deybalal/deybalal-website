@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 
 /**
  * GET /api/artists/[id]/songs
@@ -59,22 +60,22 @@ export async function GET(
       id: song.id,
       title: song.title,
       titleEn: song.titleEn,
-      uri: song.uri,
+      uri: getAssetUrl(song.uri),
       filename: song.filename || "",
       index: song.index,
       duration: song.duration,
-      coverArt: song.coverArt,
+      coverArt: getAssetUrl(song.coverArt),
       artist: artist!.name,
       album: song.albumName,
       playCount: song.playCount,
       albumId: song.albumId,
       year: song.year?.toString() ?? null,
-      links: song.links,
+      links: resolveSongLinks(song.links as any),
       artists: [
         {
           id: artist!.id,
           name: artist!.name,
-          image: artist!.image,
+          image: getAssetUrl(artist!.image),
           isVerified: artist!.isVerified,
         },
       ],

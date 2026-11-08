@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
-import { formatTime } from "@/lib/utils";
+import { formatTime, getAssetUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -255,7 +255,7 @@ export default function SyncLyricsPage({
         <div className="hidden md:flex flex-col items-center justify-center w-1/3 p-8 border-r border-white/10 bg-zinc-900/50">
           <div className="relative w-64 h-64 rounded-2xl overflow-hidden shadow-2xl shadow-background border border-white/10 mb-6">
             <Image
-              src={song.coverArt || "/images/cover.png"}
+              src={getAssetUrl(song.coverArt) || "/images/cover.png"}
               alt={song.title}
               fill
               className="object-cover"
@@ -274,7 +274,7 @@ export default function SyncLyricsPage({
           <div className="md:hidden flex items-center p-4 border-b border-white/5 bg-zinc-900/30">
             <div className="relative w-12 h-12 rounded-md overflow-hidden mr-3">
               <Image
-                src={song.coverArt || "/images/cover.png"}
+                src={getAssetUrl(song.coverArt) || "/images/cover.png"}
                 alt="Cover"
                 fill
                 className="object-cover"

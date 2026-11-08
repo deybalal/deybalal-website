@@ -1,6 +1,7 @@
 import { Temporal } from "@js-temporal/polyfill";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
@@ -115,10 +116,30 @@ export async function GET() {
         totalDuration: playlist.totalDuration,
         currentTrack: {
           ...currentTrack.song,
+          coverArt: getAssetUrl(currentTrack.song.coverArt),
+          uri: getAssetUrl(currentTrack.song.uri),
+          links: resolveSongLinks(
+            currentTrack.song.links as Record<
+              string | number,
+              { url: string; size?: string; bytes?: number }
+            >
+          ),
           position: trackPosition,
           filename: currentTrack.song.filename,
         },
-        nextTrack,
+        nextTrack: nextTrack
+          ? {
+              ...nextTrack,
+              coverArt: getAssetUrl(nextTrack.coverArt),
+              uri: getAssetUrl(nextTrack.uri),
+              links: resolveSongLinks(
+                nextTrack.links as Record<
+                  string | number,
+                  { url: string; size?: string; bytes?: number }
+                >
+              ),
+            }
+          : null,
         playlistId: playlist.id,
         timeZone: now.timeZoneId,
       },

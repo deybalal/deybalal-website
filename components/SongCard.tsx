@@ -3,7 +3,7 @@ import { Song } from "@/types/types";
 import { Play, Music2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { formatPlayCount } from "@/lib/utils";
+import { formatPlayCount, getAssetUrl } from "@/lib/utils";
 import SongCardPlayButton from "./SongCardPlayButton";
 import SongCardContextMenu from "./SongCardContextMenu";
 
@@ -52,7 +52,7 @@ const SongCard = ({ song }: SongCardProps) => {
               {song.coverArt ? (
                 <>
                   <Image
-                    src={song.coverArt}
+                    src={getAssetUrl(song.coverArt)}
                     alt={song.title || "Song"}
                     fill
                     className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-2"

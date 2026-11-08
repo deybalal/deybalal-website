@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Twitter, Send, Link, Share2, MessageSquareText, Instagram } from "lucide-react";
+import {
+  Twitter,
+  Send,
+  Link,
+  Share2,
+  MessageSquareText,
+  Instagram,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import ShareStoryModal, { SongShareData } from "./ShareStoryModal";
 
@@ -27,12 +34,19 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
-export function ShareButtons({ title, url, shortUrl, song }: ShareButtonsProps) {
+export function ShareButtons({
+  title,
+  url,
+  shortUrl,
+  song,
+}: ShareButtonsProps) {
   const [isShareSupported, setIsShareSupported] = useState(false);
 
   useEffect(() => {
     const handle = setTimeout(() => {
-      setIsShareSupported(typeof navigator !== "undefined" && !!navigator.share);
+      setIsShareSupported(
+        typeof navigator !== "undefined" && !!navigator.share
+      );
     }, 0);
     return () => clearTimeout(handle);
   }, []);
@@ -77,92 +91,94 @@ export function ShareButtons({ title, url, shortUrl, song }: ShareButtonsProps) 
   };
 
   return (
-    <div className="flex items-center gap-3">
-      {/* Story Share */}
-      {song && (
-        <ShareStoryModal
-          song={song}
-          trigger={
-            <Button
-              variant="outline"
-              size="icon"
-              className="cursor-pointer rounded-full bg-linear-to-tr from-amber-500/15 via-pink-500/15 to-purple-500/15 hover:from-amber-500/25 hover:via-pink-500/25 hover:to-purple-500/25 border-pink-500/30 text-pink-400 hover:text-pink-300 h-9 w-9 shadow-xs"
-              title="اشتراک در استوری اینستاگرام / تلگرام"
-            >
-              <Instagram className="w-4 h-4" />
-            </Button>
-          }
-        />
-      )}
-      {/* WhatsApp */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="cursor-pointer rounded-full hover:bg-green-500/10 hover:text-green-400 border-white/10 h-9 w-9"
-        onClick={() => window.open(shareLinks.whatsapp, "_blank")}
-        title="به اشتراک گذاری در واتساپ"
-      >
-        <WhatsAppIcon className="w-4 h-4" />
-      </Button>
-
-      {/* Telegram */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="cursor-pointer rounded-full hover:bg-blue-500/10 hover:text-blue-400 border-white/10 h-9 w-9"
-        onClick={() => window.open(shareLinks.telegram, "_blank")}
-        title="به اشتراک گذاری در تلگرام"
-      >
-        <Send className="w-4 h-4" />
-      </Button>
-
-      {/* Twitter */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="cursor-pointer rounded-full hover:bg-blue-500/10 hover:text-blue-400 border-white/10 h-9 w-9"
-        onClick={() => window.open(shareLinks.twitter, "_blank")}
-        title="به اشتراک گذاری در توییتر"
-      >
-        <Twitter className="w-4 h-4" />
-      </Button>
-
-      {/* SMS */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="cursor-pointer rounded-full hover:bg-teal-500/10 hover:text-teal-400 border-white/10 h-9 w-9"
-        onClick={() => {
-          window.location.href = shareLinks.sms;
-        }}
-        title="به اشتراک گذاری از طریق پیامک"
-      >
-        <MessageSquareText className="w-4 h-4" />
-      </Button>
-
-      {/* OS Share */}
-      {isShareSupported && (
+    <>
+      <div className="flex items-center gap-1 md:gap-3">
+        {/* Story Share */}
+        {song && (
+          <ShareStoryModal
+            song={song}
+            trigger={
+              <Button
+                variant="outline"
+                size="icon"
+                className="cursor-pointer rounded-full bg-linear-to-tr from-amber-500/15 via-pink-500/15 to-purple-500/15 hover:from-amber-500/25 hover:via-pink-500/25 hover:to-purple-500/25 border-pink-500/30 text-pink-400 hover:text-pink-300 h-9 w-9 shadow-xs"
+                title="اشتراک در استوری اینستاگرام / تلگرام"
+              >
+                <Instagram className="w-4 h-4" />
+              </Button>
+            }
+          />
+        )}
+        {/* WhatsApp */}
         <Button
           variant="outline"
           size="icon"
-          className="cursor-pointer rounded-full hover:bg-orange-500/10 hover:text-orange-400 border-white/10 h-9 w-9"
-          onClick={handleSystemShare}
-          title="اشتراک‌گذاری با سیستم"
+          className="cursor-pointer rounded-full hover:bg-green-500/10 hover:text-green-400 border-white/10 h-9 w-9"
+          onClick={() => window.open(shareLinks.whatsapp, "_blank")}
+          title="به اشتراک گذاری در واتساپ"
         >
-          <Share2 className="w-4 h-4" />
+          <WhatsAppIcon className="w-4 h-4" />
         </Button>
-      )}
 
-      {/* Copy Link */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="cursor-pointer rounded-full hover:bg-white/10 border-white/10 h-9 w-9"
-        onClick={copyToClipboard}
-        title="کپی لینک کامل"
-      >
-        <Link className="w-4 h-4" />
-      </Button>
+        {/* Telegram */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="cursor-pointer rounded-full hover:bg-blue-500/10 hover:text-blue-400 border-white/10 h-9 w-9"
+          onClick={() => window.open(shareLinks.telegram, "_blank")}
+          title="به اشتراک گذاری در تلگرام"
+        >
+          <Send className="w-4 h-4" />
+        </Button>
+
+        {/* Twitter */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="cursor-pointer rounded-full hover:bg-blue-500/10 hover:text-blue-400 border-white/10 h-9 w-9"
+          onClick={() => window.open(shareLinks.twitter, "_blank")}
+          title="به اشتراک گذاری در توییتر"
+        >
+          <Twitter className="w-4 h-4" />
+        </Button>
+
+        {/* SMS */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="cursor-pointer rounded-full hover:bg-teal-500/10 hover:text-teal-400 border-white/10 h-9 w-9"
+          onClick={() => {
+            window.location.href = shareLinks.sms;
+          }}
+          title="به اشتراک گذاری از طریق پیامک"
+        >
+          <MessageSquareText className="w-4 h-4" />
+        </Button>
+
+        {/* OS Share */}
+        {isShareSupported && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="cursor-pointer rounded-full hover:bg-orange-500/10 hover:text-orange-400 border-white/10 h-9 w-9"
+            onClick={handleSystemShare}
+            title="اشتراک‌گذاری با سیستم"
+          >
+            <Share2 className="w-4 h-4" />
+          </Button>
+        )}
+
+        {/* Copy Link */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="cursor-pointer rounded-full hover:bg-white/10 border-white/10 h-9 w-9"
+          onClick={copyToClipboard}
+          title="کپی لینک کامل"
+        >
+          <Link className="w-4 h-4" />
+        </Button>
+      </div>
 
       {/* Short Link */}
       {shortUrl && (
@@ -176,6 +192,6 @@ export function ShareButtons({ title, url, shortUrl, song }: ShareButtonsProps) 
           لینک کوتاه
         </Button>
       )}
-    </div>
+    </>
   );
 }

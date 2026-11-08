@@ -4,6 +4,7 @@ import { usePlayerStore, TAB_ID } from "@/hooks/usePlayerStore";
 import { useRadioStore } from "@/hooks/useRadioStore";
 import { useEffect, useRef } from "react";
 import { packRequestHash } from "@/lib/hash";
+import { getAssetUrl } from "@/lib/utils";
 
 const getPlayThreshold = (duration: number): number => {
   if (duration > 0 && duration < 30) {
@@ -102,7 +103,7 @@ const PlayerProvider = () => {
 
     if (currentSong?.uri) {
       const currentSrc = decodeURIComponent(audio.src);
-      const newSrc = decodeURIComponent(currentSong.uri);
+      const newSrc = decodeURIComponent(getAssetUrl(currentSong.uri));
 
       const isNewSong = lastSongIdRef.current !== currentSong.id;
       const isNewPlay = lastPlayNonceRef.current !== playNonce;

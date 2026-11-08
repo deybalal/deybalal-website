@@ -27,7 +27,7 @@ import {
 import { toast } from "react-hot-toast";
 import { Album } from "@/types/types";
 import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getAssetUrl } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -555,7 +555,7 @@ export default function SongFormEdit({ songId, mode = "edit" }: SongFormProps) {
                   {field.value && (
                     <div className="relative w-32 h-32 rounded-md overflow-hidden border">
                       <Image
-                        src={field.value}
+                        src={getAssetUrl(field.value)}
                         alt="پیش نمایش کاور"
                         fill
                         className="object-cover"

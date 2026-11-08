@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
@@ -26,7 +27,25 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ success: true, data: album });
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...album,
+        coverArt: getAssetUrl(album.coverArt),
+        artist: album.artist
+          ? {
+              ...album.artist,
+              image: getAssetUrl(album.artist.image),
+            }
+          : null,
+        songs: album.songs.map((s) => ({
+          ...s,
+          coverArt: getAssetUrl(s.coverArt),
+          uri: getAssetUrl(s.uri),
+          links: resolveSongLinks(s.links as any),
+        })),
+      },
+    });
   } catch {
     return NextResponse.json(
       { success: false, message: "خطا در دریافت آلبوم" },

@@ -6,6 +6,7 @@ import { sanitizeTextContent } from "@/lib/input-sanitizer";
 import { validateContentLength, CONTENT_LENGTH_LIMITS } from "@/lib/validators";
 import { verifyCaptchaToken } from "@/lib/captcha";
 import { cookies } from "next/headers";
+import { getAssetUrl } from "@/lib/utils";
 
 export async function GET(request: Request) {
   try {
@@ -84,7 +85,17 @@ export async function GET(request: Request) {
 
     const filteredComments = comments.filter(filterActive).map((cm) => ({
       ...cm,
-      replies: cm.replies.filter(filterActive),
+      user: {
+        ...cm.user,
+        image: getAssetUrl(cm.user.image),
+      },
+      replies: cm.replies.filter(filterActive).map((r) => ({
+        ...r,
+        user: {
+          ...r.user,
+          image: getAssetUrl(r.user.image),
+        },
+      })),
     }));
 
     return NextResponse.json({ success: true, data: filteredComments });
@@ -226,7 +237,16 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, data: comment });
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...comment,
+        user: {
+          ...comment.user,
+          image: getAssetUrl(comment.user.image),
+        },
+      },
+    });
   } catch (error) {
     console.error("Error creating comment:", error);
     return NextResponse.json(

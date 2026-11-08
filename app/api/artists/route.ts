@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cache } from "@/lib/cache";
+import { getAssetUrl } from "@/lib/utils";
 
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -32,7 +33,7 @@ export async function GET() {
       if (artist) {
         return NextResponse.json({
           success: true,
-          data: [artist],
+          data: [{ ...artist, image: getAssetUrl(artist.image) }],
         });
       } else {
         return NextResponse.json({
@@ -64,7 +65,10 @@ export async function GET() {
 
     cache.set(cacheKey, artists);
 
-    return NextResponse.json({ success: true, data: artists });
+    return NextResponse.json({
+      success: true,
+      data: artists.map((a) => ({ ...a, image: getAssetUrl(a.image) })),
+    });
   } catch (error) {
     console.error("Error fetching artists:", error);
     return NextResponse.json(

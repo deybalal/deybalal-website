@@ -1,11 +1,12 @@
 import { FTPService } from "@/lib/ftp";
 import crypto from "crypto";
+import { getAssetUrl, getDownloadHost } from "@/lib/utils";
 
 /**
  * Downloads an image from a URL and saves it to the public/assets/avatars directory.
  * @param url The URL of the image to download.
  * @param filename The name to save the file as (without extension).
- * @returns The local path to the saved image (relative to public directory), or null if failed.
+ * @returns The remote URL to the saved image in dedicated storage, or null if failed.
  */
 export async function downloadAvatar(
   url: string,
@@ -43,7 +44,7 @@ export async function downloadAvatar(
     // Upload to FTP
     await FTPService.uploadBuffer(buffer, relativePath);
 
-    return `${process.env.NEXT_PUBLIC_FTP_BASE_URL}${relativePath}`;
+    return getAssetUrl(relativePath);
   } catch (error) {
     console.error("Error downloading avatar:", error);
     return null;

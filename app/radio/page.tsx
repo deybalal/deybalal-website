@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { useRadioStore } from "@/hooks/useRadioStore";
 import { useLyricsStore } from "@/hooks/useLyricsStore";
-import { formatTime } from "@/lib/utils";
+import { formatTime, getAssetUrl } from "@/lib/utils";
 import Image from "next/image";
 import {
   Music,
@@ -259,7 +259,7 @@ export default function RadioPage() {
                 }
               >
                 <Image
-                  src={state?.currentTrack.coverArt || "/images/cover.png"}
+                  src={getAssetUrl(state?.currentTrack.coverArt) || "/images/cover.png"}
                   alt={state?.currentTrack.title || "Cover"}
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-105 rounded-lg"
@@ -547,7 +547,7 @@ export default function RadioPage() {
                       <Image
                         alt="عکس آهنگ"
                         fill
-                        src={`${state.nextTrack.coverArt}`}
+                        src={getAssetUrl(state.nextTrack.coverArt) || "/images/cover.png"}
                         className="w-7 h-7 absolute inset-0 m-auto text-foreground group-hover:scale-110 transition-transform"
                       />
                     </Link>

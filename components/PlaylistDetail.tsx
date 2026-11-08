@@ -4,7 +4,7 @@ import React, { useState, useCallback } from "react";
 import SongList from "@/components/SongList";
 import { Playlist, Song } from "@/types/types";
 import { ListMusic, Lock, Globe, Play, Loader2 } from "lucide-react";
-import { formatTime } from "@/lib/utils";
+import { formatTime, getAssetUrl } from "@/lib/utils";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Switch } from "@/components/ui/switch";
@@ -58,7 +58,7 @@ export default function PlaylistDetail({
         <div className="relative w-64 h-64 rounded-lg overflow-hidden shadow-2xl neon-box shrink-0 bg-linear-to-br from-primary to-accent flex items-center justify-center">
           {playlist.coverArt ? (
             <Image
-              src={playlist.coverArt}
+              src={getAssetUrl(playlist.coverArt)}
               alt={playlist.name}
               fill
               className="object-cover"

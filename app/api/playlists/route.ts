@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { unstable_noStore as noStore } from "next/cache";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { getAssetUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +59,11 @@ export async function GET(request: Request) {
 
     const formattedPlaylists = playlists.map((p) => ({
       ...p,
-      songs: p.songs.map((ps) => ps.song),
+      coverArt: getAssetUrl(p.coverArt),
+      songs: p.songs.map((ps) => ({
+        ...ps.song,
+        coverArt: getAssetUrl(ps.song.coverArt),
+      })),
     }));
 
     return NextResponse.json({

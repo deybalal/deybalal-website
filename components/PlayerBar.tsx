@@ -41,7 +41,7 @@ import {
 import DynamicDarkModeToggle from "@/components/DynamicDarkModeToggle";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { cn, formatTime } from "@/lib/utils";
+import { cn, formatTime, getAssetUrl } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import MarqueeText from "./MarqueeText";
@@ -283,7 +283,7 @@ const PlayerBar = () => {
           >
             <div className="w-10 h-10 lg:w-14 lg:h-14 bg-gray-800 rounded-md neon-box ml-2 lg:ml-4 shrink-0 relative overflow-hidden">
               <Image
-                src={currentSong.coverArt || "/images/cover.png"}
+                src={getAssetUrl(currentSong.coverArt) || "/images/cover.png"}
                 alt="Cover"
                 width={60}
                 height={60}

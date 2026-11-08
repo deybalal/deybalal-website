@@ -7,6 +7,7 @@ import { unlink } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { createNotification } from "@/lib/notifications";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,18 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ success: true, data: song });
+    const transformedSong = {
+      ...song,
+      coverArt: getAssetUrl(song.coverArt),
+      uri: getAssetUrl(song.uri),
+      links: resolveSongLinks(song.links as any),
+      artists: song.artists.map((a) => ({
+        ...a,
+        image: getAssetUrl(a.image),
+      })),
+    };
+
+    return NextResponse.json({ success: true, data: transformedSong });
   } catch (error) {
     console.error("Error fetching song:", error);
     return NextResponse.json(

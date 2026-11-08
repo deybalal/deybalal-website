@@ -2,7 +2,7 @@
 
 import { Song } from "@/types/types";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
-import { formatTime, formatPlayCount } from "@/lib/utils";
+import { formatTime, formatPlayCount, getAssetUrl } from "@/lib/utils";
 import Image from "next/image";
 import {
   Trash2,
@@ -83,7 +83,7 @@ const SongList = ({
             >
               {song.coverArt ? (
                 <Image
-                  src={song.coverArt}
+                  src={getAssetUrl(song.coverArt)}
                   alt={`پخش ${song.title}` || "پخش آهنگ"}
                   fill
                   className="object-cover"

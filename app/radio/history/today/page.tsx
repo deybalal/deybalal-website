@@ -5,6 +5,7 @@ import { usePlayerStore } from "@/hooks/usePlayerStore";
 import PlaylistClient from "@/components/PlaylistClient";
 import PlaylistSkeleton from "@/components/PlaylistSkeleton";
 import { Playlist } from "@/types/types";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 
 function TodayHistoryPageContent() {
@@ -47,7 +48,7 @@ function TodayHistoryPageContent() {
           description:
             "آهنگ هایی که تا این لحظه در رادیو پخش شده است (به ترتیب از جدید به قدیم)",
           songsLength: totalTracksCount,
-          coverArt: reversedTracks[0].song.coverArt ?? "/images/cover.png",
+          coverArt: getAssetUrl(reversedTracks[0]?.song?.coverArt, "/images/cover.png"),
           songs: paginatedTracks.map(
             (track: {
               startOffset: number;
@@ -103,17 +104,17 @@ function TodayHistoryPageContent() {
                 ...track,
                 playedAtRange,
                 artist: track.song.artist,
-                artists: track.song.artists,
+                artists: track.song.artists.map((a) => ({ ...a, image: getAssetUrl(a.image) })),
                 id: track.songId,
                 title: track.song.title,
-                coverArt: track.song.coverArt,
-                uri: track.song.uri ?? "",
+                coverArt: getAssetUrl(track.song.coverArt),
+                uri: getAssetUrl(track.song.uri ?? ""),
                 filename: track.song.filename ?? "",
                 album: track.song.albumName,
                 albumId: track.song.albumId,
                 duration: track.duration,
                 isFavorite: false,
-                links: JSON.parse(JSON.stringify(track.song.links)),
+                links: resolveSongLinks(JSON.parse(JSON.stringify(track.song.links))),
                 doesUserOwnsPlaylist: false,
               };
             }

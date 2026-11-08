@@ -14,6 +14,7 @@ import { StructuredData } from "@/components/StructuredData";
 import SearchModal from "@/components/SearchModal";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getAssetUrl } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -122,7 +123,7 @@ export default async function AlbumDetailPage({
   }));
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com";
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.ir";
   const albumUrl = `${baseUrl}/album/${album.id}`;
 
   const structuredData = {
@@ -130,7 +131,7 @@ export default async function AlbumDetailPage({
     "@type": "MusicAlbum",
     name: album.name,
     url: albumUrl,
-    image: album.coverArt,
+    image: getAssetUrl(album.coverArt),
     byArtist: {
       "@type": "MusicGroup",
       name: album.artistName,
@@ -156,7 +157,7 @@ export default async function AlbumDetailPage({
           <div className="relative w-64 h-64 rounded-xl overflow-hidden shadow-2xl shrink-0 group">
             {album.coverArt ? (
               <Image
-                src={album.coverArt}
+                src={getAssetUrl(album.coverArt)}
                 alt={album.name}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"

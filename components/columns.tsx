@@ -13,6 +13,7 @@ import {
   Badge,
 } from "@prisma/client";
 import Image from "next/image";
+import { getAssetUrl } from "@/lib/utils";
 import { Song as PlayerSong } from "@/types/types";
 import {
   MoreHorizontal,
@@ -713,7 +714,7 @@ export const getPlaylistColumns = (): ColumnDef<Playlist>[] => [
         <div className="relative w-10 h-10 rounded overflow-hidden">
           {coverArt ? (
             <Image
-              src={coverArt}
+              src={getAssetUrl(coverArt)}
               alt={row.getValue("name")}
               fill
               className="object-cover"
@@ -933,7 +934,7 @@ export const getUserColumns = (userRole?: string): ColumnDef<PrismaUser>[] => [
         {row.original.image && (
           <div className="relative w-8 h-8 rounded-full overflow-hidden">
             <Image
-              src={row.original.image}
+              src={getAssetUrl(row.original.image)}
               alt={row.original.name}
               fill
               className="object-cover"

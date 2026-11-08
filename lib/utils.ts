@@ -69,3 +69,65 @@ export const getStringSimilarity = (str1: string, str2: string): number => {
   const maxLen = Math.max(len1, len2);
   return 1 - distance / maxLen;
 };
+
+export const DEFAULT_DOWNLOAD_HOST = "https://dl.deybalal.ir";
+
+export function getDownloadHost(): string {
+  const host =
+    process.env.NEXT_PUBLIC_DOWNLOAD_HOST || DEFAULT_DOWNLOAD_HOST;
+  return host.replace(/\/+$/, "");
+}
+
+/**
+ * Ensures an asset path points to the dedicated download storage server.
+ * Handles:
+ * - relative paths like `/assets/cover/...` or `assets/mp3/...`
+ * - absolute URLs on older or external domains containing `/assets/...`
+ * - fallbacks when path is falsy
+ */
+export function getAssetUrl(
+  path: string | null | undefined,
+  fallback: string = ""
+): string {
+  if (!path) return fallback;
+
+  // If already absolute URL
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    if (path.includes("/assets/")) {
+      const downloadHost = getDownloadHost();
+      const assetsIndex = path.indexOf("/assets/");
+      return `${downloadHost}${path.substring(assetsIndex)}`;
+    }
+    return path;
+  }
+
+  // If relative path under /assets/
+  if (path.startsWith("/assets/") || path.startsWith("assets/")) {
+    const downloadHost = getDownloadHost();
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    return `${downloadHost}${cleanPath}`;
+  }
+
+  return path;
+}
+
+/**
+ * Resolves all audio URLs inside links JSON to point to dedicated storage
+ */
+export function resolveSongLinks<
+  T extends Record<string | number, { url: string; size?: string; bytes?: number }> | null | undefined
+>(links: T): T {
+  if (!links) return links;
+  const result: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(links)) {
+    if (val && typeof val === "object" && "url" in val) {
+      result[key] = {
+        ...val,
+        url: getAssetUrl((val as { url: string }).url),
+      };
+    } else {
+      result[key] = val;
+    }
+  }
+  return result as T;
+}

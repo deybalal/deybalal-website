@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { getAssetUrl } from "@/lib/utils";
 
 export async function GET(
   request: Request,
@@ -67,7 +68,14 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: targetUser,
+      data: {
+        ...targetUser,
+        image: getAssetUrl(targetUser.image),
+        playlists: targetUser.playlists.map((p) => ({
+          ...p,
+          coverArt: getAssetUrl(p.coverArt),
+        })),
+      },
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);

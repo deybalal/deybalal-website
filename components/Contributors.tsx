@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { getAssetUrl } from "@/lib/utils";
 import { User, Music, FileText, Timer } from "lucide-react";
 import { Contributor } from "@/types/types";
 
@@ -53,7 +54,7 @@ export const Contributors = ({ contributors }: ContributorsProps) => {
                   <div className="relative size-10 rounded-full overflow-hidden border-2 border-foreground/10 group-hover/user:border-indigo-500 transition-colors">
                     {c.user.image ? (
                       <Image
-                        src={c.user.image}
+                        src={getAssetUrl(c.user.image)}
                         alt={c.user.name}
                         fill
                         className="object-cover"

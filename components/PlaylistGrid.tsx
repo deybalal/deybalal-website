@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { formatTime } from "@/lib/utils";
+import { formatTime, getAssetUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -80,7 +80,7 @@ export default function PlaylistGrid({ initialPlaylists }: PlaylistGridProps) {
                 <div className="aspect-square w-full mb-4 rounded-md bg-linear-to-br from-primary/20 to-accent/20 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 relative overflow-hidden">
                   {playlist.coverArt ? (
                     <Image
-                      src={playlist.coverArt}
+                      src={getAssetUrl(playlist.coverArt)}
                       alt={playlist.name}
                       fill
                       className="object-cover"

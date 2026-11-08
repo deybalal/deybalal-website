@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { getAssetUrl } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -41,7 +42,10 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ success: true, data: users });
+    return NextResponse.json({
+      success: true,
+      data: users.map((u) => ({ ...u, image: getAssetUrl(u.image) })),
+    });
   } catch (error) {
     console.error("Error fetching users:", error);
     return NextResponse.json(

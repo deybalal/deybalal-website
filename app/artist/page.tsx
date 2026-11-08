@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SearchModal from "@/components/SearchModal";
 import { Button } from "@/components/ui/button";
+import { getAssetUrl } from "@/lib/utils";
 
 export default function ArtistPage() {
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -86,7 +87,7 @@ export default function ArtistPage() {
                   <div className="w-32 h-32 rounded-full bg-gray-800 mb-4 flex items-center justify-center overflow-hidden shadow-lg group-hover:scale-110 transition-transform duration-500 neon-box relative">
                     {artist.image ? (
                       <Image
-                        src={artist.image}
+                        src={getAssetUrl(artist.image)}
                         alt={artist.name}
                         fill
                         className="object-cover"

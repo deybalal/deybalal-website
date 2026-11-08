@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Album } from "@/types/types";
 import Image from "next/image";
 import Link from "next/link";
+import { getAssetUrl } from "@/lib/utils";
 
 interface AlbumCardProps {
   album: Album;
@@ -15,7 +16,7 @@ const AlbumCard = ({ album }: AlbumCardProps) => {
           <div className="relative aspect-square w-full mb-4 rounded-md overflow-hidden shadow-lg">
             {album.coverArt ? (
               <Image
-                src={album.coverArt}
+                src={getAssetUrl(album.coverArt)}
                 alt={album.name}
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-500"

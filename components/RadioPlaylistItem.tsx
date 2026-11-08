@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getAssetUrl } from "@/lib/utils";
 
 interface GenreCardProps {
   id: string;
@@ -25,7 +26,7 @@ const RadioPlaylistItem = ({
               coverArts.map((cover, i) => (
                 <Image
                   key={i}
-                  src={cover || "/images/default-album-art.png"}
+                  src={getAssetUrl(cover) || "/images/default-album-art.png"}
                   alt={"آهنگ در رادیو دی بلال"}
                   width={60}
                   height={60}

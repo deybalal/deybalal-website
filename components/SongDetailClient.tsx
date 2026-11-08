@@ -13,7 +13,7 @@ import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
 import ShareStoryModal from "@/components/ShareStoryModal";
 import { toast } from "react-hot-toast";
 import { useLyricsStore } from "@/hooks/useLyricsStore";
-import { formatPlayCount } from "@/lib/utils";
+import { formatPlayCount, getAssetUrl } from "@/lib/utils";
 import MarqueeText from "./MarqueeText";
 
 interface SongDetailClientProps {
@@ -158,7 +158,7 @@ export default function SongDetailClient({
         >
           {song.coverArt ? (
             <Image
-              src={song.coverArt || "/images/cover.png"}
+              src={getAssetUrl(song.coverArt) || "/images/cover.png"}
               alt={song.title || "Song"}
               fill
               className="object-cover"

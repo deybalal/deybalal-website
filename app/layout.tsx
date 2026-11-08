@@ -18,7 +18,7 @@ const iranyekan = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com"
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.ir"
   ),
   title: {
     default: "دی بلال | پلتفرم پخش آنلاین آهنگ لری",

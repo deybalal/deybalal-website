@@ -2,7 +2,7 @@
 
 import { Song } from "@/types/types";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
-import { formatTime, formatPlayCount } from "@/lib/utils";
+import { formatTime, formatPlayCount, getAssetUrl } from "@/lib/utils";
 import Image from "next/image";
 import {
   Trash2,
@@ -70,7 +70,7 @@ const SongList = ({
             <div className="relative w-12 h-12 bg-white/5 rounded-lg overflow-hidden shrink-0 mx-3 border border-white/5">
               {song.coverArt ? (
                 <Image
-                  src={song.coverArt}
+                  src={getAssetUrl(song.coverArt)}
                   alt={song.title || "Song"}
                   fill
                   className="object-cover"

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ListPlus, Loader2, Music } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
+import { getAssetUrl } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Playlist } from "@/types/types";
 import { formatTime } from "@/lib/utils";
@@ -118,7 +119,7 @@ export default function AddToPlaylistDialog({
                     <div className="relative h-12 w-12 rounded-md overflow-hidden bg-muted flex items-center justify-center shrink-0">
                       {playlist.coverArt ? (
                         <Image
-                          src={playlist.coverArt}
+                          src={getAssetUrl(playlist.coverArt)}
                           alt={playlist.name}
                           fill
                           className="object-cover"

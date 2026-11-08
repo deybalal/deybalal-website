@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { Prisma } from "@prisma/client";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -28,7 +29,18 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ success: true, data: albums });
+    const transformedAlbums = albums.map((album) => ({
+      ...album,
+      coverArt: getAssetUrl(album.coverArt),
+      songs: album.songs.map((s) => ({
+        ...s,
+        coverArt: getAssetUrl(s.coverArt),
+        uri: getAssetUrl(s.uri),
+        links: resolveSongLinks(s.links as any),
+      })),
+    }));
+
+    return NextResponse.json({ success: true, data: transformedAlbums });
   } catch (error) {
     console.error((error as Error).message);
     return NextResponse.json(
@@ -68,7 +80,18 @@ export async function POST() {
         { status: 400 }
       );
     }
-    return NextResponse.json({ success: true, data: albums });
+    const transformedAlbums = albums.map((album) => ({
+      ...album,
+      coverArt: getAssetUrl(album.coverArt),
+      songs: album.songs.map((s) => ({
+        ...s,
+        coverArt: getAssetUrl(s.coverArt),
+        uri: getAssetUrl(s.uri),
+        links: resolveSongLinks(s.links as any),
+      })),
+    }));
+
+    return NextResponse.json({ success: true, data: transformedAlbums });
   } catch (error) {
     console.error((error as Error).message);
     return NextResponse.json(

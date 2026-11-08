@@ -38,7 +38,7 @@ import {
   Download,
   CheckCircle2,
 } from "lucide-react";
-import { cn, getStringSimilarity } from "@/lib/utils";
+import { cn, getStringSimilarity, getAssetUrl } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -1337,7 +1337,7 @@ export default function SongForm({ songId, mode = "create" }: SongFormProps) {
                             {field.value ? (
                               <div className="relative w-full aspect-square rounded-md overflow-hidden border shadow-sm">
                                 <Image
-                                  src={field.value}
+                                  src={getAssetUrl(field.value)}
                                   alt="Cover Art Preview"
                                   fill
                                   className="object-cover"

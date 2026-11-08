@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 import { Loader2, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { getAssetUrl } from "@/lib/utils";
 import DialogAlert from "./DialogAlert";
 import { faIR } from "date-fns/locale";
 import { CaptchaWidget } from "@/components/CaptchaWidget";
@@ -204,7 +205,7 @@ export function CommentSection({
                 <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden shrink-0 border border-white/10">
                   {comment.user.image ? (
                     <Image
-                      src={comment.user.image}
+                      src={getAssetUrl(comment.user.image)}
                       alt={comment.user.name}
                       width={40}
                       height={40}
@@ -314,7 +315,7 @@ export function CommentSection({
                       <div className="w-8 h-8 rounded-full bg-gray-800 overflow-hidden shrink-0 border border-white/10">
                         {reply.user.image ? (
                           <Image
-                            src={reply.user.image}
+                            src={getAssetUrl(reply.user.image)}
                             alt={reply.user.name}
                             width={32}
                             height={32}

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import SongCard from "@/components/SongCard";
 import { prisma } from "@/lib/prisma";
 import { Song as PrismaSong, Artist as PrismaArtist } from "@prisma/client";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 
 import { Metadata } from "next";
 
@@ -39,19 +40,21 @@ export default async function SongsPage({
   const mapSong = (song: PrismaSongWithArtists) => ({
     ...song,
     album: song.albumName,
-    coverArt: song.coverArt || null,
+    coverArt: getAssetUrl(song.coverArt) || null,
+    uri: getAssetUrl(song.uri),
     lyrics: song.lyrics || null,
     syncedLyrics: song.syncedLyrics || null,
     filename: song.filename || "",
     year: song.year.toString(),
     createdAt: song.createdAt.getTime(),
     updatedAt: song.updatedAt.getTime(),
-    links: song.links as Record<
+    links: resolveSongLinks(song.links as Record<
       number,
       { url: string; size: string; bytes: number }
-    > | null,
+    > | null),
     artists: song.artists.map((artist: PrismaArtist) => ({
       ...artist,
+      image: getAssetUrl(artist.image),
       songs: [],
     })),
   });

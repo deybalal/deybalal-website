@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import SongCard from "@/components/SongCard";
 import AlbumCard from "@/components/AlbumCard";
 import { Song } from "@/types/types";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -102,9 +103,9 @@ export default async function GenrePage({
     artist: song.artist,
     albumId: song.albumId || null,
     album: song.albumName || null,
-    coverArt: song.coverArt || null,
+    coverArt: getAssetUrl(song.coverArt),
     duration: song.duration || 0,
-    uri: song.uri,
+    uri: getAssetUrl(song.uri),
     playCount: song.playCount,
     titleEn: song.titleEn,
     filename: song.filename || "",
@@ -112,12 +113,12 @@ export default async function GenrePage({
     artists: song.artists.map((a) => ({
       id: a.id,
       name: a.name,
-      image: a.image,
+      image: getAssetUrl(a.image),
       isVerified: a.isVerified,
       songs: [],
       userId: "",
     })),
-    links: song.links as unknown as Song["links"],
+    links: resolveSongLinks(song.links as unknown as Song["links"]),
     year: song.year.toString(),
     slug: song.slug,
     isDisabled: song.isDisabled,
@@ -214,7 +215,7 @@ export default async function GenrePage({
                 key={album.id}
                 album={{
                   ...album,
-                  coverArt: album.coverArt || undefined,
+                  coverArt: album.coverArt ? getAssetUrl(album.coverArt) : undefined,
                   releaseDate: album.releaseDate || 0,
                   artistId: album.artistId || "",
                   createdAt: album.createdAt.getTime(),
@@ -223,7 +224,8 @@ export default async function GenrePage({
                     ...s,
                     albumId: s.albumId || null,
                     album: s.albumName || null,
-                    coverArt: s.coverArt || null,
+                    coverArt: getAssetUrl(s.coverArt),
+                    uri: getAssetUrl(s.uri),
                     titleEn: s.titleEn || "",
                     artistEn: s.artistEn || "",
                     filename: s.filename || "",
@@ -234,7 +236,7 @@ export default async function GenrePage({
                     disabledDescription: s.disabledDescription || null,
                     artists: [],
                     year: s.year.toString(),
-                    links: s.links as unknown as Song["links"],
+                    links: resolveSongLinks(s.links as unknown as Song["links"]),
                   })),
                 }}
               />

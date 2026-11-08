@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getAssetUrl } from "@/lib/utils";
 import {
   parseSearchQuery,
   buildSongSearchWhere,
@@ -235,7 +236,7 @@ export async function POST(request: Request) {
           id: best.id,
           title: best.title,
           artist: best.artist,
-          coverArt: best.coverArt,
+          coverArt: getAssetUrl(best.coverArt),
           slug: best.slug,
           type: "song",
         };
@@ -243,7 +244,7 @@ export async function POST(request: Request) {
         topResult = {
           id: best.id,
           name: best.name,
-          image: best.image,
+          image: getAssetUrl(best.image),
           type: "artist",
         };
       } else if (best.type === "album") {
@@ -251,14 +252,14 @@ export async function POST(request: Request) {
           id: best.id,
           name: best.name,
           artistName: best.artistName,
-          coverArt: best.coverArt,
+          coverArt: getAssetUrl(best.coverArt),
           type: "album",
         };
       } else if (best.type === "playlist") {
         topResult = {
           id: best.id,
           name: best.name,
-          coverArt: best.coverArt,
+          coverArt: getAssetUrl(best.coverArt),
           type: "playlist",
         };
       }
@@ -269,7 +270,7 @@ export async function POST(request: Request) {
         id: s.id,
         title: s.title,
         artist: s.artist,
-        coverArt: s.coverArt,
+        coverArt: getAssetUrl(s.coverArt),
         slug: s.slug,
         titleEn: s.titleEn,
         artistEn: s.artistEn,
@@ -278,19 +279,19 @@ export async function POST(request: Request) {
         id: a.id,
         name: a.name,
         nameEn: a.nameEn,
-        image: a.image,
+        image: getAssetUrl(a.image),
       })),
       albums: scoredAlbums.slice(0, 20).map((al) => ({
         id: al.id,
         name: al.name,
         artistName: al.artistName,
         artistNameEn: al.artistNameEn,
-        coverArt: al.coverArt,
+        coverArt: getAssetUrl(al.coverArt),
       })),
       playlists: scoredPlaylists.slice(0, 20).map((p) => ({
         id: p.id,
         name: p.name,
-        coverArt: p.coverArt,
+        coverArt: getAssetUrl(p.coverArt),
       })),
       radioPlaylist: candidateRadioTracks.slice(0, 20),
       topResult,

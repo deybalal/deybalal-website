@@ -1,6 +1,7 @@
 import { Artist } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
+import { getAssetUrl } from "@/lib/utils";
 
 interface ArtistCardProps {
   artist: Artist;
@@ -13,7 +14,7 @@ const ArtistCard = ({ artist }: ArtistCardProps) => {
         <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-300 border-2 border-transparent group-hover:border-purple-500/50">
           {artist.image ? (
             <Image
-              src={artist.image}
+              src={getAssetUrl(artist.image)}
               alt={artist.name}
               fill
               className="object-cover"

@@ -3,16 +3,19 @@
  */
 
 export function getSecurityHeaders(): Record<string, string> {
+  const downloadHost =
+    process.env.NEXT_PUBLIC_DOWNLOAD_HOST || "https://dl.deybalal.ir";
+
   return {
     // Content Security Policy - prevents XSS attacks
     "Content-Security-Policy": [
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // unsafe-inline needed for Next.js
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com data:",
-      "img-src 'self' data: blob: https: https://dl2.mytg.ir",
-      "media-src 'self' blob: data: https://dl2.mytg.ir",
-      "connect-src 'self' https://dl2.mytg.ir",
+      `font-src 'self' https://fonts.gstatic.com data: ${downloadHost} https://dl.deybalal.ir`,
+      `img-src 'self' data: blob: https: ${downloadHost} https://dl.deybalal.ir https://dl2.mytg.ir`,
+      `media-src 'self' blob: data: https: ${downloadHost} https://dl.deybalal.ir https://dl2.mytg.ir`,
+      `connect-src 'self' ${downloadHost} https://dl.deybalal.ir https://dl2.mytg.ir`,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -53,7 +56,10 @@ export function getSecurityHeaders(): Record<string, string> {
  */
 export function getCorsHeaders(origin: string | null): Record<string, string> {
   const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [
-    process.env.BETTER_AUTH_URL || "http://localhost:3000",
+    process.env.BETTER_AUTH_URL || "https://deybalal.ir",
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.ir",
+    process.env.NEXT_PUBLIC_DOWNLOAD_HOST || "https://dl.deybalal.ir",
+    "http://localhost:3000",
   ];
 
   // Check if origin is allowed

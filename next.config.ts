@@ -1,5 +1,15 @@
 import type { NextConfig } from "next";
 
+const downloadHost =
+  process.env.NEXT_PUBLIC_DOWNLOAD_HOST || "https://dl.deybalal.ir";
+
+let downloadHostname = "dl.deybalal.ir";
+try {
+  downloadHostname = new URL(downloadHost).hostname;
+} catch {
+  // fallback default
+}
+
 const nextConfig: NextConfig = {
   serverExternalPackages: ["svg-captcha"],
   /* config options here */
@@ -17,10 +27,24 @@ const nextConfig: NextConfig = {
     "my.local",
     "lori.local",
     "192.168.70.108",
+    "deybalal.ir",
+    "dl.deybalal.ir",
   ],
   images: {
     unoptimized: true,
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: downloadHostname,
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "dl.deybalal.ir",
+        port: "",
+        pathname: "/**",
+      },
       {
         protocol: "https",
         hostname: "dl.mytg.ir",
@@ -40,6 +64,19 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+  },
+
+  async redirects() {
+    const targetHost =
+      process.env.NEXT_PUBLIC_DOWNLOAD_HOST || "https://dl.deybalal.ir";
+    const cleanHost = targetHost.replace(/\/+$/, "");
+    return [
+      {
+        source: "/assets/:path*",
+        destination: `${cleanHost}/assets/:path*`,
+        permanent: false,
+      },
+    ];
   },
 
   // Security headers

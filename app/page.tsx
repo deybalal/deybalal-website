@@ -16,6 +16,7 @@ import { Atom, Mic2, Radio } from "lucide-react";
 import RadioPlaylistItem from "@/components/RadioPlaylistItem";
 import { formatDuration } from "@/tools/formatDuration";
 import { shuffleArray } from "@/tools/shuffleArray";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "دی بلال | پلتفرم پخش آنلاین آهنگ لری به همراه متن آهنگ",
@@ -92,14 +93,17 @@ export default async function Home() {
       }
     });
   });
-  const mostPlayedArtists = Array.from(artistMap.values()).slice(0, 10);
+  const mostPlayedArtists = Array.from(artistMap.values())
+    .slice(0, 10)
+    .map((a) => ({ ...a, image: getAssetUrl(a.image) }));
 
   type PrismaSongWithArtists = PrismaSong & { artists: PrismaArtist[] };
 
   const mapSong = (song: PrismaSongWithArtists) => ({
     ...song,
     album: song.albumName,
-    coverArt: song.coverArt || null,
+    coverArt: getAssetUrl(song.coverArt) || null,
+    uri: getAssetUrl(song.uri),
     lyrics: song.lyrics || null,
     syncedLyrics: song.syncedLyrics || null,
     filename: song.filename || "",
@@ -108,12 +112,13 @@ export default async function Home() {
     updatedAt: song.updatedAt.getTime(),
     artists: song.artists.map((artist: PrismaArtist) => ({
       ...artist,
+      image: getAssetUrl(artist.image),
       songs: [],
     })),
-    links: song.links as Record<
+    links: resolveSongLinks(song.links as Record<
       number,
       { url: string; size: string; bytes: number }
-    > | null,
+    > | null),
   });
 
   const shuffledFeaturedSongs = shuffleArray(featuredSongsData);
@@ -124,14 +129,15 @@ export default async function Home() {
   const albums = albumsData.map((album) => ({
     ...album,
     artistId: album.artistId || "",
-    coverArt: album.coverArt || undefined,
+    coverArt: getAssetUrl(album.coverArt) || undefined,
     releaseDate: album.releaseDate || 0,
     createdAt: album.createdAt.getTime(),
     updatedAt: album.updatedAt.getTime(),
     songs: album.songs.map((song) => ({
       ...song,
       album: song.albumName,
-      coverArt: song.coverArt || null,
+      coverArt: getAssetUrl(song.coverArt) || null,
+    uri: getAssetUrl(song.uri),
       lyrics: song.lyrics || null,
       syncedLyrics: song.syncedLyrics || null,
       filename: song.filename || "",
@@ -139,10 +145,10 @@ export default async function Home() {
       createdAt: song.createdAt.getTime(),
       updatedAt: song.updatedAt.getTime(),
       artists: [],
-      links: song.links as Record<
+      links: resolveSongLinks(song.links as Record<
         number,
         { url: string; size: string; bytes: number }
-      > | null,
+      > | null),
     })),
   }));
 
@@ -158,7 +164,7 @@ export default async function Home() {
   ];
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com";
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.ir";
 
   const structuredData = {
     "@context": "https://schema.org",

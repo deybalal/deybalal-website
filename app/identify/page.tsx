@@ -27,6 +27,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
 import { Song } from "@/types/types";
+import { getAssetUrl } from "@/lib/utils";
 
 interface IdentifiedSong {
   id: string;
@@ -316,7 +317,7 @@ export default function IdentifyPage() {
       };
     }
 
-    const oggUrl = `/assets/ogg/${songId}.ogg`;
+    const oggUrl = getAssetUrl(`/assets/ogg/${songId}.ogg`);
 
     if (isPlayingPreview) {
       previewAudioRef.current.pause();
@@ -332,7 +333,7 @@ export default function IdentifyPage() {
         Math.min(1, (volume ?? 100) / 100)
       );
 
-      const targetSrc = window.location.origin + oggUrl;
+      const targetSrc = oggUrl;
       if (previewAudioRef.current.src !== targetSrc) {
         previewAudioRef.current.src = oggUrl;
       }
@@ -370,12 +371,12 @@ export default function IdentifyPage() {
         id: song.id,
         title: song.title,
         titleEn: song.titleEn,
-        uri: song.uri || `/assets/mp3/${song.id}.mp3`,
+        uri: getAssetUrl(song.uri || `/assets/mp3/${song.id}.mp3`),
         filename: song.uri?.split("/").pop() || `${song.id}.mp3`,
         links: song.links,
         index: 0,
         duration: song.duration || 0,
-        coverArt: song.coverArt || null,
+        coverArt: getAssetUrl(song.coverArt) || null,
         artist: song.artist,
         album: null,
         albumId: null,
@@ -635,7 +636,7 @@ export default function IdentifyPage() {
               >
                 {result.song.coverArt ? (
                   <Image
-                    src={result.song.coverArt}
+                    src={getAssetUrl(result.song.coverArt)}
                     alt={result.song.title}
                     fill
                     sizes="(max-width: 640px) 112px, 128px"

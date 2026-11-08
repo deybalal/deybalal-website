@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Song } from "@/types/types";
 import { toast } from "react-hot-toast";
+import { getAssetUrl } from "@/lib/utils";
 
 export const TAB_ID =
   typeof window !== "undefined"
@@ -90,7 +91,7 @@ const getBestUri = (
   preference: number
 ): { uri: string; quality: number } => {
   if (!song.links || Object.keys(song.links).length === 0) {
-    return { uri: song.uri, quality: 128 }; // Default to 128 if unknown
+    return { uri: getAssetUrl(song.uri), quality: 128 }; // Default to 128 if unknown
   }
 
   const links = song.links;
@@ -98,7 +99,7 @@ const getBestUri = (
 
   // Try exact match (JS object keys are coerced to strings, but being explicit is safer)
   if (links[prefStr]) {
-    return { uri: links[prefStr].url, quality: preference };
+    return { uri: getAssetUrl(links[prefStr].url), quality: preference };
   }
 
   // Fallback to closest available quality
@@ -115,11 +116,11 @@ const getBestUri = (
 
     const matchUri = links[String(bestMatch)]?.url;
     if (matchUri) {
-      return { uri: matchUri, quality: bestMatch };
+      return { uri: getAssetUrl(matchUri), quality: bestMatch };
     }
   }
 
-  return { uri: song.uri, quality: 128 };
+  return { uri: getAssetUrl(song.uri), quality: 128 };
 };
 
 const sendToServerProxy = (
@@ -214,7 +215,11 @@ export const usePlayerStore = create<PlayerState>()(
         const pref = get().downloadPreference;
         const songsWithUri = songs.map((s) => {
           const { uri } = getBestUri(s, pref);
-          return { ...s, uri };
+          return {
+            ...s,
+            uri,
+            coverArt: s.coverArt ? getAssetUrl(s.coverArt) : s.coverArt,
+          };
         });
 
         // Always randomize queue for genuine radio experience
@@ -306,7 +311,11 @@ export const usePlayerStore = create<PlayerState>()(
         }
 
         set({
-          currentSong: { ...song, uri },
+          currentSong: {
+            ...song,
+            uri,
+            coverArt: song.coverArt ? getAssetUrl(song.coverArt) : song.coverArt,
+          },
           currentQuality: quality,
           isPlaying: play === false ? false : true,
           progress: 0,
@@ -334,7 +343,11 @@ export const usePlayerStore = create<PlayerState>()(
         const { playbackDevice, downloadPreference, serverVolume } = get();
         const songsWithUri = songs.map((s) => {
           const { uri } = getBestUri(s, downloadPreference);
-          return { ...s, uri };
+          return {
+            ...s,
+            uri,
+            coverArt: s.coverArt ? getAssetUrl(s.coverArt) : s.coverArt,
+          };
         });
 
         const currentSongData = songsWithUri[startIndex] || null;
@@ -391,14 +404,28 @@ export const usePlayerStore = create<PlayerState>()(
       addToQueue: (song) => {
         const { uri } = getBestUri(song, get().downloadPreference);
         set((state) => ({
-          priorityQueue: [...state.priorityQueue, { ...song, uri }],
+          priorityQueue: [
+            ...state.priorityQueue,
+            {
+              ...song,
+              uri,
+              coverArt: song.coverArt ? getAssetUrl(song.coverArt) : song.coverArt,
+            },
+          ],
         }));
       },
 
       playNext: (song) => {
         const { uri } = getBestUri(song, get().downloadPreference);
         set((state) => ({
-          priorityQueue: [{ ...song, uri }, ...state.priorityQueue],
+          priorityQueue: [
+            {
+              ...song,
+              uri,
+              coverArt: song.coverArt ? getAssetUrl(song.coverArt) : song.coverArt,
+            },
+            ...state.priorityQueue,
+          ],
         }));
       },
 

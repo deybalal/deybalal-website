@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 
 export async function GET(
   request: Request,
@@ -40,7 +41,25 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ success: true, data: playlist });
+    const transformedPlaylist = {
+      ...playlist,
+      coverArt: getAssetUrl(playlist.coverArt),
+      songs: playlist.songs.map((ps) => ({
+        ...ps,
+        song: {
+          ...ps.song,
+          coverArt: getAssetUrl(ps.song.coverArt),
+          uri: getAssetUrl(ps.song.uri),
+          links: resolveSongLinks(ps.song.links as any),
+          artists: ps.song.artists.map((a) => ({
+            ...a,
+            image: getAssetUrl(a.image),
+          })),
+        },
+      })),
+    };
+
+    return NextResponse.json({ success: true, data: transformedPlaylist });
   } catch (error) {
     console.error("Failed to fetch playlist", error);
     return NextResponse.json(

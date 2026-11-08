@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ListMusic, X, GripVertical, Trash2 } from "lucide-react";
 import { usePlayerStore } from "@/hooks/usePlayerStore";
 import Image from "next/image";
+import { getAssetUrl } from "@/lib/utils";
 import {
   DndContext,
   closestCenter,
@@ -75,7 +76,7 @@ function SortableSongItem({
       </div>
       <div className="relative w-10 h-10 rounded overflow-hidden shrink-0">
         <Image
-          src={song.coverArt || "/images/default-album-art.png"}
+          src={getAssetUrl(song.coverArt) || "/images/default-album-art.png"}
           alt={song.title || "Song"}
           fill
           className={`object-cover ${!isPriority ? "opacity-60" : ""}`}
@@ -194,7 +195,7 @@ export default function QueueDrawer() {
                 <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 shadow-lg">
                   <Image
                     src={
-                      currentSong.coverArt || "/images/default-album-art.png"
+                      getAssetUrl(currentSong.coverArt) || "/images/default-album-art.png"
                     }
                     alt={currentSong.title || "Song"}
                     fill

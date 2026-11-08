@@ -14,6 +14,7 @@ import { ReportIssueModal } from "@/components/ReportIssueModal";
 import SimilarSongsCarousel from "@/components/SimilarSongsCarousel";
 import { Song, Contributor } from "@/types/types";
 import { StructuredData } from "@/components/StructuredData";
+import { getAssetUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -166,7 +167,7 @@ export default async function SongDetailPage({
   );
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com";
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.ir";
   const songUrl = `${baseUrl}/song/${song.id}`;
 
   const structuredData = {
@@ -174,7 +175,7 @@ export default async function SongDetailPage({
     "@type": "MusicRecording",
     name: song.title,
     url: songUrl,
-    image: song.coverArt,
+    image: getAssetUrl(song.coverArt),
     datePublished: new Date(song.createdAt).toISOString(),
     genre: song.genres.map((g) => g.name),
     byArtist: song.artists.map((a) => ({
@@ -215,7 +216,7 @@ export default async function SongDetailPage({
                   className="bg-blue-600 hover:bg-blue-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-3 lg:px-6 group transition-all overflow-hidden"
                 >
                   <a
-                    href={song.links[64].url}
+                    href={getAssetUrl(song.links[64].url)}
                     download={`${song.artist} - ${song.title} (64kbps).mp3`}
                   >
                     <div className="flex items-center gap-1.5 lg:gap-3 min-w-0">
@@ -239,7 +240,7 @@ export default async function SongDetailPage({
                   className="bg-purple-600 hover:bg-purple-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-3 lg:px-6 group transition-all overflow-hidden"
                 >
                   <a
-                    href={song.links[128].url}
+                    href={getAssetUrl(song.links[128].url)}
                     download={`${song.artist} - ${song.title} (128kbps).mp3`}
                   >
                     <div className="flex items-center gap-1.5 lg:gap-3 min-w-0">
@@ -263,7 +264,7 @@ export default async function SongDetailPage({
                   className="bg-green-600 hover:bg-green-700 text-white border-none h-16 rounded-xl flex items-center justify-between px-3 lg:px-6 group transition-all overflow-hidden"
                 >
                   <a
-                    href={song.links[320].url}
+                    href={getAssetUrl(song.links[320].url)}
                     download={`${song.artist} - ${song.title} (320kbps).mp3`}
                   >
                     <div className="flex items-center gap-1.5 lg:gap-3 min-w-0">
@@ -352,8 +353,8 @@ export default async function SongDetailPage({
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <ShareButtons
               title={song.title}
-              url={`${process.env.NEXT_PUBLIC_DEPLOYED_URL}/song/${song.id}`}
-              shortUrl={`${process.env.NEXT_PUBLIC_DEPLOYED_URL}/s/${song.index}`}
+              url={`${baseUrl}/song/${song.id}`}
+              shortUrl={`${baseUrl}/s/${song.index}`}
               song={{
                 id: song.id,
                 title: song.title || "",
@@ -371,7 +372,7 @@ export default async function SongDetailPage({
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 bg-white/5 p-6 rounded-2xl border border-white/10 mb-6">
           <ReportIssueModal
             songTitle={`${song.title} - ${song.artist}`}
-            songUrl={`${process.env.NEXT_PUBLIC_DEPLOYED_URL}/song/${song.id}`}
+            songUrl={`${baseUrl}/song/${song.id}`}
           />
         </div>
         <CommentSection

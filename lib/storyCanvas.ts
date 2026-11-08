@@ -1,4 +1,5 @@
 import { generateQRCode } from "./qrGenerator";
+import { getAssetUrl } from "@/lib/utils";
 
 export type StoryTheme = "ambient" | "dark" | "vibrant" | "lyrics";
 
@@ -67,6 +68,7 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
       resolve(null);
       return;
     }
+    const finalSrc = getAssetUrl(src);
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
@@ -75,9 +77,9 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
       const fallbackImg = new Image();
       fallbackImg.onload = () => resolve(fallbackImg);
       fallbackImg.onerror = () => resolve(null);
-      fallbackImg.src = src;
+      fallbackImg.src = finalSrc;
     };
-    img.src = src;
+    img.src = finalSrc;
   });
 }
 
@@ -285,7 +287,7 @@ export async function renderStoryCard(
   ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
   ctx.textAlign = "left";
   ctx.fillText(
-    (process.env.NEXT_PUBLIC_DEPLOYED_URL || "deybalal.com")
+    (process.env.NEXT_PUBLIC_DEPLOYED_URL || "deybalal.ir")
       .replace("https://", "")
       .replace("http://", ""),
     waveStartX + 66,

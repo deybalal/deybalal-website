@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getAssetUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       success: true,
-      data: songs,
+      data: songs.map((song) => ({
+        ...song,
+        coverArt: getAssetUrl(song.coverArt),
+      })),
       pagination: {
         page,
         limit,

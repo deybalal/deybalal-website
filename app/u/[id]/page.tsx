@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Music, CheckCircle2 } from "lucide-react";
 import { Metadata } from "next";
+import { getAssetUrl } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -36,14 +37,14 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      images: user.image ? [user.image] : [],
+      images: user.image ? [getAssetUrl(user.image)] : [],
       type: "profile",
     },
     twitter: {
       card: "summary",
       title,
       description,
-      images: user.image ? [user.image] : [],
+      images: user.image ? [getAssetUrl(user.image)] : [],
     },
   };
 }
@@ -102,7 +103,7 @@ export default async function PublicProfilePage({
         <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-background shadow-xl">
           {user.image ? (
             <Image
-              src={user.image}
+              src={getAssetUrl(user.image)}
               alt={user.name}
               fill
               className="object-cover"

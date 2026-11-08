@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import PlaylistClient from "@/components/PlaylistClient";
 import { Suspense } from "react";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 import PlaylistSkeleton from "@/components/PlaylistSkeleton";
 import { Metadata } from "next";
 
@@ -115,7 +116,7 @@ export default async function PlaylistDetailPage({
           }
         )}`,
     coverArt:
-      playlistData.tracks[0]?.song?.coverArt || "/images/default-album-art.png",
+      getAssetUrl(playlistData.tracks[0]?.song?.coverArt, "/images/default-album-art.png"),
     songsLength: totalFilteredTracks,
     createdAt: playlistData.createdAt.getTime(),
     updatedAt: playlistData.updatedAt.getTime(),
@@ -138,22 +139,22 @@ export default async function PlaylistDetailPage({
       return {
         ...song,
         playedAtRange,
-        uri: song.song.uri ?? "",
+        uri: getAssetUrl(song.song.uri ?? ""),
         filename: song.song.filename ?? "",
         artist: song.song.artist,
-        artists: song.song.artists,
+        artists: song.song.artists.map((a) => ({ ...a, image: getAssetUrl(a.image) })),
         id: song.songId,
         album: song.song.albumName,
         albumId: song.song.albumId,
         title: song.song.title,
         titleEn: song.song.titleEn,
-        coverArt: song.song.coverArt,
+        coverArt: getAssetUrl(song.song.coverArt),
         index: 0,
         year: null,
         comment: null,
         date: null,
         isFavorite: false,
-        links: (song.song.links as Record<
+        links: resolveSongLinks(song.song.links as Record<
           number,
           { url: string; size: string; bytes: number }
         > | null),

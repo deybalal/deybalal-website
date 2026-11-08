@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getAssetUrl } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -279,7 +279,7 @@ export default function AlbumForm() {
                   {field.value && (
                     <div className="relative w-32 h-32 rounded-md overflow-hidden border">
                       <Image
-                        src={field.value}
+                        src={getAssetUrl(field.value)}
                         alt="Cover Art Preview"
                         fill
                         className="object-cover"

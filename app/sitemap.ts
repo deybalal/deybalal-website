@@ -3,7 +3,7 @@ import { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
-    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com";
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.ir";
 
   // Static routes
   const staticRoutes: MetadataRoute.Sitemap = [

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -68,7 +69,22 @@ export async function GET() {
       return NextResponse.json({ error: "Song not found" }, { status: 404 });
     }
 
-    return NextResponse.json(randomSong);
+    return NextResponse.json({
+      ...randomSong,
+      coverArt: getAssetUrl(randomSong.coverArt),
+      uri: getAssetUrl(randomSong.uri),
+      links: resolveSongLinks(randomSong.links as any),
+      artists: randomSong.artists.map((a) => ({
+        ...a,
+        image: getAssetUrl(a.image),
+      })),
+      album: randomSong.album
+        ? {
+            ...randomSong.album,
+            coverArt: getAssetUrl(randomSong.album.coverArt),
+          }
+        : null,
+    });
   } catch (error) {
     console.error("Error fetching random song:", error);
     return NextResponse.json(

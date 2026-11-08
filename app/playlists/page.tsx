@@ -4,6 +4,7 @@ import Link from "next/link";
 import PlaylistGrid from "@/components/PlaylistGrid";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 
 import { Metadata } from "next";
 
@@ -47,18 +48,18 @@ export default async function PlaylistsPage() {
       titleEn: ps.song.titleEn,
       artist: ps.song.artist,
       artistEn: ps.song.artistEn,
-      uri: ps.song.uri,
+      uri: getAssetUrl(ps.song.uri),
       album: ps.song.albumName,
       albumId: ps.song.albumId,
-      coverArt: ps.song.coverArt || null,
+      coverArt: getAssetUrl(ps.song.coverArt),
       lyrics: ps.song.lyrics || null,
       syncedLyrics: ps.song.syncedLyrics || null,
       filename: ps.song.filename || "",
       year: ps.song.year?.toString() || "0",
-      links: ps.song.links as Record<
+      links: resolveSongLinks(ps.song.links as Record<
         number,
         { url: string; size: string; bytes: number }
-      > | null,
+      > | null),
       duration: ps.song.duration,
       playCount: ps.song.playCount,
       isActive: ps.song.isActive,
@@ -69,7 +70,7 @@ export default async function PlaylistsPage() {
       artists: [], // Minimal artist info for playlist view
     })),
     songsLength: playlist.songs.length,
-    coverArt: playlist.coverArt || undefined,
+    coverArt: playlist.coverArt ? getAssetUrl(playlist.coverArt) : undefined,
     description: playlist.description || undefined,
     userId: undefined,
     userName: undefined, // Own playlist
@@ -86,18 +87,18 @@ export default async function PlaylistsPage() {
       titleEn: ps.song.titleEn,
       artist: ps.song.artist,
       artistEn: ps.song.artistEn,
-      uri: ps.song.uri,
+      uri: getAssetUrl(ps.song.uri),
       album: ps.song.albumName,
       albumId: ps.song.albumId,
-      coverArt: ps.song.coverArt || null,
+      coverArt: getAssetUrl(ps.song.coverArt),
       lyrics: ps.song.lyrics || null,
       syncedLyrics: ps.song.syncedLyrics || null,
       filename: ps.song.filename || "",
       year: ps.song.year?.toString() || "0",
-      links: ps.song.links as Record<
+      links: resolveSongLinks(ps.song.links as Record<
         number,
         { url: string; size: string; bytes: number }
-      > | null,
+      > | null),
       duration: ps.song.duration,
       playCount: ps.song.playCount,
       isActive: ps.song.isActive,
@@ -108,11 +109,11 @@ export default async function PlaylistsPage() {
       artists: [], // Minimal artist info for playlist view
     })),
     songsLength: playlist.songs.length,
-    coverArt: playlist.coverArt || undefined,
+    coverArt: playlist.coverArt ? getAssetUrl(playlist.coverArt) : undefined,
     description: playlist.description || undefined,
     userId: undefined,
     userName: playlist.user.name,
-    profileUrl: playlist.user.image || undefined,
+    profileUrl: playlist.user.image ? getAssetUrl(playlist.user.image) : undefined,
   }));
 
   return (

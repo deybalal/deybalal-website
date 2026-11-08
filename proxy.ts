@@ -49,9 +49,9 @@ export async function proxy(request: NextRequest) {
 
 /**
  * Matcher:
- *   • All routes **except** the internal Next.js assets
+ *   • All routes **except** internal Next.js assets, public assets, and static files
  *   • The auth check for `/panel` is performed inside the function
  */
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/identify).*)"],
+  matcher: ["/((?!_next/static|_next/image|assets|favicon.ico|api/identify).*)"],
 };

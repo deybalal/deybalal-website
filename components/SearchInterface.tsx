@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, getAssetUrl } from "@/lib/utils";
 
 interface SearchInterfaceProps {
   onClose?: () => void;
@@ -330,9 +330,9 @@ export default function SearchInterface({
                               results.topResult.type === "song" ||
                               results.topResult.type === "album" ||
                               results.topResult.type === "playlist"
-                                ? results.topResult.coverArt ||
+                                ? getAssetUrl(results.topResult.coverArt) ||
                                   "/images/default-album-art.png"
-                                : results.topResult.image ||
+                                : getAssetUrl(results.topResult.image) ||
                                   "/images/default-album-art.png"
                             }
                             alt={
@@ -383,7 +383,7 @@ export default function SearchInterface({
                           <div className="relative w-14 h-14 rounded-lg overflow-hidden me-4 shadow-lg bg-zinc-800 shrink-0 group-hover:scale-105 transition-transform duration-300">
                             {song.coverArt ? (
                               <Image
-                                src={song.coverArt}
+                                src={getAssetUrl(song.coverArt)}
                                 alt={song.title}
                                 fill
                                 className="object-cover"
@@ -436,7 +436,7 @@ export default function SearchInterface({
                           <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden mb-4 shadow-xl group-hover:shadow-2xl group-hover:scale-105 transition-all duration-300 bg-zinc-800 ring-2 ring-transparent group-hover:ring-purple-500/50">
                             {artist.image ? (
                               <Image
-                                src={artist.image}
+                                src={getAssetUrl(artist.image)}
                                 alt={artist.name}
                                 fill
                                 className="object-cover"
@@ -484,7 +484,7 @@ export default function SearchInterface({
                           <div className="relative w-full aspect-square rounded-xl overflow-hidden mb-4 shadow-lg group-hover:shadow-2xl transition-all bg-zinc-800">
                             {album.coverArt ? (
                               <Image
-                                src={album.coverArt}
+                                src={getAssetUrl(album.coverArt)}
                                 alt={album.name}
                                 fill
                                 className="object-cover"
@@ -532,7 +532,7 @@ export default function SearchInterface({
                           <div className="relative w-full aspect-square rounded-xl overflow-hidden mb-4 shadow-lg group-hover:shadow-2xl transition-all bg-zinc-800">
                             {playlist.coverArt ? (
                               <Image
-                                src={playlist.coverArt}
+                                src={getAssetUrl(playlist.coverArt)}
                                 alt={playlist.name}
                                 fill
                                 className="object-cover"

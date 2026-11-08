@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
+import { getAssetUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -19,12 +20,13 @@ export async function GET(
       return new Response("Song not found", { status: 404 });
     }
 
-    const baseUrl = new URL(request.url).origin;
+    const baseUrl =
+      process.env.NEXT_PUBLIC_DEPLOYED_URL || new URL(request.url).origin;
     const coverArtUrl = song.coverArt
       ? song.coverArt.startsWith("http")
-        ? song.coverArt
-        : `${baseUrl}${song.coverArt}`
-      : `${baseUrl}/assets/default-cover.jpg`;
+        ? getAssetUrl(song.coverArt)
+        : getAssetUrl(song.coverArt)
+      : getAssetUrl("/assets/default-cover.jpg");
 
     return new ImageResponse(
       (

@@ -15,6 +15,7 @@ import SearchModal from "@/components/SearchModal";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PlayArtistButton from "@/components/PlayArtistButton";
+import { getAssetUrl } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -168,7 +169,7 @@ export default async function ArtistDetailPage({
   }));
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.com";
+    process.env.NEXT_PUBLIC_DEPLOYED_URL || "https://deybalal.ir";
   const artistUrl = `${baseUrl}/artist/${artist.id}`;
 
   const structuredData = {
@@ -176,7 +177,7 @@ export default async function ArtistDetailPage({
     "@type": "MusicGroup",
     name: artist.name,
     url: artistUrl,
-    image: artist.image,
+    image: getAssetUrl(artist.image),
     description: artist.description,
     track: songs.map((s) => ({
       "@type": "MusicRecording",
@@ -194,7 +195,7 @@ export default async function ArtistDetailPage({
         {artist.image && (
           <div className="absolute inset-0 z-0">
             <Image
-              src={artist.image}
+              src={getAssetUrl(artist.image)}
               alt={artist.name}
               fill
               className="object-cover blur-3xl opacity-30 scale-110"
@@ -209,7 +210,7 @@ export default async function ArtistDetailPage({
             <div className="relative w-40 h-40 md:w-64 md:h-64 shrink-0 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/10 group">
               {artist.image ? (
                 <Image
-                  src={artist.image}
+                  src={getAssetUrl(artist.image)}
                   alt={artist.name}
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-110"

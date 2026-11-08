@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-hot-toast";
 import { Artist } from "@/types/types";
+import { getAssetUrl } from "@/lib/utils";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -161,7 +162,7 @@ export default function ArtistForm({
                   {field.value && (
                     <div className="relative w-32 h-32 rounded-md overflow-hidden border">
                       <Image
-                        src={field.value}
+                        src={getAssetUrl(field.value)}
                         alt="Artist Image Preview"
                         fill
                         className="object-cover"

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import PlaylistClient from "@/components/PlaylistClient";
 import { Suspense } from "react";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 import PlaylistSkeleton from "@/components/PlaylistSkeleton";
 import { Heart } from "lucide-react";
 import Link from "next/link";
@@ -115,28 +116,29 @@ export default async function Page({
     userId: undefined,
     doesUserOwnsPlaylist: true,
     description: playlistData.description ?? undefined,
-    coverArt: playlistData.coverArt ?? undefined,
+    coverArt: playlistData.coverArt ? getAssetUrl(playlistData.coverArt) : undefined,
     songsLength: playlistData._count.songs,
     createdAt: playlistData.createdAt.getTime(),
     updatedAt: playlistData.updatedAt.getTime(),
     songs: playlistData.songs.map((ps) => ({
       ...ps.song,
+      coverArt: getAssetUrl(ps.song.coverArt),
       addedAt: ps.addedAt.getTime(),
-      uri: ps.song.uri ?? "",
+      uri: getAssetUrl(ps.song.uri ?? ""),
       filename: ps.song.filename ?? "",
       artist: ps.song.artist,
       album: ps.song.albumName,
       albumId: ps.song.albumId,
-      artists: [...ps.song.artists],
+      artists: ps.song.artists.map((a) => ({ ...a, image: getAssetUrl(a.image) })),
       index: ps.song.index,
       year: ps.song.year?.toString() || "0",
       comment: null,
       date: null,
       isFavorite: true,
-      links: ps.song.links as Record<
+      links: resolveSongLinks(ps.song.links as Record<
         number,
         { url: string; size: string; bytes: number }
-      > | null,
+      > | null),
     })),
   };
 

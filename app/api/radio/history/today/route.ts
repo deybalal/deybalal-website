@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getAssetUrl, resolveSongLinks } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +48,22 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      data: { ...playlistData, tracks: filteredTracks },
+      data: {
+        ...playlistData,
+        tracks: filteredTracks.map((t) => ({
+          ...t,
+          song: {
+            ...t.song,
+            coverArt: getAssetUrl(t.song.coverArt),
+            uri: getAssetUrl(t.song.uri),
+            artists: t.song.artists.map((a) => ({
+              ...a,
+              image: getAssetUrl(a.image),
+            })),
+            links: resolveSongLinks(t.song.links as any),
+          },
+        })),
+      },
     });
   } catch (error) {
     console.error("Error fetching today playlist:", error);
